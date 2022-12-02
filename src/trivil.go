@@ -26,7 +26,7 @@ func main() {
 
 	fmt.Println("length: ", len(src.Bytes))
 
-	env.AddError("Проверка", src, 1)
+	env.AddError(src, 1, "Проверка")
 
 	env.ShowErrors()
 

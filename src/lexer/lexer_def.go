@@ -11,6 +11,7 @@ const (
 	// Special tokens
 	Invalid Token = iota
 	EOF
+	NL
 
 	// literals
 	IDENT
@@ -78,6 +79,7 @@ var tokens = [...]string{
 	Invalid: "Invalid",
 
 	EOF: "EOF",
+	NL:  "NL",
 
 	IDENT:  "IDENT",
 	INT:    "INT",
