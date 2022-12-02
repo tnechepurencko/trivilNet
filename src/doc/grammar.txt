@@ -1,0 +1,318 @@
+compilation_unit
+	: 'модуль' ident
+	  import_list
+	  declaration_list
+	;
+
+import_list
+	: import (sep import)* sep?
+	;
+import
+	: 'импорт' (ident '=')? import_path 
+	;
+import_path
+	: string
+	;
+
+declaration_list
+	:  declaration (sep declaration)* sep?
+	;
+	
+declaration
+	: type_decl
+	| const_decl 
+	| var_decl
+	| modifier? func_decl
+	| entry
+	;
+
+//==== types
+
+type_decl
+	: 'тип' name '=' type_def
+	;
+
+name
+	: ident '*'?  // export mark
+	;
+
+type_def
+	: array_def
+	| class_def
+//?	| func_type
+	;
+
+array_def
+	: '[' ']' type_ref // single dimension only for now
+	;
+
+class_def
+	: 'класс' base_type? '{' class_field_list? '}'
+	;
+	
+base_type
+	: '(' type_ref ')'
+	;
+	
+class_field_list
+	: class_field (sep class_field)* sep?
+	;
+	
+class_field
+	: name ':' type_ref
+	;
+
+type_ref
+	: 'мб'? qualident
+	;
+	
+qualident
+	: ident ('.' ident) 
+	;
+	
+//==== consts and vars
+
+const_decl
+	: 'конст' (single_const | group_const)
+	;
+single_const
+	: name (':' type_ref)? '=' const_expression 
+	;
+group_const
+	: '(' single_const (sep name)* sep? ')'
+	;
+
+const_expression // to be extended later
+	: literal
+	| qualident 
+	;
+
+var_decl
+	: 'пусть' name ':' type_ref ('=' expression) // 'дано' for let
+	
+//=== function
+
+func_decl
+	: 'фн' receiver? name signature statement_seq?
+	;
+
+receiver
+	: '(' ident ':' type_ref ')'
+	;
+
+signature
+	: '(' param_list? ')' result_type?
+	;
+param_list
+	: param (',' param)* ','?
+	;
+param
+	: ident ':' type_ref
+	;
+
+result_type
+	: ':' type_ref
+	;
+
+//=== entry 
+
+entry
+	: 'вход' statement_seq
+	;
+
+//=== statements
+
+statement_seq
+	: '{' statement_or_decl (sep statement_or_decl)* sep? '}'
+	;
+
+statement_or_decl
+	: statement
+	| const_decl
+	| var_decl
+	;
+
+statement
+	: if_stm
+	| while_stm
+	//| switch_stm
+	| 'прервать'
+	| 'вернуть' (expression | sep)
+	| assignment
+	| expression ('++' | '--')?
+	;
+
+if_stm
+	: 'если' expression statement_seq ('иначе' statement_seq)?
+	;
+	
+while_stm
+	: 'пока' expression statement_seq 
+	;
+
+//switch_stm // TBD
+//	: 'выбор' 
+//	;
+	
+assignment
+	: expression ':=' expression
+	;
+
+//==== expression
+
+expression
+	: unary_expr 
+	| expression binary_op expression
+	;
+
+unary_expr
+	: primary_expr is_defined_op? 
+	| unary_op unary_expr
+	;
+
+is_defined_op: '?';
+unary_op: '+' | '-' | '~'; // '~' for not
+binary_op: '|' | '&' | rel_op | add_op | mul_op;
+rel_op: '=' | '#' | '<' | '<=' | '>' | '>=';
+add_op: '+' | '-' | '|.' | 'xor';      
+mul_op: '*' | '/' | '%' | '&.';  
+
+// TODO:  bitnot - use '^' ?
+// TODO: shifts << >>
+
+primary_exp
+	: operand
+	| primary_expr selector
+	| primary_expr arguments
+	| primary_expr conversion
+	| primary_expr index_or_array_composite
+	| primary_expr class_composite // no space allowed
+	| primary_expr check_defined
+	;
+
+operand
+	: literal
+	| qualident
+	| '(' expression ')'
+//	| lambda // later
+	;
+	
+literal
+	: int_lit
+	| float_lit
+	| str_lit
+	;
+	
+selector: '.' ident;
+arguments: '(' expression_list? ')'
+conversion: 'Л' type_ref 'Ы';
+check_defined: '!'; 
+
+expression_list
+	: expression (',' expression)* ','? // trailing comma allowed
+	;
+
+index_or_array_composite
+	: '[' expression ']';
+	| array_composite
+	;
+
+array_composite
+	: '[' element_value_list? ']'
+	; 
+
+element_value_list
+	: element_value (',' element_value)* ','? // trailing comma allowed
+	;
+
+element_value
+	: expression (':' expression)
+
+
+class_composite
+	: '{' field_value_list? '}'
+	; 
+
+field_value_list
+	: field_value (',' field_value)* ','? // trailing comma allowed
+	;
+	
+field_value
+	: ident ':' expression
+	;
+	
+sep // разделитель между описани€ми, операторами и т.д.
+	: ';'
+	| NL
+	;	
+	
+//==== lexer
+
+int_lit
+	: digits
+	| '0x' hex_digit ('_' hex_digit)*
+	;
+digits: digit ('_'? 'digit')*
+digit: '0'..'9';
+hex_digit
+	: '0'..'9'
+	| 'a'..'f'
+	| 'A'..'F'
+	;
+
+float_lit
+	: digits '.' digits // only simple form
+	;
+	
+str_lit
+	: '"' (~('"' | '\\' | '\n' | '\r' | '\t') | escape_value)* '"' 
+	: "'" (~("'" | '\\' | '\n' | '\r' | '\t') | escape_value)* "'"
+	;
+
+escape_value
+	: '\\'
+	( 'u' hex_digit hex_digit hex_digit hex_digit
+	| [a-tv-zA-TV-Z] // not 'u'
+	| '"'
+	| "'"
+	)
+	;
+
+ident
+	: ident_begin ident_middle* ident_end?
+	;
+	
+ident_start
+	: letter
+	| '_'
+	| 'є'
+	;
+
+letter
+	: russian_letter
+	| latin_letter
+	;
+
+ident_middle
+	: ident_start
+	| digit
+	| space // no more than one space in a row
+	| '-'   // no space around
+	;
+
+ident_end
+	: '?' // no space before
+	| '!' // no space before
+	;
+
+modifier
+	: '@' letter ('-'? letter)*
+	;
+
+// special symbols
+
+Л U+2039
+Ы U+203A
+Ђ U+00AB
+ї U+00BB
+
