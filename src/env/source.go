@@ -28,3 +28,7 @@ func ReadSource(path string) *Source {
 
 	return src
 }
+
+func (s *Source) AddLine(ofs int) {
+	s.Lines = append(s.Lines, ofs)
+}

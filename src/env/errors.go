@@ -38,7 +38,7 @@ func Init() {
 	}
 }
 
-func AddError(id string, source *Source, pos int, args ...interface{}) {
+func AddError(source *Source, pos int, id string, args ...interface{}) {
 	var err = &Error{
 		id:     id,
 		source: source,
@@ -63,4 +63,8 @@ func ShowErrors() {
 	for _, e := range errors {
 		fmt.Println(e.text)
 	}
+}
+
+func ErrorCount() int {
+	return len(errors)
 }
