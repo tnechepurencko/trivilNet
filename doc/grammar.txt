@@ -306,7 +306,7 @@ ident_end
 	;
 
 modifier
-	: '@' letter ('-'? letter)*
+	: '@' letter+
 	;
 
 // special symbols
