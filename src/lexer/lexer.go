@@ -4,7 +4,7 @@ import (
 	//"bytes"
 	"fmt"
 	//"strconv"
-	//"unicode"
+	"unicode"
 	"unicode/utf8"
 
 	"trivil/env"
@@ -42,7 +42,7 @@ func (s *Lexer) Init(source *env.Source) {
 }
 
 func (s *Lexer) error(pos int, id string, args ...interface{}) {
-	env.AddError(s.source, pos, id, args)
+	env.AddError(s.source, pos, id, args...)
 }
 
 // Read the next Unicode char into s.ch.
@@ -58,7 +58,7 @@ func (s *Lexer) next() {
 		w := 1
 		switch {
 		case r == 0:
-			s.error(s.offset, "ЛЕК-НЕДОП-СИМ", rune(0))
+			s.error(s.offset, "ЛЕК-ОШ-СИМ", rune(0))
 		case r == '\r':
 			r = '\n'
 			if s.rdOffset+1 < len(s.src) && rune(s.src[s.rdOffset+1]) == '\n' {
@@ -92,138 +92,147 @@ func (s *Lexer) peek() byte {
 
 //====
 
-/*
+func lower(ch rune) rune     { return ('a' - 'A') | ch }
+func isDecimal(ch rune) bool { return '0' <= ch && ch <= '9' }
+func isHex(ch rune) bool     { return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f' }
 
-func (s *Lexer) scanComment() string {
-	// initial '/' already consumed; s.ch == '/' || s.ch == '*'
-	offs := s.offset - 1 // position of initial '/'
-	next := -1           // position immediately following the comment; < 0 means invalid comment
-	numCR := 0
+func isLetter(ch rune) bool {
+	return 'a' <= lower(ch) && lower(ch) <= 'z' || ch == '_' || ch >= utf8.RuneSelf && unicode.IsLetter(ch)
+}
 
-	if s.ch == '/' {
-		//-style comment
-		// (the final '\n' is not considered part of the comment)
+func isDigit(ch rune) bool {
+	return isDecimal(ch) || ch >= utf8.RuneSelf && unicode.IsDigit(ch)
+}
+
+func (s *Lexer) skipWhitespace() {
+	for s.ch == ' ' || s.ch == '\t' {
 		s.next()
-		for s.ch != '\n' && s.ch >= 0 {
-			if s.ch == '\r' {
-				numCR++
-			}
-			s.next()
-		}
-		// if we are at '\n', the position following the comment is afterwards
-		next = s.offset
-		if s.ch == '\n' {
-			next++
-		}
-		goto exit
 	}
+}
 
-	/ *-style comment * /
+func (s *Lexer) scanModifier() string {
+	ofs := s.offset - 1
+	if !isLetter(s.ch) {
+		s.error(s.offset, "ЛЕК-МОДИФИКАТОР")
+		return ""
+	}
+	for isLetter(s.ch) {
+		s.next()
+	}
+	return string(s.src[ofs:s.offset])
+}
+
+func (s *Lexer) scanLineComment() int {
+	// Первый '/' уже взят
+	ofs := s.offset - 1
 	s.next()
-	for s.ch >= 0 {
-		ch := s.ch
-		if ch == '\r' {
-			numCR++
+	for s.ch != '\n' && s.ch >= 0 {
+		s.next()
+	}
+	if s.ch == '\n' {
+		s.next() // перешли на след. символ после комментария
+	}
+	return ofs
+}
+
+func (s *Lexer) scanBlockComment() int {
+	// '/' уже взят
+	ofs := s.offset - 1
+	s.next() // '*'
+	for true {
+		if s.ch < 0 {
+			s.error(ofs, "ЛЕК-НЕТ-*/")
+			break
 		}
+		ch := s.ch
 		s.next()
 		if ch == '*' && s.ch == '/' {
 			s.next()
-			next = s.offset
-			goto exit
+			break
+		} else if ch == '/' && s.ch == '*' {
+			s.scanBlockComment()
 		}
 	}
-
-	s.error(offs, "comment not terminated")
-
-exit:
-	lit := s.src[offs:s.offset]
-
-	// On Windows, a (//-comment) line may end in "\r\n".
-	// Remove the final '\r' before analyzing the text for
-	// line directives (matching the compiler). Remove any
-	// other '\r' afterwards (matching the pre-existing be-
-	// havior of the scanner).
-	if numCR > 0 && len(lit) >= 2 && lit[1] == '/' && lit[len(lit)-1] == '\r' {
-		lit = lit[:len(lit)-1]
-		numCR--
-	}
-
-	// interpret line directives
-	// (//line directives must start at the beginning of the current line)
-	if next >= 0 /* implies valid comment *!/ && (lit[1] == '*' || offs == s.lineOffset) && bytes.HasPrefix(lit[2:], prefix) {
-		s.updateLineInfo(next, offs, lit)
-	}
-
-	if numCR > 0 {
-		lit = stripCR(lit, lit[1] == '*')
-	}
-
-	return string(lit)
+	return ofs
 }
 
-var prefix = []byte("line ")
-
-// updateLineInfo parses the incoming comment text at offset offs
-// as a line directive. If successful, it updates the line info table
-// for the position next per the line directive.
-func (s *Lexer) updateLineInfo(next, offs int, text []byte) {
-	// extract comment text
-	if text[1] == '*' {
-		text = text[:len(text)-2] // lop off trailing "* /"
+// пока упрощенный
+func (s *Lexer) scanIdentifier() string {
+	ofs := s.offset
+	for isLetter(s.ch) || isDigit(s.ch) {
+		s.next()
 	}
-	text = text[7:] // lop off leading "//line " or "/ *line "
-	offs += 7
+	return string(s.src[ofs:s.offset])
+}
 
-	i, n, ok := trailingDigits(text)
-	if i == 0 {
-		return // ignore (not a line directive)
-	}
-	// i > 0
+func (s *Lexer) scanString(opening rune) string {
+	// первая кавычка уже взята
+	ofs := s.offset - 1
 
-	if !ok {
-		// text has a suffix :xxx but xxx is not a number
-		s.error(offs+i, "invalid line number: "+string(text[i:]))
-		return
-	}
-
-	var line, col int
-	i2, n2, ok2 := trailingDigits(text[:i-1])
-	if ok2 {
-		//line filename:line:col
-		i, i2 = i2, i
-		line, col = n2, n
-		if col == 0 {
-			s.error(offs+i2, "invalid column number: "+string(text[i2:]))
-			return
+	for {
+		ch := s.ch
+		if ch == '\n' || ch < 0 {
+			s.error(ofs, "ЛЕК-ОШ-СТРОКА")
+			break
 		}
-		text = text[:i2-1] // lop off ":col"
+		s.next()
+		if ch == opening {
+			break
+		}
+		if ch == '\\' {
+			s.scanEscape(opening)
+		}
+	}
+
+	return string(s.src[ofs:s.offset])
+}
+
+// Сканирует escape sequence. В случае ошибки возвращает false
+// Не проверяет корректность
+func (s *Lexer) scanEscape(quote rune) bool {
+	ofs := s.offset
+
+	var n int
+	if s.ch == 'u' { // \uABCD
+		n = 4
 	} else {
-		//line filename:line
-		line = n
-	}
-
-	if line == 0 {
-		s.error(offs+i, "invalid line number: "+string(text[i:]))
-		return
-	}
-
-	// If we have a column (//line filename:line:col form),
-	// an empty filename means to use the previous filename.
-	filename := string(text[:i-1]) // lop off ":line", and trim white space
-	if filename == "" && ok2 {
-		filename = s.file.Position(s.file.Pos(offs)).Filename
-	} else if filename != "" {
-		// Put a relative filename in the current directory.
-		// This is for compatibility with earlier releases.
-		// See issue 26671.
-		filename = filepath.Clean(filename)
-		if !filepath.IsAbs(filename) {
-			filename = filepath.Join(s.dir, filename)
+		if s.ch < 0 {
+			s.error(ofs, "ЛЕК-ОШ-ESCAPE")
+			return false
 		}
+		s.next()
+		return true
+
 	}
 
-	s.file.AddLineColumnInfo(next, filename, line, col)
+	for n > 0 {
+		d := uint32(digitVal(s.ch))
+		if d >= 16 {
+			if s.ch < 0 {
+				s.error(s.offset, "ЛЕК-ОШ-ESCAPE")
+			} else {
+				s.error(s.offset, "ЛЕК-ОШ-СИМ", s.ch)
+				return false
+			}
+		}
+		s.next()
+		n--
+	}
+
+	return true
 }
+
+func digitVal(ch rune) int {
+	switch {
+	case '0' <= ch && ch <= '9':
+		return int(ch - '0')
+	case 'a' <= lower(ch) && lower(ch) <= 'f':
+		return int(lower(ch) - 'a' + 10)
+	}
+	return 16 // larger than any legal digit val
+}
+
+/*
 
 func trailingDigits(text []byte) (int, int, bool) {
 	i := bytes.LastIndexByte(text, ':') // look from right (Windows filenames may contain ':')
@@ -279,77 +288,8 @@ func (s *Lexer) findLineEnd() bool {
 	return false
 }
 
-func isLetter(ch rune) bool {
-	return 'a' <= lower(ch) && lower(ch) <= 'z' || ch == '_' || ch >= utf8.RuneSelf && unicode.IsLetter(ch)
-}
 
-func isDigit(ch rune) bool {
-	return isDecimal(ch) || ch >= utf8.RuneSelf && unicode.IsDigit(ch)
-}
 
-// scanIdentifier reads the string of valid identifier characters at s.offset.
-// It must only be called when s.ch is known to be a valid letter.
-//
-// Be careful when making changes to this function: it is optimized and affects
-// scanning performance significantly.
-func (s *Lexer) scanIdentifier() string {
-	offs := s.offset
-
-	// Optimize for the common case of an ASCII identifier.
-	//
-	// Ranging over s.src[s.rdOffset:] lets us avoid some bounds checks, and
-	// avoids conversions to runes.
-	//
-	// In case we encounter a non-ASCII character, fall back on the slower path
-	// of calling into s.next().
-	for rdOffset, b := range s.src[s.rdOffset:] {
-		if 'a' <= b && b <= 'z' || 'A' <= b && b <= 'Z' || b == '_' || '0' <= b && b <= '9' {
-			// Avoid assigning a rune for the common case of an ascii character.
-			continue
-		}
-		s.rdOffset += rdOffset
-		if 0 < b && b < utf8.RuneSelf {
-			// Optimization: we've encountered an ASCII character that's not a letter
-			// or number. Avoid the call into s.next() and corresponding set up.
-			//
-			// Note that s.next() does some line accounting if s.ch is '\n', so this
-			// shortcut is only possible because we know that the preceding character
-			// is not '\n'.
-			s.ch = rune(b)
-			s.offset = s.rdOffset
-			s.rdOffset++
-			goto exit
-		}
-		// We know that the preceding character is valid for an identifier because
-		// scanIdentifier is only called when s.ch is a letter, so calling s.next()
-		// at s.rdOffset resets the scanner state.
-		s.next()
-		for isLetter(s.ch) || isDigit(s.ch) {
-			s.next()
-		}
-		goto exit
-	}
-	s.offset = len(s.src)
-	s.rdOffset = len(s.src)
-	s.ch = eof
-
-exit:
-	return string(s.src[offs:s.offset])
-}
-
-func digitVal(ch rune) int {
-	switch {
-	case '0' <= ch && ch <= '9':
-		return int(ch - '0')
-	case 'a' <= lower(ch) && lower(ch) <= 'f':
-		return int(lower(ch) - 'a' + 10)
-	}
-	return 16 // larger than any legal digit val
-}
-
-func lower(ch rune) rune     { return ('a' - 'A') | ch } // returns lower-case ch iff ch is ASCII letter
-func isDecimal(ch rune) bool { return '0' <= ch && ch <= '9' }
-func isHex(ch rune) bool     { return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f' }
 
 // digits accepts the sequence { digit | '_' }.
 // If base <= 10, digits accepts any decimal digit but records
@@ -383,9 +323,9 @@ func (s *Lexer) digits(base int, invalid *int) (digsep int) {
 	return
 }
 
-func (s *Lexer) scanNumber() (token.Token, string) {
+func (s *Lexer) scanNumber() (Token, string) {
 	offs := s.offset
-	tok := token.ILLEGAL
+	tok := ILLEGAL
 
 	base := 10        // number base
 	prefix := rune(0) // one of 0 (decimal), '0' (0-octal), 'x', 'o', or 'b'
@@ -394,7 +334,7 @@ func (s *Lexer) scanNumber() (token.Token, string) {
 
 	// integer part
 	if s.ch != '.' {
-		tok = token.INT
+		tok = INT
 		if s.ch == '0' {
 			s.next()
 			switch lower(s.ch) {
@@ -417,7 +357,7 @@ func (s *Lexer) scanNumber() (token.Token, string) {
 
 	// fractional part
 	if s.ch == '.' {
-		tok = token.FLOAT
+		tok = FLOAT
 		if prefix == 'o' || prefix == 'b' {
 			s.error(s.offset, "invalid radix point in "+litname(prefix))
 		}
@@ -438,7 +378,7 @@ func (s *Lexer) scanNumber() (token.Token, string) {
 			s.errorf(s.offset, "%q exponent requires hexadecimal mantissa", s.ch)
 		}
 		s.next()
-		tok = token.FLOAT
+		tok = FLOAT
 		if s.ch == '+' || s.ch == '-' {
 			s.next()
 		}
@@ -447,18 +387,18 @@ func (s *Lexer) scanNumber() (token.Token, string) {
 		if ds&1 == 0 {
 			s.error(s.offset, "exponent has no digits")
 		}
-	} else if prefix == 'x' && tok == token.FLOAT {
+	} else if prefix == 'x' && tok == FLOAT {
 		s.error(s.offset, "hexadecimal mantissa requires a 'p' exponent")
 	}
 
 	// suffix 'i'
 	if s.ch == 'i' {
-		tok = token.IMAG
+		tok = IMAG
 		s.next()
 	}
 
 	lit := string(s.src[offs:s.offset])
-	if tok == token.INT && invalid >= 0 {
+	if tok == INT && invalid >= 0 {
 		s.errorf(invalid, "invalid digit %q in %s", lit[invalid-offs], litname(prefix))
 	}
 	if digsep&2 != 0 {
@@ -522,120 +462,8 @@ func invalidSep(x string) int {
 	return -1
 }
 
-// scanEscape parses an escape sequence where rune is the accepted
-// escaped quote. In case of a syntax error, it stops at the offending
-// character (without consuming it) and returns false. Otherwise
-// it returns true.
-func (s *Lexer) scanEscape(quote rune) bool {
-	offs := s.offset
 
-	var n int
-	var base, max uint32
-	switch s.ch {
-	case 'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', quote:
-		s.next()
-		return true
-	case '0', '1', '2', '3', '4', '5', '6', '7':
-		n, base, max = 3, 8, 255
-	case 'x':
-		s.next()
-		n, base, max = 2, 16, 255
-	case 'u':
-		s.next()
-		n, base, max = 4, 16, unicode.MaxRune
-	case 'U':
-		s.next()
-		n, base, max = 8, 16, unicode.MaxRune
-	default:
-		msg := "unknown escape sequence"
-		if s.ch < 0 {
-			msg = "escape sequence not terminated"
-		}
-		s.error(offs, msg)
-		return false
-	}
 
-	var x uint32
-	for n > 0 {
-		d := uint32(digitVal(s.ch))
-		if d >= base {
-			msg := fmt.Sprintf("illegal character %#U in escape sequence", s.ch)
-			if s.ch < 0 {
-				msg = "escape sequence not terminated"
-			}
-			s.error(s.offset, msg)
-			return false
-		}
-		x = x*base + d
-		s.next()
-		n--
-	}
-
-	if x > max || 0xD800 <= x && x < 0xE000 {
-		s.error(offs, "escape sequence is invalid Unicode code point")
-		return false
-	}
-
-	return true
-}
-
-func (s *Lexer) scanRune() string {
-	// '\'' opening already consumed
-	offs := s.offset - 1
-
-	valid := true
-	n := 0
-	for {
-		ch := s.ch
-		if ch == '\n' || ch < 0 {
-			// only report error if we don't have one already
-			if valid {
-				s.error(offs, "rune literal not terminated")
-				valid = false
-			}
-			break
-		}
-		s.next()
-		if ch == '\'' {
-			break
-		}
-		n++
-		if ch == '\\' {
-			if !s.scanEscape('\'') {
-				valid = false
-			}
-			// continue to read to closing quote
-		}
-	}
-
-	if valid && n != 1 {
-		s.error(offs, "illegal rune literal")
-	}
-
-	return string(s.src[offs:s.offset])
-}
-
-func (s *Lexer) scanString() string {
-	// '"' opening already consumed
-	offs := s.offset - 1
-
-	for {
-		ch := s.ch
-		if ch == '\n' || ch < 0 {
-			s.error(offs, "string literal not terminated")
-			break
-		}
-		s.next()
-		if ch == '"' {
-			break
-		}
-		if ch == '\\' {
-			s.scanEscape('"')
-		}
-	}
-
-	return string(s.src[offs:s.offset])
-}
 
 func stripCR(b []byte, comment bool) []byte {
 	c := make([]byte, len(b))
@@ -655,47 +483,11 @@ func stripCR(b []byte, comment bool) []byte {
 	return c[:i]
 }
 
-func (s *Lexer) scanRawString() string {
-	// '`' opening already consumed
-	offs := s.offset - 1
+*/
 
-	hasCR := false
-	for {
-		ch := s.ch
-		if ch < 0 {
-			s.error(offs, "raw string literal not terminated")
-			break
-		}
-		s.next()
-		if ch == '`' {
-			break
-		}
-		if ch == '\r' {
-			hasCR = true
-		}
-	}
+//====
 
-	lit := s.src[offs:s.offset]
-	if hasCR {
-		lit = stripCR(lit, false)
-	}
-
-	return string(lit)
-}
-
-func (s *Lexer) skipWhitespace() {
-	for s.ch == ' ' || s.ch == '\t' || s.ch == '\n' && !s.insertSemi || s.ch == '\r' {
-		s.next()
-	}
-}
-
-// Helper functions for scanning multi-byte tokens such as >> += >>= .
-// Different routines recognize different length tok_i based on matches
-// of ch_i. If a token ends in '=', the result is tok1 or tok3
-// respectively. Otherwise, the result is tok0 if there was no other
-// matching character, or tok2 if the matching character was ch2.
-
-func (s *Lexer) switch2(tok0, tok1 token.Token) token.Token {
+func (s *Lexer) checkEqu(tok0, tok1 Token) Token {
 	if s.ch == '=' {
 		s.next()
 		return tok1
@@ -703,223 +495,130 @@ func (s *Lexer) switch2(tok0, tok1 token.Token) token.Token {
 	return tok0
 }
 
-func (s *Lexer) switch3(tok0, tok1 token.Token, ch2 rune, tok2 token.Token) token.Token {
-	if s.ch == '=' {
+func (s *Lexer) checkNext(tok0 Token, next rune, tok1 Token) Token {
+	if s.ch == next {
 		s.next()
 		return tok1
-	}
-	if s.ch == ch2 {
-		s.next()
-		return tok2
 	}
 	return tok0
 }
 
-func (s *Lexer) switch4(tok0, tok1 token.Token, ch2 rune, tok2, tok3 token.Token) token.Token {
-	if s.ch == '=' {
-		s.next()
-		return tok1
-	}
-	if s.ch == ch2 {
-		s.next()
-		if s.ch == '=' {
-			s.next()
-			return tok3
-		}
-		return tok2
-	}
-	return tok0
-}
+func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 
-// Scan scans the next token and returns the token position, the token,
-// and its literal string if applicable. The source end is indicated by
-// token.EOF.
-//
-// If the returned token is a literal (token.IDENT, token.INT, token.FLOAT,
-// token.IMAG, token.CHAR, token.STRING) or token.COMMENT, the literal string
-// has the corresponding value.
-//
-// If the returned token is a keyword, the literal string is the keyword.
-//
-// If the returned token is token.SEMICOLON, the corresponding
-// literal string is ";" if the semicolon was present in the source,
-// and "\n" if the semicolon was inserted because of a newline or
-// at EOF.
-//
-// If the returned token is token.ILLEGAL, the literal string is the
-// offending character.
-//
-// In all other cases, Scan returns an empty literal string.
-//
-// For more tolerant parsing, Scan will return a valid token if
-// possible even if a syntax error was encountered. Thus, even
-// if the resulting token sequence contains no illegal tokens,
-// a client may not assume that no error occurred. Instead it
-// must check the scanner's ErrorCount or the number of calls
-// of the error handler, if there was one installed.
-//
-// Scan adds line information to the file added to the file
-// set with Init. Token positions are relative to that file
-// and thus relative to the file set.
-func (s *Lexer) Scan() (pos token.Pos, tok token.Token, lit string) {
-scanAgain:
 	s.skipWhitespace()
 
-	// current token start
-	pos = s.file.Pos(s.offset)
+	// начало лексемы
+	pos = s.offset
 
-	// determine token value
-	insertSemi := false
 	switch ch := s.ch; {
 	case isLetter(ch):
 		lit = s.scanIdentifier()
 		if len(lit) > 1 {
-			// keywords are longer than one letter - avoid lookup otherwise
-			tok = token.Lookup(lit)
-			switch tok {
-			case token.IDENT, token.BREAK, token.CONTINUE, token.FALLTHROUGH, token.RETURN:
-				insertSemi = true
-			}
+			// все ключевые слова длиннее одного символа
+			tok = Lookup(lit)
 		} else {
-			insertSemi = true
-			tok = token.IDENT
+			tok = IDENT
 		}
-	case isDecimal(ch) || ch == '.' && isDecimal(rune(s.peek())):
-		insertSemi = true
-		tok, lit = s.scanNumber()
+		//!	case isDecimal(ch) || ch == '.' && isDecimal(rune(s.peek())):
+		//		tok, lit = s.scanNumber()
 	default:
-		s.next() // always make progress
+		s.next() // всегда двигаемся
 		switch ch {
 		case -1:
-			if s.insertSemi {
-				s.insertSemi = false // EOF consumed
-				return pos, token.SEMICOLON, "\n"
-			}
-			tok = token.EOF
+			tok = EOF
 		case '\n':
-			// we only reach here if s.insertSemi was
-			// set in the first place and exited early
-			// from s.skipWhitespace()
-			s.insertSemi = false // newline consumed
-			return pos, token.SEMICOLON, "\n"
-		case '"':
-			insertSemi = true
-			tok = token.STRING
-			lit = s.scanString()
-		case '\'':
-			insertSemi = true
-			tok = token.CHAR
-			lit = s.scanRune()
-		case '`':
-			insertSemi = true
-			tok = token.STRING
-			lit = s.scanRawString()
-		case ':':
-			tok = s.switch2(token.COLON, token.DEFINE)
-		case '.':
-			// fractions starting with a '.' are handled by outer switch
-			tok = token.PERIOD
-			if s.ch == '.' && s.peek() == '.' {
+			// пропускаем все
+			for s.ch == '\n' {
 				s.next()
-				s.next() // consume last '.'
-				tok = token.ELLIPSIS
 			}
+			tok = NL
+		case '"':
+			tok = STRING
+			lit = s.scanString('"')
+		case '\'':
+			tok = STRING
+			lit = s.scanString('\'')
+		case '@':
+			tok = MODIFIER
+			lit = s.scanModifier()
+		case ':':
+			tok = s.checkEqu(COLON, ASSIGN)
+		case '.':
+			tok = DOT
 		case ',':
-			tok = token.COMMA
+			tok = COMMA
 		case ';':
-			tok = token.SEMICOLON
+			tok = SEMI
 			lit = ";"
 		case '(':
-			tok = token.LPAREN
+			tok = LPAR
 		case ')':
-			insertSemi = true
-			tok = token.RPAREN
+			tok = RPAR
 		case '[':
-			tok = token.LBRACK
+			tok = LBRACK
 		case ']':
-			insertSemi = true
-			tok = token.RBRACK
+			tok = RBRACK
 		case '{':
-			tok = token.LBRACE
+			tok = LBRACE
 		case '}':
-			insertSemi = true
-			tok = token.RBRACE
+			tok = RBRACE
 		case '+':
-			tok = s.switch3(token.ADD, token.ADD_ASSIGN, '+', token.INC)
-			if tok == token.INC {
-				insertSemi = true
-			}
+			tok = s.checkNext(ADD, '+', INC)
 		case '-':
-			tok = s.switch3(token.SUB, token.SUB_ASSIGN, '-', token.DEC)
-			if tok == token.DEC {
-				insertSemi = true
-			}
+			tok = s.checkNext(SUB, '-', DEC)
 		case '*':
-			tok = s.switch2(token.MUL, token.MUL_ASSIGN)
+			tok = MUL
 		case '/':
-			if s.ch == '/' || s.ch == '*' {
-				// comment
-				if s.insertSemi && s.findLineEnd() {
-					// reset position to the beginning of the comment
-					s.ch = '/'
-					s.offset = s.file.Offset(pos)
-					s.rdOffset = s.offset + 1
-					s.insertSemi = false // newline consumed
-					return pos, token.SEMICOLON, "\n"
-				}
-				comment := s.scanComment()
-				if s.mode&ScanComments == 0 {
-					// skip comment
-					s.insertSemi = false // newline consumed
-					goto scanAgain
-				}
-				tok = token.COMMENT
-				lit = comment
+			if s.ch == '/' {
+				tok = LINE_COMMENT
+				ofs := s.scanLineComment()
+				lit = string(s.src[ofs:s.offset])
+			} else if s.ch == '*' {
+				tok = BLOCK_COMMENT
+				ofs := s.scanBlockComment()
+				lit = string(s.src[ofs:s.offset])
 			} else {
-				tok = s.switch2(token.QUO, token.QUO_ASSIGN)
+				tok = QUO
 			}
+
 		case '%':
-			tok = s.switch2(token.REM, token.REM_ASSIGN)
-		case '^':
-			tok = s.switch2(token.XOR, token.XOR_ASSIGN)
+			tok = REM
+			//		case '^':
+			//			tok = XOR
 		case '<':
-			if s.ch == '-' {
-				s.next()
-				tok = token.ARROW
-			} else {
-				tok = s.switch4(token.LSS, token.LEQ, '<', token.SHL, token.SHL_ASSIGN)
-			}
+			tok = s.checkEqu(LSS, LEQ)
 		case '>':
-			tok = s.switch4(token.GTR, token.GEQ, '>', token.SHR, token.SHR_ASSIGN)
+			tok = s.checkEqu(GTR, GEQ)
 		case '=':
-			tok = s.switch2(token.ASSIGN, token.EQL)
-		case '!':
-			tok = s.switch2(token.NOT, token.NEQ)
-		case '&':
-			if s.ch == '^' {
-				s.next()
-				tok = s.switch2(token.AND_NOT, token.AND_NOT_ASSIGN)
-			} else {
-				tok = s.switch3(token.AND, token.AND_ASSIGN, '&', token.LAND)
-			}
-		case '|':
-			tok = s.switch3(token.OR, token.OR_ASSIGN, '|', token.LOR)
+			tok = EQ
+		case '#':
+			tok = NEQ
 		case '~':
-			tok = token.TILDE
+			tok = NOT
+		case '&':
+			tok = s.checkNext(AND, '.', BITAND)
+		case '|':
+			tok = s.checkNext(OR, '.', BITOR)
 		default:
-			// next reports unexpected BOMs - don't repeat
-			if ch != bom {
-				s.errorf(s.file.Offset(pos), "illegal character %#U", ch)
-			}
-			insertSemi = s.insertSemi // preserve insertSemi info
-			tok = token.ILLEGAL
+			s.error(s.offset, "ЛЕК-ОШ-СИМ", ch)
+			tok = Invalid
 			lit = string(ch)
 		}
-	}
-	if s.mode&dontInsertSemis == 0 {
-		s.insertSemi = insertSemi
 	}
 
 	return
 }
-*/
+
+func (s *Lexer) WhitespaceBefore(c rune) bool {
+
+	ofs := s.offset - 2
+	if ofs < 0 {
+		return false
+	}
+	if s.src[ofs+1] != byte(c) {
+		return false
+	}
+
+	ch := s.src[ofs]
+	return ch == ' ' || ch == '\t'
+}

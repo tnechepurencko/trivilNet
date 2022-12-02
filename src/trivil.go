@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"trivil/env"
+	"trivil/lexer"
 )
 
 func main() {
@@ -24,9 +25,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("length: ", len(src.Bytes))
+	fmt.Printf("%v\n", src.Bytes)
 
-	env.AddError(src, 1, "Проверка")
+	var lex = new(lexer.Lexer)
+	lex.Init(src)
+
+	for true {
+		pos, tok, lit := lex.Scan()
+		if tok == lexer.EOF {
+			break
+		}
+		fmt.Printf("%d %v %s\n", pos, tok, lit)
+	}
 
 	env.ShowErrors()
 

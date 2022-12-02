@@ -13,6 +13,10 @@ const (
 	EOF
 	NL
 
+	LINE_COMMENT
+	BLOCK_COMMENT
+	MODIFIER
+
 	// literals
 	IDENT
 	INT
@@ -52,10 +56,10 @@ const (
 	LBRACE // {
 	RBRACE // }
 
-	COMMA  // ,
-	PERIOD // .
-	SEMI   // ;
-	COLON  // :
+	COMMA // ,
+	DOT   // .
+	SEMI  // ;
+	COLON // :
 
 	// keywords
 	keyword_beg
@@ -80,6 +84,11 @@ var tokens = [...]string{
 
 	EOF: "EOF",
 	NL:  "NL",
+
+	LINE_COMMENT:  "LINE_COMMENT",
+	BLOCK_COMMENT: "BLOCK_COMMENT",
+
+	MODIFIER: "@",
 
 	IDENT:  "IDENT",
 	INT:    "INT",
@@ -121,10 +130,10 @@ var tokens = [...]string{
 	RBRACK: "]",
 	RBRACE: "}",
 
-	COMMA:  ",",
-	PERIOD: ".",
-	SEMI:   ";",
-	COLON:  ":",
+	COMMA: ",",
+	DOT:   ".",
+	SEMI:  ";",
+	COLON: ":",
 
 	BREAK:  "прервать",
 	CLASS:  "класс",
