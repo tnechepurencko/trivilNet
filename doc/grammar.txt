@@ -249,10 +249,9 @@ sep // разделитель между описаниями, операторами и т.д.
 //==== lexer
 
 int_lit
-	: digits
-	| '0x' hex_digit ('_' hex_digit)*
+	: digit+
+	| '0x' hex_digit+
 	;
-digits: digit ('_'? 'digit')*
 digit: '0'..'9';
 hex_digit
 	: '0'..'9'
@@ -261,7 +260,7 @@ hex_digit
 	;
 
 float_lit
-	: digits '.' digits // only simple form
+	: digit+ '.' digit* // only simple form
 	;
 	
 str_lit

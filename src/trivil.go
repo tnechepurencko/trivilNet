@@ -25,7 +25,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("%v\n", src.Bytes)
+	//fmt.Printf("%v\n", src.Bytes)
 
 	var lex = new(lexer.Lexer)
 	lex.Init(src)
