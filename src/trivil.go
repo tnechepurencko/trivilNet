@@ -19,7 +19,7 @@ func main() {
 	fmt.Println("Тривиль-0 компилятор v0.0")
 	env.Init()
 
-	src := env.ReadSource(arg)
+	src := env.AddSource(arg)
 	if src.Err != nil {
 		fmt.Printf("Ошибка чтения исходного файла '%s': %s\n", arg, src.Err.Error())
 		os.Exit(1)

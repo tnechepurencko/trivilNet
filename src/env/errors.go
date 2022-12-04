@@ -9,7 +9,8 @@ import (
 type Error struct {
 	id     string
 	source *Source
-	pos    int
+	line   int
+	col    int
 	text   string
 }
 
@@ -18,7 +19,7 @@ var (
 	messages map[string]string
 )
 
-func Init() {
+func initErrors() {
 	errors = make([]*Error, 0)
 	messages = make(map[string]string)
 
@@ -38,11 +39,15 @@ func Init() {
 	}
 }
 
-func AddError(source *Source, pos int, id string, args ...interface{}) {
+func AddError(pos int, id string, args ...interface{}) {
+
+	source, line, col := SourcePos(pos)
+
 	var err = &Error{
 		id:     id,
 		source: source,
-		pos:    pos,
+		line:   line,
+		col:    col,
 	}
 
 	template, ok := messages[id]
@@ -54,7 +59,7 @@ func AddError(source *Source, pos int, id string, args ...interface{}) {
 		msg = fmt.Sprintf("сообщение для ошибки '%s' не задано!", id)
 	}
 
-	err.text = fmt.Sprintf("%s:%d:%s: %s", source.Path, pos, id, msg)
+	err.text = fmt.Sprintf("%s:%d:%d:%s: %s", source.Path, line, col, id, msg)
 
 	errors = append(errors, err)
 }

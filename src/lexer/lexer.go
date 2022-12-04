@@ -41,8 +41,8 @@ func (s *Lexer) Init(source *env.Source) {
 	s.next()
 }
 
-func (s *Lexer) error(pos int, id string, args ...interface{}) {
-	env.AddError(s.source, pos, id, args...)
+func (s *Lexer) error(ofs int, id string, args ...interface{}) {
+	env.AddError(s.source.MakePos(ofs), id, args...)
 }
 
 // Read the next Unicode char into s.ch.
@@ -307,7 +307,7 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 	s.skipWhitespace()
 
 	// начало лексемы
-	pos = s.offset
+	pos = s.source.MakePos(s.offset)
 
 	switch ch := s.ch; {
 	case isLetter(ch):
