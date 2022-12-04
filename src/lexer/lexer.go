@@ -1,9 +1,7 @@
 package lexer
 
 import (
-	//"bytes"
 	"fmt"
-	//"strconv"
 	"unicode"
 	"unicode/utf8"
 
