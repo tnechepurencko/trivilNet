@@ -6,6 +6,7 @@ import (
 	"os"
 	"trivil/env"
 	"trivil/lexer"
+	"trivil/parser"
 )
 
 func main() {
@@ -26,7 +27,18 @@ func main() {
 	}
 
 	//fmt.Printf("%v\n", src.Bytes)
+	if false {
+		testLexer(src)
+	} else {
+		parser.Parse(src)
 
+	}
+
+	env.ShowErrors()
+
+}
+
+func testLexer(src *env.Source) {
 	var lex = new(lexer.Lexer)
 	lex.Init(src)
 
@@ -37,7 +49,4 @@ func main() {
 		}
 		fmt.Printf("%d %v %s\n", pos, tok, lit)
 	}
-
-	env.ShowErrors()
-
 }

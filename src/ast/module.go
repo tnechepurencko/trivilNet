@@ -16,6 +16,10 @@ type Module struct {
 	Entry *EntryFn
 }
 
+func NewModule() *Module {
+	return &Module{}
+}
+
 //=== вход
 
 type EntryFn struct {
