@@ -86,16 +86,47 @@ func (p *Parser) parseModule() {
 
 func (p *Parser) parseImportList() {
 	if p.trace {
-		defer un(trace(p, "Import List"))
+		defer un(trace(p, "Импорты"))
 	}
 
 }
 
 func (p *Parser) parseDeclarations() {
 	if p.trace {
-		defer un(trace(p, "Declarations"))
+		defer un(trace(p, "Описания"))
 	}
 
+	for p.tok != lexer.EOF {
+
+		switch p.tok {
+		case lexer.ENTRY:
+			p.parseEntry()
+		default:
+			env.AddError(p.pos, "ПАР-ОШ-ОПИСАНИЕ", p.tok.String())
+			p.next()
+		}
+
+	}
+}
+
+func (p *Parser) parseEntry() {
+	if p.trace {
+		defer un(trace(p, "Вход"))
+	}
+
+	var n = &ast.EntryFn{
+		Pos: p.pos,
+	}
+
+	p.next()
+	n.Seq = p.parseStatementSeq()
+
+	if p.module.Entry != nil {
+		env.AddError(p.pos, "ПАР-ДУБЛЬ-ВХОД")
+		return
+	}
+
+	p.module.Entry = n
 }
 
 //====

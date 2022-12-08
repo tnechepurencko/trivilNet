@@ -23,5 +23,10 @@ func NewModule() *Module {
 //=== вход
 
 type EntryFn struct {
-	//source *env.Source
+	Pos int
+	Seq *StatementSeq
+}
+
+func (n *EntryFn) GetPos() int {
+	return n.Pos
 }

@@ -66,6 +66,7 @@ const (
 	BREAK
 	CONST
 	ELSE
+	ENTRY
 	FN
 	IF
 	IMPORT
@@ -138,6 +139,7 @@ var tokens = [...]string{
 	BREAK:  "прервать",
 	CLASS:  "класс",
 	CONST:  "конст",
+	ENTRY:  "вход",
 	ELSE:   "иначе",
 	FN:     "фн",
 	IF:     "если",

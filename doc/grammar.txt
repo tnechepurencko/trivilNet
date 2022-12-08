@@ -15,7 +15,7 @@ import_path
 	;
 
 declaration_list
-	:  declaration (sep declaration)* sep?
+	:  declaration (sep declaration)*
 	;
 	
 declaration
@@ -123,7 +123,7 @@ entry
 //=== statements
 
 statement_seq
-	: '{' statement_or_decl (sep statement_or_decl)* sep? '}'
+	: '{' statement_or_decl (sep statement_or_decl)* '}'
 	;
 
 statement_or_decl

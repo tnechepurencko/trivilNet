@@ -27,9 +27,9 @@ type Expr interface {
 	ExprNode()
 }
 
-type Stmt interface {
+type Statement interface {
 	Node
-	StmtNode()
+	StatementNode()
 }
 
 //==== declarations
