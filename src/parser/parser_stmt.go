@@ -28,7 +28,11 @@ func (p *Parser) parseStatementSeq() *ast.StatementSeq {
 		if s != nil {
 			n.Statements = append(n.Statements, s)
 		}
-		!sep
+
+		if p.tok == lexer.RBRACE {
+			break
+		}
+		p.expectSep("ПАР_РАЗД_ОПЕРАТОРОВ")
 	}
 
 	p.expect(lexer.RBRACE)

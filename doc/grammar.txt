@@ -1,5 +1,5 @@
 compilation_unit
-	: 'модуль' ident
+	: 'РјРѕРґСѓР»СЊ' ident
 	  import_list
 	  declaration_list
 	;
@@ -8,7 +8,7 @@ import_list
 	: import (sep import)* sep?
 	;
 import
-	: 'импорт' (ident '=')? import_path 
+	: 'РёРјРїРѕСЂС‚' (ident '=')? import_path 
 	;
 import_path
 	: string
@@ -29,7 +29,7 @@ declaration
 //==== types
 
 type_decl
-	: 'тип' name '=' type_def
+	: 'С‚РёРї' name '=' type_def
 	;
 
 name
@@ -47,7 +47,7 @@ array_def
 	;
 
 class_def
-	: 'класс' base_type? '{' class_field_list? '}'
+	: 'РєР»Р°СЃСЃ' base_type? '{' class_field_list? '}'
 	;
 	
 base_type
@@ -63,7 +63,7 @@ class_field
 	;
 
 type_ref
-	: 'мб'? qualident
+	: 'РјР±'? qualident
 	;
 	
 qualident
@@ -73,7 +73,7 @@ qualident
 //==== consts and vars
 
 const_decl
-	: 'конст' (single_const | group_const)
+	: 'РєРѕРЅСЃС‚' (single_const | group_const)
 	;
 single_const
 	: name (':' type_ref)? '=' const_expression 
@@ -88,12 +88,12 @@ const_expression // to be extended later
 	;
 
 var_decl
-	: 'пусть' name ':' type_ref ('=' expression) // 'дано' for let
+	: 'РїСѓСЃС‚СЊ' name ':' type_ref ('=' expression) // 'РґР°РЅРѕ' for let
 	
 //=== function
 
 func_decl
-	: 'фн' receiver? name signature statement_seq?
+	: 'С„РЅ' receiver? name signature statement_seq?
 	;
 
 receiver
@@ -117,7 +117,7 @@ result_type
 //=== entry 
 
 entry
-	: 'вход' statement_seq
+	: 'РІС…РѕРґ' statement_seq
 	;
 
 //=== statements
@@ -136,22 +136,22 @@ statement
 	: if_stm
 	| while_stm
 	//| switch_stm
-	| 'прервать'
-	| 'вернуть' (expression | sep)
+	| 'РїСЂРµСЂРІР°С‚СЊ'
+	| 'РІРµСЂРЅСѓС‚СЊ' (expression | sep)
 	| assignment
 	| expression ('++' | '--')?
 	;
 
 if_stm
-	: 'если' expression statement_seq ('иначе' statement_seq)?
+	: 'РµСЃР»Рё' expression statement_seq ('РёРЅР°С‡Рµ' statement_seq)?
 	;
 	
 while_stm
-	: 'пока' expression statement_seq 
+	: 'РїРѕРєР°' expression statement_seq 
 	;
 
 //switch_stm // TBD
-//	: 'выбор' 
+//	: 'РІС‹Р±РѕСЂ' 
 //	;
 	
 assignment
@@ -205,7 +205,7 @@ literal
 	
 selector: '.' ident;
 arguments: '(' expression_list? ')'
-conversion: '‹' type_ref '›';
+conversion: 'вЂ№' type_ref 'вЂє';
 check_defined: '!'; 
 
 expression_list
@@ -241,7 +241,7 @@ field_value
 	: ident ':' expression
 	;
 	
-sep // разделитель между описаниями, операторами и т.д.
+sep // СЂР°Р·РґРµР»РёС‚РµР»СЊ РјРµР¶РґСѓ РѕРїРёСЃР°РЅРёВ¤РјРё, РѕРїРµСЂР°С‚РѕСЂР°РјРё Рё С‚.Рґ.
 	: ';'
 	| NL
 	;	
@@ -284,7 +284,7 @@ ident
 ident_start
 	: letter
 	| '_'
-	| '№'
+	| 'С”'
 	;
 
 letter
@@ -310,8 +310,9 @@ modifier
 
 // special symbols
 
-‹ U+2039
-› U+203A
-« U+00AB
-» U+00BB
+В« U+00AB
+В» U+00BB
+вЂ№ U+2039
+вЂє U+203A
 
+вЂ№вЂє

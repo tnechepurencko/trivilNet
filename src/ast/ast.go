@@ -32,22 +32,8 @@ type Statement interface {
 	StatementNode()
 }
 
-//==== declarations
-
-type DeclBase struct {
-	Pos int
-}
-
-func (n *DeclBase) GetPos() int {
-	return n.Pos
-}
-func (n *DeclBase) DeclNode() {}
-
-type VarDecl struct {
-	DeclBase
-	Name string
-	Typ  Type
-}
+//==== init
 
 func init() {
+	initScopes()
 }

@@ -23,3 +23,9 @@ type PredefinedType struct {
 	TypeBase
 	Name string
 }
+
+//==== function type
+
+type FuncType struct {
+	TypeBase
+}
