@@ -18,7 +18,7 @@ type Lexer struct {
 	ch       rune // текущий unicode символ
 	offset   int  // смещение (начало) текущего символа
 	rdOffset int  // позиция чтения
-	uofs     int  // смещение в unicode символах
+	uOffset  int  // смещение в unicode символах
 }
 
 func (s *Lexer) Init(source *env.Source) {
@@ -28,13 +28,14 @@ func (s *Lexer) Init(source *env.Source) {
 	s.ch = ' '
 	s.offset = 0
 	s.rdOffset = 0
+	s.uOffset = 0
 
 	// пропустить BOM
 	if len(s.src) >= 3 && s.src[0] == 0xEF && s.src[1] == 0xBB && s.src[2] == 0xBF {
 		s.offset = 3
 	}
 
-	s.source.AddLine(s.offset)
+	s.source.AddLine(s.uOffset)
 	s.next()
 }
 
@@ -52,26 +53,33 @@ func (s *Lexer) next() {
 		switch {
 		case r == 0:
 			s.error(s.offset, "ЛЕК-ОШ-СИМ", rune(0))
+			s.uOffset++
 		case r == '\n':
-			s.source.AddLine(s.rdOffset + w)
+			s.uOffset++
+			s.source.AddLine(s.uOffset)
 		case r == '\r':
 			r = '\n'
+			s.uOffset++
 			if s.rdOffset+1 < len(s.src) && rune(s.src[s.rdOffset+1]) == '\n' {
+				s.uOffset++
 				w = 2
 			}
-			s.source.AddLine(s.rdOffset + w)
+			s.source.AddLine(s.uOffset)
 		case r >= utf8.RuneSelf:
 			// not ASCII
 			r, w = utf8.DecodeRune(s.src[s.rdOffset:])
 			if r == utf8.RuneError && w == 1 {
 				s.error(s.offset, "ЛЕК-UTF8")
 			}
+			s.uOffset++
+		default:
+			s.uOffset++ // ascii
 		}
 		s.rdOffset += w
 		s.ch = r
 	} else {
 		s.offset = len(s.src)
-		s.source.AddLine(s.offset)
+		s.source.AddLine(s.uOffset)
 		s.ch = -1 // eof
 	}
 }
@@ -300,7 +308,7 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 	s.skipWhitespace()
 
 	// начало лексемы
-	pos = s.source.MakePos(s.offset)
+	pos = s.source.MakePos(s.uOffset)
 
 	switch ch := s.ch; {
 	case isLetter(ch):

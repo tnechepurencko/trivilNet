@@ -69,8 +69,6 @@ func SourcePos(pos int) (src *Source, line int, col int) {
 
 func calcTextPos(src *Source, ofs int) (int, int) {
 
-	fmt.Printf("%v in %v\n", ofs, src.Lines)
-
 	if len(src.Lines) == 0 {
 		return 0, ofs
 	}
@@ -83,7 +81,6 @@ func calcTextPos(src *Source, ofs int) (int, int) {
 			break
 		}
 		var x = (l + r) / 2
-		fmt.Printf("%v, %v", l, r)
 		var lofs = src.Lines[x]
 
 		if ofs > lofs {
@@ -94,12 +91,11 @@ func calcTextPos(src *Source, ofs int) (int, int) {
 			l = x
 			break
 		}
-		fmt.Printf(" => %v, %v\n", l, r)
 	}
 
 	if ofs < src.Lines[l] && l > 0 {
 		l--
 	}
 
-	return l + 1, ofs - src.Lines[l] + 1
+	return l + 1, ofs - src.Lines[l]
 }
