@@ -185,17 +185,18 @@ mul_op: '*' | '/' | '%' | '&.';
 
 primary_exp
 	: operand
-	| primary_expr selector
-	| primary_expr arguments
-	| primary_expr conversion
-	| primary_expr index_or_array_composite
-	| primary_expr class_composite // no space allowed
-	| primary_expr not_null_check
+	( selector
+	| arguments
+	| conversion
+	| index_or_array_composite
+	| class_composite // no space allowed
+	| not_null_check
+	)*
 	;
 
 operand
 	: literal
-	| qualident
+	| ident
 	| '(' expression ')'
 //	| lambda // later
 	;
