@@ -26,6 +26,14 @@ func (p *Parser) parseFn() *ast.Function {
 		DeclBase: ast.DeclBase{Pos: p.pos},
 	}
 
+	switch mod {
+	case "":
+	case "@внешняя":
+		n.External = true
+	default:
+		env.AddError(p.pos, "ПАР-ОШ-МОДИФИКАТОР", mod)
+	}
+
 	p.expect(lexer.FN)
 
 	n.Name = p.parseIdent()
@@ -34,14 +42,9 @@ func (p *Parser) parseFn() *ast.Function {
 	}
 
 	n.Typ = p.parseFuncType()
-	n.Seq = p.parseStatementSeq()
 
-	switch mod {
-	case "":
-	case "@внешняя":
-		n.External = true
-	default:
-		env.AddError(p.pos, "ПАР-ОШ-МОДИФИКАТОР", mod)
+	if !n.External {
+		n.Seq = p.parseStatementSeq()
 	}
 
 	return n

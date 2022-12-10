@@ -9,9 +9,27 @@ import (
 
 var _ = fmt.Printf
 
+var validSimpleStmToken = map[lexer.Token]bool{
+	lexer.IDENT: true,
+	lexer.LPAR:  true,
+
+	// literals
+	lexer.INT:    true,
+	lexer.FLOAT:  true,
+	lexer.STRING: true,
+
+	// unary ops
+	lexer.ADD: true,
+	lexer.SUB: true,
+	lexer.NOT: true,
+}
+
 //=== statements
 
 func (p *Parser) parseStatementSeq() *ast.StatementSeq {
+	if p.trace {
+		defer un(trace(p, "Список операторов"))
+	}
 
 	var n = &ast.StatementSeq{
 		StatementBase: ast.StatementBase{Pos: p.pos},
@@ -41,14 +59,36 @@ func (p *Parser) parseStatementSeq() *ast.StatementSeq {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор"))
+	}
 
 	switch p.tok {
 	default:
+		if validSimpleStmToken[p.tok] {
+			return p.parseSimpleStatement()
+		}
 		env.AddError(p.pos, "ПАР-ОШ-ОПЕРАТОР", p.tok.String())
 		return nil
 	}
 
 	return nil
+}
+
+func (p *Parser) parseSimpleStatement() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Простой оператор"))
+	}
+
+	var expr = p.parseExpression()
+
+	var s = &ast.ExprStatement{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+
+		X: expr,
+	}
+
+	return s
 }
 
 //====

@@ -23,3 +23,8 @@ type StatementSeq struct {
 	StatementBase
 	Statements []Statement
 }
+
+type ExprStatement struct {
+	StatementBase
+	X Expr
+}
