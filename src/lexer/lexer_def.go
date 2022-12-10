@@ -47,6 +47,9 @@ const (
 	LEQ // <=
 	GEQ // >=
 
+	NNQUERY // ?
+	NNCHECK // !
+
 	ASSIGN // :=
 
 	LPAR   // (
