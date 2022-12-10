@@ -122,7 +122,33 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 		return &ast.InvalidExpr{}
 	}
 
-	// for {} //next
+	for {
+		switch p.tok {
+		case lexer.LPAR:
+			x = p.parseArguments(x)
+		default:
+			return x
+		}
+	}
 
-	return x
+}
+
+func (p *Parser) parseArguments(x ast.Expr) ast.Expr {
+	if p.trace {
+		defer un(trace(p, "Аргументы"))
+	}
+
+	var n = &ast.CallExpr{
+		ExprBase: ast.ExprBase{Pos: p.pos},
+		X:        x,
+		Args:     make([]ast.Expr, 0),
+	}
+
+	p.expect(lexer.LPAR)
+
+	//TODO
+
+	p.expect(lexer.RPAR)
+
+	return n
 }

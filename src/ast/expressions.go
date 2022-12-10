@@ -20,6 +20,12 @@ func (n *ExprBase) ExprNode() {}
 
 //====
 
+type InvalidExpr struct {
+	ExprBase
+}
+
+//====
+
 type BinaryExpr struct {
 	ExprBase
 	X  Expr
@@ -45,6 +51,8 @@ type IdentExpr struct {
 	Obj  Decl
 }
 
-type InvalidExpr struct {
+type CallExpr struct {
 	ExprBase
+	X    Expr
+	Args []Expr
 }
