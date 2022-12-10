@@ -8,7 +8,7 @@ import_list
 	: import (sep import)* sep?
 	;
 import
-	: 'импорт' (ident '=')? import_path 
+	: 'импорт' import_path 
 	;
 import_path
 	: string
