@@ -3,8 +3,7 @@ package parser
 import (
 	"fmt"
 	"trivil/ast"
-
-	//	"trivil/env"
+	"trivil/env"
 	"trivil/lexer"
 )
 
@@ -97,5 +96,33 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 		defer un(trace(p, "Выражение первичное"))
 	}
 
-	return nil
+	var x ast.Expr
+
+	switch p.tok {
+	case lexer.INT, lexer.FLOAT, lexer.STRING:
+		x = &ast.LiteralExpr{
+			ExprBase: ast.ExprBase{Pos: p.pos},
+			Kind:     p.tok,
+			Lit:      p.lit,
+		}
+		p.next()
+	case lexer.IDENT:
+		x = &ast.LiteralExpr{
+			ExprBase: ast.ExprBase{Pos: p.pos},
+			Kind:     p.tok,
+			Lit:      p.lit,
+		}
+		p.next()
+	case lexer.LPAR:
+		p.next()
+		x = p.parseExpression()
+		p.expect(lexer.RPAR)
+	default:
+		env.AddError(p.pos, "ПАР-ОШ-ОПЕРАНД", p.tok.String())
+		return &ast.InvalidExpr{}
+	}
+
+	// for {} //next
+
+	return x
 }

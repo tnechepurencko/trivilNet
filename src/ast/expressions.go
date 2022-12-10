@@ -32,3 +32,19 @@ type UnaryExpr struct {
 	Op lexer.Token
 	X  Expr
 }
+
+type LiteralExpr struct {
+	ExprBase
+	Kind lexer.Token
+	Lit  string
+}
+
+type IdentExpr struct {
+	ExprBase
+	Name string
+	Obj  Decl
+}
+
+type InvalidExpr struct {
+	ExprBase
+}
