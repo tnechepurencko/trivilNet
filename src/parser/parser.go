@@ -106,13 +106,16 @@ func (p *Parser) parseDeclarations() {
 		defer un(trace(p, "Описания"))
 	}
 
+	var d ast.Decl
+
 	for p.tok != lexer.EOF {
 
+		d = nil
 		switch p.tok {
+		case lexer.FN, lexer.MODIFIER:
+			d = p.parseFn()
 		case lexer.ENTRY:
 			p.parseEntry()
-		case lexer.FN, lexer.MODIFIER:
-			p.parseFn()
 		default:
 			env.AddError(p.pos, "ПАР-ОШ-ОПИСАНИЕ", p.tok.String())
 			p.next()
@@ -121,6 +124,10 @@ func (p *Parser) parseDeclarations() {
 		}
 
 		p.expectSep("ПАР_РАЗД_ОПИСАНИЙ")
+
+		if d != nil {
+			p.module.Decls = append(p.module.Decls, d)
+		}
 
 	}
 }

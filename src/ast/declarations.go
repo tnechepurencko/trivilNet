@@ -28,6 +28,13 @@ func (n *DeclBase) SetExported() {
 	n.Exported = true
 }
 
+//====
+
+type InvalidDecl struct {
+	DeclBase
+	Name string
+}
+
 //=== описания
 
 type Function struct {

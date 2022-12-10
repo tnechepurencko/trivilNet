@@ -13,11 +13,18 @@ type Module struct {
 	//source *env.Source
 	Name  string
 	Inner *Scope
+	Decls []Decl
 	Entry *EntryFn
 }
 
 func NewModule() *Module {
-	return &Module{}
+	return &Module{
+		Inner: &Scope{
+			Outer: topScope,
+			Names: make(map[string]Decl),
+		},
+		Decls: make([]Decl, 0),
+	}
 }
 
 //=== вход

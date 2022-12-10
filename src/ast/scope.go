@@ -11,10 +11,10 @@ type Scope struct {
 	Names map[string]Decl
 }
 
-var top *Scope
+var topScope *Scope
 
 func initScopes() {
-	top = &Scope{
+	topScope = &Scope{
 		Names: make(map[string]Decl),
 	}
 }
