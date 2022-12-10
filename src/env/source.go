@@ -1,8 +1,11 @@
 package env
 
 import (
+	"fmt"
 	"io/ioutil"
 )
+
+var _ = fmt.Printf
 
 type Source struct {
 	Path  string
@@ -56,7 +59,47 @@ func SourcePos(pos int) (src *Source, line int, col int) {
 	}
 
 	src = sources[no-1]
-	line = 0 // TBD: find line number
-	col = ofs
+
+	line, col = calcTextPos(src, ofs)
+
+	//	line = 0 // TBD: find line number
+	//	col = ofs
 	return
+}
+
+func calcTextPos(src *Source, ofs int) (int, int) {
+
+	fmt.Printf("%v in %v\n", ofs, src.Lines)
+
+	if len(src.Lines) == 0 {
+		return 0, ofs
+	}
+
+	var l = 0
+	var r = len(src.Lines) - 1
+
+	for {
+		if l == r {
+			break
+		}
+		var x = (l + r) / 2
+		fmt.Printf("%v, %v", l, r)
+		var lofs = src.Lines[x]
+
+		if ofs > lofs {
+			l = x + 1
+		} else if ofs < lofs {
+			r = x - 1
+		} else {
+			l = x
+			break
+		}
+		fmt.Printf(" => %v, %v\n", l, r)
+	}
+
+	if ofs < src.Lines[l] && l > 0 {
+		l--
+	}
+
+	return l + 1, ofs - src.Lines[l] + 1
 }

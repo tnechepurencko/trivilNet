@@ -116,6 +116,8 @@ func (p *Parser) parseDeclarations() {
 		default:
 			env.AddError(p.pos, "ПАР-ОШ-ОПИСАНИЕ", p.tok.String())
 			p.next()
+			//TODO: skipTo
+			continue
 		}
 
 		p.expectSep("ПАР_РАЗД_ОПИСАНИЙ")
