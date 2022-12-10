@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"trivil/analyzer"
 	"trivil/env"
 	"trivil/lexer"
 	"trivil/parser"
@@ -30,12 +31,20 @@ func main() {
 	if false {
 		testLexer(src)
 	} else {
-		parser.Parse(src)
-
+		compile(src)
 	}
 
 	env.ShowErrors()
 
+}
+
+func compile(src *env.Source) {
+	var m = parser.Parse(src)
+	if env.ErrorCount() != 0 {
+		return
+	}
+
+	analyzer.Analyse(m)
 }
 
 func testLexer(src *env.Source) {
