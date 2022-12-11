@@ -9,13 +9,12 @@ import (
 var _ = fmt.Printf
 
 func lookup(m *ast.Module) {
-	fmt.Printf("lookup %v\n", len(m.Decls))
 
 	// добавление имен
 	for _, d := range m.Decls {
 		switch x := d.(type) {
 		case *ast.Function:
-			fmt.Printf("Function %v\n", x.Name)
+			//			fmt.Printf("Function %v\n", x.Name)
 			addToScope(x.Name, x, m.Inner)
 		default:
 			panic(fmt.Sprintf("lookup: ni %T", d))
@@ -58,7 +57,7 @@ func processExpr(scope *ast.Scope, expr ast.Expr) {
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
 		x.Obj = findInScopes(scope, x.Name, x.Pos)
-		fmt.Printf("found %v => %v\n", x.Name, x.Obj)
+		//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
 
 	case *ast.CallExpr:
 		processExpr(scope, x.X)

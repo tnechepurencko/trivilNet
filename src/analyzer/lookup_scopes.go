@@ -16,7 +16,7 @@ func addToScope(name string, d ast.Decl, scope *ast.Scope) {
 	}
 	scope.Names[name] = d
 
-	fmt.Printf("scope: %v\n", scope.Names)
+	//fmt.Printf("scope: %v\n", scope.Names)
 }
 
 func findInScopes(scope *ast.Scope, name string, pos int) ast.Decl {

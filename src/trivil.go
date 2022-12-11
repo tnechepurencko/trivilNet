@@ -6,6 +6,7 @@ import (
 	"os"
 	"trivil/analyzer"
 	"trivil/env"
+	"trivil/genc"
 	"trivil/lexer"
 	"trivil/parser"
 )
@@ -46,6 +47,12 @@ func compile(src *env.Source) {
 	}
 
 	analyzer.Analyse(m)
+	if env.ErrorCount() != 0 {
+		return
+	}
+
+	genc.Generate(m)
+
 }
 
 func testLexer(src *env.Source) {
