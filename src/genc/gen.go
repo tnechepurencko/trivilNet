@@ -20,7 +20,6 @@ type genContext struct {
 }
 
 func Generate(m *ast.Module) {
-	fmt.Printf("genc\n")
 
 	var genc = &genContext{
 		module:  m,
@@ -33,7 +32,7 @@ func Generate(m *ast.Module) {
 	genc.genModule()
 	genc.finishCode()
 
-	genc.show()
+	//genc.show()
 	genc.save()
 
 }
@@ -51,6 +50,7 @@ func (genc *genContext) startCode() {
 	genc.h("#ifndef %s", hname)
 	genc.h("#define %s", hname)
 
+	genc.c("#include \"trirun.h\"")
 	genc.c("#include \"%s\"", genc.outname+".h")
 
 }

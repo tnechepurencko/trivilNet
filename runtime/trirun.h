@@ -1,2 +1,2 @@
 
-void first();
+void tri_welcome();
