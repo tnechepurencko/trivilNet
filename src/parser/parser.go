@@ -29,7 +29,7 @@ func Parse(source *env.Source) *ast.Module {
 	p.lex.Init(source)
 	p.source = source
 
-	p.trace = true //!
+	p.trace = *env.TraceFlag
 
 	p.next()
 	p.parseModule()

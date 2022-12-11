@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	// флаги определены в env.flags
 	flag.Parse()
 	arg := flag.Arg(0)
 	if arg == "" {
