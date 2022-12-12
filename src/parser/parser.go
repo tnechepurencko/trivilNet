@@ -151,6 +151,8 @@ func (p *Parser) parseDeclarations() {
 		switch p.tok {
 		case lexer.FN, lexer.MODIFIER:
 			d = p.parseFn()
+		case lexer.VAR:
+			d = p.parseVarDecl()
 		case lexer.ENTRY:
 			p.parseEntry()
 		default:
@@ -166,6 +168,24 @@ func (p *Parser) parseDeclarations() {
 		}
 
 	}
+}
+
+func (p *Parser) parseVarDecl() *ast.VarDecl {
+	if p.trace {
+		defer un(trace(p, "Описание переменной"))
+	}
+
+	p.next()
+
+	var v = &ast.VarDecl{
+		DeclBase: ast.DeclBase{Pos: p.pos},
+	}
+
+	v.Name = p.parseIdent()
+	p.expect(lexer.COLON)
+	v.Typ = p.parseTypeRef()
+
+	return v
 }
 
 func (p *Parser) parseEntry() {

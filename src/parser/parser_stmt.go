@@ -73,6 +73,14 @@ func (p *Parser) parseStatement() ast.Statement {
 	}
 
 	switch p.tok {
+	case lexer.VAR:
+		return &ast.DeclStatement{
+			StatementBase: ast.StatementBase{Pos: p.pos},
+			D:             p.parseVarDecl(),
+		}
+	case lexer.CONST:
+		panic("ni")
+
 	default:
 		if validSimpleStmToken[p.tok] {
 			return p.parseSimpleStatement()

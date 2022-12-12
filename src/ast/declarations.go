@@ -54,8 +54,9 @@ type VarDecl struct {
 
 type ConstDecl struct {
 	DeclBase
-	Name string
-	Typ  Type
+	Name  string
+	Typ   Type
+	Value Expr
 }
 
 type TypeDecl struct {

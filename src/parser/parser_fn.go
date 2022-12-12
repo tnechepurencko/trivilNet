@@ -89,18 +89,12 @@ func (p *Parser) parseParameters(ft *ast.FuncType) {
 			TypeBase: ast.TypeBase{Pos: p.pos},
 		}
 
-		if p.tok != lexer.IDENT {
-			p.expect(lexer.IDENT)
-		} else {
-			param.Name = p.parseIdent()
+		param.Name = p.parseIdent()
 
-			p.expect(lexer.COLON)
+		p.expect(lexer.COLON)
 
-			param.Typ = p.parseTypeRef()
-
-		}
+		param.Typ = p.parseTypeRef()
 
 		ft.Params = append(ft.Params, param)
-
 	}
 }

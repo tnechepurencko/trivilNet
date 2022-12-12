@@ -28,3 +28,8 @@ type ExprStatement struct {
 	StatementBase
 	X Expr
 }
+
+type DeclStatement struct {
+	StatementBase
+	D Decl
+}

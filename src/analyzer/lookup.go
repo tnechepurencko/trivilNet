@@ -16,6 +16,9 @@ func lookup(m *ast.Module) {
 		case *ast.Function:
 			//			fmt.Printf("Function %v\n", x.Name)
 			addToScope(x.Name, x, m.Inner)
+		case *ast.VarDecl:
+			//			fmt.Printf("Function %v\n", x.Name)
+			addToScope(x.Name, x, m.Inner)
 		default:
 			panic(fmt.Sprintf("lookup: ni %T", d))
 		}
