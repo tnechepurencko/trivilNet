@@ -60,9 +60,18 @@ func (p *Parser) next() {
 	}
 }
 
+//====
+
+func (p *Parser) error(pos int, id string, args ...interface{}) {
+	s := env.AddError(pos, id, args...)
+	if p.trace {
+		fmt.Println(s)
+	}
+}
+
 func (p *Parser) expect(tok lexer.Token) {
 	if p.tok != tok {
-		env.AddError(p.pos, "ПАР-ОЖИДАЛСЯ", tok.String())
+		p.error(p.pos, "ПАР-ОЖИДАЛСЯ", tok.String())
 	}
 	p.next()
 }
@@ -73,7 +82,22 @@ func (p *Parser) expectSep(err string) {
 	} else if p.afterNL {
 		// ok
 	} else {
-		env.AddError(p.pos, err, p.tok.String())
+		p.error(p.pos, err, p.tok.String())
+	}
+}
+
+//====
+
+type tokens map[lexer.Token]bool
+
+func (p *Parser) skipTo(ts tokens) {
+	p.next()
+
+	for {
+		if _, ok := ts[p.tok]; ok {
+			break
+		}
+		p.next()
 	}
 }
 
@@ -84,7 +108,7 @@ func (p *Parser) parseModule() {
 	p.module = ast.NewModule()
 
 	if p.tok != lexer.MODULE {
-		env.AddError(p.pos, "ПАР-ОЖИДАЛСЯ", lexer.MODULE.String())
+		p.error(p.pos, "ПАР-ОЖИДАЛСЯ", lexer.MODULE.String())
 		return
 	}
 	p.next()
@@ -99,6 +123,19 @@ func (p *Parser) parseImportList() {
 		defer un(trace(p, "Импорты"))
 	}
 
+}
+
+//====
+
+var skipToDeclaration = tokens{
+	lexer.EOF: true,
+
+	lexer.TYPE:     true,
+	lexer.VAR:      true,
+	lexer.CONST:    true,
+	lexer.FN:       true,
+	lexer.MODIFIER: true,
+	lexer.ENTRY:    true,
 }
 
 func (p *Parser) parseDeclarations() {
@@ -117,9 +154,8 @@ func (p *Parser) parseDeclarations() {
 		case lexer.ENTRY:
 			p.parseEntry()
 		default:
-			env.AddError(p.pos, "ПАР-ОШ-ОПИСАНИЕ", p.tok.String())
-			p.next()
-			//TODO: skipTo
+			p.error(p.pos, "ПАР-ОШ-ОПИСАНИЕ", p.tok.String())
+			p.skipTo(skipToDeclaration)
 			continue
 		}
 
@@ -145,7 +181,7 @@ func (p *Parser) parseEntry() {
 	n.Seq = p.parseStatementSeq()
 
 	if p.module.Entry != nil {
-		env.AddError(p.pos, "ПАР-ДУБЛЬ-ВХОД")
+		p.error(p.pos, "ПАР-ДУБЛЬ-ВХОД")
 		return
 	}
 

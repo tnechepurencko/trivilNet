@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"trivil/ast"
-	"trivil/env"
 	"trivil/lexer"
 )
 
@@ -31,7 +30,7 @@ func (p *Parser) parseFn() *ast.Function {
 	case "@внешняя":
 		n.External = true
 	default:
-		env.AddError(p.pos, "ПАР-ОШ-МОДИФИКАТОР", mod)
+		p.error(p.pos, "ПАР-ОШ-МОДИФИКАТОР", mod)
 	}
 
 	p.expect(lexer.FN)

@@ -3,13 +3,12 @@ package parser
 import (
 	"fmt"
 	"trivil/ast"
-	"trivil/env"
 	"trivil/lexer"
 )
 
 var _ = fmt.Printf
 
-var validSimpleStmToken = map[lexer.Token]bool{
+var validSimpleStmToken = tokens{
 	lexer.IDENT: true,
 	lexer.LPAR:  true,
 
@@ -22,6 +21,16 @@ var validSimpleStmToken = map[lexer.Token]bool{
 	lexer.ADD: true,
 	lexer.SUB: true,
 	lexer.NOT: true,
+}
+
+var skipToStatement = tokens{
+	lexer.EOF: true,
+
+	lexer.RBRACE: true,
+
+	lexer.IF:    true,
+	lexer.WHILE: true,
+	//TODO
 }
 
 //=== statements
@@ -68,8 +77,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		if validSimpleStmToken[p.tok] {
 			return p.parseSimpleStatement()
 		}
-		env.AddError(p.pos, "ПАР-ОШ-ОПЕРАТОР", p.tok.String())
-		return nil
+		p.error(p.pos, "ПАР-ОШ-ОПЕРАТОР", p.tok.String())
+		p.skipTo((skipToStatement))
 	}
 
 	return nil

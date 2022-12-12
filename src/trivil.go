@@ -38,6 +38,10 @@ func main() {
 
 	env.ShowErrors()
 
+	if env.ErrorCount() == 0 {
+		fmt.Printf("Без ошибок\n")
+	}
+
 }
 
 func compile(src *env.Source) {

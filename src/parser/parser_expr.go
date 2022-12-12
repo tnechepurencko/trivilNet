@@ -3,7 +3,6 @@ package parser
 import (
 	"fmt"
 	"trivil/ast"
-	"trivil/env"
 	"trivil/lexer"
 )
 
@@ -117,7 +116,7 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 		x = p.parseExpression()
 		p.expect(lexer.RPAR)
 	default:
-		env.AddError(p.pos, "ПАР-ОШ-ОПЕРАНД", p.tok.String())
+		p.error(p.pos, "ПАР-ОШ-ОПЕРАНД", p.tok.String())
 		return &ast.InvalidExpr{}
 	}
 

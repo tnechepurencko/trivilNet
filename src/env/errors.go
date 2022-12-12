@@ -39,7 +39,7 @@ func initErrors() {
 	}
 }
 
-func AddError(pos int, id string, args ...interface{}) {
+func AddError(pos int, id string, args ...interface{}) string {
 
 	source, line, col := SourcePos(pos)
 
@@ -62,6 +62,8 @@ func AddError(pos int, id string, args ...interface{}) {
 	err.text = fmt.Sprintf("%s:%d:%d:%s: %s", source.Path, line, col, id, msg)
 
 	errors = append(errors, err)
+
+	return err.text
 }
 
 func ShowErrors() {
