@@ -35,6 +35,8 @@ func (p *Parser) parseFn() *ast.Function {
 
 	p.expect(lexer.FN)
 
+	//receiver
+
 	n.Name = p.parseIdent()
 	if p.parseExportMark() {
 		n.SetExported()
@@ -54,13 +56,51 @@ func (p *Parser) parseFuncType() *ast.FuncType {
 		defer un(trace(p, "Тип функции"))
 	}
 
-	var t = &ast.FuncType{
+	var ft = &ast.FuncType{
 		TypeBase: ast.TypeBase{Pos: p.pos},
 	}
 
 	p.expect(lexer.LPAR)
 
+	p.parseParameters(ft)
+
 	p.expect(lexer.RPAR)
 
-	return t
+	if p.tok == lexer.COLON {
+		p.next()
+		ft.ReturnTyp = p.parseTypeRef()
+	}
+
+	return ft
+}
+
+var skipToParam = tokens{
+	lexer.EOF: true,
+
+	lexer.RPAR:  true,
+	lexer.COMMA: true,
+}
+
+func (p *Parser) parseParameters(ft *ast.FuncType) {
+
+	for p.tok != lexer.RPAR && p.tok != lexer.EOF {
+
+		var param = &ast.Param{
+			TypeBase: ast.TypeBase{Pos: p.pos},
+		}
+
+		if p.tok != lexer.IDENT {
+			p.expect(lexer.IDENT)
+		} else {
+			param.Name = p.parseIdent()
+
+			p.expect(lexer.COLON)
+
+			param.Typ = p.parseTypeRef()
+
+		}
+
+		ft.Params = append(ft.Params, param)
+
+	}
 }

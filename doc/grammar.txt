@@ -93,14 +93,14 @@ var_decl
 //=== function
 
 func_decl
-	: 'фн' receiver? name signature statement_seq?
+	: 'фн' receiver? name func_type statement_seq?
 	;
 
 receiver
 	: '(' ident ':' type_ref ')'
 	;
 
-signature
+func_type
 	: '(' param_list? ')' result_type?
 	;
 param_list
