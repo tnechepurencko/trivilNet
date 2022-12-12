@@ -144,7 +144,17 @@ func (p *Parser) parseArguments(x ast.Expr) ast.Expr {
 
 	p.expect(lexer.LPAR)
 
-	//TODO
+	for p.tok != lexer.RPAR && p.tok != lexer.EOF {
+
+		var expr = p.parseExpression()
+
+		n.Args = append(n.Args, expr)
+
+		if p.tok == lexer.RPAR {
+			break
+		}
+		p.expect(lexer.COMMA)
+	}
 
 	p.expect(lexer.RPAR)
 
