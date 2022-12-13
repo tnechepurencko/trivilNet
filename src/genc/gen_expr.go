@@ -15,6 +15,10 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 		return x.Name
 	case *ast.LiteralExpr:
 		return genc.genLiteral(x)
+	case *ast.UnaryExpr:
+		return x.Op.String() + genc.genExpr(x.X)
+	case *ast.BinaryExpr:
+		return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), x.Op.String(), genc.genExpr(x.Y))
 	case *ast.CallExpr:
 		return genc.genCall(x)
 

@@ -43,28 +43,28 @@ func lookup(m *ast.Module) {
 		switch x := d.(type) {
 		case *ast.Function:
 		case *ast.VarDecl:
-			lc.processVarDecl(x)
+			lc.lookVarDecl(x)
 		default:
 			panic(fmt.Sprintf("lookup 2: ni %T", d))
 		}
 	}
 
 	if m.Entry != nil {
-		lc.processEntry(m.Entry)
+		lc.lookEntry(m.Entry)
 	}
 
 }
 
 //==== описания
 
-func (lc *lookContext) processVarDecl(v *ast.VarDecl) {
-	lc.processTypeRef(v.Typ)
+func (lc *lookContext) lookVarDecl(v *ast.VarDecl) {
+	lc.lookTypeRef(v.Typ)
 
 }
 
 //==== ссылка на тип
 
-func (lc *lookContext) processTypeRef(t ast.Type) {
+func (lc *lookContext) lookTypeRef(t ast.Type) {
 	var tr = t.(*ast.TypeRef)
 
 	if tr.ModuleName != "" {
@@ -80,22 +80,22 @@ func (lc *lookContext) processTypeRef(t ast.Type) {
 
 //====
 
-func (lc *lookContext) processEntry(e *ast.EntryFn) {
-	lc.processStatements(e.Seq)
+func (lc *lookContext) lookEntry(e *ast.EntryFn) {
+	lc.lookStatements(e.Seq)
 }
 
-func (lc *lookContext) processStatements(seq *ast.StatementSeq) {
+func (lc *lookContext) lookStatements(seq *ast.StatementSeq) {
 
 	for _, s := range seq.Statements {
 
 		switch x := s.(type) {
 		case *ast.ExprStatement:
-			lc.processExpr(x.X)
+			lc.lookExpr(x.X)
 		case *ast.DeclStatement:
-			lc.processLocalDecl(seq, x.D)
+			lc.lookLocalDecl(seq, x.D)
 		case *ast.AssignStatement:
-			lc.processExpr(x.L)
-			lc.processExpr(x.R)
+			lc.lookExpr(x.L)
+			lc.lookExpr(x.R)
 
 		default:
 			panic(fmt.Sprintf("statement: ni %T", s))
@@ -108,7 +108,7 @@ func (lc *lookContext) processStatements(seq *ast.StatementSeq) {
 	}
 }
 
-func (lc *lookContext) processLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
+func (lc *lookContext) lookLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
 	if lc.scope != seq.Inner {
 		seq.Inner = ast.NewScope(lc.scope)
 		lc.scope = seq.Inner
@@ -116,7 +116,7 @@ func (lc *lookContext) processLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
 	switch x := decl.(type) {
 	case *ast.VarDecl:
 		addToScope(x.Name, x, lc.scope)
-		lc.processVarDecl(x)
+		lc.lookVarDecl(x)
 	default:
 		panic(fmt.Sprintf("local decl: ni %T", decl))
 	}
@@ -125,7 +125,7 @@ func (lc *lookContext) processLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
 
 //====
 
-func (lc *lookContext) processExpr(expr ast.Expr) {
+func (lc *lookContext) lookExpr(expr ast.Expr) {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
@@ -133,10 +133,17 @@ func (lc *lookContext) processExpr(expr ast.Expr) {
 		//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
 
 	case *ast.LiteralExpr:
-		//lc.processExpr(x.X)
+		//lc.lookExpr(x.X)
+
+	case *ast.UnaryExpr:
+		lc.lookExpr(x.X)
+
+	case *ast.BinaryExpr:
+		lc.lookExpr(x.X)
+		lc.lookExpr(x.Y)
 
 	case *ast.CallExpr:
-		lc.processExpr(x.X)
+		lc.lookExpr(x.X)
 		//TODO: args
 
 	default:
