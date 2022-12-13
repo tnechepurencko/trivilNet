@@ -20,6 +20,7 @@ type Type interface {
 type Decl interface {
 	Node
 	DeclNode()
+	GetName() string
 }
 
 type Expr interface {

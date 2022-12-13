@@ -8,7 +8,15 @@ import (
 
 var _ = fmt.Printf
 
+type lookContext struct {
+	scope *ast.Scope
+}
+
 func lookup(m *ast.Module) {
+
+	var lc = &lookContext{
+		scope: m.Inner,
+	}
 
 	// добавление имен
 	for _, d := range m.Decls {
@@ -23,52 +31,72 @@ func lookup(m *ast.Module) {
 			panic(fmt.Sprintf("lookup: ni %T", d))
 		}
 	}
+	ast.ShowScopes("", lc.scope)
 
 	// process decls
 
 	if m.Entry != nil {
-		processEntry(m.Inner, m.Entry)
+		lc.processEntry(m.Entry)
 	}
 
 }
 
 //====
 
-func processEntry(scope *ast.Scope, e *ast.EntryFn) {
-	processStatements(scope, e.Seq)
+func (lc *lookContext) processEntry(e *ast.EntryFn) {
+	lc.processStatements(e.Seq)
 }
 
-func processStatements(scope *ast.Scope, seq *ast.StatementSeq) {
+func (lc *lookContext) processStatements(seq *ast.StatementSeq) {
 
 	for _, s := range seq.Statements {
 
 		switch x := s.(type) {
 		case *ast.ExprStatement:
-			processExpr(scope, x.X)
+			lc.processExpr(x.X)
+		case *ast.DeclStatement:
+			lc.processLocalDecl(seq, x.D)
 
 		default:
 			panic(fmt.Sprintf("statement: ni %T", s))
 
 		}
 	}
+
+	if lc.scope == seq.Inner {
+		lc.scope = seq.Inner.Outer
+	}
+}
+
+func (lc *lookContext) processLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
+	if lc.scope != seq.Inner {
+		seq.Inner = ast.NewScope(lc.scope)
+		lc.scope = seq.Inner
+	}
+	switch x := decl.(type) {
+	case *ast.VarDecl:
+		addToScope(x.Name, x, lc.scope)
+	default:
+		panic(fmt.Sprintf("local decl: ni %T", decl))
+	}
+	ast.ShowScopes("", lc.scope)
 }
 
 //====
 
-func processExpr(scope *ast.Scope, expr ast.Expr) {
+func (lc *lookContext) processExpr(expr ast.Expr) {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		x.Obj = findInScopes(scope, x.Name, x.Pos)
+		x.Obj = findInScopes(lc.scope, x.Name, x.Pos)
 		//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
 
 	case *ast.CallExpr:
-		processExpr(scope, x.X)
+		lc.processExpr(x.X)
 		//TODO: args
 
 	default:
 		panic(fmt.Sprintf("expression: ni %T", expr))
 
 	}
-
 }

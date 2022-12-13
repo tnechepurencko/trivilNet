@@ -22,6 +22,7 @@ func (n *StatementBase) StatementNode() {}
 type StatementSeq struct {
 	StatementBase
 	Statements []Statement
+	Inner      *Scope
 }
 
 type ExprStatement struct {

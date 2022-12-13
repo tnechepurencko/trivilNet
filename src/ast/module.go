@@ -19,10 +19,7 @@ type Module struct {
 
 func NewModule() *Module {
 	return &Module{
-		Inner: &Scope{
-			Outer: topScope,
-			Names: make(map[string]Decl),
-		},
+		Inner: NewScope(topScope),
 		Decls: make([]Decl, 0),
 	}
 }
