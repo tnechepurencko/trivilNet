@@ -31,13 +31,50 @@ func lookup(m *ast.Module) {
 			panic(fmt.Sprintf("lookup: ni %T", d))
 		}
 	}
-	ast.ShowScopes("", lc.scope)
 
-	// process decls
+	if lc.scope != m.Inner {
+		panic("assert - should be module scope")
+	}
+
+	// TODO обойти типы
+
+	// обойти описания
+	for _, d := range m.Decls {
+		switch x := d.(type) {
+		case *ast.Function:
+		case *ast.VarDecl:
+			lc.processVarDecl(x)
+		default:
+			panic(fmt.Sprintf("lookup 2: ni %T", d))
+		}
+	}
 
 	if m.Entry != nil {
 		lc.processEntry(m.Entry)
 	}
+
+}
+
+//==== описания
+
+func (lc *lookContext) processVarDecl(v *ast.VarDecl) {
+	lc.processTypeRef(v.Typ)
+
+}
+
+//==== ссылка на тип
+
+func (lc *lookContext) processTypeRef(t ast.Type) {
+	var tr = t.(*ast.TypeRef)
+
+	if tr.ModuleName != "" {
+		panic("ni")
+	}
+
+	tr.TypeDecl = findInScopes(lc.scope, tr.TypeName, tr.Pos).(*ast.TypeDecl)
+	tr.Typ = tr.TypeDecl.Typ
+
+	fmt.Printf("! %v %T\n", tr.TypeDecl, tr.Typ)
 
 }
 
@@ -76,6 +113,7 @@ func (lc *lookContext) processLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
 	switch x := decl.(type) {
 	case *ast.VarDecl:
 		addToScope(x.Name, x, lc.scope)
+		lc.processVarDecl(x)
 	default:
 		panic(fmt.Sprintf("local decl: ni %T", decl))
 	}

@@ -25,6 +25,9 @@ func findInScopes(scope *ast.Scope, name string, pos int) ast.Decl {
 
 	for {
 		if cur == nil {
+
+			//ast.ShowScopes("not found "+name, scope)
+
 			env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО", name)
 			var inv = &ast.InvalidDecl{
 				Name: name,
@@ -33,7 +36,7 @@ func findInScopes(scope *ast.Scope, name string, pos int) ast.Decl {
 			return inv
 		}
 
-		d, ok := scope.Names[name]
+		d, ok := cur.Names[name]
 		if ok {
 			return d
 		}

@@ -30,7 +30,7 @@ type TypeRef struct {
 	TypeBase
 	TypeName   string
 	ModuleName string
-	Decl       TypeDecl
+	TypeDecl   *TypeDecl
 	Typ        Type
 }
 
