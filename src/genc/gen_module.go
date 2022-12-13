@@ -73,10 +73,24 @@ func (genc *genContext) genStatementSeq(seq *ast.StatementSeq) {
 			l := genc.genExpr(x.L)
 			r := genc.genExpr(x.R)
 			genc.c(l + "=" + r + ";")
+		case *ast.IncStatement:
+			l := genc.genExpr(x.L)
+			genc.c(l + "++;")
+		case *ast.DecStatement:
+			l := genc.genExpr(x.L)
+			genc.c(l + "--;")
+		case *ast.While:
+			genc.genWhile(x)
 
 		default:
 			panic(fmt.Sprintf("gen statement: ni %T", s))
 
 		}
 	}
+}
+
+func (genc *genContext) genWhile(x *ast.While) {
+	genc.c("while (%s) {", genc.genExpr(x.Cond))
+	genc.genStatementSeq(x.Seq)
+	genc.c("}")
 }

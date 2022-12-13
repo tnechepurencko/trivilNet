@@ -74,8 +74,7 @@ func (lc *lookContext) lookTypeRef(t ast.Type) {
 	tr.TypeDecl = findInScopes(lc.scope, tr.TypeName, tr.Pos).(*ast.TypeDecl)
 	tr.Typ = tr.TypeDecl.Typ
 
-	fmt.Printf("! %v %T\n", tr.TypeDecl, tr.Typ)
-
+	//fmt.Printf("! %v %T\n", tr.TypeDecl, tr.Typ)
 }
 
 //====
@@ -96,6 +95,13 @@ func (lc *lookContext) lookStatements(seq *ast.StatementSeq) {
 		case *ast.AssignStatement:
 			lc.lookExpr(x.L)
 			lc.lookExpr(x.R)
+		case *ast.IncStatement:
+			lc.lookExpr(x.L)
+		case *ast.DecStatement:
+			lc.lookExpr(x.L)
+		case *ast.While:
+			lc.lookExpr(x.Cond)
+			lc.lookStatements(x.Seq)
 
 		default:
 			panic(fmt.Sprintf("statement: ni %T", s))

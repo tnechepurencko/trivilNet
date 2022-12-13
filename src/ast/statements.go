@@ -50,3 +50,11 @@ type DecStatement struct {
 	StatementBase
 	L Expr
 }
+
+//====
+
+type While struct {
+	StatementBase
+	Cond Expr
+	Seq  *StatementSeq
+}

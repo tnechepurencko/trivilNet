@@ -81,6 +81,9 @@ func (p *Parser) parseStatement() ast.Statement {
 	case lexer.CONST:
 		panic("ni")
 
+	case lexer.WHILE:
+		return p.parseWhile()
+
 	default:
 		if validSimpleStmToken[p.tok] {
 			return p.parseSimpleStatement()
@@ -129,6 +132,10 @@ func (p *Parser) parseSimpleStatement() ast.Statement {
 }
 
 func (p *Parser) parseAssign(l ast.Expr) ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор присваивания"))
+	}
+
 	var n = &ast.AssignStatement{
 		StatementBase: ast.StatementBase{Pos: p.pos},
 		L:             l,
@@ -141,3 +148,19 @@ func (p *Parser) parseAssign(l ast.Expr) ast.Statement {
 }
 
 //====
+
+func (p *Parser) parseWhile() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор пока"))
+	}
+
+	var n = &ast.While{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+	}
+
+	p.next()
+	n.Cond = p.parseExpression()
+	n.Seq = p.parseStatementSeq()
+
+	return n
+}
