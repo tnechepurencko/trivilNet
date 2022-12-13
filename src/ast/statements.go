@@ -34,3 +34,19 @@ type DeclStatement struct {
 	StatementBase
 	D Decl
 }
+
+type AssignStatement struct {
+	StatementBase
+	L Expr
+	R Expr
+}
+
+type IncStatement struct {
+	StatementBase
+	L Expr
+}
+
+type DecStatement struct {
+	StatementBase
+	L Expr
+}

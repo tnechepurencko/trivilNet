@@ -63,12 +63,16 @@ func (genc *genContext) genStatementSeq(seq *ast.StatementSeq) {
 	for _, s := range seq.Statements {
 
 		switch x := s.(type) {
-		case *ast.ExprStatement:
-			s := genc.genExpr(x.X)
-			genc.c(s + ";")
 		case *ast.DeclStatement:
 			s := genc.genDecl(x.D)
 			genc.c(s)
+		case *ast.ExprStatement:
+			s := genc.genExpr(x.X)
+			genc.c(s + ";")
+		case *ast.AssignStatement:
+			l := genc.genExpr(x.L)
+			r := genc.genExpr(x.R)
+			genc.c(l + "=" + r + ";")
 
 		default:
 			panic(fmt.Sprintf("gen statement: ni %T", s))

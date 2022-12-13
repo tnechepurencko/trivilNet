@@ -99,13 +99,45 @@ func (p *Parser) parseSimpleStatement() ast.Statement {
 
 	var expr = p.parseExpression()
 
-	var s = &ast.ExprStatement{
-		StatementBase: ast.StatementBase{Pos: p.pos},
+	switch p.tok {
+	case lexer.ASSIGN:
+		return p.parseAssign(expr)
+	case lexer.INC:
+		var n = &ast.IncStatement{
+			StatementBase: ast.StatementBase{Pos: p.pos},
+			L:             expr,
+		}
+		p.next()
+		return n
+	case lexer.DEC:
+		var n = &ast.DecStatement{
+			StatementBase: ast.StatementBase{Pos: p.pos},
+			L:             expr,
+		}
+		p.next()
+		return n
 
-		X: expr,
+	default:
+		var s = &ast.ExprStatement{
+			StatementBase: ast.StatementBase{Pos: p.pos},
+
+			X: expr,
+		}
+
+		return s
+	}
+}
+
+func (p *Parser) parseAssign(l ast.Expr) ast.Statement {
+	var n = &ast.AssignStatement{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+		L:             l,
 	}
 
-	return s
+	p.next()
+	n.R = p.parseExpression()
+
+	return n
 }
 
 //====

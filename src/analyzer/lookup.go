@@ -93,6 +93,9 @@ func (lc *lookContext) processStatements(seq *ast.StatementSeq) {
 			lc.processExpr(x.X)
 		case *ast.DeclStatement:
 			lc.processLocalDecl(seq, x.D)
+		case *ast.AssignStatement:
+			lc.processExpr(x.L)
+			lc.processExpr(x.R)
 
 		default:
 			panic(fmt.Sprintf("statement: ni %T", s))
@@ -117,7 +120,7 @@ func (lc *lookContext) processLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
 	default:
 		panic(fmt.Sprintf("local decl: ni %T", decl))
 	}
-	ast.ShowScopes("", lc.scope)
+	//ast.ShowScopes("", lc.scope)
 }
 
 //====
@@ -128,6 +131,9 @@ func (lc *lookContext) processExpr(expr ast.Expr) {
 	case *ast.IdentExpr:
 		x.Obj = findInScopes(lc.scope, x.Name, x.Pos)
 		//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
+
+	case *ast.LiteralExpr:
+		//lc.processExpr(x.X)
 
 	case *ast.CallExpr:
 		lc.processExpr(x.X)
