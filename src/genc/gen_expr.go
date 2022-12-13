@@ -21,7 +21,6 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 	default:
 		panic(fmt.Sprintf("gen expression: ni %T", expr))
 	}
-
 }
 
 func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
