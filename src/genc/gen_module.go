@@ -89,6 +89,12 @@ func (genc *genContext) genStatementSeq(seq *ast.StatementSeq) {
 			genc.c(l + "--;")
 		case *ast.While:
 			genc.genWhile(x)
+		case *ast.Return:
+			r := ""
+			if x.X != nil {
+				r = " " + genc.genExpr(x.X)
+			}
+			genc.c("return" + r)
 
 		default:
 			panic(fmt.Sprintf("gen statement: ni %T", s))

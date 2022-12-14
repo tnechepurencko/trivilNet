@@ -58,3 +58,8 @@ type While struct {
 	Cond Expr
 	Seq  *StatementSeq
 }
+
+type Return struct {
+	StatementBase
+	X Expr
+}

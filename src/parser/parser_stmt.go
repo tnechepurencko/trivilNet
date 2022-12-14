@@ -28,8 +28,9 @@ var skipToStatement = tokens{
 
 	lexer.RBRACE: true,
 
-	lexer.IF:    true,
-	lexer.WHILE: true,
+	lexer.IF:     true,
+	lexer.WHILE:  true,
+	lexer.RETURN: true,
 	//TODO
 }
 
@@ -83,6 +84,9 @@ func (p *Parser) parseStatement() ast.Statement {
 
 	case lexer.WHILE:
 		return p.parseWhile()
+
+	case lexer.RETURN:
+		return p.parseReturn()
 
 	default:
 		if validSimpleStmToken[p.tok] {
@@ -161,6 +165,26 @@ func (p *Parser) parseWhile() ast.Statement {
 	p.next()
 	n.Cond = p.parseExpression()
 	n.Seq = p.parseStatementSeq()
+
+	return n
+}
+
+func (p *Parser) parseReturn() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор вернуть"))
+	}
+
+	var n = &ast.Return{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+	}
+
+	p.next()
+
+	if p.afterNL || p.tok == lexer.SEMI || p.tok == lexer.RBRACE {
+		return n
+	}
+
+	n.X = p.parseExpression()
 
 	return n
 }
