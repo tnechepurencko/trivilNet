@@ -1,3 +1,5 @@
+#include <stdint.h>
+#include <stdbool.h>
 
 void tri_welcome();
 

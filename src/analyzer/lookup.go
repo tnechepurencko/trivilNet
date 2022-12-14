@@ -71,7 +71,13 @@ func (lc *lookContext) lookTypeRef(t ast.Type) {
 		panic("ni")
 	}
 
-	tr.TypeDecl = findInScopes(lc.scope, tr.TypeName, tr.Pos).(*ast.TypeDecl)
+	var x = findInScopes(lc.scope, tr.TypeName, tr.Pos)
+	td, ok := x.(*ast.TypeDecl)
+	if !ok {
+		return
+	}
+
+	tr.TypeDecl = td
 	tr.Typ = tr.TypeDecl.Typ
 
 	//fmt.Printf("! %v %T\n", tr.TypeDecl, tr.Typ)

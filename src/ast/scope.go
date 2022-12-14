@@ -18,7 +18,12 @@ func initScopes() {
 		Names: make(map[string]Decl),
 	}
 
-	addType("цел")
+	addType("Байт")
+	addType("Цел")
+	addType("Цел64")
+	addType("Вещ64")
+	addType("Лог")
+	addType("Строка")
 	//ShowScopes("top", topScope)
 
 }
