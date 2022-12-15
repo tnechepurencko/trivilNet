@@ -28,7 +28,7 @@ func lookup(m *ast.Module) {
 			//			fmt.Printf("Function %v\n", x.Name)
 			addToScope(x.Name, x, m.Inner)
 		default:
-			panic(fmt.Sprintf("lookup: ni %T", d))
+			panic(fmt.Sprintf("lookup 1: ni %T", d))
 		}
 	}
 
@@ -45,7 +45,14 @@ func lookup(m *ast.Module) {
 		case *ast.VarDecl:
 			lc.lookVarDecl(x)
 		default:
-			panic(fmt.Sprintf("lookup 2: ni %T", d))
+			panic(fmt.Sprintf("lookup 3: ni %T", d))
+		}
+	}
+	// обойти функции
+	for _, d := range m.Decls {
+		f, ok := d.(*ast.Function)
+		if ok {
+			lc.lookFunction(f)
 		}
 	}
 
@@ -83,11 +90,46 @@ func (lc *lookContext) lookTypeRef(t ast.Type) {
 	//fmt.Printf("! %v %T\n", tr.TypeDecl, tr.Typ)
 }
 
-//====
+//==== functions
+
+func (lc *lookContext) lookFunction(f *ast.Function) {
+
+	f.Inner = ast.NewScope(lc.scope)
+	lc.scope = f.Inner
+
+	var ft = f.Typ.(*ast.FuncType)
+
+	for _, p := range ft.Params {
+		lc.lookTypeRef(p.Typ)
+		if !f.External {
+			lc.addVarForParameter(p)
+		}
+	}
+
+	if ft.ReturnTyp != nil {
+		lc.lookTypeRef(ft.ReturnTyp)
+	}
+
+	if !f.External {
+		lc.lookStatements(f.Seq)
+	}
+
+	lc.scope = lc.scope.Outer
+}
+
+func (lc *lookContext) addVarForParameter(p *ast.Param) {
+	var v = &ast.VarDecl{
+		Typ: p.Typ,
+	}
+	v.Name = p.Name
+	addToScope(v.Name, v, lc.scope)
+}
 
 func (lc *lookContext) lookEntry(e *ast.EntryFn) {
 	lc.lookStatements(e.Seq)
 }
+
+//==== statements
 
 func (lc *lookContext) lookStatements(seq *ast.StatementSeq) {
 
