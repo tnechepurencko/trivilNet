@@ -82,6 +82,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	case lexer.CONST:
 		panic("ni")
 
+	case lexer.IF:
+		return p.parseIf()
 	case lexer.WHILE:
 		return p.parseWhile()
 
@@ -152,6 +154,34 @@ func (p *Parser) parseAssign(l ast.Expr) ast.Statement {
 }
 
 //====
+
+func (p *Parser) parseIf() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор если"))
+	}
+
+	var n = &ast.If{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+	}
+
+	p.next()
+	n.Cond = p.parseExpression()
+	n.Then = p.parseStatementSeq()
+
+	if p.tok != lexer.ELSE {
+		return n
+	}
+
+	p.next()
+
+	if p.tok == lexer.IF {
+		n.Else = p.parseIf()
+	} else {
+		n.Else = p.parseStatementSeq()
+	}
+
+	return n
+}
 
 func (p *Parser) parseWhile() ast.Statement {
 	if p.trace {

@@ -134,35 +134,46 @@ func (lc *lookContext) lookEntry(e *ast.EntryFn) {
 func (lc *lookContext) lookStatements(seq *ast.StatementSeq) {
 
 	for _, s := range seq.Statements {
-
-		switch x := s.(type) {
-		case *ast.ExprStatement:
-			lc.lookExpr(x.X)
-		case *ast.DeclStatement:
-			lc.lookLocalDecl(seq, x.D)
-		case *ast.AssignStatement:
-			lc.lookExpr(x.L)
-			lc.lookExpr(x.R)
-		case *ast.IncStatement:
-			lc.lookExpr(x.L)
-		case *ast.DecStatement:
-			lc.lookExpr(x.L)
-		case *ast.While:
-			lc.lookExpr(x.Cond)
-			lc.lookStatements(x.Seq)
-		case *ast.Return:
-			if x.X != nil {
-				lc.lookExpr(x.X)
-			}
-
-		default:
-			panic(fmt.Sprintf("statement: ni %T", s))
-
-		}
+		lc.lookStatement(seq, s)
 	}
 
 	if lc.scope == seq.Inner {
 		lc.scope = seq.Inner.Outer
+	}
+}
+
+func (lc *lookContext) lookStatement(seq *ast.StatementSeq, s ast.Statement) {
+	switch x := s.(type) {
+	case *ast.StatementSeq:
+		lc.lookStatements(x)
+	case *ast.ExprStatement:
+		lc.lookExpr(x.X)
+	case *ast.DeclStatement:
+		lc.lookLocalDecl(seq, x.D)
+	case *ast.AssignStatement:
+		lc.lookExpr(x.L)
+		lc.lookExpr(x.R)
+	case *ast.IncStatement:
+		lc.lookExpr(x.L)
+	case *ast.DecStatement:
+		lc.lookExpr(x.L)
+	case *ast.If:
+		lc.lookExpr(x.Cond)
+		lc.lookStatements(x.Then)
+		if x.Else != nil {
+			lc.lookStatement(nil, x.Else)
+		}
+	case *ast.While:
+		lc.lookExpr(x.Cond)
+		lc.lookStatements(x.Seq)
+	case *ast.Return:
+		if x.X != nil {
+			lc.lookExpr(x.X)
+		}
+
+	default:
+		panic(fmt.Sprintf("statement: ni %T", s))
+
 	}
 }
 

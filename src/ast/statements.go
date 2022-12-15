@@ -53,6 +53,13 @@ type DecStatement struct {
 
 //====
 
+type If struct {
+	StatementBase
+	Cond Expr
+	Then *StatementSeq
+	Else Statement
+}
+
 type While struct {
 	StatementBase
 	Cond Expr
