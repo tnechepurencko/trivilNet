@@ -142,7 +142,7 @@ statement
 	;
 
 if_stm
-	: 'если' expression statement_seq ('иначе' statement_seq)?
+	: 'если' expression statement_seq ('иначе' (if_stm | statement_seq)?
 	;
 	
 while_stm
