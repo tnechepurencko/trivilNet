@@ -58,6 +58,8 @@ const (
 	RBRACK // ]
 	LBRACE // {
 	RBRACE // }
+	LCONV  // ‹
+	RCONV  // ›
 
 	COMMA // ,
 	DOT   // .
@@ -126,13 +128,17 @@ var tokens = [...]string{
 
 	ASSIGN: ":=",
 
-	LPAR:   "(",
-	LBRACK: "[",
-	LBRACE: "{",
+	LPAR: "(",
+	RPAR: ")",
 
-	RPAR:   ")",
+	LBRACK: "[",
 	RBRACK: "]",
+
+	LBRACE: "{",
 	RBRACE: "}",
+
+	LCONV: "‹", // or .<
+	RCONV: "›",
 
 	COMMA: ",",
 	DOT:   ".",

@@ -344,7 +344,7 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 		case ':':
 			tok = s.checkEqu(COLON, ASSIGN)
 		case '.':
-			tok = DOT
+			tok = s.checkNext(DOT, '<', LCONV)
 		case ',':
 			tok = COMMA
 		case ';':
@@ -362,6 +362,10 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 			tok = LBRACE
 		case '}':
 			tok = RBRACE
+		case '‹':
+			tok = LCONV
+		case '›':
+			tok = RCONV
 		case '+':
 			tok = s.checkNext(ADD, '+', INC)
 		case '-':
