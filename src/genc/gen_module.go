@@ -2,27 +2,97 @@ package genc
 
 import (
 	"fmt"
+	"strings"
+
 	"trivil/ast"
 )
 
 var _ = fmt.Printf
 
 func (genc *genContext) genModule() {
+
+	//=== gen types
+
+	//=== gen decls
+
+	//=== gen functions
+	for _, d := range genc.module.Decls {
+		f, ok := d.(*ast.Function)
+		if ok {
+			genc.genFunction(f)
+		}
+	}
+
 	genc.genEntry(genc.module.Entry, true)
+}
+
+//=== functions
+
+func (genc *genContext) genFunction(f *ast.Function) {
+
+	if f.External {
+		return
+	}
+
+	var ft = f.Typ.(*ast.FuncType)
+
+	genc.c("%s %s(%s) {", genc.returnType(ft), f.Name, genc.params(ft))
+
+	genc.genStatementSeq(f.Seq)
+
+	genc.c("}")
+}
+
+func (genc *genContext) returnType(ft *ast.FuncType) string {
+	if ft.ReturnTyp == nil {
+		return "void"
+	} else {
+		return genc.typeRef(ft.ReturnTyp)
+	}
+
+}
+
+func (genc *genContext) params(ft *ast.FuncType) string {
+
+	var b strings.Builder
+
+	for i, p := range ft.Params {
+
+		b.WriteString(fmt.Sprintf("%s %s", genc.typeRef(p.Typ), p.Name))
+		if i < len(ft.Params)-1 {
+			b.WriteRune(',')
+		}
+	}
+
+	return b.String()
+}
+
+func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
+
+	if !main {
+		panic("ni")
+	}
+
+	genc.c("int main() {")
+
+	genc.genStatementSeq(entry.Seq)
+
+	genc.c("  return 0;")
+	genc.c("}")
 }
 
 //===
 
-func (genc *genContext) genDecl(d ast.Decl) string {
+func (genc *genContext) genLocalDecl(d ast.Decl) string {
 	switch x := d.(type) {
 	case *ast.VarDecl:
-		return fmt.Sprintf("%s %s;", genc.genTypeRef(x.Typ), x.Name)
+		return fmt.Sprintf("%s %s;", genc.typeRef(x.Typ), x.Name)
 	default:
 		panic(fmt.Sprintf("genDecl: ni %T", d))
 	}
 }
 
-func (genc *genContext) genTypeRef(t ast.Type) string {
+func (genc *genContext) typeRef(t ast.Type) string {
 	var tr = t.(*ast.TypeRef)
 
 	switch x := tr.Typ.(type) {
@@ -48,63 +118,4 @@ func predefinedTypeName(name string) string {
 	default:
 		panic(fmt.Sprintf("predefinedTypeName: ni %s", name))
 	}
-}
-
-func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
-
-	if !main {
-		panic("ni")
-	}
-
-	genc.c("int main() {")
-
-	genc.genStatementSeq(entry.Seq)
-
-	genc.c("  return 0;")
-	genc.c("}")
-}
-
-//====
-
-func (genc *genContext) genStatementSeq(seq *ast.StatementSeq) {
-
-	for _, s := range seq.Statements {
-
-		switch x := s.(type) {
-		case *ast.DeclStatement:
-			s := genc.genDecl(x.D)
-			genc.c(s)
-		case *ast.ExprStatement:
-			s := genc.genExpr(x.X)
-			genc.c(s + ";")
-		case *ast.AssignStatement:
-			l := genc.genExpr(x.L)
-			r := genc.genExpr(x.R)
-			genc.c(l + "=" + r + ";")
-		case *ast.IncStatement:
-			l := genc.genExpr(x.L)
-			genc.c(l + "++;")
-		case *ast.DecStatement:
-			l := genc.genExpr(x.L)
-			genc.c(l + "--;")
-		case *ast.While:
-			genc.genWhile(x)
-		case *ast.Return:
-			r := ""
-			if x.X != nil {
-				r = " " + genc.genExpr(x.X)
-			}
-			genc.c("return" + r)
-
-		default:
-			panic(fmt.Sprintf("gen statement: ni %T", s))
-
-		}
-	}
-}
-
-func (genc *genContext) genWhile(x *ast.While) {
-	genc.c("while (%s) {", genc.genExpr(x.Cond))
-	genc.genStatementSeq(x.Seq)
-	genc.c("}")
 }
