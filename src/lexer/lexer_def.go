@@ -145,19 +145,19 @@ var tokens = [...]string{
 	SEMI:  ";",
 	COLON: ":",
 
-	BREAK:  "прервать",
+	RETURN: "вернуть",
+	ENTRY:  "вход",
+	IF:     "если",
+	ELSE:   "иначе",
+	IMPORT: "импорт",
 	CLASS:  "класс",
 	CONST:  "конст",
-	ENTRY:  "вход",
-	ELSE:   "иначе",
-	FN:     "фн",
-	IF:     "если",
-	IMPORT: "импорт",
 	MODULE: "модуль",
-	RETURN: "вернуть",
-	TYPE:   "тип",
-	VAR:    "пусть",
 	WHILE:  "пока",
+	BREAK:  "прервать",
+	VAR:    "пусть",
+	TYPE:   "тип",
+	FN:     "фн",
 }
 
 func (tok Token) String() string {
