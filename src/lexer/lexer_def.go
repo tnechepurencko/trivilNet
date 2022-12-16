@@ -97,9 +97,9 @@ var tokens = [...]string{
 	MODIFIER: "@",
 
 	IDENT:  "IDENT",
-	INT:    "INT",
-	FLOAT:  "FLOAT",
-	STRING: "STRING",
+	INT:    "INT Literal",
+	FLOAT:  "FLOAT Literal",
+	STRING: "STRING Literal",
 
 	ADD: "+",
 	SUB: "-",
