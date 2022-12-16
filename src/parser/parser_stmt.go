@@ -60,7 +60,7 @@ func (p *Parser) parseStatementSeq() *ast.StatementSeq {
 		if p.tok == lexer.RBRACE {
 			break
 		}
-		p.expectSep("ПАР_РАЗД_ОПЕРАТОРОВ")
+		p.sep()
 	}
 
 	p.expect(lexer.RBRACE)

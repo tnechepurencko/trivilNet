@@ -76,13 +76,13 @@ func (p *Parser) expect(tok lexer.Token) {
 	p.next()
 }
 
-func (p *Parser) expectSep(err string) {
+func (p *Parser) sep() {
 	if p.tok == lexer.SEMI {
 		p.next()
 	} else if p.afterNL {
 		// ok
 	} else {
-		p.error(p.pos, err, p.tok.String())
+		p.error(p.pos, "ПАР-ОШ-РАЗД", p.tok.String())
 	}
 }
 
@@ -113,6 +113,7 @@ func (p *Parser) parseModule() {
 	}
 	p.next()
 	p.module.Name = p.parseIdent()
+	p.sep()
 
 	p.parseImportList()
 	p.parseDeclarations()
@@ -161,7 +162,7 @@ func (p *Parser) parseDeclarations() {
 			continue
 		}
 
-		p.expectSep("ПАР_РАЗД_ОПИСАНИЙ")
+		p.sep()
 
 		if d != nil {
 			p.module.Decls = append(p.module.Decls, d)

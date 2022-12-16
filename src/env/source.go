@@ -42,6 +42,20 @@ func AddSource(path string) *Source {
 	return src
 }
 
+func AddImmSource(text string) *Source {
+
+	var src = &Source{
+		Path:  "imm",
+		Lines: make([]int, 0),
+		No:    len(sources) + 1,
+		Bytes: []byte(text),
+	}
+
+	sources = append(sources, src)
+
+	return src
+}
+
 func (s *Source) AddLine(ofs int) {
 	s.Lines = append(s.Lines, ofs)
 }

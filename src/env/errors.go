@@ -75,3 +75,7 @@ func ShowErrors() {
 func ErrorCount() int {
 	return len(errors)
 }
+
+func ClearErrors() {
+	errors = make([]*Error, 0)
+}
