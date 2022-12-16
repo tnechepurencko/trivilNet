@@ -1,21 +1,21 @@
 compilation_unit
-	: 'модуль' ident
+	: 'модуль' ident sep
 	  import_list
 	  declaration_list
 	;
 
 import_list
-	: import (sep import)* sep?
+	: import*
 	;
 import
-	: 'импорт' import_path 
+	: 'импорт' import_path sep
 	;
 import_path
 	: string
 	;
 
 declaration_list
-	:  declaration (sep declaration)*
+	:  (declaration sep)*
 	;
 	
 declaration
