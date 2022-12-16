@@ -282,13 +282,13 @@ escape_value
 	;
 
 ident
-	: ident_begin ident_middle* ident_end?
+	: ident_start ident_middle* ident_end?
 	;
 	
 ident_start
 	: letter
 	| '_'
-	| 'є'
+	| '№'
 	;
 
 letter
@@ -318,5 +318,6 @@ modifier
 » U+00BB
 ‹ U+2039
 › U+203A
+№ U+2116
 
 ‹›
