@@ -76,10 +76,10 @@ const_decl
 	: 'конст' (single_const | group_const)
 	;
 single_const
-	: name (':' type_ref)? '=' const_expression 
+	: name ':' type_ref '=' const_expression
 	;
 group_const
-	: '(' single_const (sep name)* sep? ')'
+	: '*'? '(' single_const ( sep next_const)* ')'
 	;
 
 const_expression // to be extended later
