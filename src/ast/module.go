@@ -11,10 +11,11 @@ var _ = fmt.Printf
 
 type Module struct {
 	//source *env.Source
-	Name  string
-	Inner *Scope
-	Decls []Decl
-	Entry *EntryFn
+	Name    string
+	Imports []*Import
+	Decls   []Decl
+	Entry   *EntryFn
+	Inner   *Scope
 }
 
 func NewModule() *Module {
@@ -22,6 +23,18 @@ func NewModule() *Module {
 		Inner: NewScope(topScope),
 		Decls: make([]Decl, 0),
 	}
+}
+
+//=== импорт
+
+type Import struct {
+	Pos  int
+	Path string
+	Mod  Module
+}
+
+func (n *Import) GetPos() int {
+	return n.Pos
 }
 
 //=== вход

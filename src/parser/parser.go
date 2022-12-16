@@ -9,6 +9,8 @@ import (
 
 var _ = fmt.Printf
 
+const ExportMark = lexer.MUL
+
 type Parser struct {
 	source *env.Source
 	lex    *lexer.Lexer
@@ -124,6 +126,22 @@ func (p *Parser) parseImportList() {
 		defer un(trace(p, "Импорты"))
 	}
 
+	for p.tok == lexer.IMPORT {
+
+		var n = &ast.Import{Pos: p.pos}
+
+		p.next()
+		if p.tok == lexer.STRING {
+			n.Path = p.lit
+			p.next()
+		} else {
+			p.expect(lexer.STRING)
+		}
+
+		p.module.Imports = append(p.module.Imports, n)
+
+		p.sep()
+	}
 }
 
 //====
@@ -154,6 +172,11 @@ func (p *Parser) parseDeclarations() {
 			d = p.parseFn()
 		case lexer.VAR:
 			d = p.parseVarDecl()
+		case lexer.CONST:
+			var cs = p.parseConstDecls()
+			for _, c := range cs {
+				p.module.Decls = append(p.module.Decls, c)
+			}
 		case lexer.ENTRY:
 			p.parseEntry()
 		default:
@@ -171,6 +194,53 @@ func (p *Parser) parseDeclarations() {
 	}
 }
 
+//=== константы
+
+func (p *Parser) parseConstDecls() []*ast.ConstDecl {
+	if p.trace {
+		defer un(trace(p, "Описание констант"))
+	}
+
+	p.next()
+
+	if p.tok == ExportMark || p.tok == lexer.LPAR {
+		return p.parseConstGroup()
+	}
+
+	var c = p.parseSingleConst()
+
+	var cs = make([]*ast.ConstDecl, 1)
+	cs[0] = c
+
+	return cs
+}
+
+func (p *Parser) parseSingleConst() *ast.ConstDecl {
+
+	var n = &ast.ConstDecl{
+		DeclBase: ast.DeclBase{Pos: p.pos},
+	}
+
+	n.Name = p.parseIdent()
+	if p.parseExportMark() {
+		n.SetExported()
+	}
+
+	p.expect(lexer.COLON)
+	n.Typ = p.parseTypeRef()
+
+	p.expect(lexer.EQ)
+	n.Value = p.parseExpression() //! const expression
+
+	return n
+}
+
+func (p *Parser) parseConstGroup() []*ast.ConstDecl {
+	return nil
+}
+
+//=== переменные
+
 func (p *Parser) parseVarDecl() *ast.VarDecl {
 	if p.trace {
 		defer un(trace(p, "Описание переменной"))
@@ -178,16 +248,22 @@ func (p *Parser) parseVarDecl() *ast.VarDecl {
 
 	p.next()
 
-	var v = &ast.VarDecl{
+	var n = &ast.VarDecl{
 		DeclBase: ast.DeclBase{Pos: p.pos},
 	}
 
-	v.Name = p.parseIdent()
-	p.expect(lexer.COLON)
-	v.Typ = p.parseTypeRef()
+	n.Name = p.parseIdent()
+	if p.parseExportMark() {
+		n.SetExported()
+	}
 
-	return v
+	p.expect(lexer.COLON)
+	n.Typ = p.parseTypeRef()
+
+	return n
 }
+
+//==== вход
 
 func (p *Parser) parseEntry() {
 	if p.trace {
@@ -223,7 +299,7 @@ func (p *Parser) parseIdent() string {
 }
 
 func (p *Parser) parseExportMark() bool {
-	if p.tok == lexer.MUL {
+	if p.tok == ExportMark {
 		p.next()
 		return true
 	}
