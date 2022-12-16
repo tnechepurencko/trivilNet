@@ -30,7 +30,7 @@ func main() {
 	}
 
 	//fmt.Printf("%v\n", src.Bytes)
-	if false {
+	if *env.JustLexer {
 		testLexer(src)
 	} else {
 		compile(src)
@@ -68,6 +68,12 @@ func testLexer(src *env.Source) {
 		if tok == lexer.EOF {
 			break
 		}
-		fmt.Printf("%d %v %s\n", pos, tok, lit)
+
+		_, line, col := env.SourcePos(pos)
+		if lit == "" {
+			fmt.Printf("%d:%d %v\n", line, col, tok)
+		} else {
+			fmt.Printf("%d:%d %v '%s'\n", line, col, tok, lit)
+		}
 	}
 }

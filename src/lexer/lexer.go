@@ -100,7 +100,9 @@ func isDecimal(ch rune) bool { return '0' <= ch && ch <= '9' }
 func isHex(ch rune) bool     { return '0' <= ch && ch <= '9' || 'a' <= lower(ch) && lower(ch) <= 'f' }
 
 func isLetter(ch rune) bool {
-	return 'a' <= lower(ch) && lower(ch) <= 'z' || ch == '_' || ch >= utf8.RuneSelf && unicode.IsLetter(ch)
+	return ch >= utf8.RuneSelf && unicode.IsLetter(ch) ||
+		'a' <= lower(ch) && lower(ch) <= 'z' || ch == '_' || ch == '№'
+
 }
 
 func isDigit(ch rune) bool {
@@ -159,13 +161,58 @@ func (s *Lexer) scanBlockComment() int {
 	return ofs
 }
 
-// пока упрощенный
-func (s *Lexer) scanIdentifier() string {
+func (s *Lexer) scanIdentifier() (Token, string) {
 	ofs := s.offset
-	for isLetter(s.ch) || isDigit(s.ch) {
+	afterSpace := false
+	firstSpace := true
+
+loop:
+	for {
 		s.next()
+		switch {
+		case isLetter(s.ch):
+			afterSpace = false
+		case s.ch == ' ':
+			if firstSpace {
+				lit := string(s.src[ofs:s.offset])
+				tok := Lookup(lit)
+				if tok != IDENT {
+					return tok, lit
+				}
+				firstSpace = false
+			}
+			if afterSpace {
+				break loop
+			}
+			afterSpace = true
+			firstSpace = false
+		case isDigit(s.ch) || s.ch == '-':
+			if afterSpace {
+				break loop
+			}
+			afterSpace = false
+		case s.ch == '?' || s.ch == '!':
+			if afterSpace {
+				break loop
+			}
+			afterSpace = false
+			s.next()
+			break loop
+		case s.ch == -1:
+			break loop
+		default:
+			break loop
+		}
 	}
-	return string(s.src[ofs:s.offset])
+
+	last := s.offset
+	if afterSpace {
+		last--
+	}
+
+	lit := string(s.src[ofs:last])
+
+	return Lookup(lit), lit
 }
 
 func (s *Lexer) scanString(opening rune) string {
@@ -309,16 +356,19 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 
 	// начало лексемы
 	pos = s.source.MakePos(s.uOffset)
+	ch := s.ch
 
-	switch ch := s.ch; {
+	switch {
 	case isLetter(ch):
-		lit = s.scanIdentifier()
-		if len(lit) > 1 {
-			// все ключевые слова длиннее одного символа
-			tok = Lookup(lit)
-		} else {
-			tok = IDENT
-		}
+		tok, lit = s.scanIdentifier()
+		/*
+			if len(lit) > 1 {
+				// все ключевые слова длиннее одного символа
+				tok = Lookup(lit)
+			} else {
+				tok = IDENT
+			}
+		*/
 	case isDecimal(ch):
 		tok, lit = s.scanNumber()
 	default:

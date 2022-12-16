@@ -126,6 +126,9 @@ var tokens = [...]string{
 	LEQ: "<=",
 	GEQ: ">=",
 
+	NNQUERY: "?",
+	NNCHECK: "!",
+
 	ASSIGN: ":=",
 
 	LPAR: "(",
