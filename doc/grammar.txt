@@ -282,30 +282,22 @@ escape_value
 	;
 
 ident
-	: ident_start ident_middle* ident_end?
+	: word ((' ' | '-') word)* punctuation?
 	;
 	
-ident_start
-	: letter
+word
+	: letter (letter | digit)*
+	;
+
+letter
+	: unicode_letter
 	| '_'
 	| '№'
 	;
 
-letter
-	: russian_letter
-	| latin_letter
-	;
-
-ident_middle
-	: ident_start
-	| digit
-	| space // no more than one space in a row
-	| '-'   // no space around
-	;
-
-ident_end
-	: '?' // no space before
-	| '!' // no space before
+punctuation
+	: '?' 
+	| '!' 
 	;
 
 modifier
@@ -321,3 +313,4 @@ modifier
 № U+2116
 
 ‹›
+
