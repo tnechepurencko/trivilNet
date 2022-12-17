@@ -394,7 +394,7 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 		case ':':
 			tok = s.checkEqu(COLON, ASSIGN)
 		case '.':
-			tok = s.checkNext(DOT, '<', LCONV)
+			tok = DOT // s.checkNext(DOT, '<', LCONV)
 		case ',':
 			tok = COMMA
 		case ';':

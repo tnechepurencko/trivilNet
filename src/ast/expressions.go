@@ -62,3 +62,9 @@ type CallExpr struct {
 	X    Expr
 	Args []Expr
 }
+
+type ConversionExpr struct {
+	ExprBase
+	X   Expr
+	Typ Type
+}

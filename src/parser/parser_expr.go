@@ -126,6 +126,8 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 			x = p.parseSelector(x)
 		case lexer.LPAR:
 			x = p.parseArguments(x)
+		case lexer.LCONV:
+			x = p.parseConversion(x)
 		default:
 			return x
 		}
@@ -175,6 +177,24 @@ func (p *Parser) parseArguments(x ast.Expr) ast.Expr {
 	}
 
 	p.expect(lexer.RPAR)
+
+	return n
+}
+
+func (p *Parser) parseConversion(x ast.Expr) ast.Expr {
+	if p.trace {
+		defer un(trace(p, "Конверсия"))
+	}
+
+	var n = &ast.ConversionExpr{
+		ExprBase: ast.ExprBase{Pos: p.pos},
+		X:        x,
+	}
+
+	p.next()
+	n.Typ = p.parseTypeRef()
+
+	p.expect(lexer.RCONV)
 
 	return n
 }
