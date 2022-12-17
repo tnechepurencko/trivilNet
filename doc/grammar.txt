@@ -78,6 +78,10 @@ const_decl
 single_const
 	: name ':' type_ref '=' const_expression
 	;
+next_const
+	: name (':' type_ref '=' const_expression)?
+	;
+	
 group_const
 	: '*'? '(' single_const ( sep next_const)* ')'
 	;
@@ -188,7 +192,7 @@ primary_exp
 	( selector
 	| arguments
 	| conversion
-	| index_or_array_composite
+	| index
 	| class_composite // no space allowed
 	| not_null_check
 	)*
@@ -216,14 +220,10 @@ expression_list
 	: expression (',' expression)* ','? // trailing comma allowed
 	;
 
-index_or_array_composite
-	: '[' expression ']';
-	| array_composite
+index // index or array composite
+	: '[' element_value_list? ']' 
 	;
 
-array_composite
-	: '[' element_value_list? ']'
-	; 
 
 element_value_list
 	: element_value (',' element_value)* ','? // trailing comma allowed
