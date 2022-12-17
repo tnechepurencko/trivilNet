@@ -310,7 +310,6 @@ func (p *Parser) completeConstGroup(cs []*ast.ConstDecl) {
 
 				if ok && literal.Kind == lexer.INT {
 					i, err := strconv.Atoi(literal.Lit)
-					fmt.Printf("value of %s = %d\n", base.Name, i)
 					if err != nil {
 						p.error(base.Pos, "ПАР-ОШ-КОНСТ-БАЗА", fmt.Sprintf("(%s)", err.Error()))
 						val = 0
@@ -327,7 +326,6 @@ func (p *Parser) completeConstGroup(cs []*ast.ConstDecl) {
 			c.Typ = base.Typ
 
 			val++
-			fmt.Printf("set %s = %d\n", c.Name, val)
 			c.Value = &ast.LiteralExpr{
 				ExprBase: ast.ExprBase{Pos: c.Pos},
 				Kind:     lexer.INT,
