@@ -122,6 +122,8 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 
 	for {
 		switch p.tok {
+		case lexer.DOT:
+			x = p.parseSelector(x)
 		case lexer.LPAR:
 			x = p.parseArguments(x)
 		default:
@@ -129,6 +131,22 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 		}
 	}
 
+}
+
+func (p *Parser) parseSelector(x ast.Expr) ast.Expr {
+	if p.trace {
+		defer un(trace(p, "Селектор"))
+	}
+
+	var n = &ast.SelectorExpr{
+		ExprBase: ast.ExprBase{Pos: p.pos},
+		X:        x,
+	}
+
+	p.next()
+	n.Name = p.parseIdent()
+
+	return n
 }
 
 func (p *Parser) parseArguments(x ast.Expr) ast.Expr {

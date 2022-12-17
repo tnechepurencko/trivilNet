@@ -75,7 +75,9 @@ func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 
 	genc.c("int main() {")
 
-	genc.genStatementSeq(entry.Seq)
+	if entry != nil {
+		genc.genStatementSeq(entry.Seq)
+	}
 
 	genc.c("  return 0;")
 	genc.c("}")

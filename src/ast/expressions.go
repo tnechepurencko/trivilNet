@@ -51,6 +51,12 @@ type IdentExpr struct {
 	Obj  Decl
 }
 
+type SelectorExpr struct {
+	ExprBase
+	X    Expr
+	Name string
+}
+
 type CallExpr struct {
 	ExprBase
 	X    Expr

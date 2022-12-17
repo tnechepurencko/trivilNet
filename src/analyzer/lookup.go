@@ -21,12 +21,13 @@ func lookup(m *ast.Module) {
 	// добавление имен
 	for _, d := range m.Decls {
 		switch x := d.(type) {
-		case *ast.Function:
+		case *ast.TypeDecl:
 			addToScope(x.Name, x, m.Inner)
 		case *ast.VarDecl:
 			addToScope(x.Name, x, m.Inner)
 		case *ast.ConstDecl:
-			fmt.Printf("const %s\n", x.Name)
+			addToScope(x.Name, x, m.Inner)
+		case *ast.Function:
 			addToScope(x.Name, x, m.Inner)
 		default:
 			panic(fmt.Sprintf("lookup 1: ni %T", d))
@@ -42,11 +43,14 @@ func lookup(m *ast.Module) {
 	// обойти описания
 	for _, d := range m.Decls {
 		switch x := d.(type) {
-		case *ast.Function:
-		case *ast.VarDecl:
-			lc.lookVarDecl(x)
+		case *ast.TypeDecl:
+			lc.lookTypeDecl(x)
 		case *ast.ConstDecl:
 			lc.lookConstDecl(x)
+		case *ast.VarDecl:
+			lc.lookVarDecl(x)
+		case *ast.Function:
+			// отдельно
 		default:
 			panic(fmt.Sprintf("lookup 3: ni %T", d))
 		}
@@ -65,16 +69,20 @@ func lookup(m *ast.Module) {
 
 }
 
-//==== описания
+//==== константы и переменные
 
 func (lc *lookContext) lookVarDecl(v *ast.VarDecl) {
 	lc.lookTypeRef(v.Typ)
-
 }
 
 func (lc *lookContext) lookConstDecl(v *ast.ConstDecl) {
 	lc.lookTypeRef(v.Typ)
 
+}
+
+//==== типы
+
+func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 }
 
 //==== ссылка на тип
@@ -221,6 +229,10 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 	case *ast.BinaryExpr:
 		lc.lookExpr(x.X)
 		lc.lookExpr(x.Y)
+
+	case *ast.SelectorExpr:
+		lc.lookExpr(x.X)
+		panic("ni")
 
 	case *ast.CallExpr:
 		lc.lookExpr(x.X)
