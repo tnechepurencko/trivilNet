@@ -13,19 +13,21 @@ import (
 var _ = fmt.Printf
 
 type genContext struct {
-	module  *ast.Module
-	outname string
-	hlines  []string
-	clines  []string
+	module   *ast.Module
+	outname  string
+	outNames map[string]string
+	hlines   []string
+	clines   []string
 }
 
 func Generate(m *ast.Module) {
 
 	var genc = &genContext{
-		module:  m,
-		outname: env.OutName(m.Name),
-		hlines:  make([]string, 0),
-		clines:  make([]string, 0),
+		module:   m,
+		outname:  env.OutName(m.Name),
+		outNames: make(map[string]string),
+		hlines:   make([]string, 0),
+		clines:   make([]string, 0),
 	}
 
 	genc.startCode()
@@ -57,6 +59,19 @@ func (genc *genContext) startCode() {
 
 func (genc *genContext) finishCode() {
 	genc.h("#endif")
+}
+
+//====
+
+func (genc *genContext) outName(name string) string {
+	out, ok := genc.outNames[name]
+	if ok {
+		return out
+	}
+	out = env.OutName(name)
+	genc.outNames[name] = out
+
+	return out
 }
 
 //====

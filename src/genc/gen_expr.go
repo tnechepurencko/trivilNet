@@ -12,7 +12,7 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		return x.Name
+		return genc.outName(x.Name)
 	case *ast.LiteralExpr:
 		return genc.genLiteral(x)
 	case *ast.UnaryExpr:

@@ -36,7 +36,7 @@ func (genc *genContext) genFunction(f *ast.Function) {
 
 	var ft = f.Typ.(*ast.FuncType)
 
-	genc.c("%s %s(%s) {", genc.returnType(ft), f.Name, genc.params(ft))
+	genc.c("%s %s(%s) {", genc.returnType(ft), genc.outName(f.Name), genc.params(ft))
 
 	genc.genStatementSeq(f.Seq)
 
@@ -58,7 +58,7 @@ func (genc *genContext) params(ft *ast.FuncType) string {
 
 	for i, p := range ft.Params {
 
-		b.WriteString(fmt.Sprintf("%s %s", genc.typeRef(p.Typ), p.Name))
+		b.WriteString(fmt.Sprintf("%s %s", genc.typeRef(p.Typ), genc.outName(p.Name)))
 		if i < len(ft.Params)-1 {
 			b.WriteRune(',')
 		}
@@ -86,7 +86,7 @@ func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 func (genc *genContext) genLocalDecl(d ast.Decl) string {
 	switch x := d.(type) {
 	case *ast.VarDecl:
-		return fmt.Sprintf("%s %s;", genc.typeRef(x.Typ), x.Name)
+		return fmt.Sprintf("%s %s;", genc.typeRef(x.Typ), genc.outName(x.Name))
 	default:
 		panic(fmt.Sprintf("genDecl: ni %T", d))
 	}

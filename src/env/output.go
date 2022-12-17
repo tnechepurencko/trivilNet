@@ -35,8 +35,14 @@ func OutName(name string) string {
 
 	for _, origin = range name {
 		switch origin {
-		case ' ':
+		case ' ', '-':
 			s = "_"
+		case '№':
+			s = "N_"
+		case '?':
+			s = "_Q"
+		case '!':
+			s = "_E"
 		case 'а':
 			c("a")
 		case 'б':
