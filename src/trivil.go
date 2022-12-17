@@ -4,7 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
 	"trivil/analyzer"
+	"trivil/ast"
 	"trivil/env"
 	"trivil/genc"
 	"trivil/lexer"
@@ -50,9 +52,17 @@ func compile(src *env.Source) {
 		return
 	}
 
+	if *env.ShowAST == 1 {
+		fmt.Println(ast.SExpr(m))
+	}
+
 	analyzer.Analyse(m)
 	if env.ErrorCount() != 0 {
 		return
+	}
+
+	if *env.ShowAST == 2 {
+		fmt.Println(ast.SExpr(m))
 	}
 
 	genc.Generate(m)
