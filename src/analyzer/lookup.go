@@ -22,10 +22,11 @@ func lookup(m *ast.Module) {
 	for _, d := range m.Decls {
 		switch x := d.(type) {
 		case *ast.Function:
-			//			fmt.Printf("Function %v\n", x.Name)
 			addToScope(x.Name, x, m.Inner)
 		case *ast.VarDecl:
-			//			fmt.Printf("Function %v\n", x.Name)
+			addToScope(x.Name, x, m.Inner)
+		case *ast.ConstDecl:
+			fmt.Printf("const %s\n", x.Name)
 			addToScope(x.Name, x, m.Inner)
 		default:
 			panic(fmt.Sprintf("lookup 1: ni %T", d))
@@ -44,6 +45,8 @@ func lookup(m *ast.Module) {
 		case *ast.Function:
 		case *ast.VarDecl:
 			lc.lookVarDecl(x)
+		case *ast.ConstDecl:
+			lc.lookConstDecl(x)
 		default:
 			panic(fmt.Sprintf("lookup 3: ni %T", d))
 		}
@@ -69,10 +72,18 @@ func (lc *lookContext) lookVarDecl(v *ast.VarDecl) {
 
 }
 
+func (lc *lookContext) lookConstDecl(v *ast.ConstDecl) {
+	lc.lookTypeRef(v.Typ)
+
+}
+
 //==== ссылка на тип
 
 func (lc *lookContext) lookTypeRef(t ast.Type) {
 	var tr = t.(*ast.TypeRef)
+	if tr.Typ != nil {
+		return // уже сделано
+	}
 
 	if tr.ModuleName != "" {
 		panic("ni")

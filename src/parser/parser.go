@@ -2,6 +2,8 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
+
 	"trivil/ast"
 	"trivil/env"
 	"trivil/lexer"
@@ -235,8 +237,103 @@ func (p *Parser) parseSingleConst() *ast.ConstDecl {
 	return n
 }
 
+func (p *Parser) parseNextConst() *ast.ConstDecl {
+
+	var n = &ast.ConstDecl{
+		DeclBase: ast.DeclBase{Pos: p.pos},
+	}
+
+	n.Name = p.parseIdent()
+	if p.parseExportMark() {
+		n.SetExported()
+	}
+
+	if p.tok != lexer.COLON {
+		return n
+	}
+
+	p.next()
+	n.Typ = p.parseTypeRef()
+
+	p.expect(lexer.EQ)
+	n.Value = p.parseExpression()
+
+	return n
+}
+
 func (p *Parser) parseConstGroup() []*ast.ConstDecl {
-	return nil
+
+	var exported = false
+	if p.tok == ExportMark {
+		exported = true
+		p.next()
+	}
+
+	p.expect(lexer.LPAR)
+
+	var cs = make([]*ast.ConstDecl, 0)
+	var c = p.parseSingleConst()
+
+	c.Exported = exported
+	cs = append(cs, c)
+
+	for p.tok != lexer.RPAR && p.tok != lexer.EOF {
+		p.sep()
+
+		c = p.parseNextConst()
+		cs = append(cs, c)
+	}
+
+	p.expect(lexer.RPAR)
+
+	p.completeConstGroup(cs)
+
+	return cs
+}
+
+func (p *Parser) completeConstGroup(cs []*ast.ConstDecl) {
+
+	var base *ast.ConstDecl
+	var first = true
+	var val int
+
+	for _, c := range cs {
+		if c.Typ != nil {
+			base = c
+			first = true
+		} else {
+			if first { // первая авто константа
+
+				literal, ok := base.Value.(*ast.LiteralExpr)
+
+				if ok && literal.Kind == lexer.INT {
+					i, err := strconv.Atoi(literal.Lit)
+					fmt.Printf("value of %s = %d\n", base.Name, i)
+					if err != nil {
+						p.error(base.Pos, "ПАР-ОШ-КОНСТ-БАЗА", fmt.Sprintf("(%s)", err.Error()))
+						val = 0
+					} else {
+						val = i
+					}
+				} else {
+					p.error(base.Pos, "ПАР-ОШ-КОНСТ-БАЗА", "")
+					val = 0
+				}
+				first = false
+			}
+
+			c.Typ = base.Typ
+
+			val++
+			fmt.Printf("set %s = %d\n", c.Name, val)
+			c.Value = &ast.LiteralExpr{
+				ExprBase: ast.ExprBase{Pos: c.Pos},
+				Kind:     lexer.INT,
+				Lit:      strconv.Itoa(val),
+			}
+		}
+	}
+
 }
 
 //=== переменные
