@@ -128,6 +128,8 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 			x = p.parseArguments(x)
 		case lexer.LCONV:
 			x = p.parseConversion(x)
+		case lexer.LBRACK:
+			x = p.parseIndex(x)
 		default:
 			return x
 		}
@@ -197,4 +199,62 @@ func (p *Parser) parseConversion(x ast.Expr) ast.Expr {
 	p.expect(lexer.RCONV)
 
 	return n
+}
+
+func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
+	if p.trace {
+		defer un(trace(p, "Индексация"))
+	}
+
+	var n = &ast.IndexExpr{
+		ExprBase: ast.ExprBase{Pos: p.pos},
+		X:        x,
+		Values:   make([]ast.ValuePair, 0),
+	}
+
+	p.expect(lexer.LBRACK)
+
+	var l ast.Expr
+	var r ast.Expr
+
+	for p.tok != lexer.RBRACK && p.tok != lexer.EOF {
+
+		l = p.parseExpression()
+
+		if p.tok == lexer.COLON {
+			p.next()
+			r = p.parseExpression()
+		} else {
+			r = nil
+		}
+
+		n.Values = append(n.Values, ast.ValuePair{L: l, R: r})
+
+		if p.tok == lexer.RBRACK {
+			break
+		}
+		p.expect(lexer.COMMA)
+	}
+
+	p.expect(lexer.RBRACK)
+
+	p.checkIndexValues(n)
+
+	return n
+}
+
+func (p *Parser) checkIndexValues(n *ast.IndexExpr) {
+
+	var pairs = 0
+	for _, v := range n.Values {
+		if v.R != nil {
+			pairs++
+		}
+	}
+
+	if pairs == len(n.Values) {
+		n.Pairs = true
+	} else if pairs != 0 {
+		p.error(n.Pos, "ПАР-СМЕСЬ-МАССИВ")
+	}
 }
