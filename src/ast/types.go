@@ -24,6 +24,10 @@ type PredefinedType struct {
 	Name string
 }
 
+type InvalidType struct {
+	TypeBase
+}
+
 //=== type ref
 
 type TypeRef struct {
@@ -32,6 +36,13 @@ type TypeRef struct {
 	ModuleName string
 	TypeDecl   *TypeDecl
 	Typ        Type
+}
+
+//==== array type
+
+type ArrayType struct {
+	TypeBase
+	ElementTyp Type
 }
 
 //==== function type
