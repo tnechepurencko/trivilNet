@@ -60,7 +60,7 @@ func (p *Parser) parseTypeDef() ast.Type {
 	case lexer.LBRACK:
 		return p.parseArrayType()
 	case lexer.CLASS:
-		panic("ni")
+		return p.parseClassType()
 	default:
 		p.error(p.pos, "ПАР-ОШ-ОП-ТИПА", p.tok.String())
 		return &ast.InvalidType{
@@ -79,6 +79,53 @@ func (p *Parser) parseArrayType() *ast.ArrayType {
 	p.expect(lexer.RBRACK)
 
 	t.ElementTyp = p.parseTypeRef()
+
+	return t
+}
+
+//==== класс
+
+func (p *Parser) parseClassType() *ast.ClassType {
+
+	var t = &ast.ClassType{
+		TypeBase: ast.TypeBase{Pos: p.pos},
+	}
+
+	p.next()
+
+	if p.tok == lexer.LPAR {
+		p.next()
+		t.BaseTyp = p.parseTypeRef()
+		p.expect(lexer.RPAR)
+	}
+
+	p.expect(lexer.LBRACE)
+
+	for p.tok != lexer.RBRACE && p.tok != lexer.EOF {
+
+		var f = &ast.Field{
+			TypeBase: ast.TypeBase{Pos: p.pos},
+		}
+
+		f.Name = p.parseIdent()
+		if p.parseExportMark() {
+			f.Exported = true
+		}
+
+		p.expect(lexer.COLON)
+
+		f.Typ = p.parseTypeRef()
+
+		t.Fields = append(t.Fields, f)
+
+		if p.tok == lexer.RBRACE {
+			break
+		}
+		p.sep()
+
+	}
+
+	p.expect(lexer.RBRACE)
 
 	return t
 }

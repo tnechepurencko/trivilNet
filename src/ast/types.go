@@ -45,6 +45,22 @@ type ArrayType struct {
 	ElementTyp Type
 }
 
+//==== class type
+
+type ClassType struct {
+	TypeBase
+	BaseTyp Type
+	Fields  []*Field
+	Methods []*Function
+}
+
+type Field struct {
+	TypeBase
+	Name     string
+	Exported bool
+	Typ      Type
+}
+
 //==== function type
 
 type FuncType struct {
