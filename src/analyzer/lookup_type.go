@@ -29,6 +29,10 @@ func (lc *lookContext) lookTypeRef(t ast.Type) {
 	tr.TypeDecl = td
 	tr.Typ = tr.TypeDecl.Typ
 
+	if tr.Typ == nil {
+		panic("not resolved")
+	}
+
 	//fmt.Printf("! %v %T\n", tr.TypeDecl, tr.Typ)
 }
 
@@ -39,6 +43,13 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 	switch x := v.Typ.(type) {
 	case *ast.ArrayType:
 		lc.lookTypeRef(x.ElementTyp)
+	case *ast.ClassType:
+		if x.BaseTyp != nil {
+			lc.lookTypeRef(x.BaseTyp)
+		}
+		for _, f := range x.Fields {
+			lc.lookTypeRef(f.Typ)
+		}
 
 	default:
 		panic(fmt.Sprintf("lookTypeDecl: ni %T", v.Typ))
