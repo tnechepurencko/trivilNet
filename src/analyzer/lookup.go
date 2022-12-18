@@ -3,7 +3,7 @@ package analyzer
 import (
 	"fmt"
 	"trivil/ast"
-	//"trivil/env"
+	"trivil/env"
 )
 
 var _ = fmt.Printf
@@ -92,6 +92,12 @@ func (lc *lookContext) lookFunction(f *ast.Function) {
 	f.Inner = ast.NewScope(lc.scope)
 	lc.scope = f.Inner
 
+	if f.Recv.Typ != nil {
+		lc.lookTypeRef(f.Recv.Typ)
+
+		lc.addMethodToType(f)
+	}
+
 	var ft = f.Typ.(*ast.FuncType)
 
 	for _, p := range ft.Params {
@@ -110,6 +116,20 @@ func (lc *lookContext) lookFunction(f *ast.Function) {
 	}
 
 	lc.scope = lc.scope.Outer
+}
+
+func (lc *lookContext) addMethodToType(f *ast.Function) {
+
+	var rt = f.Recv.Typ.(*ast.TypeRef)
+
+	cl, ok := rt.Typ.(*ast.ClassType)
+	if !ok {
+		env.AddError(f.Recv.Pos, "СЕМ-ПОЛУЧАТЕЛЬ-КЛАСС")
+		return
+	}
+
+	cl.Methods = append(cl.Methods, f)
+
 }
 
 func (lc *lookContext) addVarForParameter(p *ast.Param) {

@@ -63,9 +63,25 @@ func sexpr(v reflect.Value) string {
 				fs += " " + sexpr(f)
 			}
 		case reflect.Slice:
-			var list = slice(f)
+			if v.Type().Field(i).Name == "Methods" {
 
-			fs += fmt.Sprintf(" [%s]", strings.Join(list, " "))
+				var list = make([]string, f.Len())
+				for i := 0; i < f.Len(); i++ {
+					e := f.Index(i)
+					st, ok := getStruct(e)
+					if !ok {
+						panic("struct Function expected")
+					}
+					name := st.FieldByName("Name")
+					list[i] = "\"" + name.String() + "\""
+				}
+				fs += fmt.Sprintf(" [%s]", strings.Join(list, " "))
+
+			} else {
+				var list = slice(f)
+
+				fs += fmt.Sprintf(" [%s]", strings.Join(list, " "))
+			}
 		case reflect.Interface:
 			if !f.IsNil() {
 				fs += " " + sexpr(f.Elem())
