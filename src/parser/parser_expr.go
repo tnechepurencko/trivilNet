@@ -130,6 +130,12 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 			x = p.parseConversion(x)
 		case lexer.LBRACK:
 			x = p.parseIndex(x)
+		case lexer.LBRACE:
+			if p.lex.WhitespaceBefore('{') {
+				return x
+			}
+			x = p.parseClassComposite(x)
+
 		default:
 			return x
 		}
@@ -209,7 +215,7 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 	var n = &ast.IndexExpr{
 		ExprBase: ast.ExprBase{Pos: p.pos},
 		X:        x,
-		Values:   make([]ast.ValuePair, 0),
+		Elements: make([]ast.ElementPair, 0),
 	}
 
 	p.expect(lexer.LBRACK)
@@ -228,7 +234,7 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 			r = nil
 		}
 
-		n.Values = append(n.Values, ast.ValuePair{L: l, R: r})
+		n.Elements = append(n.Elements, ast.ElementPair{L: l, R: r})
 
 		if p.tok == lexer.RBRACK {
 			break
@@ -246,15 +252,51 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 func (p *Parser) checkIndexValues(n *ast.IndexExpr) {
 
 	var pairs = 0
-	for _, v := range n.Values {
+	for _, v := range n.Elements {
 		if v.R != nil {
 			pairs++
 		}
 	}
 
-	if pairs == len(n.Values) {
+	if pairs == len(n.Elements) {
 		n.Pairs = true
 	} else if pairs != 0 {
 		p.error(n.Pos, "ПАР-СМЕСЬ-МАССИВ")
 	}
+}
+
+// class composite
+
+func (p *Parser) parseClassComposite(x ast.Expr) ast.Expr {
+	if p.trace {
+		defer un(trace(p, "Композит класса"))
+	}
+
+	var n = &ast.CompositeExpr{
+		ExprBase: ast.ExprBase{Pos: p.pos},
+		X:        x,
+		Values:   make([]ast.ValuePair, 0),
+	}
+
+	p.expect(lexer.LBRACE)
+
+	for p.tok != lexer.RBRACE && p.tok != lexer.EOF {
+
+		var vp = ast.ValuePair{Pos: p.pos}
+
+		vp.Name = p.parseIdent()
+		p.expect(lexer.COLON)
+		vp.V = p.parseExpression()
+
+		n.Values = append(n.Values, vp)
+
+		if p.tok == lexer.RBRACE {
+			break
+		}
+		p.expect(lexer.COMMA)
+	}
+
+	p.expect(lexer.RBRACE)
+
+	return n
 }

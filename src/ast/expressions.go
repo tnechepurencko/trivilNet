@@ -69,7 +69,7 @@ type ConversionExpr struct {
 	Typ Type
 }
 
-type ValuePair struct {
+type ElementPair struct {
 	L Expr
 	R Expr
 }
@@ -79,6 +79,18 @@ type IndexExpr struct {
 	X     Expr
 	Index Expr // indexation if != nil
 	// composite:
+	Elements []ElementPair
+	Pairs    bool // L - are indexes, R - values
+}
+
+type ValuePair struct {
+	Pos  int
+	Name string
+	V    Expr
+}
+
+type CompositeExpr struct {
+	ExprBase
+	X      Expr
 	Values []ValuePair
-	Pairs  bool // L - are indexes, R - values
 }
