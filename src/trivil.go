@@ -52,7 +52,7 @@ func compile(src *env.Source) {
 		return
 	}
 
-	if *env.ShowAST == 1 {
+	if *env.ShowAST >= 1 {
 		fmt.Println(ast.SExpr(m))
 	}
 
@@ -61,11 +61,13 @@ func compile(src *env.Source) {
 		return
 	}
 
-	if *env.ShowAST == 2 {
+	if *env.ShowAST >= 2 {
 		fmt.Println(ast.SExpr(m))
 	}
 
-	genc.Generate(m)
+	if *env.DoGen {
+		genc.Generate(m)
+	}
 
 }
 

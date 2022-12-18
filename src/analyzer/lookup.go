@@ -39,18 +39,24 @@ func lookup(m *ast.Module) {
 	}
 
 	// TODO обойти типы
+	for _, d := range m.Decls {
+		td, ok := d.(*ast.TypeDecl)
+		if ok {
+			lc.lookTypeDecl(td)
+		}
+	}
 
 	// обойти описания
 	for _, d := range m.Decls {
 		switch x := d.(type) {
 		case *ast.TypeDecl:
-			lc.lookTypeDecl(x)
+			// уже сделано
 		case *ast.ConstDecl:
 			lc.lookConstDecl(x)
 		case *ast.VarDecl:
 			lc.lookVarDecl(x)
 		case *ast.Function:
-			// отдельно
+			// позже
 		default:
 			panic(fmt.Sprintf("lookup 3: ni %T", d))
 		}
@@ -66,7 +72,6 @@ func lookup(m *ast.Module) {
 	if m.Entry != nil {
 		lc.lookEntry(m.Entry)
 	}
-
 }
 
 //==== константы и переменные
@@ -78,35 +83,6 @@ func (lc *lookContext) lookVarDecl(v *ast.VarDecl) {
 func (lc *lookContext) lookConstDecl(v *ast.ConstDecl) {
 	lc.lookTypeRef(v.Typ)
 
-}
-
-//==== типы
-
-func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
-}
-
-//==== ссылка на тип
-
-func (lc *lookContext) lookTypeRef(t ast.Type) {
-	var tr = t.(*ast.TypeRef)
-	if tr.Typ != nil {
-		return // уже сделано
-	}
-
-	if tr.ModuleName != "" {
-		panic("ni")
-	}
-
-	var x = findInScopes(lc.scope, tr.TypeName, tr.Pos)
-	td, ok := x.(*ast.TypeDecl)
-	if !ok {
-		return
-	}
-
-	tr.TypeDecl = td
-	tr.Typ = tr.TypeDecl.Typ
-
-	//fmt.Printf("! %v %T\n", tr.TypeDecl, tr.Typ)
 }
 
 //==== functions
@@ -236,7 +212,22 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 
 	case *ast.CallExpr:
 		lc.lookExpr(x.X)
-		//TODO: args
+		for _, a := range x.Args {
+			lc.lookExpr(a)
+		}
+
+	case *ast.IndexExpr:
+		lc.lookExpr(x.X)
+		if x.Index != nil {
+			lc.lookExpr(x.Index)
+		}
+
+		for _, e := range x.Elements {
+			lc.lookExpr(e.L)
+			if e.R != nil {
+				lc.lookExpr(e.R)
+			}
+		}
 
 	default:
 		panic(fmt.Sprintf("expression: ni %T", expr))

@@ -80,7 +80,7 @@ type IndexExpr struct {
 	Index Expr // indexation if != nil
 	// composite:
 	Elements []ElementPair
-	Pairs    bool // L - are indexes, R - values
+	Pairs    bool // both L and R are used: L - are indexes, R - values
 }
 
 type ValuePair struct {
