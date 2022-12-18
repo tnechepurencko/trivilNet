@@ -76,6 +76,10 @@ func ErrorCount() int {
 	return len(errors)
 }
 
+func GetError(i int) string {
+	return errors[i].text
+}
+
 func ClearErrors() {
 	errors = make([]*Error, 0)
 }
