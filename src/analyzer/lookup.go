@@ -213,7 +213,19 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		x.Obj = findInScopes(lc.scope, x.Name, x.Pos)
+		var d = findInScopes(lc.scope, x.Name, x.Pos)
+		if td, ok := d.(*ast.TypeDecl); ok {
+			x.TypRef = &ast.TypeRef{
+				TypeName: td.Name,
+				//ModuleName: ?
+				TypeDecl: td,
+				Typ:      td.Typ,
+			}
+			x.TypRef.Pos = x.Pos
+		} else {
+			x.Obj = d
+		}
+
 		//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
 
 	case *ast.LiteralExpr:
@@ -247,6 +259,13 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 			if e.R != nil {
 				lc.lookExpr(e.R)
 			}
+		}
+	case *ast.CompositeExpr:
+		lc.lookExpr(x.X)
+
+		for _, vp := range x.Values {
+			lc.lookExpr(vp.V)
+
 		}
 
 	default:

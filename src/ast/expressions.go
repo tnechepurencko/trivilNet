@@ -47,8 +47,9 @@ type LiteralExpr struct {
 
 type IdentExpr struct {
 	ExprBase
-	Name string
-	Obj  Decl
+	Name   string
+	Obj    Decl     // var, const or function, never type
+	TypRef *TypeRef // != if using type name in expression, like in composite
 }
 
 type SelectorExpr struct {
@@ -69,10 +70,7 @@ type ConversionExpr struct {
 	Typ Type
 }
 
-type ElementPair struct {
-	L Expr
-	R Expr
-}
+//==== index
 
 type IndexExpr struct {
 	ExprBase
@@ -83,14 +81,21 @@ type IndexExpr struct {
 	Pairs    bool // both L and R are used: L - are indexes, R - values
 }
 
-type ValuePair struct {
-	Pos  int
-	Name string
-	V    Expr
+type ElementPair struct {
+	L Expr
+	R Expr
 }
+
+//=== composite
 
 type CompositeExpr struct {
 	ExprBase
 	X      Expr
 	Values []ValuePair
+}
+
+type ValuePair struct {
+	Pos  int
+	Name string
+	V    Expr
 }
