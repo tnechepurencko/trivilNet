@@ -37,7 +37,9 @@ func sexpr(v reflect.Value) string {
 		case reflect.Int:
 			fs += fmt.Sprintf(" (%s %d)", v.Type().Field(i).Name, f.Int())
 		case reflect.Bool:
-			fs += fmt.Sprintf(" (%s %v)", v.Type().Field(i).Name, f.Bool())
+			if f.Bool() {
+				fs += " " + v.Type().Field(i).Name
+			}
 		case reflect.String:
 			fs += " \"" + f.String() + "\""
 		case reflect.Pointer:
@@ -53,13 +55,16 @@ func sexpr(v reflect.Value) string {
 				fs += " " + sexpr(f.Elem())
 			}
 		case reflect.Struct:
-			if f.Type().Name() == "DeclBase" {
+			sname := f.Type().Name()
+			if sname == "DeclBase" {
 				name := f.FieldByName("Name")
 				fs += " \"" + name.String() + "\""
 				exported := f.FieldByName("Exported")
 				if exported.Bool() {
 					fs += " Exported"
 				}
+			} else if strings.HasSuffix(sname, "Base") {
+				// игнорирую
 			} else {
 				fs += " " + sexpr(f)
 			}
