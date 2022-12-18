@@ -35,7 +35,17 @@ func (p *Parser) parseFn() *ast.Function {
 
 	p.expect(lexer.FN)
 
-	//receiver
+	if p.tok == lexer.LPAR { //receiver
+		p.next()
+
+		n.Recv.Pos = p.pos
+
+		n.Recv.Name = p.parseIdent()
+		p.expect(lexer.COLON)
+		n.Recv.Typ = p.parseTypeRef()
+
+		p.expect(lexer.RPAR)
+	}
 
 	n.Name = p.parseIdent()
 	if p.parseExportMark() {
@@ -96,5 +106,10 @@ func (p *Parser) parseParameters(ft *ast.FuncType) {
 		param.Typ = p.parseTypeRef()
 
 		ft.Params = append(ft.Params, param)
+
+		if p.tok == lexer.RPAR {
+			break
+		}
+		p.expect(lexer.COMMA)
 	}
 }

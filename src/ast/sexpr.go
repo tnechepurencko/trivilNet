@@ -23,6 +23,22 @@ func sexpr(v reflect.Value) string {
 		return ""
 	}
 
+	if v.Type().Name() == "TypeRef" {
+		// to prevent cycles
+		mname := v.FieldByName("ModuleName").String()
+		tname := v.FieldByName("TypeName").String()
+		if mname != "" {
+			tname = mname + "." + tname
+		}
+		typ := v.FieldByName("Typ")
+		resolved := ""
+		if !typ.IsNil() {
+			resolved = "Resolved"
+		}
+
+		return fmt.Sprintf("(TypeRef \"%s\" %s)", tname, resolved)
+	}
+
 	var fs = ""
 	for i := 0; i < v.NumField(); i++ {
 		f := v.Field(i)

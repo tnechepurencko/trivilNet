@@ -44,6 +44,7 @@ type InvalidDecl struct {
 
 type Function struct {
 	DeclBase
+	Recv     Param
 	Typ      Type
 	Inner    *Scope
 	Seq      *StatementSeq
