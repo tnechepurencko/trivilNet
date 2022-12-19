@@ -40,7 +40,7 @@ type TypeRef struct {
 
 //==== array type
 
-type ArrayType struct {
+type DynArrayType struct {
 	TypeBase
 	ElementTyp Type
 }

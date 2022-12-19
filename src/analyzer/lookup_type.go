@@ -41,7 +41,7 @@ func (lc *lookContext) lookTypeRef(t ast.Type) {
 func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 
 	switch x := v.Typ.(type) {
-	case *ast.ArrayType:
+	case *ast.DynArrayType:
 		lc.lookTypeRef(x.ElementTyp)
 	case *ast.ClassType:
 		if x.BaseTyp != nil {

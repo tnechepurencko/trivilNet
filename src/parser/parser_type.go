@@ -69,9 +69,9 @@ func (p *Parser) parseTypeDef() ast.Type {
 	}
 }
 
-func (p *Parser) parseArrayType() *ast.ArrayType {
+func (p *Parser) parseArrayType() *ast.DynArrayType {
 
-	var t = &ast.ArrayType{
+	var t = &ast.DynArrayType{
 		TypeBase: ast.TypeBase{Pos: p.pos},
 	}
 
