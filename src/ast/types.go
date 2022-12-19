@@ -38,9 +38,9 @@ type TypeRef struct {
 	Typ        Type
 }
 
-//==== array type
+//==== vector type
 
-type DynArrayType struct {
+type VectorType struct {
 	TypeBase
 	ElementTyp Type
 }

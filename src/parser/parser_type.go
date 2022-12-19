@@ -58,7 +58,7 @@ func (p *Parser) parseTypeDef() ast.Type {
 
 	switch p.tok {
 	case lexer.LBRACK:
-		return p.parseArrayType()
+		return p.parseVectorType()
 	case lexer.CLASS:
 		return p.parseClassType()
 	default:
@@ -69,9 +69,9 @@ func (p *Parser) parseTypeDef() ast.Type {
 	}
 }
 
-func (p *Parser) parseArrayType() *ast.DynArrayType {
+func (p *Parser) parseVectorType() *ast.VectorType {
 
-	var t = &ast.DynArrayType{
+	var t = &ast.VectorType{
 		TypeBase: ast.TypeBase{Pos: p.pos},
 	}
 
