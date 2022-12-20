@@ -9,10 +9,13 @@ import (
 var _ = fmt.Printf
 
 type checkContext struct {
+	checkedTypes map[string]struct{}
 }
 
 func Process(m *ast.Module) {
-	var cc = &checkContext{}
+	var cc = &checkContext{
+		checkedTypes: make(map[string]struct{}),
+	}
 
 	for _, d := range m.Decls {
 		switch x := d.(type) {

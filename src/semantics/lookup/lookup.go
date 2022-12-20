@@ -126,7 +126,7 @@ func (lc *lookContext) addMethodToType(f *ast.Function) {
 
 	cl, ok := rt.Typ.(*ast.ClassType)
 	if !ok {
-		env.AddError(f.Recv.Pos, "СЕМ-ПОЛУЧАТЕЛЬ-КЛАСС")
+		env.AddError(f.Recv.Pos, "СЕМ-ПОЛУЧАТЕЛЬ-НЕ-КЛАСС")
 		return
 	}
 
