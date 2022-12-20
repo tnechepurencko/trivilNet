@@ -75,5 +75,5 @@ func compile(text string) {
 	if env.ErrorCount() > 0 {
 		return
 	}
-	lookup(m)
+	Process(m)
 }

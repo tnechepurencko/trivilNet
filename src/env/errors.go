@@ -80,6 +80,10 @@ func GetError(i int) string {
 	return errors[i].text
 }
 
+func GetErrorId(i int) string {
+	return errors[i].id
+}
+
 func ClearErrors() {
 	errors = make([]*Error, 0)
 }

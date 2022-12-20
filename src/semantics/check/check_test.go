@@ -1,0 +1,55 @@
+package check
+
+import (
+	"testing"
+	"trivil/env"
+	"trivil/parser"
+	"trivil/semantics/lookup"
+)
+
+type one struct {
+	text string
+	id   string
+}
+
+var error_tests = []one{
+	{"модуль x; тип А = класс (Цел) {}", "СЕМ-БАЗА-НЕ-КЛАСС"},
+}
+
+//===
+
+func TestErrors(t *testing.T) {
+	t.Run("error tests", func(t *testing.T) {
+		for _, e := range error_tests {
+			checkForError(t, e.text, e.id)
+		}
+	})
+}
+
+func checkForError(t *testing.T, text, id string) {
+	compile(text)
+	if env.ErrorCount() == 0 {
+		t.Errorf("An error is expected in text:\n%s\n", text)
+		return
+	}
+	if id != "" {
+		if env.GetErrorId(0) != id {
+			t.Errorf("Expected '%s' error, got '%s' in text:\n%s\n", id, env.GetErrorId(0), text)
+		}
+	}
+	env.ClearErrors()
+}
+
+func compile(text string) {
+	var src = env.AddImmSource(text)
+
+	m := parser.Parse(src)
+	if env.ErrorCount() > 0 {
+		return
+	}
+	lookup.Process(m)
+	if env.ErrorCount() > 0 {
+		return
+	}
+	Process(m)
+}
