@@ -38,7 +38,9 @@ func (p *Parser) parseFn() *ast.Function {
 	if p.tok == lexer.LPAR { //receiver
 		p.next()
 
-		n.Recv.Pos = p.pos
+		n.Recv = &ast.Param{
+			TypeBase: ast.TypeBase{Pos: p.pos},
+		}
 
 		n.Recv.Name = p.parseIdent()
 		p.expect(lexer.COLON)

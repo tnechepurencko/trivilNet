@@ -28,7 +28,9 @@ func Process(m *ast.Module) {
 		case *ast.ConstDecl:
 			addToScope(x.Name, x, m.Inner)
 		case *ast.Function:
-			addToScope(x.Name, x, m.Inner)
+			if x.Recv == nil {
+				addToScope(x.Name, x, m.Inner)
+			}
 		default:
 			panic(fmt.Sprintf("lookup 1: ni %T", d))
 		}
@@ -92,7 +94,7 @@ func (lc *lookContext) lookFunction(f *ast.Function) {
 	f.Inner = ast.NewScope(lc.scope)
 	lc.scope = f.Inner
 
-	if f.Recv.Typ != nil {
+	if f.Recv != nil {
 		lc.lookTypeRef(f.Recv.Typ)
 
 		lc.addMethodToType(f)
