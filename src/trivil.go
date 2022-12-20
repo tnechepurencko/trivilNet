@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"trivil/analyzer"
 	"trivil/ast"
 	"trivil/env"
 	"trivil/genc"
 	"trivil/lexer"
 	"trivil/parser"
+	"trivil/semantics"
 )
 
 func main() {
@@ -56,7 +56,7 @@ func compile(src *env.Source) {
 		fmt.Println(ast.SExpr(m))
 	}
 
-	analyzer.Analyse(m)
+	semantics.Analyse(m)
 	if env.ErrorCount() != 0 {
 		return
 	}

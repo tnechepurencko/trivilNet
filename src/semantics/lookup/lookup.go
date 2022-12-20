@@ -1,4 +1,4 @@
-package analyzer
+package lookup
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ type lookContext struct {
 	scope *ast.Scope
 }
 
-func lookup(m *ast.Module) {
+func Process(m *ast.Module) {
 
 	var lc = &lookContext{
 		scope: m.Inner,
