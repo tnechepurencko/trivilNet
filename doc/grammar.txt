@@ -22,7 +22,7 @@ declaration
 	: type_decl
 	| const_decl 
 	| var_decl
-	| modifier? func_decl
+	| func_decl
 	| entry
 	;
 
@@ -97,7 +97,7 @@ var_decl
 //=== function
 
 func_decl
-	: 'фн' receiver? name func_type statement_seq?
+	: 'фн' receiver? name func_type (statement_seq | modifier)?
 	;
 
 receiver
@@ -181,10 +181,10 @@ not_null_query: '?';
 unary_op: '+' | '-' | '~'; // '~' for not
 binary_op: '|' | '&' | rel_op | add_op | mul_op;
 rel_op: '=' | '#' | '<' | '<=' | '>' | '>=';
-add_op: '+' | '-' | '|.' | 'xor'; // xor?
+add_op: '+' | '-' | '|.' // xor
 mul_op: '*' | '/' | '%' | '&.';  
 
-// TODO:  bitnot - use '^' ?
+// TODO:  xor, bitnot - use '~.' ?
 // TODO: shifts << >>
 
 primary_exp
@@ -214,7 +214,7 @@ literal
 selector: '.' ident;
 arguments: '(' expression_list? ')'
 conversion: '‹' type_ref '›';
-not_null_check: '!'; 
+not_null_check: '!';  // or ^ a^.b 
 
 expression_list
 	: expression (',' expression)* ','? // trailing comma allowed

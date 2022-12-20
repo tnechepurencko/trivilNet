@@ -15,22 +15,8 @@ func (p *Parser) parseFn() *ast.Function {
 		defer un(trace(p, "Функция"))
 	}
 
-	var mod = ""
-	if p.tok == lexer.MODIFIER {
-		mod = p.lit
-		p.next()
-	}
-
 	var n = &ast.Function{
 		DeclBase: ast.DeclBase{Pos: p.pos},
-	}
-
-	switch mod {
-	case "":
-	case "@внешняя":
-		n.External = true
-	default:
-		p.error(p.pos, "ПАР-ОШ-МОДИФИКАТОР", mod)
 	}
 
 	p.expect(lexer.FN)
@@ -56,7 +42,18 @@ func (p *Parser) parseFn() *ast.Function {
 
 	n.Typ = p.parseFuncType()
 
-	if !n.External {
+	if p.tok == lexer.MODIFIER {
+		var mod = p.lit
+		p.next()
+
+		switch mod {
+		case "@внешняя":
+			n.External = true
+		default:
+			p.error(p.pos, "ПАР-ОШ-МОДИФИКАТОР", mod)
+		}
+
+	} else {
 		n.Seq = p.parseStatementSeq()
 	}
 

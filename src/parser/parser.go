@@ -151,12 +151,12 @@ func (p *Parser) parseImportList() {
 var skipToDeclaration = tokens{
 	lexer.EOF: true,
 
-	lexer.TYPE:     true,
-	lexer.VAR:      true,
-	lexer.CONST:    true,
-	lexer.FN:       true,
-	lexer.MODIFIER: true,
-	lexer.ENTRY:    true,
+	lexer.TYPE:  true,
+	lexer.VAR:   true,
+	lexer.CONST: true,
+	lexer.FN:    true,
+	//lexer.MODIFIER: true,
+	lexer.ENTRY: true,
 }
 
 func (p *Parser) parseDeclarations() {
@@ -179,7 +179,7 @@ func (p *Parser) parseDeclarations() {
 			}
 		case lexer.VAR:
 			d = p.parseVarDecl()
-		case lexer.FN, lexer.MODIFIER:
+		case lexer.FN:
 			d = p.parseFn()
 		case lexer.ENTRY:
 			p.parseEntry()
