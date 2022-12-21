@@ -39,6 +39,11 @@ func initErrors() {
 	}
 }
 
+func PosString(pos int) string {
+	source, line, col := SourcePos(pos)
+	return fmt.Sprintf("%s:%d:%d", source.Path, line, col)
+}
+
 func AddError(pos int, id string, args ...interface{}) string {
 
 	source, line, col := SourcePos(pos)
