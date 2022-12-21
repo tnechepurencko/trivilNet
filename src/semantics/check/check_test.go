@@ -1,6 +1,7 @@
 package check
 
 import (
+	"fmt"
 	"testing"
 	"trivil/env"
 	"trivil/parser"
@@ -14,11 +15,14 @@ type one struct {
 
 var error_tests = []one{
 	{"модуль x; тип А = класс (Цел) {}", "СЕМ-БАЗА-НЕ-КЛАСС"},
+	{"модуль x; тип А = класс { ц: Цел; ц: Цел}", "СЕМ-ДУБЛЬ-В-КЛАССЕ"},
+	{"модуль x; тип А = класс { ц: Цел}; фн (а: А) ц() {}", "СЕМ-ДУБЛЬ-В-КЛАССЕ"},
 }
 
 //===
 
 func TestErrors(t *testing.T) {
+	fmt.Printf("--- tests for errors: %d ---\n", len(error_tests))
 	t.Run("error tests", func(t *testing.T) {
 		for _, e := range error_tests {
 			checkForError(t, e.text, e.id)

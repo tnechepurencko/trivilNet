@@ -1,6 +1,7 @@
 package lookup
 
 import (
+	"fmt"
 	"testing"
 	"trivil/env"
 	"trivil/parser"
@@ -34,6 +35,7 @@ var invalid_texts = []string{
 //===
 
 func TestValid(t *testing.T) {
+	fmt.Printf("--- valid tests: %d ---\n", len(valid_texts))
 	t.Run("valid tests", func(t *testing.T) {
 		for _, text := range valid_texts {
 			checkValid(t, text)
