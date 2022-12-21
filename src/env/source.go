@@ -87,15 +87,19 @@ func calcTextPos(src *Source, ofs int) (int, int) {
 		return 0, ofs
 	}
 
+	//fmt.Printf("%d in %v\n", ofs, src.Lines)
+
 	var l = 0
 	var r = len(src.Lines) - 1
 
 	for {
-		if l == r {
+		if l >= r {
 			break
 		}
 		var x = (l + r) / 2
 		var lofs = src.Lines[x]
+
+		//fmt.Printf("%d.%d %d.%d => %d.%d\n", l, src.Lines[l], r, src.Lines[r], x, src.Lines[x])
 
 		if ofs > lofs {
 			l = x + 1
