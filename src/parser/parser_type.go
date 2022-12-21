@@ -89,6 +89,7 @@ func (p *Parser) parseClassType() *ast.ClassType {
 
 	var t = &ast.ClassType{
 		TypeBase: ast.TypeBase{Pos: p.pos},
+		Members:  make(map[string]ast.Decl),
 	}
 
 	p.next()
@@ -104,7 +105,7 @@ func (p *Parser) parseClassType() *ast.ClassType {
 	for p.tok != lexer.RBRACE && p.tok != lexer.EOF {
 
 		var f = &ast.Field{
-			TypeBase: ast.TypeBase{Pos: p.pos},
+			DeclBase: ast.DeclBase{Pos: p.pos},
 		}
 
 		f.Name = p.parseIdent()

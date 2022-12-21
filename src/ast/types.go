@@ -50,15 +50,14 @@ type VectorType struct {
 type ClassType struct {
 	TypeBase
 	BaseTyp Type
-	Fields  []*Field
-	Methods []*Function
+	Fields  []*Field        // поля самого класса
+	Methods []*Function     // методы самого класса
+	Members map[string]Decl // включая поля и методы базовых типов
 }
 
 type Field struct {
-	TypeBase
-	Name     string
-	Exported bool
-	Typ      Type
+	DeclBase
+	Typ Type
 }
 
 //==== function type
