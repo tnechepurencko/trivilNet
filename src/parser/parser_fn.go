@@ -35,7 +35,9 @@ func (p *Parser) parseFn() *ast.Function {
 		p.expect(lexer.RPAR)
 	}
 
+	n.Pos = p.pos // ident pos
 	n.Name = p.parseIdent()
+
 	if p.parseExportMark() {
 		n.SetExported()
 	}
