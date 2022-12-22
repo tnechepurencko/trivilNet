@@ -108,7 +108,7 @@ func (cc *checkContext) compareFuncTypes(t1, t2 ast.Type) string {
 
 	for i, p := range ft1.Params {
 		if p.Typ != ft2.Params[i].Typ {
-			return fmt.Sprintf("другой типы у параметра '%s'", p.Name)
+			return fmt.Sprintf("не совпадает тип у параметра '%s'", p.Name)
 		}
 	}
 

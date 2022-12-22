@@ -6,6 +6,17 @@ import (
 
 var _ = fmt.Printf
 
+var (
+	Byte    *PredefinedType
+	Int     *PredefinedType
+	Int32   *PredefinedType
+	Int64   *PredefinedType
+	Float64 *PredefinedType
+	Bool    *PredefinedType
+	Symbol  *PredefinedType
+	String  *PredefinedType
+)
+
 type Scope struct {
 	Outer *Scope
 	Names map[string]Decl
@@ -18,24 +29,28 @@ func initScopes() {
 		Names: make(map[string]Decl),
 	}
 
-	addType("Байт")
-	addType("Цел")
-	addType("Цел64")
-	addType("Вещ64")
-	addType("Лог")
-	addType("Строка")
+	Byte = addType("Байт")
+	Int = addType("Цел")
+	Int32 = addType("Цел32")
+	Int64 = addType("Цел64")
+	Float64 = addType("Вещ64")
+	Bool = addType("Лог")
+	Symbol = addType("Символ")
+	String = addType("Строка")
 	//ShowScopes("top", topScope)
 
 }
 
-func addType(name string) {
-	var td = &TypeDecl{
-		Typ: &PredefinedType{
-			Name: name,
-		},
+func addType(name string) *PredefinedType {
+	var pt = &PredefinedType{
+		Name: name,
 	}
+
+	var td = &TypeDecl{Typ: pt}
 	td.Name = name
 	topScope.Names[name] = td
+
+	return pt
 }
 
 func NewScope(outer *Scope) *Scope {

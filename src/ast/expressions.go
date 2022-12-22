@@ -11,12 +11,18 @@ var _ = fmt.Printf
 
 type ExprBase struct {
 	Pos int
+	Typ Type
 }
+
+func (n *ExprBase) ExprNode() {}
 
 func (n *ExprBase) GetPos() int {
 	return n.Pos
 }
-func (n *ExprBase) ExprNode() {}
+
+func (n *ExprBase) GetType() Type {
+	return n.Typ
+}
 
 //====
 
@@ -66,8 +72,8 @@ type CallExpr struct {
 
 type ConversionExpr struct {
 	ExprBase
-	X   Expr
-	Typ Type
+	X         Expr
+	TargetTyp Type
 }
 
 //==== index
