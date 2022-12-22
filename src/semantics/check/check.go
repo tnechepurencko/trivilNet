@@ -179,46 +179,48 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		//TODO: check not type
 		x.Typ = x.Obj.GetType()
 
-		fmt.Printf("ident %v %v\n", x.Obj, x.Typ)
-	/*
+		//fmt.Printf("ident %v %v\n", x.Obj, x.Typ)
+		/*
 
-		case *ast.UnaryExpr:
-			cc.expr(x.X)
+			case *ast.UnaryExpr:
+				cc.expr(x.X)
 
-		case *ast.BinaryExpr:
-			cc.expr(x.X)
-			cc.expr(x.Y)
+			case *ast.BinaryExpr:
+				cc.expr(x.X)
+				cc.expr(x.Y)
 
-		case *ast.SelectorExpr:
-			cc.expr(x.X)
-			panic("ni")
+			case *ast.SelectorExpr:
+				cc.expr(x.X)
+				panic("ni")
+		*/
+	case *ast.CallExpr:
+		cc.expr(x.X)
+		for _, a := range x.Args {
+			cc.expr(a)
+		}
+		cc.call(x)
 
-		case *ast.CallExpr:
-			cc.expr(x.X)
-			for _, a := range x.Args {
-				cc.expr(a)
-			}
-
-		case *ast.IndexExpr:
-			cc.expr(x.X)
-			if x.Index != nil {
-				cc.expr(x.Index)
-			}
-
-			for _, e := range x.Elements {
-				cc.expr(e.L)
-				if e.R != nil {
-					cc.expr(e.R)
+		/*
+			case *ast.IndexExpr:
+				cc.expr(x.X)
+				if x.Index != nil {
+					cc.expr(x.Index)
 				}
-			}
-		case *ast.CompositeExpr:
-			cc.expr(x.X)
 
-			for _, vp := range x.Values {
-				cc.expr(vp.V)
+				for _, e := range x.Elements {
+					cc.expr(e.L)
+					if e.R != nil {
+						cc.expr(e.R)
+					}
+				}
+			case *ast.CompositeExpr:
+				cc.expr(x.X)
 
-			}
-	*/
+				for _, vp := range x.Values {
+					cc.expr(vp.V)
+
+				}
+		*/
 	case *ast.LiteralExpr:
 		switch x.Kind {
 		case lexer.INT:
@@ -238,4 +240,29 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		panic(fmt.Sprintf("expression: ni %T", expr))
 	}
 
+}
+
+func (cc *checkContext) call(x *ast.CallExpr) {
+
+	ft, ok := x.X.GetType().(*ast.FuncType)
+	if !ok {
+		env.AddError(x.X.GetPos(), "СЕМ-ВЫЗОВ-НЕ_ФУНКТИП")
+		return
+	}
+
+	if len(x.Args) != len(ft.Params) {
+		env.AddError(x.X.GetPos(), "СЕМ-ЧИСЛО-АРГУМЕНТОВ", len(x.Args), len(ft.Params))
+		return
+	}
+
+	for i, p := range ft.Params {
+		res := assignable(p.Typ, x.Args[i])
+		if res != "" {
+			if res == "без уточнения" {
+				res = ""
+			}
+
+			env.AddError(x.Args[i].GetPos(), "СЕМ-НЕСОВМЕСТИМЫй-АРГУМЕНТ", res)
+		}
+	}
 }

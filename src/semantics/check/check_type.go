@@ -112,9 +112,22 @@ func (cc *checkContext) compareFuncTypes(t1, t2 ast.Type) string {
 		}
 	}
 
-	if ft1.ReturnTyp != ft2.ReturnTyp {
+	if !equalTypes(ft1.ReturnTyp, ft2.ReturnTyp) {
 		return "разные типы результата"
 	}
 
 	return ""
+}
+
+func equalTypes(t1, t2 ast.Type) bool {
+	return t1 == t2
+}
+
+// Возвращает "", если равны или причину ошибки
+func assignable(lt ast.Type, r ast.Expr) string {
+	if equalTypes(lt, r.GetType()) {
+		return ""
+	}
+	// TODO: целые литералы, function types, ...
+	return "без уточнения"
 }
