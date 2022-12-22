@@ -21,11 +21,13 @@ type Decl interface {
 	Node
 	DeclNode()
 	GetName() string
+	GetType() Type
 }
 
 type Expr interface {
 	Node
 	ExprNode()
+	GetType() Type
 }
 
 type Statement interface {

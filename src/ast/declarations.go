@@ -12,6 +12,7 @@ var _ = fmt.Printf
 type DeclBase struct {
 	Pos      int
 	Name     string
+	Typ      Type
 	Exported bool
 }
 
@@ -23,6 +24,10 @@ func (n *DeclBase) GetPos() int {
 
 func (n *DeclBase) GetName() string {
 	return n.Name
+}
+
+func (n *DeclBase) GetType() Type {
+	return n.Typ
 }
 
 func (n *DeclBase) IsExported() bool {
@@ -45,7 +50,6 @@ type InvalidDecl struct {
 type Function struct {
 	DeclBase
 	Recv     *Param
-	Typ      Type
 	Inner    *Scope
 	Seq      *StatementSeq
 	External bool
@@ -53,16 +57,13 @@ type Function struct {
 
 type VarDecl struct {
 	DeclBase
-	Typ Type
 }
 
 type ConstDecl struct {
 	DeclBase
-	Typ   Type
 	Value Expr
 }
 
 type TypeDecl struct {
 	DeclBase
-	Typ Type
 }

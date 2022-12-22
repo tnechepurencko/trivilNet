@@ -51,6 +51,11 @@ type LiteralExpr struct {
 	Lit  string
 }
 
+type BoolLiteral struct {
+	ExprBase
+	Value bool
+}
+
 type IdentExpr struct {
 	ExprBase
 	Name   string

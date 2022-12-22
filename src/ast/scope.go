@@ -37,8 +37,11 @@ func initScopes() {
 	Bool = addType("Лог")
 	Symbol = addType("Символ")
 	String = addType("Строка")
-	//ShowScopes("top", topScope)
 
+	addBoolConst("истина", true)
+	addBoolConst("ложь", false)
+
+	//	ShowScopes("top", topScope)
 }
 
 func addType(name string) *PredefinedType {
@@ -46,11 +49,22 @@ func addType(name string) *PredefinedType {
 		Name: name,
 	}
 
-	var td = &TypeDecl{Typ: pt}
+	var td = &TypeDecl{}
+	td.Typ = pt
 	td.Name = name
 	topScope.Names[name] = td
 
 	return pt
+}
+
+func addBoolConst(name string, val bool) {
+	var c = &ConstDecl{
+		Value: &BoolLiteral{Value: val},
+	}
+	c.Typ = Bool
+	c.Name = name
+
+	topScope.Names[name] = c
 }
 
 func NewScope(outer *Scope) *Scope {

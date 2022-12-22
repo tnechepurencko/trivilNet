@@ -135,9 +135,8 @@ func (lc *lookContext) addMethodToType(f *ast.Function) {
 }
 
 func (lc *lookContext) addVarForParameter(p *ast.Param) {
-	var v = &ast.VarDecl{
-		Typ: p.Typ,
-	}
+	var v = &ast.VarDecl{}
+	v.Typ = p.Typ
 	v.Name = p.Name
 	addToScope(v.Name, v, lc.scope)
 }

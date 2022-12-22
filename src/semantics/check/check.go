@@ -3,7 +3,8 @@ package check
 import (
 	"fmt"
 	"trivil/ast"
-	//	"trivil/env"
+	"trivil/env"
+	"trivil/lexer"
 )
 
 var _ = fmt.Printf
@@ -29,33 +30,31 @@ func Process(m *ast.Module) {
 		}
 	}
 
-	/*
-		if m.Entry != nil {
-			lc.lookEntry(m.Entry)
-		}
-	*/
+	if m.Entry != nil {
+		cc.entry(m.Entry)
+	}
 }
 
 //==== константы и переменные
 /*
-func (lc *lookContext) lookVarDecl(v *ast.VarDecl) {
-	lc.lookTypeRef(v.Typ)
+func (cc *checkContext) lookVarDecl(v *ast.VarDecl) {
+	cc.TypeRef(v.Typ)
 }
 
-func (lc *lookContext) lookConstDecl(v *ast.ConstDecl) {
-	lc.lookTypeRef(v.Typ)
+func (cc *checkContext) lookConstDecl(v *ast.ConstDecl) {
+	cc.TypeRef(v.Typ)
 
 }
 
 //==== functions
 
-func (lc *lookContext) lookFunction(f *ast.Function) {
+func (cc *checkContext) lookFunction(f *ast.Function) {
 
 	f.Inner = ast.NewScope(lc.scope)
 	lc.scope = f.Inner
 
 	if f.Recv.Typ != nil {
-		lc.lookTypeRef(f.Recv.Typ)
+		cc.TypeRef(f.Recv.Typ)
 
 		lc.addMethodToType(f)
 	}
@@ -63,24 +62,24 @@ func (lc *lookContext) lookFunction(f *ast.Function) {
 	var ft = f.Typ.(*ast.FuncType)
 
 	for _, p := range ft.Params {
-		lc.lookTypeRef(p.Typ)
+		cc.TypeRef(p.Typ)
 		if !f.External {
 			lc.addVarForParameter(p)
 		}
 	}
 
 	if ft.ReturnTyp != nil {
-		lc.lookTypeRef(ft.ReturnTyp)
+		cc.TypeRef(ft.ReturnTyp)
 	}
 
 	if !f.External {
-		lc.lookStatements(f.Seq)
+		cc.Statements(f.Seq)
 	}
 
 	lc.scope = lc.scope.Outer
 }
 
-func (lc *lookContext) addMethodToType(f *ast.Function) {
+func (cc *checkContext) addMethodToType(f *ast.Function) {
 
 	var rt = f.Recv.Typ.(*ast.TypeRef)
 
@@ -94,67 +93,70 @@ func (lc *lookContext) addMethodToType(f *ast.Function) {
 
 }
 
-func (lc *lookContext) addVarForParameter(p *ast.Param) {
+func (cc *checkContext) addVarForParameter(p *ast.Param) {
 	var v = &ast.VarDecl{
 		Typ: p.Typ,
 	}
 	v.Name = p.Name
 	addToScope(v.Name, v, lc.scope)
 }
+*/
 
-func (lc *lookContext) lookEntry(e *ast.EntryFn) {
-	lc.lookStatements(e.Seq)
+func (cc *checkContext) entry(e *ast.EntryFn) {
+	cc.statements(e.Seq)
 }
 
 //==== statements
 
-func (lc *lookContext) lookStatements(seq *ast.StatementSeq) {
+func (cc *checkContext) statements(seq *ast.StatementSeq) {
 
 	for _, s := range seq.Statements {
-		lc.lookStatement(seq, s)
-	}
-
-	if lc.scope == seq.Inner {
-		lc.scope = seq.Inner.Outer
+		cc.statement(s)
 	}
 }
 
-func (lc *lookContext) lookStatement(seq *ast.StatementSeq, s ast.Statement) {
+func (cc *checkContext) statement(s ast.Statement) {
 	switch x := s.(type) {
 	case *ast.StatementSeq:
-		lc.lookStatements(x)
+		cc.statements(x) // из else
 	case *ast.ExprStatement:
-		lc.lookExpr(x.X)
+		cc.expr(x.X)
+		//TODO: проверить, что есть вызов, иначе ошибка
 	case *ast.DeclStatement:
-		lc.lookLocalDecl(seq, x.D)
+		//cc.localDecl(seq, x.D)
 	case *ast.AssignStatement:
-		lc.lookExpr(x.L)
-		lc.lookExpr(x.R)
+		cc.expr(x.L)
+		cc.expr(x.R)
 	case *ast.IncStatement:
-		lc.lookExpr(x.L)
+		cc.expr(x.L)
 	case *ast.DecStatement:
-		lc.lookExpr(x.L)
+		cc.expr(x.L)
 	case *ast.If:
-		lc.lookExpr(x.Cond)
-		lc.lookStatements(x.Then)
+		cc.expr(x.Cond)
+		if x.Cond.GetType() != ast.Bool {
+			env.AddError(x.Cond.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.Bool.Name)
+		}
+
+		cc.statements(x.Then)
 		if x.Else != nil {
-			lc.lookStatement(nil, x.Else)
+			cc.statement(x.Else)
 		}
 	case *ast.While:
-		lc.lookExpr(x.Cond)
-		lc.lookStatements(x.Seq)
+		cc.expr(x.Cond)
+		cc.statements(x.Seq)
 	case *ast.Return:
 		if x.X != nil {
-			lc.lookExpr(x.X)
+			cc.expr(x.X)
 		}
 
 	default:
 		panic(fmt.Sprintf("statement: ni %T", s))
-
 	}
 }
 
-func (lc *lookContext) lookLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
+/*
+func (cc *checkContext) localDecl(seq *ast.StatementSeq, decl ast.Decl) {
+
 	if lc.scope != seq.Inner {
 		seq.Inner = ast.NewScope(lc.scope)
 		lc.scope = seq.Inner
@@ -162,77 +164,78 @@ func (lc *lookContext) lookLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
 	switch x := decl.(type) {
 	case *ast.VarDecl:
 		addToScope(x.Name, x, lc.scope)
-		lc.lookVarDecl(x)
+		cc.VarDecl(x)
 	default:
 		panic(fmt.Sprintf("local decl: ni %T", decl))
 	}
-	//ast.ShowScopes("", lc.scope)
 }
+*/
 
 //====
 
-func (lc *lookContext) lookExpr(expr ast.Expr) {
-
+func (cc *checkContext) expr(expr ast.Expr) {
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		var d = findInScopes(lc.scope, x.Name, x.Pos)
-		if td, ok := d.(*ast.TypeDecl); ok {
-			x.TypRef = &ast.TypeRef{
-				TypeName: td.Name,
-				//ModuleName: ?
-				TypeDecl: td,
-				Typ:      td.Typ,
+		//TODO: check not type
+		x.Typ = x.Obj.GetType()
+
+		fmt.Printf("ident %v %v\n", x.Obj, x.Typ)
+	/*
+
+		case *ast.UnaryExpr:
+			cc.expr(x.X)
+
+		case *ast.BinaryExpr:
+			cc.expr(x.X)
+			cc.expr(x.Y)
+
+		case *ast.SelectorExpr:
+			cc.expr(x.X)
+			panic("ni")
+
+		case *ast.CallExpr:
+			cc.expr(x.X)
+			for _, a := range x.Args {
+				cc.expr(a)
 			}
-			x.TypRef.Pos = x.Pos
-		} else {
-			x.Obj = d
-		}
 
-		//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
+		case *ast.IndexExpr:
+			cc.expr(x.X)
+			if x.Index != nil {
+				cc.expr(x.Index)
+			}
 
+			for _, e := range x.Elements {
+				cc.expr(e.L)
+				if e.R != nil {
+					cc.expr(e.R)
+				}
+			}
+		case *ast.CompositeExpr:
+			cc.expr(x.X)
+
+			for _, vp := range x.Values {
+				cc.expr(vp.V)
+
+			}
+	*/
 	case *ast.LiteralExpr:
-		//lc.lookExpr(x.X)
-
-	case *ast.UnaryExpr:
-		lc.lookExpr(x.X)
-
-	case *ast.BinaryExpr:
-		lc.lookExpr(x.X)
-		lc.lookExpr(x.Y)
-
-	case *ast.SelectorExpr:
-		lc.lookExpr(x.X)
-		panic("ni")
-
-	case *ast.CallExpr:
-		lc.lookExpr(x.X)
-		for _, a := range x.Args {
-			lc.lookExpr(a)
+		switch x.Kind {
+		case lexer.INT:
+			//TODO: нужный тип
+			x.Typ = ast.Int
+		case lexer.FLOAT:
+			x.Typ = ast.Float64
+		case lexer.STRING:
+			x.Typ = ast.String
+		default:
+			panic(fmt.Sprintf("LiteralExpr - bad kind: ni %v", x))
 		}
-
-	case *ast.IndexExpr:
-		lc.lookExpr(x.X)
-		if x.Index != nil {
-			lc.lookExpr(x.Index)
-		}
-
-		for _, e := range x.Elements {
-			lc.lookExpr(e.L)
-			if e.R != nil {
-				lc.lookExpr(e.R)
-			}
-		}
-	case *ast.CompositeExpr:
-		lc.lookExpr(x.X)
-
-		for _, vp := range x.Values {
-			lc.lookExpr(vp.V)
-
-		}
-
+		//cc.expr(x.X)
+	case *ast.BoolLiteral:
+		x.Typ = ast.Bool
 	default:
 		panic(fmt.Sprintf("expression: ni %T", expr))
-
 	}
+
 }
-*/
