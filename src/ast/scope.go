@@ -15,6 +15,8 @@ var (
 	Bool    *PredefinedType
 	Symbol  *PredefinedType
 	String  *PredefinedType
+
+	Void *PredefinedType // только для вызова функции без результата
 )
 
 type Scope struct {
@@ -41,6 +43,7 @@ func initScopes() {
 	addBoolConst("истина", true)
 	addBoolConst("ложь", false)
 
+	Void = &PredefinedType{Name: "нет результата"}
 	//	ShowScopes("top", topScope)
 }
 

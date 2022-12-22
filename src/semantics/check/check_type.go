@@ -125,6 +125,11 @@ func equalTypes(t1, t2 ast.Type) bool {
 
 // Возвращает "", если равны или причину ошибки
 func assignable(lt ast.Type, r ast.Expr) string {
+
+	if tr, ok := lt.(*ast.TypeRef); ok {
+		lt = tr.Typ
+	}
+
 	if equalTypes(lt, r.GetType()) {
 		return ""
 	}

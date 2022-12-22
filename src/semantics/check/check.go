@@ -250,6 +250,12 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 		return
 	}
 
+	if ft.ReturnTyp == nil {
+		x.Typ = ast.Void
+	} else {
+		x.Typ = ft.ReturnTyp
+	}
+
 	if len(x.Args) != len(ft.Params) {
 		env.AddError(x.X.GetPos(), "СЕМ-ЧИСЛО-АРГУМЕНТОВ", len(x.Args), len(ft.Params))
 		return
@@ -258,6 +264,7 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	for i, p := range ft.Params {
 		res := assignable(p.Typ, x.Args[i])
 		if res != "" {
+
 			if res == "без уточнения" {
 				res = ""
 			}
