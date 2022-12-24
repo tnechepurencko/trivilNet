@@ -32,8 +32,7 @@ func initScopes() {
 	}
 
 	Byte = addType("Байт")
-	Int = addType("Цел")
-	Int32 = addType("Цел32")
+	//	Int32 = addType("Цел32")
 	Int64 = addType("Цел64")
 	Float64 = addType("Вещ64")
 	Bool = addType("Лог")
