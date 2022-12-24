@@ -46,6 +46,9 @@ func sexpr(v reflect.Value) string {
 		if v.Type().Field(i).Name == "Pos" {
 			continue
 		}
+		if v.Type().Field(i).Name == "Obj" {
+			continue
+		}
 
 		//fmt.Println(f.Type().String())
 
@@ -91,10 +94,15 @@ func sexpr(v reflect.Value) string {
 			if sname == "DeclBase" {
 				name := f.FieldByName("Name")
 				fs += " \"" + name.String() + "\""
+				typ := f.FieldByName("Typ")
+				fs += shortType(typ.Interface())
 				exported := f.FieldByName("Exported")
 				if exported.Bool() {
 					fs += " Exported"
 				}
+			} else if sname == "ExprBase" {
+				typ := f.FieldByName("Typ")
+				fs += shortType(typ.Interface())
 			} else if strings.HasSuffix(sname, "Base") {
 				// игнорирую
 			} else {
@@ -127,4 +135,20 @@ func getStruct(v reflect.Value) (reflect.Value, bool) {
 		return v, true
 	}
 	return v, false
+}
+
+func shortType(i interface{}) string {
+
+	switch x := i.(type) {
+	case nil:
+		return ""
+	case *PredefinedType:
+		return " \"" + x.Name + "\""
+	case *TypeRef:
+		return " \"" + x.TypeName + "\""
+	case *FuncType:
+		return " \"functype\""
+	}
+
+	return fmt.Sprintf(" *%T*", i)
 }
