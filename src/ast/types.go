@@ -73,3 +73,25 @@ type Param struct {
 	Name string
 	Typ  Type
 }
+
+//====
+
+func TypeString(t Type) string {
+
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	switch x := t.(type) {
+	case nil:
+		return "*nil*"
+	case *InvalidType:
+		return "*invalid*"
+	case *PredefinedType:
+		return x.Name
+	case *VectorType:
+		return "[]" + TypeString(x.ElementTyp)
+	default:
+		return fmt.Sprintf("TypeString ni: %T", t)
+	}
+}

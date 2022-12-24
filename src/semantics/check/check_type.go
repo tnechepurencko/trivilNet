@@ -130,9 +130,15 @@ func assignable(lt ast.Type, r ast.Expr) string {
 		lt = tr.Typ
 	}
 
-	if equalTypes(lt, r.GetType()) {
+	var rt = r.GetType()
+	if tr, ok := rt.(*ast.TypeRef); ok {
+		rt = tr.Typ
+	}
+
+	if equalTypes(lt, rt) {
 		return ""
 	}
+
 	// TODO: целые литералы, function types, ...
 	return "без уточнения"
 }
