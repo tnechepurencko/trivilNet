@@ -7,9 +7,8 @@ import (
 var _ = fmt.Printf
 
 var (
-	Byte    *PredefinedType
-	Int     *PredefinedType
-	Int32   *PredefinedType
+	Byte *PredefinedType
+	//Int32   *PredefinedType
 	Int64   *PredefinedType
 	Float64 *PredefinedType
 	Bool    *PredefinedType

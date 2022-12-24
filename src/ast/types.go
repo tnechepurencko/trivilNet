@@ -74,7 +74,33 @@ type Param struct {
 	Typ  Type
 }
 
-//====
+//==== predicates
+
+func IsIntegerType(t Type) bool {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	return t == Int64 || t == Byte
+}
+
+func IsFloatType(t Type) bool {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	return t == Float64
+}
+
+func IsBoolType(t Type) bool {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	return t == Bool
+}
+
+//==== for error messages
 
 func TypeString(t Type) string {
 

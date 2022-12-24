@@ -20,11 +20,13 @@ func (cc *checkContext) expr(expr ast.Expr) {
 
 			case *ast.UnaryExpr:
 				cc.expr(x.X)
+		*/
+	case *ast.BinaryExpr:
+		cc.expr(x.X)
+		cc.expr(x.Y)
+		cc.binaryExpr(x)
 
-			case *ast.BinaryExpr:
-				cc.expr(x.X)
-				cc.expr(x.Y)
-
+		/*
 			case *ast.SelectorExpr:
 				cc.expr(x.X)
 				panic("ni")
@@ -68,7 +70,6 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		default:
 			panic(fmt.Sprintf("LiteralExpr - bad kind: ni %v", x))
 		}
-		//cc.expr(x.X)
 	case *ast.BoolLiteral:
 		x.Typ = ast.Bool
 	default:
@@ -108,4 +109,61 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 				ast.TypeString(p.Typ), ast.TypeString(x.Args[i].GetType()))
 		}
 	}
+}
+
+func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
+
+	switch x.Op {
+	case lexer.ADD, lexer.SUB, lexer.MUL, lexer.REM, lexer.QUO:
+		if ast.IsIntegerType(x.X.GetType()) || ast.IsFloatType(x.X.GetType()) {
+			checkOperandTypes(x)
+		} else {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(x.X.GetType()), x.Op.String())
+		}
+		x.Typ = x.X.GetType()
+	case lexer.AND, lexer.OR:
+		if !ast.IsBoolType(x.X.GetType()) {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(x.X.GetType()), x.Op.String())
+		} else if !ast.IsBoolType(x.Y.GetType()) {
+			env.AddError(x.Y.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(x.Y.GetType()), x.Op.String())
+		}
+		x.Typ = ast.Bool
+
+	//case lexer.BITAND, lexer.BITOR:
+	case lexer.EQ, lexer.NEQ:
+		if ast.IsIntegerType(x.X.GetType()) || ast.IsFloatType(x.X.GetType()) {
+			checkOperandTypes(x)
+
+			//TODO: add other
+		} else {
+			env.AddError(x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(x.X.GetType()), x.Op.String())
+		}
+
+		x.Typ = ast.Bool
+	case lexer.LSS, lexer.LEQ, lexer.GTR, lexer.GEQ:
+		if ast.IsIntegerType(x.X.GetType()) || ast.IsFloatType(x.X.GetType()) {
+			checkOperandTypes(x)
+		} else {
+			env.AddError(x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(x.X.GetType()), x.Op.String())
+		}
+		x.Typ = ast.Bool
+
+	default:
+		panic(fmt.Sprintf("binary expr ni: %T op=%s", x, x.Op.String()))
+	}
+
+}
+
+func checkOperandTypes(x *ast.BinaryExpr) {
+	if equalTypes(x.X.GetType(), x.Y.GetType()) {
+		return
+	}
+	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",
+		ast.TypeString(x.X.GetType()), x.Op.String(), ast.TypeString(x.Y.GetType()))
+
 }

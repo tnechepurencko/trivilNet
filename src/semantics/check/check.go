@@ -24,6 +24,7 @@ func Process(m *ast.Module) {
 		case *ast.VarDecl:
 		case *ast.ConstDecl:
 		case *ast.Function:
+			cc.function(x)
 		default:
 			panic(fmt.Sprintf("check: ni %T", d))
 		}
@@ -44,40 +45,18 @@ func (cc *checkContext) lookConstDecl(v *ast.ConstDecl) {
 	cc.TypeRef(v.Typ)
 
 }
+*/
 
 //==== functions
 
-func (cc *checkContext) lookFunction(f *ast.Function) {
+func (cc *checkContext) function(f *ast.Function) {
 
-	f.Inner = ast.NewScope(lc.scope)
-	lc.scope = f.Inner
-
-	if f.Recv.Typ != nil {
-		cc.TypeRef(f.Recv.Typ)
-
-		lc.addMethodToType(f)
+	if f.Seq != nil {
+		cc.statements(f.Seq)
 	}
-
-	var ft = f.Typ.(*ast.FuncType)
-
-	for _, p := range ft.Params {
-		cc.TypeRef(p.Typ)
-		if !f.External {
-			lc.addVarForParameter(p)
-		}
-	}
-
-	if ft.ReturnTyp != nil {
-		cc.TypeRef(ft.ReturnTyp)
-	}
-
-	if !f.External {
-		cc.Statements(f.Seq)
-	}
-
-	lc.scope = lc.scope.Outer
 }
 
+/*
 func (cc *checkContext) addMethodToType(f *ast.Function) {
 
 	var rt = f.Recv.Typ.(*ast.TypeRef)
@@ -132,7 +111,7 @@ func (cc *checkContext) statement(s ast.Statement) {
 		cc.expr(x.L)
 	case *ast.If:
 		cc.expr(x.Cond)
-		if x.Cond.GetType() != ast.Bool {
+		if !ast.IsBoolType(x.Cond.GetType()) {
 			env.AddError(x.Cond.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.Bool.Name)
 		}
 
@@ -142,6 +121,9 @@ func (cc *checkContext) statement(s ast.Statement) {
 		}
 	case *ast.While:
 		cc.expr(x.Cond)
+		if !ast.IsBoolType(x.Cond.GetType()) {
+			env.AddError(x.Cond.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.Bool.Name)
+		}
 		cc.statements(x.Seq)
 	case *ast.Return:
 		if x.X != nil {
