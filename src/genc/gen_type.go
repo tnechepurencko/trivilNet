@@ -9,13 +9,15 @@ import (
 var _ = fmt.Printf
 
 func (genc *genContext) typeRef(t ast.Type) string {
-	var tr = t.(*ast.TypeRef)
+	if tr, ok := t.(*ast.TypeRef); ok {
+		t = tr.Typ
+	}
 
-	switch x := tr.Typ.(type) {
+	switch x := t.(type) {
 	case *ast.PredefinedType:
 		return predefinedTypeName(x.Name)
 	default:
-		panic(fmt.Sprintf("genTypeRef: ni %T", tr.Typ))
+		panic(fmt.Sprintf("genTypeRef: ni %T", t))
 	}
 }
 
