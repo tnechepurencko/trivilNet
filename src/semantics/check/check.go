@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"trivil/ast"
 	"trivil/env"
+	"trivil/lexer"
 )
 
 var _ = fmt.Printf
@@ -45,10 +46,7 @@ func (cc *checkContext) varDecl(v *ast.VarDecl) {
 	cc.expr(v.Init)
 
 	if v.Typ != nil {
-		if !cc.assignable(v.Typ, v.Init) {
-			env.AddError(v.Pos, "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
-				ast.TypeString(v.Typ), ast.TypeString(v.Init.GetType()))
-		}
+		cc.checkAssignable(v.Typ, v.Init)
 	} else {
 		v.Typ = v.Init.GetType()
 		if v.Typ == nil {
@@ -126,13 +124,19 @@ func (cc *checkContext) statement(s ast.Statement) {
 	case *ast.AssignStatement:
 		cc.expr(x.L)
 		cc.expr(x.R)
-		//TODO
+		cc.checkAssignable(x.L.GetType(), x.R)
 	case *ast.IncStatement:
 		cc.expr(x.L)
-		//TODO
+		if !ast.IsIntegerType(x.L.GetType()) {
+			env.AddError(x.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
+				ast.TypeString(x.L.GetType()), lexer.INC.String())
+		}
 	case *ast.DecStatement:
 		cc.expr(x.L)
-		//TODO
+		if !ast.IsIntegerType(x.L.GetType()) {
+			env.AddError(x.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
+				ast.TypeString(x.L.GetType()), lexer.DEC.String())
+		}
 	case *ast.If:
 		cc.expr(x.Cond)
 		if !ast.IsBoolType(x.Cond.GetType()) {
@@ -155,9 +159,8 @@ func (cc *checkContext) statement(s ast.Statement) {
 
 			if cc.returnTyp == nil {
 				env.AddError(x.Pos, "СЕМ-ОШ-ВЕРНУТЬ-ЛИШНЕЕ")
-			} else if !cc.assignable(cc.returnTyp, x.X) {
-				env.AddError(x.X.GetPos(), "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
-					ast.TypeString(cc.returnTyp), ast.TypeString(x.X.GetType()))
+			} else {
+				cc.checkAssignable(cc.returnTyp, x.X)
 			}
 		} else if cc.returnTyp != nil {
 			env.AddError(x.Pos, "СЕМ-ОШ-ВЕРНУТЬ-НУЖНО")

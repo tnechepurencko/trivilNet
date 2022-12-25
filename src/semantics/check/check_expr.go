@@ -85,11 +85,7 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	}
 
 	for i, p := range ft.Params {
-		if !cc.assignable(p.Typ, x.Args[i]) {
-
-			env.AddError(x.Args[i].GetPos(), "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
-				ast.TypeString(p.Typ), ast.TypeString(x.Args[i].GetType()))
-		}
+		cc.checkAssignable(p.Typ, x.Args[i])
 	}
 }
 
@@ -100,7 +96,7 @@ func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
 	case lexer.NOT:
 		if !ast.IsBoolType(x.X.GetType()) {
 			env.AddError(x.X.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
-				x.Op.String(), ast.TypeString(x.X.GetType()))
+				ast.TypeString(x.X.GetType()), x.Op.String())
 		}
 		x.Typ = ast.Bool
 	default:
