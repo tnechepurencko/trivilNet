@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"testing"
 	"trivil/env"
 )
@@ -27,11 +28,14 @@ var tests = []one{
 	{"как дела?", []pair{{IDENT, "как дела?"}}},
 	{"как дела ?", []pair{{IDENT, "как дела"}, {NNQUERY, ""}}},
 	{"Паниковать !", []pair{{IDENT, "Паниковать"}, {NNCHECK, ""}}},
+	{"если-нет", []pair{{IDENT, "если-нет"}}},
+	{"ц--", []pair{{IDENT, "ц"}, {DEC, ""}}},
 }
 
 //===
 
 func TestValid(t *testing.T) {
+	fmt.Printf("--- valid tests: %d ---\n", len(tests))
 	t.Run("valid tests", func(t *testing.T) {
 		for _, test := range tests {
 			check(t, test)

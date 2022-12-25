@@ -162,16 +162,17 @@ func (s *Lexer) scanBlockComment() int {
 }
 
 func (s *Lexer) scanIdentifier() (Token, string) {
-	ofs := s.offset
-	afterSpace := false
-	firstSpace := true
+	var ofs = s.offset
+	var afterWordSep = false
+	var sep = ' '
+	var firstSpace = true
 
 loop:
 	for {
 		s.next()
 		switch {
 		case isLetter(s.ch):
-			afterSpace = false
+			afterWordSep = false
 		case s.ch == ' ':
 			if firstSpace {
 				lit := string(s.src[ofs:s.offset])
@@ -181,21 +182,27 @@ loop:
 				}
 				firstSpace = false
 			}
-			if afterSpace {
+			if afterWordSep {
 				break loop
 			}
-			afterSpace = true
-			firstSpace = false
-		case isDigit(s.ch) || s.ch == '-':
-			if afterSpace {
+			afterWordSep = true
+			sep = ' '
+		case s.ch == '-':
+			if afterWordSep {
 				break loop
 			}
-			afterSpace = false
+			afterWordSep = true
+			sep = '-'
+		case isDigit(s.ch):
+			if afterWordSep {
+				break loop
+			}
+			afterWordSep = false
 		case s.ch == '?' || s.ch == '!':
-			if afterSpace {
+			if afterWordSep {
 				break loop
 			}
-			afterSpace = false
+			afterWordSep = false
 			s.next()
 			break loop
 		case s.ch == -1:
@@ -206,8 +213,11 @@ loop:
 	}
 
 	last := s.offset
-	if afterSpace {
+	if afterWordSep {
 		last--
+		if sep == '-' {
+			s.rdOffset--
+		}
 	}
 
 	lit := string(s.src[ofs:last])
