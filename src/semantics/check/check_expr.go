@@ -98,14 +98,9 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	}
 
 	for i, p := range ft.Params {
-		res := assignable(p.Typ, x.Args[i])
-		if res != "" {
+		if !cc.assignable(p.Typ, x.Args[i]) {
 
-			if res == "без уточнения" {
-				res = ""
-			}
-
-			env.AddError(x.Args[i].GetPos(), "СЕМ-НЕСОВМЕСТИМЫй-АРГУМЕНТ", res,
+			env.AddError(x.Args[i].GetPos(), "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
 				ast.TypeString(p.Typ), ast.TypeString(x.Args[i].GetType()))
 		}
 	}

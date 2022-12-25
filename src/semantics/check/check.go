@@ -10,6 +10,8 @@ var _ = fmt.Printf
 
 type checkContext struct {
 	checkedTypes map[string]struct{}
+	returnTyp    ast.Type
+	errorHint    string
 }
 
 func Process(m *ast.Module) {
@@ -52,7 +54,11 @@ func (cc *checkContext) lookConstDecl(v *ast.ConstDecl) {
 func (cc *checkContext) function(f *ast.Function) {
 
 	if f.Seq != nil {
+		cc.returnTyp = f.Typ.(*ast.FuncType).ReturnTyp
+
 		cc.statements(f.Seq)
+
+		cc.returnTyp = nil
 	}
 }
 
@@ -128,6 +134,15 @@ func (cc *checkContext) statement(s ast.Statement) {
 	case *ast.Return:
 		if x.X != nil {
 			cc.expr(x.X)
+
+			if cc.returnTyp == nil {
+				env.AddError(x.Pos, "СЕМ-ОШ-ВЕРНУТЬ-ЛИШНЕЕ")
+			} else if !cc.assignable(cc.returnTyp, x.X) {
+				env.AddError(x.X.GetPos(), "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
+					ast.TypeString(cc.returnTyp), ast.TypeString(x.X.GetType()))
+			}
+		} else if cc.returnTyp != nil {
+			env.AddError(x.Pos, "СЕМ-ОШ-ВЕРНУТЬ-НУЖНО")
 		}
 
 	default:

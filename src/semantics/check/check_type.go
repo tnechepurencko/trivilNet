@@ -119,26 +119,28 @@ func (cc *checkContext) compareFuncTypes(t1, t2 ast.Type) string {
 	return ""
 }
 
-func equalTypes(t1, t2 ast.Type) bool {
-	return t1 == t2
-}
-
 // Возвращает "", если равны или причину ошибки
-func assignable(lt ast.Type, r ast.Expr) string {
+func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 
-	if tr, ok := lt.(*ast.TypeRef); ok {
-		lt = tr.Typ
-	}
+	cc.errorHint = ""
 
-	var rt = r.GetType()
-	if tr, ok := rt.(*ast.TypeRef); ok {
-		rt = tr.Typ
-	}
-
-	if equalTypes(lt, rt) {
-		return ""
+	if equalTypes(lt, r.GetType()) {
+		return true
 	}
 
 	// TODO: целые литералы, function types, ...
-	return "без уточнения"
+	return false
+}
+
+func equalTypes(t1, t2 ast.Type) bool {
+
+	if tr, ok := t1.(*ast.TypeRef); ok {
+		t1 = tr.Typ
+	}
+
+	if tr, ok := t2.(*ast.TypeRef); ok {
+		t2 = tr.Typ
+	}
+
+	return t1 == t2
 }
