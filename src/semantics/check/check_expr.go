@@ -12,9 +12,11 @@ var _ = fmt.Printf
 func (cc *checkContext) expr(expr ast.Expr) {
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		//TODO: check not type
-		x.Typ = x.Obj.GetType()
+		if x.Obj == nil {
+			panic("ni") //TODO: check not type
+		}
 
+		x.Typ = x.Obj.GetType()
 		//fmt.Printf("ident %v %v\n", x.Obj, x.Typ)
 
 	case *ast.UnaryExpr:

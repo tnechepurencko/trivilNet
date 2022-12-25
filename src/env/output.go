@@ -1,10 +1,13 @@
 package env
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"unicode"
 )
+
+var _ = fmt.Printf
 
 // Подготовка папку для записи кода
 func PrepareOutFolder() string {
@@ -27,14 +30,14 @@ func OutName(name string) string {
 
 	var c = func(x string) {
 		if unicode.IsUpper(origin) {
-			s = strings.ToUpper(s)
+			s = strings.ToUpper(x)
 		} else {
 			s = x
 		}
 	}
 
 	for _, origin = range name {
-		switch origin {
+		switch unicode.ToLower(origin) {
 		case ' ', '-':
 			s = "_"
 		case '№':
