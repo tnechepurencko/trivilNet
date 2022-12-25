@@ -16,21 +16,20 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		x.Typ = x.Obj.GetType()
 
 		//fmt.Printf("ident %v %v\n", x.Obj, x.Typ)
-		/*
 
-			case *ast.UnaryExpr:
-				cc.expr(x.X)
-		*/
+	case *ast.UnaryExpr:
+		cc.expr(x.X)
+		cc.unaryExpr(x)
+
 	case *ast.BinaryExpr:
 		cc.expr(x.X)
 		cc.expr(x.Y)
 		cc.binaryExpr(x)
 
-		/*
-			case *ast.SelectorExpr:
-				cc.expr(x.X)
-				panic("ni")
-		*/
+	case *ast.SelectorExpr:
+		cc.expr(x.X)
+		panic("ni")
+
 	case *ast.CallExpr:
 		cc.expr(x.X)
 		for _, a := range x.Args {
@@ -38,27 +37,13 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		}
 		cc.call(x)
 
-		/*
-			case *ast.IndexExpr:
-				cc.expr(x.X)
-				if x.Index != nil {
-					cc.expr(x.Index)
-				}
+	case *ast.CompositeExpr:
+		cc.expr(x.X)
 
-				for _, e := range x.Elements {
-					cc.expr(e.L)
-					if e.R != nil {
-						cc.expr(e.R)
-					}
-				}
-			case *ast.CompositeExpr:
-				cc.expr(x.X)
-
-				for _, vp := range x.Values {
-					cc.expr(vp.V)
-
-				}
-		*/
+		for _, vp := range x.Values {
+			cc.expr(vp.V)
+		}
+		panic("ni")
 	case *ast.LiteralExpr:
 		switch x.Kind {
 		case lexer.INT:
@@ -103,6 +88,21 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 			env.AddError(x.Args[i].GetPos(), "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
 				ast.TypeString(p.Typ), ast.TypeString(x.Args[i].GetType()))
 		}
+	}
+}
+
+func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
+	switch x.Op {
+	case lexer.SUB:
+		panic("ni")
+	case lexer.NOT:
+		if !ast.IsBoolType(x.X.GetType()) {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
+				x.Op.String(), ast.TypeString(x.X.GetType()))
+		}
+		x.Typ = ast.Bool
+	default:
+		panic(fmt.Sprintf("unary expr ni: %T op=%s", x, x.Op.String()))
 	}
 }
 
@@ -151,7 +151,6 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 	default:
 		panic(fmt.Sprintf("binary expr ni: %T op=%s", x, x.Op.String()))
 	}
-
 }
 
 func checkOperandTypes(x *ast.BinaryExpr) {
