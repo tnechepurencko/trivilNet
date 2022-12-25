@@ -88,7 +88,7 @@ func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 func (genc *genContext) genLocalDecl(d ast.Decl) string {
 	switch x := d.(type) {
 	case *ast.VarDecl:
-		return fmt.Sprintf("%s %s;", genc.typeRef(x.Typ), genc.outName(x.Name))
+		return fmt.Sprintf("%s %s = %s;", genc.typeRef(x.Typ), genc.outName(x.Name), genc.genExpr(x.Init))
 	default:
 		panic(fmt.Sprintf("genDecl: ni %T", d))
 	}

@@ -24,7 +24,9 @@ func Process(m *ast.Module) {
 		case *ast.TypeDecl:
 			cc.typeDecl(x)
 		case *ast.VarDecl:
+			cc.varDecl(x)
 		case *ast.ConstDecl:
+		//
 		case *ast.Function:
 			cc.function(x)
 		default:
@@ -38,11 +40,24 @@ func Process(m *ast.Module) {
 }
 
 //==== константы и переменные
-/*
-func (cc *checkContext) lookVarDecl(v *ast.VarDecl) {
-	cc.TypeRef(v.Typ)
+
+func (cc *checkContext) varDecl(v *ast.VarDecl) {
+	cc.expr(v.Init)
+
+	if v.Typ != nil {
+		if !cc.assignable(v.Typ, v.Init) {
+			env.AddError(v.Pos, "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
+				ast.TypeString(v.Typ), ast.TypeString(v.Init.GetType()))
+		}
+	} else {
+		v.Typ = v.Init.GetType()
+		if v.Typ == nil {
+			panic("assert - не задан тип переменной")
+		}
+	}
 }
 
+/*
 func (cc *checkContext) lookConstDecl(v *ast.ConstDecl) {
 	cc.TypeRef(v.Typ)
 
@@ -107,14 +122,17 @@ func (cc *checkContext) statement(s ast.Statement) {
 		cc.expr(x.X)
 		//TODO: проверить, что есть вызов, иначе ошибка
 	case *ast.DeclStatement:
-		//cc.localDecl(seq, x.D)
+		cc.localDecl(x.D)
 	case *ast.AssignStatement:
 		cc.expr(x.L)
 		cc.expr(x.R)
+		//TODO
 	case *ast.IncStatement:
 		cc.expr(x.L)
+		//TODO
 	case *ast.DecStatement:
 		cc.expr(x.L)
+		//TODO
 	case *ast.If:
 		cc.expr(x.Cond)
 		if !ast.IsBoolType(x.Cond.GetType()) {
@@ -150,21 +168,14 @@ func (cc *checkContext) statement(s ast.Statement) {
 	}
 }
 
-/*
-func (cc *checkContext) localDecl(seq *ast.StatementSeq, decl ast.Decl) {
+func (cc *checkContext) localDecl(decl ast.Decl) {
 
-	if lc.scope != seq.Inner {
-		seq.Inner = ast.NewScope(lc.scope)
-		lc.scope = seq.Inner
-	}
 	switch x := decl.(type) {
 	case *ast.VarDecl:
-		addToScope(x.Name, x, lc.scope)
-		cc.VarDecl(x)
+		cc.varDecl(x)
 	default:
 		panic(fmt.Sprintf("local decl: ni %T", decl))
 	}
 }
-*/
 
 //====

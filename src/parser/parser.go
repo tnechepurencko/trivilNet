@@ -354,8 +354,13 @@ func (p *Parser) parseVarDecl() *ast.VarDecl {
 		n.SetExported()
 	}
 
-	p.expect(lexer.COLON)
-	n.Typ = p.parseTypeRef()
+	if p.tok == lexer.COLON {
+		p.next()
+		n.Typ = p.parseTypeRef()
+	}
+
+	p.expect(lexer.EQ)
+	n.Init = p.parseExpression()
 
 	return n
 }

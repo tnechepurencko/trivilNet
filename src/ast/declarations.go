@@ -57,6 +57,7 @@ type Function struct {
 
 type VarDecl struct {
 	DeclBase
+	Init Expr
 }
 
 type ConstDecl struct {

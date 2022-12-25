@@ -79,7 +79,10 @@ func Process(m *ast.Module) {
 //==== константы и переменные
 
 func (lc *lookContext) lookVarDecl(v *ast.VarDecl) {
-	lc.lookTypeRef(v.Typ)
+	if v.Typ != nil {
+		lc.lookTypeRef(v.Typ)
+	}
+	lc.lookExpr(v.Init)
 }
 
 func (lc *lookContext) lookConstDecl(v *ast.ConstDecl) {
