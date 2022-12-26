@@ -259,16 +259,16 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 		}
 
 		for _, e := range x.Composite.Elements {
-			lc.lookExpr(e.L)
-			if e.R != nil {
-				lc.lookExpr(e.R)
+			if e.Key != nil {
+				lc.lookExpr(e.Key)
 			}
+			lc.lookExpr(e.Value)
 		}
 	case *ast.ClassCompositeExpr:
 		lc.lookExpr(x.X)
 
 		for _, vp := range x.Values {
-			lc.lookExpr(vp.V)
+			lc.lookExpr(vp.Value)
 
 		}
 

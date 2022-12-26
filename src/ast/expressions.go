@@ -97,8 +97,8 @@ type ArrayCompositeExpr struct {
 }
 
 type ElementPair struct {
-	L Expr
-	R Expr
+	Key   Expr
+	Value Expr
 }
 
 //=== class composite
@@ -110,7 +110,7 @@ type ClassCompositeExpr struct {
 }
 
 type ValuePair struct {
-	Pos  int
-	Name string
-	V    Expr
+	Pos   int
+	Name  string
+	Value Expr
 }

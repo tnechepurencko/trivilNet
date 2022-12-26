@@ -100,6 +100,27 @@ func IsBoolType(t Type) bool {
 	return t == Bool
 }
 
+func IsIndexableType(t Type) bool {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	_, ok := t.(*VectorType)
+	return ok
+}
+
+func ElementType(t Type) Type {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	v, ok := t.(*VectorType)
+	if !ok {
+		panic("assert - должен быть индексируемый тип")
+	}
+	return v.ElementTyp
+}
+
 //==== for error messages
 
 func TypeString(t Type) string {

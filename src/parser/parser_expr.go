@@ -234,10 +234,11 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 			p.next()
 			r = p.parseExpression()
 		} else {
-			r = nil
+			r = l
+			l = nil
 		}
 
-		n.Composite.Elements = append(n.Composite.Elements, ast.ElementPair{L: l, R: r})
+		n.Composite.Elements = append(n.Composite.Elements, ast.ElementPair{Key: l, Value: r})
 
 		if p.tok == lexer.RBRACK {
 			break
@@ -256,7 +257,7 @@ func (p *Parser) checkElements(n *ast.ArrayCompositeExpr) {
 
 	var pairs = 0
 	for _, v := range n.Elements {
-		if v.R != nil {
+		if v.Key != nil {
 			pairs++
 		}
 	}
@@ -289,7 +290,7 @@ func (p *Parser) parseClassComposite(x ast.Expr) ast.Expr {
 
 		vp.Name = p.parseIdent()
 		p.expect(lexer.COLON)
-		vp.V = p.parseExpression()
+		vp.Value = p.parseExpression()
 
 		n.Values = append(n.Values, vp)
 
