@@ -252,19 +252,19 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 			lc.lookExpr(a)
 		}
 
-	case *ast.IndexExpr:
+	case *ast.GeneralBracketExpr:
 		lc.lookExpr(x.X)
 		if x.Index != nil {
 			lc.lookExpr(x.Index)
 		}
 
-		for _, e := range x.Elements {
+		for _, e := range x.Composite.Elements {
 			lc.lookExpr(e.L)
 			if e.R != nil {
 				lc.lookExpr(e.R)
 			}
 		}
-	case *ast.CompositeExpr:
+	case *ast.ClassCompositeExpr:
 		lc.lookExpr(x.X)
 
 		for _, vp := range x.Values {

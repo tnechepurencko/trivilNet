@@ -83,13 +83,17 @@ type ConversionExpr struct {
 
 //==== index
 
-type IndexExpr struct {
+type GeneralBracketExpr struct {
 	ExprBase
-	X     Expr
-	Index Expr // indexation if != nil
-	// composite:
+	X         Expr
+	Index     Expr // indexation if != nil, otherwise composite
+	Composite *ArrayCompositeExpr
+}
+
+type ArrayCompositeExpr struct {
+	ExprBase
 	Elements []ElementPair
-	Pairs    bool // both L and R are used: L - are indexes, R - values
+	Keys     bool // both L and R are used: L - are indexes, R - values
 }
 
 type ElementPair struct {
@@ -97,9 +101,9 @@ type ElementPair struct {
 	R Expr
 }
 
-//=== composite
+//=== class composite
 
-type CompositeExpr struct {
+type ClassCompositeExpr struct {
 	ExprBase
 	X      Expr
 	Values []ValuePair

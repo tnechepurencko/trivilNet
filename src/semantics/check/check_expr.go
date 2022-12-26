@@ -39,7 +39,10 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		}
 		cc.call(x)
 
-	case *ast.CompositeExpr:
+	case *ast.GeneralBracketExpr:
+		cc.generalBracketExpr(x)
+
+	case *ast.ClassCompositeExpr:
 		cc.expr(x.X)
 
 		for _, vp := range x.Values {
@@ -87,6 +90,15 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	for i, p := range ft.Params {
 		cc.checkAssignable(p.Typ, x.Args[i])
 	}
+}
+
+func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
+	cc.expr(x.X)
+
+}
+
+func (cc *checkContext) typeName(expr ast.Expr) ast.Type {
+	return nil
 }
 
 func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {

@@ -95,14 +95,14 @@ func sexpr(v reflect.Value) string {
 				name := f.FieldByName("Name")
 				fs += " \"" + name.String() + "\""
 				typ := f.FieldByName("Typ")
-				fs += shortType(typ.Interface())
+				fs += " \"" + shortType(typ.Interface()) + "\""
 				exported := f.FieldByName("Exported")
 				if exported.Bool() {
 					fs += " Exported"
 				}
 			} else if sname == "ExprBase" {
 				typ := f.FieldByName("Typ")
-				fs += shortType(typ.Interface())
+				fs += " \"" + shortType(typ.Interface()) + "\""
 			} else if strings.HasSuffix(sname, "Base") {
 				// игнорирую
 			} else {
@@ -143,12 +143,14 @@ func shortType(i interface{}) string {
 	case nil:
 		return ""
 	case *PredefinedType:
-		return " \"" + x.Name + "\""
+		return x.Name
 	case *TypeRef:
-		return " \"" + x.TypeName + "\""
+		return x.TypeName
 	case *FuncType:
-		return " \"functype\""
+		return "functype"
+	case *VectorType:
+		return "[]" + shortType(x.ElementTyp)
 	}
 
-	return fmt.Sprintf(" *%T*", i)
+	return fmt.Sprintf("*%T*", i)
 }

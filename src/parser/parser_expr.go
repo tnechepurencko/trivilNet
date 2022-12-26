@@ -212,10 +212,13 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 		defer un(trace(p, "Индексация"))
 	}
 
-	var n = &ast.IndexExpr{
+	var n = &ast.GeneralBracketExpr{
 		ExprBase: ast.ExprBase{Pos: p.pos},
 		X:        x,
-		Elements: make([]ast.ElementPair, 0),
+		Composite: &ast.ArrayCompositeExpr{
+			ExprBase: ast.ExprBase{Pos: p.pos},
+			Elements: make([]ast.ElementPair, 0),
+		},
 	}
 
 	p.expect(lexer.LBRACK)
@@ -234,7 +237,7 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 			r = nil
 		}
 
-		n.Elements = append(n.Elements, ast.ElementPair{L: l, R: r})
+		n.Composite.Elements = append(n.Composite.Elements, ast.ElementPair{L: l, R: r})
 
 		if p.tok == lexer.RBRACK {
 			break
@@ -244,12 +247,12 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 
 	p.expect(lexer.RBRACK)
 
-	p.checkIndexValues(n)
+	p.checkElements(n.Composite)
 
 	return n
 }
 
-func (p *Parser) checkIndexValues(n *ast.IndexExpr) {
+func (p *Parser) checkElements(n *ast.ArrayCompositeExpr) {
 
 	var pairs = 0
 	for _, v := range n.Elements {
@@ -259,7 +262,7 @@ func (p *Parser) checkIndexValues(n *ast.IndexExpr) {
 	}
 
 	if pairs == len(n.Elements) {
-		n.Pairs = true
+		n.Keys = true
 	} else if pairs != 0 {
 		p.error(n.Pos, "ПАР-СМЕСЬ-МАССИВ")
 	}
@@ -272,7 +275,7 @@ func (p *Parser) parseClassComposite(x ast.Expr) ast.Expr {
 		defer un(trace(p, "Композит класса"))
 	}
 
-	var n = &ast.CompositeExpr{
+	var n = &ast.ClassCompositeExpr{
 		ExprBase: ast.ExprBase{Pos: p.pos},
 		X:        x,
 		Values:   make([]ast.ValuePair, 0),
