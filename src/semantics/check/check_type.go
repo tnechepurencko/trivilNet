@@ -133,11 +133,15 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 }
 
 func (cc *checkContext) checkAssignable(lt ast.Type, r ast.Expr) {
-	if !cc.assignable(lt, r) {
-		env.AddError(r.GetPos(), "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
-			ast.TypeString(lt), ast.TypeString(r.GetType()))
-
+	if cc.assignable(lt, r) {
+		return
 	}
+	if ast.IsInvalidType(lt) || ast.IsInvalidType(r.GetType()) {
+		return
+	}
+
+	env.AddError(r.GetPos(), "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
+		ast.TypeString(lt), ast.TypeString(r.GetType()))
 }
 
 func equalTypes(t1, t2 ast.Type) bool {

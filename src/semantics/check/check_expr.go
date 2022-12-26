@@ -107,34 +107,70 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 		return
 	}
 
+	// это индексация
 	cc.expr(x.X)
 
 	t = x.X.GetType()
 
 	if !ast.IsIndexableType(t) {
-		env.AddError(x.X.GetPos(), "")
+		env.AddError(x.X.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-МАССИВА", ast.TypeString(t))
 		x.Typ = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: x.Pos}}
 	} else {
 		x.Index = x.Composite.Elements[0].Value
 		cc.expr(x.Index)
 		if !ast.IsIntegerType(x.Index.GetType()) {
-			env.AddError(x.Index.GetPos(), "")
+			env.AddError(x.Index.GetPos(), "СЕМ-ОШ-ТИП-ИНДЕКСА", ast.TypeString(x.Index.GetType()))
 		}
 		x.Typ = ast.ElementType(t)
 	}
+	x.Composite = nil
 }
 
 func (cc *checkContext) typeName(expr ast.Expr) ast.Type {
+
+	switch x := expr.(type) {
+	case *ast.IdentExpr:
+		if x.TypRef != nil {
+			return x.TypRef
+		} else {
+			return nil
+		}
+	case *ast.SelectorExpr:
+		//TODO
+		panic("ni")
+	}
+
 	return nil
 }
 
 func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
-	if t == nil {
-		env.AddError(c.Pos, "!!!")
-	} else if !ast.IsIndexableType(t) {
 
+	var elemT ast.Type = nil
+
+	if t == nil {
+		env.AddError(c.Pos, "СЕМ-МАССИВ-КОМПОЗИТ-НЕТ-ТИПА")
+	} else if !ast.IsIndexableType(t) {
+		env.AddError(c.Pos, "СЕМ-МАССИВ-КОМПОЗИТ-ОШ-ТИП")
+	} else {
+		c.Typ = t
+		elemT = ast.ElementType(t)
 	}
 
+	for _, p := range c.Elements {
+
+		if p.Key != nil {
+			cc.expr(p.Key)
+			if !ast.IsIntegerType(p.Key.GetType()) {
+				env.AddError(c.Pos, "СЕМ-МАССИВ-КОМПОЗИТ-ТИП-КЛЮЧА")
+			}
+			cc.checkConstExpr(p.Key)
+		}
+
+		cc.expr(p.Value)
+		if elemT != nil {
+			cc.checkAssignable(elemT, p.Value)
+		}
+	}
 }
 
 func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
@@ -206,4 +242,19 @@ func checkOperandTypes(x *ast.BinaryExpr) {
 	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",
 		ast.TypeString(x.X.GetType()), x.Op.String(), ast.TypeString(x.Y.GetType()))
 
+}
+
+func (cc *checkContext) checkConstExpr(expr ast.Expr) {
+	switch x := expr.(type) {
+	case *ast.LiteralExpr:
+		return
+	case *ast.IdentExpr:
+		if x.Obj != nil {
+			if _, ok := x.Obj.(*ast.ConstDecl); ok {
+				return
+			}
+		}
+	}
+
+	env.AddError(expr.GetPos(), "СЕМ-ОШ-КОНСТ-ВЫРАЖЕНИЕ")
 }

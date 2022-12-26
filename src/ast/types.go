@@ -109,6 +109,15 @@ func IsIndexableType(t Type) bool {
 	return ok
 }
 
+func IsInvalidType(t Type) bool {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	_, ok := t.(*InvalidType)
+	return ok
+}
+
 func ElementType(t Type) Type {
 	if tr, ok := t.(*TypeRef); ok {
 		t = tr.Typ
