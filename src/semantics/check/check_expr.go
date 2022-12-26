@@ -46,7 +46,7 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		cc.expr(x.X)
 
 		for _, vp := range x.Values {
-			cc.expr(vp.V)
+			cc.expr(vp.Value)
 		}
 		panic("ni")
 	case *ast.LiteralExpr:
@@ -93,12 +93,48 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 }
 
 func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
+
+	var t = cc.typeName(x.X)
+
+	if t != nil || len(x.Composite.Elements) != 1 || x.Composite.Keys { // composite
+		cc.arrayComposite(x.Composite, t)
+
+		if t == nil {
+			t = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: x.X.GetPos()}}
+		}
+		x.Typ = t
+		x.X = nil
+		return
+	}
+
 	cc.expr(x.X)
 
+	t = x.X.GetType()
+
+	if !ast.IsIndexableType(t) {
+		env.AddError(x.X.GetPos(), "")
+		x.Typ = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: x.Pos}}
+	} else {
+		x.Index = x.Composite.Elements[0].Value
+		cc.expr(x.Index)
+		if !ast.IsIntegerType(x.Index.GetType()) {
+			env.AddError(x.Index.GetPos(), "")
+		}
+		x.Typ = ast.ElementType(t)
+	}
 }
 
 func (cc *checkContext) typeName(expr ast.Expr) ast.Type {
 	return nil
+}
+
+func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
+	if t == nil {
+		env.AddError(c.Pos, "!!!")
+	} else if !ast.IsIndexableType(t) {
+
+	}
+
 }
 
 func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
