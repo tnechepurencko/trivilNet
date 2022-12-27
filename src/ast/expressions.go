@@ -10,8 +10,9 @@ var _ = fmt.Printf
 //====
 
 type ExprBase struct {
-	Pos int
-	Typ Type
+	Pos      int
+	Typ      Type
+	ReadOnly bool
 }
 
 func (n *ExprBase) ExprNode() {}
@@ -22,6 +23,10 @@ func (n *ExprBase) GetPos() int {
 
 func (n *ExprBase) GetType() Type {
 	return n.Typ
+}
+
+func (n *ExprBase) IsReadOnly() bool {
+	return n.ReadOnly
 }
 
 //====

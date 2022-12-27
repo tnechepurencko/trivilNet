@@ -28,6 +28,7 @@ type Expr interface {
 	Node
 	ExprNode()
 	GetType() Type
+	IsReadOnly() bool
 }
 
 type Statement interface {

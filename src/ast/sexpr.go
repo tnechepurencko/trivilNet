@@ -103,6 +103,10 @@ func sexpr(v reflect.Value) string {
 			} else if sname == "ExprBase" {
 				typ := f.FieldByName("Typ")
 				fs += " \"" + shortType(typ.Interface()) + "\""
+				RO := f.FieldByName("ReadOnly")
+				if RO.Bool() {
+					fs += " RO"
+				}
 			} else if strings.HasSuffix(sname, "Base") {
 				// игнорирую
 			} else {

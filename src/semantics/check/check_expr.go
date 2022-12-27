@@ -13,10 +13,15 @@ func (cc *checkContext) expr(expr ast.Expr) {
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
 		if x.Obj == nil {
-			panic("ni") //TODO: check not type
+			env.AddError(x.Pos, "СЕМ-ТИП-В-ВЫРАЖЕНИИ")
+			x.Typ = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: x.Pos}}
+			return
 		}
 
 		x.Typ = x.Obj.GetType()
+
+		_, isVar := x.Obj.(*ast.VarDecl)
+		x.ReadOnly = !isVar
 		//fmt.Printf("ident %v %v\n", x.Obj, x.Typ)
 
 	case *ast.UnaryExpr:
@@ -60,8 +65,10 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		default:
 			panic(fmt.Sprintf("LiteralExpr - bad kind: ni %v", x))
 		}
+		x.ReadOnly = true
 	case *ast.BoolLiteral:
 		x.Typ = ast.Bool
+		x.ReadOnly = true
 	default:
 		panic(fmt.Sprintf("expression: ni %T", expr))
 	}
@@ -124,6 +131,10 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 		x.Typ = ast.ElementType(t)
 	}
 	x.Composite = nil
+
+	if x.X.IsReadOnly() {
+		x.ReadOnly = true
+	}
 }
 
 func (cc *checkContext) typeName(expr ast.Expr) ast.Type {
@@ -257,4 +268,31 @@ func (cc *checkContext) checkConstExpr(expr ast.Expr) {
 	}
 
 	env.AddError(expr.GetPos(), "СЕМ-ОШ-КОНСТ-ВЫРАЖЕНИЕ")
+}
+
+func isLValue(expr ast.Expr) bool {
+
+	if expr.IsReadOnly() {
+		return false
+	}
+
+	switch x := expr.(type) {
+	case *ast.IdentExpr:
+		return true
+	case *ast.GeneralBracketExpr:
+		return x.Index != nil
+	case *ast.SelectorExpr:
+		return true
+	case *ast.ConversionExpr:
+		return isLValue(x.X)
+	default:
+		return false
+	}
+}
+
+func (cc *checkContext) checkLValue(expr ast.Expr) {
+	if isLValue(expr) {
+		return
+	}
+	env.AddError(expr.GetPos(), "СЕМ-НЕ-ПРИСВОИТЬ")
 }

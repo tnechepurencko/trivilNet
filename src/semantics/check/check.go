@@ -125,18 +125,21 @@ func (cc *checkContext) statement(s ast.Statement) {
 		cc.expr(x.L)
 		cc.expr(x.R)
 		cc.checkAssignable(x.L.GetType(), x.R)
+		cc.checkLValue(x.L)
 	case *ast.IncStatement:
 		cc.expr(x.L)
 		if !ast.IsIntegerType(x.L.GetType()) {
 			env.AddError(x.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
 				ast.TypeString(x.L.GetType()), lexer.INC.String())
 		}
+		cc.checkLValue(x.L)
 	case *ast.DecStatement:
 		cc.expr(x.L)
 		if !ast.IsIntegerType(x.L.GetType()) {
 			env.AddError(x.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
 				ast.TypeString(x.L.GetType()), lexer.DEC.String())
 		}
+		cc.checkLValue(x.L)
 	case *ast.If:
 		cc.expr(x.Cond)
 		if !ast.IsBoolType(x.Cond.GetType()) {
