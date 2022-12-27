@@ -214,7 +214,22 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 		return
 	}
 
-	// проверяем поля и типы
+	// проверяю поля и типы
+	for _, vp := range c.Values {
+		d, ok := cl.Members[vp.Name]
+		if !ok {
+			//TODO: проверить экспорт
+			env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕТ-ПОЛЯ", vp.Name)
+		} else {
+			f, ok := d.(*ast.Field)
+			if !ok {
+				env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕ-ПОЛE")
+			} else {
+				cc.checkAssignable(f.Typ, vp.Value)
+			}
+		}
+	}
+	//TODO: проверить обязательные значения (без умолчания)
 }
 
 func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
