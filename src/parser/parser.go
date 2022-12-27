@@ -227,7 +227,7 @@ func (p *Parser) parseSingleConst() *ast.ConstDecl {
 
 	n.Name = p.parseIdent()
 	if p.parseExportMark() {
-		n.SetExported()
+		n.Exported = true
 	}
 
 	p.expect(lexer.COLON)
@@ -247,7 +247,7 @@ func (p *Parser) parseNextConst() *ast.ConstDecl {
 
 	n.Name = p.parseIdent()
 	if p.parseExportMark() {
-		n.SetExported()
+		n.Exported = true
 	}
 
 	if p.tok != lexer.COLON {
@@ -351,7 +351,7 @@ func (p *Parser) parseVarDecl() *ast.VarDecl {
 
 	n.Name = p.parseIdent()
 	if p.parseExportMark() {
-		n.SetExported()
+		n.Exported = true
 	}
 
 	if p.tok == lexer.COLON {

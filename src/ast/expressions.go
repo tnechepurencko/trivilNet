@@ -63,15 +63,15 @@ type BoolLiteral struct {
 
 type IdentExpr struct {
 	ExprBase
-	Name   string
-	Obj    Decl     // var, const or function, never type
-	TypRef *TypeRef // != if using type name in expression, like in composite
+	Name string
+	Obj  Node // Decl: Var, Const or Function or TypeRef
 }
 
 type SelectorExpr struct {
 	ExprBase
-	X    Expr
+	X    Expr // == nil, если импортированный объект
 	Name string
+	Obj  Node // импортированный объект или поле или метод
 }
 
 type CallExpr struct {

@@ -45,7 +45,7 @@ func (p *Parser) parseTypeDecl() *ast.TypeDecl {
 
 	n.Name = p.parseIdent()
 	if p.parseExportMark() {
-		n.SetExported()
+		n.Exported = true
 	}
 
 	p.expect(lexer.EQ)

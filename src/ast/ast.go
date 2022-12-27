@@ -22,6 +22,7 @@ type Decl interface {
 	DeclNode()
 	GetName() string
 	GetType() Type
+	IsExported() bool
 }
 
 type Expr interface {

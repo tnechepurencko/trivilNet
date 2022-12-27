@@ -12,13 +12,13 @@ var _ = fmt.Printf
 func (cc *checkContext) expr(expr ast.Expr) {
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		if x.Obj == nil {
+		if _, ok := x.Obj.(*ast.TypeRef); ok {
 			env.AddError(x.Pos, "СЕМ-ТИП-В-ВЫРАЖЕНИИ")
 			x.Typ = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: x.Pos}}
 			return
 		}
 
-		x.Typ = x.Obj.GetType()
+		x.Typ = x.Obj.(ast.Decl).GetType()
 
 		_, isVar := x.Obj.(*ast.VarDecl)
 		x.ReadOnly = !isVar
@@ -136,14 +136,17 @@ func (cc *checkContext) typeName(expr ast.Expr) ast.Type {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		if x.TypRef != nil {
-			return x.TypRef
+		if tr, ok := x.Obj.(*ast.TypeRef); ok {
+			return tr
 		} else {
 			return nil
 		}
 	case *ast.SelectorExpr:
-		//TODO
-		panic("ni")
+		if tr, ok := x.Obj.(*ast.TypeRef); ok {
+			return tr
+		} else {
+			return nil
+		}
 	}
 
 	return nil

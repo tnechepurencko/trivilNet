@@ -152,6 +152,8 @@ func shortType(i interface{}) string {
 		return x.TypeName
 	case *FuncType:
 		return "functype"
+	case *ClassType:
+		return "class"
 	case *VectorType:
 		return "[]" + shortType(x.ElementTyp)
 	}

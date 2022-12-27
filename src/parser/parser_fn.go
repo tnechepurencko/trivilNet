@@ -39,7 +39,7 @@ func (p *Parser) parseFn() *ast.Function {
 	n.Name = p.parseIdent()
 
 	if p.parseExportMark() {
-		n.SetExported()
+		n.Exported = true
 	}
 
 	n.Typ = p.parseFuncType()

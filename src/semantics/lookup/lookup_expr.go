@@ -12,22 +12,9 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
 		var d = findInScopes(lc.scope, x.Name, x.Pos)
-		if td, ok := d.(*ast.TypeDecl); ok {
-			x.TypRef = &ast.TypeRef{
-				TypeName: td.Name,
-				//ModuleName: ?
-				TypeDecl: td,
-				Typ:      td.Typ,
-			}
-			x.TypRef.Pos = x.Pos
-		} else {
-			x.Obj = d
-		}
+		x.Obj = lc.considerTypeRef(d, x.Pos)
 
 		//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
-
-	case *ast.LiteralExpr:
-		//lc.lookExpr(x.X)
 
 	case *ast.UnaryExpr:
 		lc.lookExpr(x.X)
@@ -38,7 +25,7 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 
 	case *ast.SelectorExpr:
 		lc.lookExpr(x.X)
-		panic("ni")
+		lc.lookImported(x)
 
 	case *ast.CallExpr:
 		lc.lookExpr(x.X)
@@ -65,9 +52,54 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 			lc.lookExpr(vp.Value)
 
 		}
+	case *ast.LiteralExpr:
+		//nothing
 
 	default:
 		panic(fmt.Sprintf("expression: ni %T", expr))
 
 	}
+}
+
+// Возврашает TypeRef для TypeDecl, или сам объект
+func (lc *lookContext) considerTypeRef(d ast.Decl, pos int) ast.Node {
+
+	if td, ok := d.(*ast.TypeDecl); ok {
+		return &ast.TypeRef{
+			TypeBase: ast.TypeBase{Pos: pos},
+			TypeName: td.Name,
+			//ModuleName: ?
+			TypeDecl: td,
+			Typ:      td.Typ,
+		}
+	}
+
+	return d
+
+}
+
+func (lc *lookContext) lookImported(x *ast.SelectorExpr) {
+
+	ident, ok := x.X.(*ast.IdentExpr)
+	if !ok {
+		return
+	}
+
+	m, ok := ident.Obj.(*ast.Module)
+	if !ok {
+		return
+	}
+
+	if d, ok := m.Inner.Names[x.Name]; ok {
+		x.Obj = lc.considerTypeRef(d, x.Pos)
+	} else {
+		var inv = &ast.InvalidDecl{
+			DeclBase: ast.DeclBase{Pos: x.Pos},
+			Name:     x.Name,
+		}
+		x.Obj = inv
+		m.Inner.Names[x.Name] = inv
+		panic("add and test error")
+	}
+	x.X = nil
 }

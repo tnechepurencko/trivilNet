@@ -18,6 +18,24 @@ type Module struct {
 	Inner   *Scope
 }
 
+func (n *Module) DeclNode() {}
+
+func (n *Module) GetPos() int {
+	panic("assert")
+}
+
+func (n *Module) GetName() string {
+	return n.Name
+}
+
+func (n *Module) GetType() Type {
+	panic("assert")
+}
+
+func (n *Module) IsExported() bool {
+	return false
+}
+
 func NewModule() *Module {
 	return &Module{
 		Inner: NewScope(topScope),

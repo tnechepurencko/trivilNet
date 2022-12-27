@@ -34,10 +34,6 @@ func (n *DeclBase) IsExported() bool {
 	return n.Exported
 }
 
-func (n *DeclBase) SetExported() {
-	n.Exported = true
-}
-
 //====
 
 type InvalidDecl struct {
