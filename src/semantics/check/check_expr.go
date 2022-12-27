@@ -48,12 +48,7 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		cc.generalBracketExpr(x)
 
 	case *ast.ClassCompositeExpr:
-		cc.expr(x.X)
-
-		for _, vp := range x.Values {
-			cc.expr(vp.Value)
-		}
-		panic("ni")
+		cc.classComposite(x)
 	case *ast.LiteralExpr:
 		switch x.Kind {
 		case lexer.INT:
@@ -159,7 +154,7 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 	var elemT ast.Type = nil
 
 	if t == nil {
-		env.AddError(c.Pos, "СЕМ-МАССИВ-КОМПОЗИТ-НЕТ-ТИПА")
+		env.AddError(c.Pos, "СЕМ-КОМПОЗИТ-НЕТ-ТИПА")
 	} else if !ast.IsIndexableType(t) {
 		env.AddError(c.Pos, "СЕМ-МАССИВ-КОМПОЗИТ-ОШ-ТИП")
 	} else {
@@ -182,6 +177,44 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 			cc.checkAssignable(elemT, p.Value)
 		}
 	}
+}
+
+func getClassType(t ast.Type) *ast.ClassType {
+	if tr, ok := t.(*ast.TypeRef); ok {
+		t = tr.Typ
+	}
+
+	cl, _ := t.(*ast.ClassType)
+	return cl
+}
+
+func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
+
+	var t = cc.typeName(c.X)
+
+	if t == nil {
+		env.AddError(c.Pos, "СЕМ-КОМПОЗИТ-НЕТ-ТИПА")
+		c.Typ = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: c.X.GetPos()}}
+		return
+	}
+
+	var cl = getClassType(t)
+	if cl == nil {
+		env.AddError(c.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-ОШ-ТИП")
+		c.Typ = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: c.X.GetPos()}}
+	} else {
+		c.Typ = t
+	}
+
+	for _, vp := range c.Values {
+		cc.expr(vp.Value)
+	}
+
+	if cl == nil {
+		return
+	}
+
+	// проверяем поля и типы
 }
 
 func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
