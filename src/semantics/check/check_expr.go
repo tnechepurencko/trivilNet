@@ -34,8 +34,7 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		cc.binaryExpr(x)
 
 	case *ast.SelectorExpr:
-		cc.expr(x.X)
-		panic("ni")
+		cc.selector(x)
 
 	case *ast.CallExpr:
 		cc.expr(x.X)
@@ -68,6 +67,39 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		panic(fmt.Sprintf("expression: ni %T", expr))
 	}
 
+}
+
+func (cc *checkContext) selector(x *ast.SelectorExpr) {
+	if x.Obj != nil {
+		// imported object
+		if _, ok := x.Obj.(*ast.TypeRef); ok {
+			env.AddError(x.Pos, "СЕМ-ТИП-В-ВЫРАЖЕНИИ")
+			x.Typ = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: x.Pos}}
+		}
+		return
+	}
+	cc.expr(x.X)
+	var t = x.X.GetType()
+
+	var cl = getClassType(t)
+	if cl == nil {
+		env.AddError(x.X.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeString(t))
+		x.Typ = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: x.X.GetPos()}}
+		return
+	}
+
+	d, ok := cl.Members[x.Name]
+	if !ok {
+		//TODO: проверить экспорт
+		env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПОЛЕ-ИЛИ-МЕТОД", x.Name)
+	} else {
+		x.Typ = d.GetType()
+		x.Obj = d
+	}
+
+	if x.Typ == nil {
+		x.Typ = &ast.InvalidType{TypeBase: ast.TypeBase{Pos: x.X.GetPos()}}
+	}
 }
 
 func (cc *checkContext) call(x *ast.CallExpr) {

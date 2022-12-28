@@ -57,7 +57,6 @@ type ClassType struct {
 
 type Field struct {
 	DeclBase
-	Typ Type
 }
 
 //==== function type
