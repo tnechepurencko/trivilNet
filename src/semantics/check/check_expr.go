@@ -37,9 +37,9 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		cc.selector(x)
 
 	case *ast.CallExpr:
-		cc.expr(x.X)
-		for _, a := range x.Args {
-			cc.expr(a)
+		if x.StdFunc != nil {
+			cc.callStdFunction(x)
+			return
 		}
 		cc.call(x)
 
@@ -102,10 +102,51 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 	}
 }
 
+func (cc *checkContext) callStdFunction(x *ast.CallExpr) {
+	for _, a := range x.Args {
+		cc.expr(a)
+	}
+
+	switch x.StdFunc.Name {
+	case "длина":
+		cc.callStdLen(x)
+
+	default:
+		panic("assert: не реализована стандартная функция " + x.StdFunc.Name)
+	}
+}
+
+func (cc *checkContext) callStdLen(x *ast.CallExpr) {
+	x.Typ = ast.Int64
+
+	if len(x.Args) != 1 {
+		env.AddError(x.Pos, "СЕМ-ОШ-ЧИСЛО-АРГ-СТДФУНК", x.StdFunc.Name, "1")
+		return
+	}
+
+	var t = x.Args[0].GetType()
+
+	if tr, ok := t.(*ast.TypeRef); ok {
+		t = tr.Typ
+	}
+
+	if _, ok := t.(*ast.VectorType); ok || t == ast.String {
+		// ok
+	} else {
+		env.AddError(x.Pos, "СЕМ-ДЛИНА-ОШ-ТИП-АРГ", x.StdFunc.Name)
+	}
+}
+
 func (cc *checkContext) call(x *ast.CallExpr) {
+
+	cc.expr(x.X)
+	for _, a := range x.Args {
+		cc.expr(a)
+	}
 
 	ft, ok := x.X.GetType().(*ast.FuncType)
 	if !ok {
+
 		env.AddError(x.X.GetPos(), "СЕМ-ВЫЗОВ-НЕ_ФУНКТИП")
 		return
 	}

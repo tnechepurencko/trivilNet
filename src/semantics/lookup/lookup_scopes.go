@@ -30,8 +30,7 @@ func findInScopes(scope *ast.Scope, name string, pos int) ast.Decl {
 
 			env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО", name)
 			var inv = &ast.InvalidDecl{
-				DeclBase: ast.DeclBase{Pos: pos},
-				Name:     name,
+				DeclBase: ast.DeclBase{Pos: pos, Name: name},
 			}
 			addToScope(name, inv, scope)
 			return inv

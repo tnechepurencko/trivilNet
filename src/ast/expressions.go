@@ -76,8 +76,9 @@ type SelectorExpr struct {
 
 type CallExpr struct {
 	ExprBase
-	X    Expr
-	Args []Expr
+	X       Expr
+	Args    []Expr
+	StdFunc *StdFunction
 }
 
 type ConversionExpr struct {

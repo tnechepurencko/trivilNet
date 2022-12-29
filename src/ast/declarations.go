@@ -38,7 +38,6 @@ func (n *DeclBase) IsExported() bool {
 
 type InvalidDecl struct {
 	DeclBase
-	Name string
 }
 
 //=== описания
@@ -62,5 +61,11 @@ type ConstDecl struct {
 }
 
 type TypeDecl struct {
+	DeclBase
+}
+
+//====
+
+type StdFunction struct {
 	DeclBase
 }

@@ -32,6 +32,7 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 		for _, a := range x.Args {
 			lc.lookExpr(a)
 		}
+		lc.lookStdFunction(x)
 
 	case *ast.GeneralBracketExpr:
 		lc.lookExpr(x.X)
@@ -94,12 +95,31 @@ func (lc *lookContext) lookImported(x *ast.SelectorExpr) {
 		x.Obj = lc.considerTypeRef(d, x.Pos)
 	} else {
 		var inv = &ast.InvalidDecl{
-			DeclBase: ast.DeclBase{Pos: x.Pos},
-			Name:     x.Name,
+			DeclBase: ast.DeclBase{Pos: x.Pos, Name: x.Name},
 		}
 		x.Obj = inv
 		m.Inner.Names[x.Name] = inv
 		panic("add and test error")
 	}
+	x.X = nil
+}
+
+func (lc *lookContext) lookStdFunction(x *ast.CallExpr) {
+
+	ident, ok := x.X.(*ast.IdentExpr)
+	if !ok {
+		return
+	}
+
+	if ident.Obj == nil {
+		return
+	}
+
+	stdf, ok := ident.Obj.(*ast.StdFunction)
+	if !ok {
+		return
+	}
+
+	x.StdFunc = stdf
 	x.X = nil
 }

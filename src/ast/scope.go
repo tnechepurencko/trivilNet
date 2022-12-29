@@ -42,6 +42,9 @@ func initScopes() {
 	addBoolConst("ложь", false)
 
 	Void = &PredefinedType{Name: "нет результата"}
+
+	addStdFunction("длина")
+
 	//	ShowScopes("top", topScope)
 }
 
@@ -66,6 +69,14 @@ func addBoolConst(name string, val bool) {
 	c.Name = name
 
 	topScope.Names[name] = c
+}
+
+func addStdFunction(name string) {
+	var f = &StdFunction{}
+	f.Typ = Void
+	f.Name = name
+
+	topScope.Names[name] = f
 }
 
 func NewScope(outer *Scope) *Scope {
