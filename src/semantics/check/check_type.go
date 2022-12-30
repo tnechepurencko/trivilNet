@@ -128,7 +128,7 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		return true
 	}
 
-	// TODO: целые литералы, function types, ...
+	// TODO: символ := строковый литерал из одного символа, function types, целые литералы?, ...
 	return false
 }
 

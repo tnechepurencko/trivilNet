@@ -83,6 +83,14 @@ func IsIntegerType(t Type) bool {
 	return t == Int64 || t == Byte
 }
 
+func IsInt64(t Type) bool {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	return t == Int64
+}
+
 func IsFloatType(t Type) bool {
 	if tr, ok := t.(*TypeRef); ok {
 		t = tr.Typ
@@ -137,6 +145,14 @@ func IsInvalidType(t Type) bool {
 
 	_, ok := t.(*InvalidType)
 	return ok
+}
+
+func UnderType(t Type) Type {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	return t
 }
 
 //==== for error messages
