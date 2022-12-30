@@ -227,7 +227,7 @@ loop:
 
 func (s *Lexer) scanString(opening rune) string {
 	// первая кавычка уже взята
-	ofs := s.offset - 1
+	ofs := s.offset
 
 	for {
 		ch := s.ch
@@ -244,7 +244,7 @@ func (s *Lexer) scanString(opening rune) string {
 		}
 	}
 
-	return string(s.src[ofs:s.offset])
+	return string(s.src[ofs : s.offset-1])
 }
 
 // Сканирует escape sequence. В случае ошибки возвращает false
