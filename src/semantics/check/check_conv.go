@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"unicode"
+	"unicode/utf8"
 
 	"trivil/ast"
 	"trivil/env"
@@ -81,7 +82,24 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 		x.Typ = ast.Byte
 		return
 	case ast.String:
-		panic("ni")
+		var lit = literal(x.X)
+		if lit != nil {
+			if utf8.RuneCountInString(lit.Lit) == 1 {
+				r, _ := utf8.DecodeRuneInString(lit.Lit)
+				if r < 0 || r > 255 {
+					env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
+				} else {
+					x.Done = true
+					lit.Typ = ast.Byte
+				}
+
+			} else {
+				env.AddError(x.Pos, "СЕМ-ДЛИНА-СТРОКИ-НЕ-1")
+			}
+
+		}
+		x.Typ = ast.Byte
+		return
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Byte.Name)
