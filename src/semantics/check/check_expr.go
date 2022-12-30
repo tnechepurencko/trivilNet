@@ -330,7 +330,7 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 
 	switch x.Op {
 	case lexer.ADD, lexer.SUB, lexer.MUL, lexer.REM, lexer.QUO:
-		if ast.IsIntegerType(x.X.GetType()) || ast.IsFloatType(x.X.GetType()) {
+		if ast.IsInt64(x.X.GetType()) || ast.IsFloatType(x.X.GetType()) {
 			checkOperandTypes(x)
 		} else {
 			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",

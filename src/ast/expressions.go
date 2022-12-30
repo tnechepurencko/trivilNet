@@ -85,6 +85,7 @@ type ConversionExpr struct {
 	ExprBase
 	X         Expr
 	TargetTyp Type
+	Done      bool // X уже преобразован к целевому типу
 }
 
 //==== index
