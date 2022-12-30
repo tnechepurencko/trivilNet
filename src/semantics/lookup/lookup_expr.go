@@ -34,6 +34,10 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 		}
 		lc.lookStdFunction(x)
 
+	case *ast.ConversionExpr:
+		lc.lookExpr(x.X)
+		lc.lookTypeRef(x.TargetTyp)
+
 	case *ast.GeneralBracketExpr:
 		lc.lookExpr(x.X)
 		if x.Index != nil {

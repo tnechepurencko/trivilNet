@@ -43,6 +43,9 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		}
 		cc.call(x)
 
+	case *ast.ConversionExpr:
+		cc.conversion(x)
+
 	case *ast.GeneralBracketExpr:
 		cc.generalBracketExpr(x)
 
