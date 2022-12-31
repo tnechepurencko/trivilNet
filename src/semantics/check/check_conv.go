@@ -19,7 +19,7 @@ var _ = fmt.Printf
 	Цел64: Байт, Вещ64, Символ, Строковый литерал (из 1-го символа)
 	Вещ64: Цел64
 	Лог: -
-	Символ: Цел64, Строковый литерал
+	Символ: Цел64, Строковый литерал (из 1-го символа)
 	Строка: Символ, []Символ, []Байт
 	[]Байт: Строка
 	[]Символ: Строка
@@ -68,7 +68,8 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 		x.Typ = ast.Byte
 		return
 
-	case ast.Int64, ast.Symbol:
+	case ast.Int64,
+		ast.Symbol:
 		var lit = literal(x.X)
 		if lit != nil {
 			i, err := strconv.ParseInt(lit.Lit, 0, 64)
@@ -116,7 +117,8 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 		env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(x.X.GetType()))
 		x.Typ = ast.Int64
 		return
-	case ast.Byte, ast.Symbol:
+	case ast.Byte,
+		ast.Symbol:
 		var lit = literal(x.X)
 		if lit != nil {
 			lit.Typ = ast.Byte
@@ -129,7 +131,15 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 		x.Typ = ast.Int64
 		return
 	case ast.String:
-		panic("ni")
+		var lit = oneSymbolString(x.X)
+		if lit != nil {
+			r, _ := utf8.DecodeRuneInString(lit.Lit)
+			lit.Kind = lexer.INT
+			lit.Lit = fmt.Sprintf("0x%x", r)
+			x.Typ = ast.Int64
+			x.Done = true
+			return
+		}
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Int64.Name)
@@ -180,7 +190,12 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 		x.Typ = ast.Symbol
 		return
 	case ast.String:
-		panic("ni")
+		var lit = oneSymbolString(x.X)
+		if lit != nil {
+			x.Typ = ast.Symbol
+			x.Done = true
+			return
+		}
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Symbol.Name)
