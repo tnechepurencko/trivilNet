@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 	"trivil/env"
 )
@@ -9,7 +10,7 @@ var valid_texts = []string{
 	"модуль м;",
 	"модуль м",
 	"модуль м\n",
-	"модуль x; фн print_int(a: Цел) @внешняя; вход { print_int(5) }",
+	"модуль x; фн print_int(a: Цел) @внеш; вход { print_int(5) }",
 	"модуль м; импорт 'путь'",
 	"модуль м; пусть а: Цел = 0",
 	"модуль м; пусть а*: Цел = 0",
@@ -69,6 +70,7 @@ var invalid_texts = []string{
 //===
 
 func TestValid(t *testing.T) {
+	fmt.Printf("--- valid tests: %d ---\n", len(valid_texts))
 	t.Run("valid tests", func(t *testing.T) {
 		for _, text := range valid_texts {
 			checkValid(t, text)
@@ -77,6 +79,7 @@ func TestValid(t *testing.T) {
 }
 
 func TestInvalid(t *testing.T) {
+	fmt.Printf("--- tests for errors: %d ---\n", len(invalid_texts))
 	t.Run("invalid tests", func(t *testing.T) {
 		for _, text := range invalid_texts {
 			checkInvalid(t, text)

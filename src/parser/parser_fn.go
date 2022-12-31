@@ -49,7 +49,7 @@ func (p *Parser) parseFn() *ast.Function {
 		p.next()
 
 		switch mod {
-		case "@внешняя":
+		case "@внеш":
 			n.External = true
 		default:
 			p.error(p.pos, "ПАР-ОШ-МОДИФИКАТОР", mod)
