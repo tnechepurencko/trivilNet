@@ -24,15 +24,19 @@ func (genc *genContext) typeRef(t ast.Type) string {
 func predefinedTypeName(name string) string {
 	switch name {
 	case "Байт":
-		return "int8_t"
+		return "TByte"
 		//	case "Цел":
 		//		return "int"
 	case "Цел64":
-		return "int64_t"
+		return "TInt64"
 	case "Вещ64":
-		return "double"
+		return "TFloat64"
 	case "Лог":
-		return "_Bool"
+		return "TBool"
+	case "Символ":
+		return "TSymbol"
+	case "Строка":
+		return "TString"
 	default:
 		panic(fmt.Sprintf("predefinedTypeName: ni %s", name))
 	}
