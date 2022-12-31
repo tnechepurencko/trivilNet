@@ -48,6 +48,9 @@ func (cc *checkContext) conversion(x *ast.ConversionExpr) {
 	case ast.Symbol:
 		cc.conversionToSymbol(x)
 		return
+	case ast.String:
+		cc.conversionToString(x)
+		return
 
 	}
 
@@ -201,6 +204,40 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Symbol.Name)
 	x.Typ = invalidType(x.Pos)
 
+}
+
+func (cc *checkContext) conversionToString(x *ast.ConversionExpr) {
+
+	var t = ast.UnderType(x.X.GetType())
+
+	switch t {
+	case ast.String:
+		env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(x.X.GetType()))
+		x.Typ = ast.String
+		return
+	case ast.Symbol:
+		var lit = literal(x.X)
+		if lit != nil {
+			lit.Typ = ast.String
+			x.Done = true
+		}
+		x.Typ = ast.String
+		return
+	}
+
+	vt, ok := t.(*ast.VectorType)
+	if ok {
+
+		var et = ast.UnderType(vt.ElementTyp)
+
+		if et == ast.Byte || et == ast.Symbol {
+			x.Typ = ast.String
+			return
+		}
+	}
+
+	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.String.Name)
+	x.Typ = invalidType(x.Pos)
 }
 
 //====
