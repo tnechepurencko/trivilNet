@@ -128,7 +128,17 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		return true
 	}
 
-	// TODO: символ := строковый литерал из одного символа, function types, целые литералы?, ...
+	var t = ast.UnderType(lt)
+
+	if t == ast.Symbol {
+		var lit = oneSymbolString(r)
+		if lit != nil {
+			lit.Typ = ast.Symbol
+			return true
+		}
+	}
+
+	// TODO: function types, целые литералы?, ...
 	return false
 }
 

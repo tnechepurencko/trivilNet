@@ -52,7 +52,7 @@ type UnaryExpr struct {
 
 type LiteralExpr struct {
 	ExprBase
-	Kind lexer.Token
+	Kind lexer.Token // если STRING - см. Typ - может быть Символ или Байт
 	Lit  string
 }
 

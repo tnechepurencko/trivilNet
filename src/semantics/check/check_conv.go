@@ -8,7 +8,7 @@ import (
 
 	"trivil/ast"
 	"trivil/env"
-	//	"trivil/lexer"
+	"trivil/lexer"
 )
 
 var _ = fmt.Printf
@@ -201,4 +201,19 @@ func literal(expr ast.Expr) *ast.LiteralExpr {
 		}
 	}
 	return nil
+}
+
+func oneSymbolString(expr ast.Expr) *ast.LiteralExpr {
+	var lit = literal(expr)
+	if lit == nil {
+		return nil
+	}
+	if lit.Kind != lexer.STRING {
+		return nil
+	}
+
+	if utf8.RuneCountInString(lit.Lit) != 1 {
+		return nil
+	}
+	return lit
 }
