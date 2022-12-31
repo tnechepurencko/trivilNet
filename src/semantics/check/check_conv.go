@@ -54,8 +54,11 @@ func (cc *checkContext) conversion(x *ast.ConversionExpr) {
 
 	}
 
-	switch target.(type) {
-
+	switch xt := target.(type) {
+	case *ast.VectorType:
+		cc.conversionToVector(x, xt)
+	case *ast.ClassType:
+		cc.conversionToClass(x, xt)
 	default:
 		panic(fmt.Sprintf("ni %T '%s'", target, ast.TypeString(target)))
 	}
@@ -240,6 +243,49 @@ func (cc *checkContext) conversionToString(x *ast.ConversionExpr) {
 	x.Typ = invalidType(x.Pos)
 }
 
+func (cc *checkContext) conversionToVector(x *ast.ConversionExpr, target *ast.VectorType) {
+
+	var t = ast.UnderType(x.X.GetType())
+
+	if t == ast.String {
+
+		var et = ast.UnderType(target.ElementTyp)
+
+		if et == ast.Byte || et == ast.Symbol {
+			x.Typ = x.TargetTyp
+			return
+		}
+	}
+	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА",
+		ast.TypeString(x.X.GetType()), ast.TypeString(x.TargetTyp))
+	x.Typ = invalidType(x.Pos)
+
+}
+
+func (cc *checkContext) conversionToClass(x *ast.ConversionExpr, target *ast.ClassType) {
+
+	var t = ast.UnderType(x.X.GetType())
+
+	if t == target {
+		env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(target))
+		x.Typ = x.TargetTyp
+		return
+	}
+
+	tClass, ok := t.(*ast.ClassType)
+	if ok {
+		if !isDerivedClass(tClass, target) {
+			env.AddError(x.Pos, "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
+		}
+		return
+	}
+
+	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА",
+		ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
+	x.Typ = invalidType(x.Pos)
+
+}
+
 //====
 
 func literal(expr ast.Expr) *ast.LiteralExpr {
@@ -268,4 +314,18 @@ func oneSymbolString(expr ast.Expr) *ast.LiteralExpr {
 		return nil
 	}
 	return lit
+}
+
+func isDerivedClass(base, derived *ast.ClassType) bool {
+
+	var c = derived
+
+	for c.BaseTyp != nil {
+		var t = ast.UnderType(c.BaseTyp)
+		if t == base {
+			return true
+		}
+		c = t.(*ast.ClassType)
+	}
+	return false
 }

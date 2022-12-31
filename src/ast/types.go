@@ -176,3 +176,16 @@ func TypeString(t Type) string {
 		return fmt.Sprintf("TypeString ni: %T", t)
 	}
 }
+
+func TypeName(t Type) string {
+
+	if tr, ok := t.(*TypeRef); ok {
+		if tr.ModuleName != "" {
+			return tr.ModuleName + "." + tr.TypeName
+		} else {
+			return tr.TypeName
+		}
+	} else {
+		return TypeString(t)
+	}
+}
