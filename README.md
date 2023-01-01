@@ -14,3 +14,5 @@ Compiler lines:
 (dir -Include *.go -Recurse ).Count
 
 
+Руссификация консоли: https://remontka.pro/fix-cyrillic-windows-10/
+
