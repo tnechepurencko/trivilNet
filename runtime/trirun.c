@@ -22,12 +22,14 @@ void* mm_allocate(size_t size) {
 
 //==== strings
 
-TString tri_newString(TInt64 bytes, char* body) {
+TString tri_newLiteralString(TString* sptr, TInt64 bytes, char* body) {
+
+	if (*sptr != NULL) return *sptr;
 
 	size_t sz = sizeof(StringDesc) + bytes + 1; // +1 для 0x0
-	printf("sz=%lld\n", sz);
+//	printf("sz=%lld\n", sz);
 	void* mem = mm_allocate(sz);
-	printf("mem=%p\n", mem);
+//	printf("mem=%p\n", mem);
 
 	TString s = mem;
 	s->bytes = bytes;
@@ -36,6 +38,7 @@ TString tri_newString(TInt64 bytes, char* body) {
 	memcpy(s->body, body, bytes);
 	s->body[bytes] = 0x0;
 
+	*sptr = s;
 	
 	return s;
 }
