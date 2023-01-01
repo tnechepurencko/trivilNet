@@ -12,8 +12,14 @@ var _ = fmt.Printf
 func (genc *genContext) genModule() {
 
 	//=== gen types
+	for _, d := range genc.module.Decls {
+		d, ok := d.(*ast.TypeDecl)
+		if ok {
+			genc.genTypeDecl(d)
+		}
+	}
 
-	//=== gen decls
+	//=== gen vars, consts
 
 	//=== gen functions
 	for _, d := range genc.module.Decls {

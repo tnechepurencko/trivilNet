@@ -22,6 +22,8 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 		return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), x.Op.String(), genc.genExpr(x.Y))
 	case *ast.CallExpr:
 		return genc.genCall(x)
+	case *ast.GeneralBracketExpr:
+		return genc.genBracketExpr(x)
 
 	default:
 		panic(fmt.Sprintf("gen expression: ni %T", expr))
@@ -93,4 +95,23 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 	} else {
 		panic("ni")
 	}
+}
+
+func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
+
+	if x.Index != nil {
+		panic("ni")
+		//return
+	}
+
+	return genc.genArrayComposite(x.Composite)
+
+}
+
+func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
+	// tmp = alloc vector
+	// tmp->body[0] = ...
+	// expr - tmp
+
+	return ""
 }

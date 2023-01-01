@@ -9,16 +9,18 @@ import (
 var _ = fmt.Printf
 
 func (genc *genContext) typeRef(t ast.Type) string {
-	if tr, ok := t.(*ast.TypeRef); ok {
-		t = tr.Typ
+	var tr = t.(*ast.TypeRef)
+
+	if pt, ok := tr.Typ.(*ast.PredefinedType); ok {
+		return predefinedTypeName(pt.Name)
 	}
 
-	switch x := t.(type) {
-	case *ast.PredefinedType:
-		return predefinedTypeName(x.Name)
-	default:
-		panic(fmt.Sprintf("genTypeRef: ni %T", t))
+	if tr.ModuleName != "" {
+		panic("ni")
 	}
+
+	return genc.outName(tr.TypeName)
+
 }
 
 func predefinedTypeName(name string) string {
@@ -39,5 +41,19 @@ func predefinedTypeName(name string) string {
 		return "TString"
 	default:
 		panic(fmt.Sprintf("predefinedTypeName: ni %s", name))
+	}
+}
+
+func (genc *genContext) genTypeDecl(td *ast.TypeDecl) {
+	switch x := td.Typ.(type) {
+	case *ast.VectorType:
+		var tname = genc.outName(td.Name)
+		var desc = tname + "Desc"
+		var et = genc.typeRef(x.ElementTyp)
+		genc.c("typedef struct %s { TInt64 len; %s* body; } %s;", desc, et, desc)
+		genc.c("typedef %s* %s;", desc, tname)
+
+	default:
+		panic(fmt.Sprintf("getTypeDecl: ni %T", td.Typ))
 	}
 }
