@@ -32,10 +32,14 @@ func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
 	case lexer.INT, lexer.FLOAT:
 		return li.Lit
 	case lexer.STRING:
-		return "\"" + li.Lit + "\""
+		return genc.genStringLiteral(li)
 	default:
 		panic("ni")
 	}
+}
+
+func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
+	return fmt.Sprintf("%s(%s, %d, %s)", rt_newStringLiteral, "!", len(li.Lit), "\""+li.Lit+"\"")
 }
 
 func (genc *genContext) genCall(call *ast.CallExpr) string {

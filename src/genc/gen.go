@@ -16,8 +16,9 @@ type genContext struct {
 	module   *ast.Module
 	outname  string
 	outNames map[string]string
-	hlines   []string
-	clines   []string
+	header   []string
+	code     []string
+	globals  []string
 }
 
 func Generate(m *ast.Module) {
@@ -26,8 +27,9 @@ func Generate(m *ast.Module) {
 		module:   m,
 		outname:  env.OutName(m.Name),
 		outNames: make(map[string]string),
-		hlines:   make([]string, 0),
-		clines:   make([]string, 0),
+		header:   make([]string, 0),
+		code:     make([]string, 0),
+		globals:  make([]string, 0),
 	}
 
 	genc.startCode()
@@ -40,25 +42,55 @@ func Generate(m *ast.Module) {
 }
 
 func (genc *genContext) h(format string, args ...interface{}) {
-	genc.hlines = append(genc.hlines, fmt.Sprintf(format, args...))
+	genc.header = append(genc.header, fmt.Sprintf(format, args...))
 }
 
 func (genc *genContext) c(format string, args ...interface{}) {
-	genc.clines = append(genc.clines, fmt.Sprintf(format, args...))
+	genc.code = append(genc.code, fmt.Sprintf(format, args...))
+}
+
+func (genc *genContext) g(format string, args ...interface{}) {
+	genc.globals = append(genc.globals, fmt.Sprintf(format, args...))
+}
+
+func l(lines []string, format string, args ...interface{}) {
+	lines = append(lines, fmt.Sprintf(format, args...))
 }
 
 func (genc *genContext) startCode() {
-	var hname = fmt.Sprintf("_%s_H", genc.module.Name)
-	genc.h("#ifndef %s", hname)
-	genc.h("#define %s", hname)
-
-	genc.c("#include \"trirun.h\"")
-	genc.c("#include \"%s\"", genc.outname+".h")
-
 }
 
 func (genc *genContext) finishCode() {
+	var hname = fmt.Sprintf("_%s_H", genc.module.Name)
+
+	// header file
+	var lines = genc.header
+
+	genc.header = make([]string, 0)
+	genc.h("#ifndef %s", hname)
+	genc.h("#define %s", hname)
+	genc.h("")
+
+	genc.header = append(genc.header, lines...)
+
 	genc.h("#endif")
+
+	// code
+	lines = genc.code
+	genc.code = make([]string, 0)
+
+	genc.c("#include \"trirun.h\"")
+	genc.c("#include \"%s\"", genc.outname+".h")
+	genc.c("")
+
+	if len(genc.globals) != 0 {
+		genc.c("//--- globals")
+		genc.code = append(genc.code, genc.globals...)
+		genc.c("//--- end globals")
+		genc.c("")
+	}
+
+	genc.code = append(genc.code, lines...)
 }
 
 //====
@@ -79,8 +111,8 @@ func (genc *genContext) outName(name string) string {
 func (genc *genContext) save() {
 	var folder = env.PrepareOutFolder()
 
-	writeFile(folder, genc.outname, ".h", genc.hlines)
-	writeFile(folder, genc.outname, ".c", genc.clines)
+	writeFile(folder, genc.outname, ".h", genc.header)
+	writeFile(folder, genc.outname, ".c", genc.code)
 }
 
 func writeFile(folder, name, ext string, lines []string) {
@@ -100,11 +132,11 @@ func writeFile(folder, name, ext string, lines []string) {
 
 func (genc *genContext) show() {
 	fmt.Println("---- header ----")
-	for _, s := range genc.hlines {
+	for _, s := range genc.header {
 		fmt.Println(s)
 	}
 	fmt.Println("---- c code ----")
-	for _, s := range genc.clines {
+	for _, s := range genc.code {
 		fmt.Println(s)
 	}
 	fmt.Println("---- end c  ----")
