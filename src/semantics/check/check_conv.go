@@ -76,28 +76,28 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 
 	case ast.Int64,
 		ast.Symbol:
-		var lit = literal(x.X)
-		if lit != nil {
-			i, err := strconv.ParseInt(lit.Lit, 0, 64)
+		var li = literal(x.X)
+		if li != nil {
+			i, err := strconv.ParseInt(li.Lit, 0, 64)
 			if err != nil || i < 0 || i > 255 {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
 			} else {
 				x.Done = true
-				lit.Typ = ast.Byte
+				li.Typ = ast.Byte
 			}
 		}
 		x.Typ = ast.Byte
 		return
 	case ast.String:
-		var lit = literal(x.X)
-		if lit != nil {
-			if utf8.RuneCountInString(lit.Lit) == 1 {
-				r, _ := utf8.DecodeRuneInString(lit.Lit)
+		var li = literal(x.X)
+		if li != nil {
+			if utf8.RuneCountInString(li.Lit) == 1 {
+				r, _ := utf8.DecodeRuneInString(li.Lit)
 				if r < 0 || r > 255 {
 					env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
 				} else {
 					x.Done = true
-					lit.Typ = ast.Byte
+					li.Typ = ast.Byte
 				}
 
 			} else {
@@ -125,9 +125,9 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 		return
 	case ast.Byte,
 		ast.Symbol:
-		var lit = literal(x.X)
-		if lit != nil {
-			lit.Typ = ast.Byte
+		var li = literal(x.X)
+		if li != nil {
+			li.Typ = ast.Byte
 			x.Done = true
 		}
 		x.Typ = ast.Int64
@@ -137,11 +137,11 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 		x.Typ = ast.Int64
 		return
 	case ast.String:
-		var lit = oneSymbolString(x.X)
-		if lit != nil {
-			r, _ := utf8.DecodeRuneInString(lit.Lit)
-			lit.Kind = lexer.INT
-			lit.Lit = fmt.Sprintf("0x%x", r)
+		var li = oneSymbolString(x.X)
+		if li != nil {
+			r, _ := utf8.DecodeRuneInString(li.Lit)
+			li.Kind = lexer.INT
+			li.Lit = fmt.Sprintf("0x%x", r)
 			x.Typ = ast.Int64
 			x.Done = true
 			return
@@ -183,14 +183,14 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 		return
 
 	case ast.Int64:
-		var lit = literal(x.X)
-		if lit != nil {
-			i, err := strconv.ParseInt(lit.Lit, 0, 64)
+		var li = literal(x.X)
+		if li != nil {
+			i, err := strconv.ParseInt(li.Lit, 0, 64)
 			if err != nil || i < 0 || i > unicode.MaxRune {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Symbol.Name)
 			} else {
 				x.Done = true
-				lit.Typ = ast.Symbol
+				li.Typ = ast.Symbol
 			}
 		}
 		x.Typ = ast.Symbol
@@ -219,9 +219,9 @@ func (cc *checkContext) conversionToString(x *ast.ConversionExpr) {
 		x.Typ = ast.String
 		return
 	case ast.Symbol:
-		var lit = literal(x.X)
-		if lit != nil {
-			lit.Typ = ast.String
+		var li = literal(x.X)
+		if li != nil {
+			li.Typ = ast.String
 			x.Done = true
 		}
 		x.Typ = ast.String
@@ -302,18 +302,18 @@ func literal(expr ast.Expr) *ast.LiteralExpr {
 }
 
 func oneSymbolString(expr ast.Expr) *ast.LiteralExpr {
-	var lit = literal(expr)
-	if lit == nil {
+	var li = literal(expr)
+	if li == nil {
 		return nil
 	}
-	if lit.Kind != lexer.STRING {
+	if li.Kind != lexer.STRING {
 		return nil
 	}
 
-	if utf8.RuneCountInString(lit.Lit) != 1 {
+	if utf8.RuneCountInString(li.Lit) != 1 {
 		return nil
 	}
-	return lit
+	return li
 }
 
 func isDerivedClass(base, derived *ast.ClassType) bool {
