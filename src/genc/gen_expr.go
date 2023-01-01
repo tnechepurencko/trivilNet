@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"trivil/ast"
 	"trivil/lexer"
+	"unicode/utf8"
 )
 
 var _ = fmt.Printf
@@ -39,7 +40,13 @@ func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
 }
 
 func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
-	return fmt.Sprintf("%s(%s, %d, %s)", rt_newStringLiteral, "!", len(li.Lit), "\""+li.Lit+"\"")
+
+	var name = genc.localName(nm_stringLiteral)
+	genc.g("TString %s = NULL;", name)
+
+	return fmt.Sprintf("%s(&%s, %d, %d, %s)",
+		rt_newLiteralString,
+		name, len(li.Lit), utf8.RuneCountInString(li.Lit), "\""+li.Lit+"\"")
 }
 
 func (genc *genContext) genCall(call *ast.CallExpr) string {

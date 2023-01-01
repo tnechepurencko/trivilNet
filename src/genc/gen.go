@@ -16,6 +16,7 @@ type genContext struct {
 	module   *ast.Module
 	outname  string
 	outNames map[string]string
+	autoNo   int // used for names
 	header   []string
 	code     []string
 	globals  []string
