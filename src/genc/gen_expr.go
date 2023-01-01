@@ -51,6 +51,10 @@ func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
 
 func (genc *genContext) genCall(call *ast.CallExpr) string {
 
+	if call.StdFunc != nil {
+		return genc.genStdFuncCall(call)
+	}
+
 	var left = genc.genExpr(call.X)
 
 	var cargs = ""
@@ -65,5 +69,28 @@ func (genc *genContext) genCall(call *ast.CallExpr) string {
 	}
 
 	return left + "(" + cargs + ")"
+}
 
+func (genc *genContext) genStdFuncCall(call *ast.CallExpr) string {
+
+	switch call.StdFunc.Name {
+	case "длина":
+		return genc.genStdLen(call)
+
+	default:
+		panic("assert: не реализована стандартная функция " + call.StdFunc.Name)
+	}
+}
+
+func (genc *genContext) genStdLen(call *ast.CallExpr) string {
+	var a = call.Args[0]
+
+	var t = ast.UnderType(a.GetType())
+	if t == ast.String {
+
+		return fmt.Sprintf("%s(%s)", rt_lenString, genc.genExpr(a))
+
+	} else {
+		panic("ni")
+	}
 }

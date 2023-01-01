@@ -19,7 +19,7 @@ typedef StringDesc* TString;
 
 //==== strings
 
-TString tri_newLiteralString(TString* sptr, TInt64 bytes, char* body);
+TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* body);
 
 TInt64 tri_lenString(TString s);
 

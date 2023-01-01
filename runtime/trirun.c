@@ -22,7 +22,7 @@ void* mm_allocate(size_t size) {
 
 //==== strings
 
-TString tri_newLiteralString(TString* sptr, TInt64 bytes, char* body) {
+TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* body) {
 
 	if (*sptr != NULL) return *sptr;
 
@@ -33,7 +33,7 @@ TString tri_newLiteralString(TString* sptr, TInt64 bytes, char* body) {
 
 	TString s = mem;
 	s->bytes = bytes;
-	s->symbols = -1;
+	s->symbols = symbols;
 	s->body = mem + sizeof(StringDesc);
 	memcpy(s->body, body, bytes);
 	s->body[bytes] = 0x0;
