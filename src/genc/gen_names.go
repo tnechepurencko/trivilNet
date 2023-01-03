@@ -7,6 +7,8 @@ import (
 
 var _ = fmt.Printf
 
+const typeNamePrefix = "T"
+
 // prefixes for generated names
 const (
 	nm_stringLiteral = "strlit"

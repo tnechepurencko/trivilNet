@@ -106,6 +106,9 @@ func (genc *genContext) outName(name string) string {
 
 	return out
 }
+func (genc *genContext) outTypeName(name string) string {
+	return genc.outName(typeNamePrefix + name)
+}
 
 //====
 

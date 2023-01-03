@@ -26,6 +26,8 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 		return genc.genCall(x)
 	case *ast.GeneralBracketExpr:
 		return genc.genBracketExpr(x)
+	case *ast.ClassCompositeExpr:
+		return genc.genClassComposite(x)
 
 	default:
 		panic(fmt.Sprintf("gen expression: ni %T", expr))
@@ -155,5 +157,33 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 
 	genc.c(s)
 
+	return name
+}
+
+func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
+	var name = genc.localName("loc")
+	/*
+		var vt = ast.UnderType(x.Typ).(*ast.VectorType)
+		var s = fmt.Sprintf("%s %s = %s(sizeof(%s), %d);",
+			genc.typeRef(x.Typ),
+			name,
+			rt_newVector,
+			genc.typeRef(vt.ElementTyp),
+			len(x.Elements))
+
+		var list = make([]string, len(x.Elements))
+		for i, e := range x.Elements {
+			var inx string
+			if e.Key == nil {
+				inx = fmt.Sprintf("%d", i)
+			} else {
+				inx = genc.genExpr(e.Key)
+			}
+			list[i] = fmt.Sprintf("%s->body[%s] = %s;", name, inx, genc.genExpr(e.Value))
+		}
+		s += strings.Join(list, " ")
+
+		genc.c(s)
+	*/
 	return name
 }
