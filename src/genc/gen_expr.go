@@ -2,6 +2,8 @@ package genc
 
 import (
 	"fmt"
+	"strings"
+
 	"trivil/ast"
 	"trivil/lexer"
 	"unicode/utf8"
@@ -92,6 +94,8 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 
 		return fmt.Sprintf("%s(%s)", rt_lenString, genc.genExpr(a))
 
+	} else if _, ok := t.(*ast.VectorType); ok {
+		return fmt.Sprintf("%s(%s)", rt_lenVector, genc.genExpr(a))
 	} else {
 		panic("ni")
 	}
@@ -109,9 +113,29 @@ func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 }
 
 func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
-	// tmp = alloc vector
-	// tmp->body[0] = ...
-	// expr - tmp
+	var name = genc.localName("loc")
 
-	return ""
+	var vt = ast.UnderType(x.Typ).(*ast.VectorType)
+	var s = fmt.Sprintf("%s %s = %s(sizeof(%s), %d);",
+		genc.typeRef(x.Typ),
+		name,
+		rt_newVector,
+		genc.typeRef(vt.ElementTyp),
+		len(x.Elements))
+
+	var list = make([]string, len(x.Elements))
+	for i, e := range x.Elements {
+		var inx string
+		if e.Key == nil {
+			inx = fmt.Sprintf("%d", i)
+		} else {
+			inx = genc.genExpr(e.Key)
+		}
+		list[i] = fmt.Sprintf("%s->body[%s] = %s;", name, inx, genc.genExpr(e.Value))
+	}
+	s += strings.Join(list, " ")
+
+	genc.c(s)
+
+	return name
 }
