@@ -314,7 +314,12 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
 	switch x.Op {
 	case lexer.SUB:
-		panic("ni")
+		var t = x.X.GetType()
+		if !ast.IsInt64(t) && !ast.IsFloatType(t) {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
+				ast.TypeString(x.X.GetType()), x.Op.String())
+		}
+		x.Typ = t
 	case lexer.NOT:
 		if !ast.IsBoolType(x.X.GetType()) {
 			env.AddError(x.X.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",

@@ -15,11 +15,11 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		return genc.outName(x.Name)
+		return genc.genIdent(x)
 	case *ast.LiteralExpr:
 		return genc.genLiteral(x)
 	case *ast.UnaryExpr:
-		return x.Op.String() + genc.genExpr(x.X)
+		return fmt.Sprintf("%s(%s)", x.Op.String(), genc.genExpr(x.X))
 	case *ast.BinaryExpr:
 		return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), x.Op.String(), genc.genExpr(x.Y))
 	case *ast.CallExpr:
@@ -30,6 +30,10 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 	default:
 		panic(fmt.Sprintf("gen expression: ni %T", expr))
 	}
+}
+
+func (genc *genContext) genIdent(x *ast.IdentExpr) string {
+	return genc.outName(x.Name)
 }
 
 func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
@@ -104,8 +108,22 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 
 	if x.Index != nil {
-		panic("ni")
-		//return
+		var name string
+		if id, ok := x.X.(*ast.IdentExpr); ok {
+			name = genc.genIdent(id)
+		} else {
+			name = genc.localName("loc")
+
+			genc.c("%s %s = %s;",
+				genc.typeRef(x.X.GetType()),
+				name,
+				genc.genExpr(x.X))
+		}
+		return fmt.Sprintf("%s->body[%s(%s, %s)]",
+			name,
+			rt_vcheck,
+			name,
+			genc.genExpr(x.Index))
 	}
 
 	return genc.genArrayComposite(x.Composite)

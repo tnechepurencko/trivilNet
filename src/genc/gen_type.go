@@ -9,17 +9,23 @@ import (
 var _ = fmt.Printf
 
 func (genc *genContext) typeRef(t ast.Type) string {
-	var tr = t.(*ast.TypeRef)
+	switch x := t.(type) {
+	case *ast.PredefinedType:
+		return predefinedTypeName(x.Name)
+	case *ast.TypeRef:
+		if pt, ok := x.Typ.(*ast.PredefinedType); ok {
+			return predefinedTypeName(pt.Name)
+		}
 
-	if pt, ok := tr.Typ.(*ast.PredefinedType); ok {
-		return predefinedTypeName(pt.Name)
+		if x.ModuleName != "" {
+			panic("ni")
+		}
+
+		return genc.outName(x.TypeName)
+
+	default:
+		panic(fmt.Sprintf("assert: %T", t))
 	}
-
-	if tr.ModuleName != "" {
-		panic("ni")
-	}
-
-	return genc.outName(tr.TypeName)
 
 }
 

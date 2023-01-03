@@ -19,6 +19,7 @@ const (
 	rt_lenString        = rt_prefix + "lenString"
 	rt_newVector        = rt_prefix + "newVector"
 	rt_lenVector        = rt_prefix + "lenVector"
+	rt_vcheck           = rt_prefix + "vcheck"
 )
 
 func (genc *genContext) localName(prefix string) string {
