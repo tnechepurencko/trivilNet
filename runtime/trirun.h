@@ -23,6 +23,15 @@ TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* 
 
 TInt64 tri_lenString(TString s);
 
+//==== vector
+
+void* tri_newVector(size_t element_size, TInt64 len);
+
+TInt64 tri_lenVector(void* vd);
+
+TInt64 tri_vcheck(void* vd, TInt64 inx);
+
+
 //==== console
 
 //void print_int(int i);

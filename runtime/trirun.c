@@ -49,6 +49,35 @@ TInt64 tri_lenString(TString s) {
 	return 0;
 }
 
+//==== vector
+
+
+typedef struct VectorDesc { TInt64 len; TInt64* body; } VectorDesc;
+
+
+void* tri_newVector(size_t element_size, TInt64 len) {
+	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
+	v->len = len;
+	v->body = mm_allocate(element_size * len);
+	
+	memset(v->body, 0x0, element_size * len);
+	return v;
+}
+
+TInt64 tri_lenVector(void* vd) {
+	VectorDesc* v = vd;
+	return v->len;	
+}
+
+TInt64 tri_vcheck(void* vd, TInt64 inx) {
+	VectorDesc* v = vd;
+	if (inx < 0 || inx >= v->len) {
+		crash("vector index out of bounds");
+	}
+	
+	return inx;
+}
+
 //==== console
 
 /*
