@@ -9,6 +9,14 @@ var _ = fmt.Printf
 
 const typeNamePrefix = "T"
 
+// meta информация
+const (
+	nm_VT_suffix   = "_VT"
+	nm_VT_field    = "_vtable_"
+	nm_meta_suffix = "_Meta"
+	nm_meta_field  = "_meta_"
+)
+
 // prefixes for generated names
 const (
 	nm_stringLiteral = "strlit"
