@@ -10,6 +10,7 @@ typedef _Bool TBool;
 typedef uint32_t TSymbol;
 
 typedef struct StringDesc {
+//TODO meta
   int64_t bytes;
   int64_t symbols;
   uint8_t* body;
@@ -30,6 +31,10 @@ void* tri_newVector(size_t element_size, TInt64 len);
 TInt64 tri_lenVector(void* vd);
 
 TInt64 tri_vcheck(void* vd, TInt64 inx);
+
+//==== class
+
+void* tri_newObject(void* meta);
 
 
 //==== console

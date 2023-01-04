@@ -78,6 +78,30 @@ TInt64 tri_vcheck(void* vd, TInt64 inx) {
 	return inx;
 }
 
+//==== class
+
+typedef struct VTMini { size_t self_size; } VTMini;
+typedef struct MetaMini { size_t object_size; } MetaMini;
+typedef struct ClassMini { void* meta; } ClassMini;
+
+
+
+void* tri_newObject(void* meta) {
+	
+	VTMini* vt = meta;
+	size_t vt_sz = vt->self_size;
+	printf("vt sz=%lld\n", vt_sz);
+	MetaMini* m = meta + vt_sz;
+	size_t o_sz = m->object_size;
+	printf("o sz=%lld\n", o_sz);
+	
+	ClassMini* c = mm_allocate(o_sz);
+	c->meta = meta;
+	
+	return c;
+}
+
+
 //==== console
 
 /*
