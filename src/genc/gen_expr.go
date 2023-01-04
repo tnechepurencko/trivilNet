@@ -22,6 +22,12 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 		return fmt.Sprintf("%s(%s)", x.Op.String(), genc.genExpr(x.X))
 	case *ast.BinaryExpr:
 		return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), x.Op.String(), genc.genExpr(x.Y))
+	case *ast.SelectorExpr:
+		if x.X == nil {
+			panic("ni")
+		} else {
+			return fmt.Sprintf("%s->%s", genc.genExpr(x.X), genc.outName(x.Name))
+		}
 	case *ast.CallExpr:
 		return genc.genCall(x)
 	case *ast.GeneralBracketExpr:
@@ -170,19 +176,13 @@ func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
 		name,
 		rt_newObject,
 		nm_meta_var_prefix+tname)
-	/*
-		var list = make([]string, len(x.Elements))
-		for i, e := range x.Elements {
-			var inx string
-			if e.Key == nil {
-				inx = fmt.Sprintf("%d", i)
-			} else {
-				inx = genc.genExpr(e.Key)
-			}
-			list[i] = fmt.Sprintf("%s->body[%s] = %s;", name, inx, genc.genExpr(e.Value))
-		}
-		s += strings.Join(list, " ")
-	*/
+
+	var list = make([]string, len(x.Values))
+	for i, v := range x.Values {
+		list[i] = fmt.Sprintf("%s->%s = %s;",
+			name, genc.outName(v.Name), genc.genExpr(v.Value))
+	}
+	s += strings.Join(list, " ")
 
 	genc.c(s)
 	return name
