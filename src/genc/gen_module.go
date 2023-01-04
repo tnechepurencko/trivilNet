@@ -81,6 +81,8 @@ func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 
 	genc.c("int main() {")
 
+	genc.code = append(genc.code, genc.init...)
+
 	if entry != nil {
 		genc.genStatementSeq(entry.Seq)
 	}

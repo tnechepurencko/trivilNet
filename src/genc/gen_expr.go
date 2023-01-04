@@ -162,15 +162,15 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 
 func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
 	var name = genc.localName("loc")
-	/*
-		var vt = ast.UnderType(x.Typ).(*ast.VectorType)
-		var s = fmt.Sprintf("%s %s = %s(sizeof(%s), %d);",
-			genc.typeRef(x.Typ),
-			name,
-			rt_newVector,
-			genc.typeRef(vt.ElementTyp),
-			len(x.Elements))
 
+	//	var ct = ast.UnderType(x.Typ).(*ast.ClassType)
+	var tname = genc.typeRef(x.Typ)
+	var s = fmt.Sprintf("%s %s = %s(&%s);",
+		tname,
+		name,
+		rt_newObject,
+		nm_meta_var_prefix+tname)
+	/*
 		var list = make([]string, len(x.Elements))
 		for i, e := range x.Elements {
 			var inx string
@@ -182,8 +182,8 @@ func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
 			list[i] = fmt.Sprintf("%s->body[%s] = %s;", name, inx, genc.genExpr(e.Value))
 		}
 		s += strings.Join(list, " ")
-
-		genc.c(s)
 	*/
+
+	genc.c(s)
 	return name
 }

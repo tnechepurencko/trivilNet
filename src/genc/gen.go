@@ -20,6 +20,7 @@ type genContext struct {
 	header   []string
 	code     []string
 	globals  []string
+	init     []string
 }
 
 func Generate(m *ast.Module) {
@@ -31,6 +32,7 @@ func Generate(m *ast.Module) {
 		header:   make([]string, 0),
 		code:     make([]string, 0),
 		globals:  make([]string, 0),
+		init:     make([]string, 0),
 	}
 
 	genc.startCode()
