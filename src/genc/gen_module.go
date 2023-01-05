@@ -42,7 +42,21 @@ func (genc *genContext) genFunction(f *ast.Function) {
 
 	var ft = f.Typ.(*ast.FuncType)
 
-	genc.c("%s %s(%s) {", genc.returnType(ft), genc.outName(f.Name), genc.params(ft))
+	var receiver string
+	if f.Recv != nil {
+		receiver = fmt.Sprintf("%s %s",
+			genc.typeRef(f.Recv.Typ),
+			genc.outName(f.Recv.Name))
+		if len(ft.Params) > 0 {
+			receiver += ", "
+		}
+	}
+
+	genc.c("%s %s(%s%s) {",
+		genc.returnType(ft),
+		genc.outFnName(f),
+		receiver,
+		genc.params(ft))
 
 	genc.genStatementSeq(f.Seq)
 
@@ -55,7 +69,6 @@ func (genc *genContext) returnType(ft *ast.FuncType) string {
 	} else {
 		return genc.typeRef(ft.ReturnTyp)
 	}
-
 }
 
 func (genc *genContext) params(ft *ast.FuncType) string {
@@ -72,6 +85,18 @@ func (genc *genContext) params(ft *ast.FuncType) string {
 
 	return b.String()
 }
+
+func (genc *genContext) outFnName(f *ast.Function) string {
+
+	var name = genc.outName(f.Name)
+
+	if f.Recv != nil {
+		name = genc.typeRef(f.Recv.Typ) + "_" + name
+	}
+	return name
+}
+
+//==== entry
 
 func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 
