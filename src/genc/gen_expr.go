@@ -71,8 +71,18 @@ func (genc *genContext) genCall(call *ast.CallExpr) string {
 		return genc.genStdFuncCall(call)
 	}
 
+	if isMethodCall(call.X) {
+		return genc.genMethodCall(call)
+	}
+
 	var left = genc.genExpr(call.X)
 
+	var cargs = genc.genArgs(call)
+
+	return left + "(" + cargs + ")"
+}
+
+func (genc *genContext) genArgs(call *ast.CallExpr) string {
 	var cargs = ""
 	for i, a := range call.Args {
 		var ca = genc.genExpr(a)
@@ -83,8 +93,46 @@ func (genc *genContext) genCall(call *ast.CallExpr) string {
 			cargs += ", "
 		}
 	}
+	return cargs
+}
 
-	return left + "(" + cargs + ")"
+func isMethodCall(left ast.Expr) bool {
+	sel, ok := left.(*ast.SelectorExpr)
+	if !ok {
+		return false
+	}
+
+	f, ok := sel.Obj.(*ast.Function)
+	if !ok {
+		return false
+	}
+
+	return f.Recv != nil
+}
+
+func (genc *genContext) genMethodCall(call *ast.CallExpr) string {
+
+	sel := call.X.(*ast.SelectorExpr)
+	f := sel.Obj.(*ast.Function)
+
+	var name string
+	if id, ok := sel.X.(*ast.IdentExpr); ok {
+		name = genc.genIdent(id)
+	} else {
+		name = genc.localName("loc")
+
+		genc.c("%s %s = %s;",
+			genc.typeRef(sel.X.GetType()),
+			name,
+			genc.genExpr(sel.X))
+	}
+
+	var args = name
+	if len(call.Args) > 0 {
+		args += ", " + genc.genArgs(call)
+	}
+
+	return fmt.Sprintf("%s->%s->%s(%s)", name, nm_VT_field, genc.outName(f.Name), args)
 }
 
 func (genc *genContext) genStdFuncCall(call *ast.CallExpr) string {
