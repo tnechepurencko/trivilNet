@@ -2,6 +2,7 @@ package genc
 
 import (
 	"fmt"
+	"strings"
 
 	"trivil/ast"
 )
@@ -66,25 +67,24 @@ func (genc *genContext) genTypeDecl(td *ast.TypeDecl) {
 	}
 }
 
+// genClassType - forward VT
+// genClassDesc - before entry
 func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 
 	var tname = genc.outTypeName(td.Name)
 	var tname_st = tname + "_ST"
-	var meta_type = tname + nm_meta_suffix
 	var vt_type = tname + nm_VT_suffix
 
-	var vtable = collectVTable(x)
-
-	genc.genVTable(x, vtable, meta_type, vt_type)
-
 	var fields = make([]string, len(x.Fields)+1)
-	fields[0] = fmt.Sprintf("%s* %s;", vt_type, nm_VT_field)
+	fields[0] = fmt.Sprintf("struct %s* %s;", vt_type, nm_VT_field)
 
 	for i, f := range x.Fields {
 		fields[i+1] = fmt.Sprintf("%s %s;",
 			genc.typeRef(f.Typ),
 			genc.outName(f.Name))
 	}
+
+	genc.c("struct %s;", vt_type)
 	genc.c("typedef struct %s {", tname_st)
 
 	genc.code = append(genc.code, fields...)
@@ -93,10 +93,23 @@ func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 	genc.c("typedef %s* %s;", tname_st, tname)
 	genc.c("")
 
+}
+
+func (genc *genContext) genClassDesc(td *ast.TypeDecl, x *ast.ClassType) {
+
+	var tname = genc.outTypeName(td.Name)
+	var tname_st = tname + "_ST"
+	var meta_type = tname + nm_meta_suffix
+	var vt_type = tname + nm_VT_suffix
+
+	var vtable = collectVTable(x)
+
+	genc.genVTable(x, vtable, tname, meta_type, vt_type)
+
 	genc.genClassInit(x, vtable, tname, tname_st, meta_type, vt_type)
 }
 
-func (genc *genContext) genVTable(x *ast.ClassType, vtable []*ast.Function, meta_type, vt_type string) {
+func (genc *genContext) genVTable(x *ast.ClassType, vtable []*ast.Function, tname, meta_type, vt_type string) {
 
 	genc.c("typedef struct %s { size_t object_size; } %s;", meta_type, meta_type)
 
@@ -104,10 +117,26 @@ func (genc *genContext) genVTable(x *ast.ClassType, vtable []*ast.Function, meta
 	genc.c("size_t self_size;")
 
 	for _, f := range vtable {
-		genc.c("%s %s;", "ftype", genc.outName(f.Name))
+		genc.c("%s", genc.genMethodField(f, tname))
 	}
 
 	genc.c("} %s;", vt_type)
+}
+
+func (genc *genContext) genMethodField(f *ast.Function, tname string) string {
+	var ft = f.Typ.(*ast.FuncType)
+
+	var ps = make([]string, len(ft.Params)+1)
+
+	ps[0] = tname
+	for i, p := range ft.Params {
+		ps[i+1] = genc.typeRef(p.Typ)
+	}
+
+	return fmt.Sprintf("%s (*%s)(%s);",
+		genc.returnType(ft),
+		genc.outName(f.Name),
+		strings.Join(ps, ", "))
 }
 
 func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, tname, tname_st, meta_type, vt_type string) {
@@ -122,7 +151,7 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 	genc.c("%s.meta.object_size = sizeof(%s);", meta_var, tname_st)
 
 	for _, f := range vtable {
-		genc.c("%s.vt.%s = %s;", meta_var, genc.outName(f.Name), genc.outFnName(f))
+		genc.c("%s.vt.%s = &%s;", meta_var, genc.outName(f.Name), genc.outFnName(f))
 	}
 
 	genc.c("}")
@@ -139,7 +168,7 @@ func collectVTable(x *ast.ClassType) []*ast.Function {
 	}
 	vtable = addMethodsToVT(vtable, x, x)
 
-	fmt.Printf("! len = %d\n", len(vtable))
+	//fmt.Printf("! len = %d\n", len(vtable))
 
 	return vtable
 }
@@ -153,7 +182,7 @@ func addMethodsToVT(vtable []*ast.Function, cl, sub *ast.ClassType) []*ast.Funct
 			panic("assert")
 		}
 		vtable = append(vtable, d.(*ast.Function))
-		fmt.Printf("! add %s\n", d.GetName())
+		//fmt.Printf("! add %s\n", d.GetName())
 	}
 	return vtable
 }
