@@ -15,7 +15,7 @@ const (
 	nm_VT_field        = "_vtable_"
 	nm_meta_suffix     = "_Meta"
 	nm_meta_field      = "_meta_"
-	nm_meta_var_prefix = "meta_"
+	nm_meta_var_suffix = "_desc"
 )
 
 // prefixes for generated names

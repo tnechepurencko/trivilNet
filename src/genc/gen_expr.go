@@ -175,7 +175,7 @@ func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
 		tname,
 		name,
 		rt_newObject,
-		nm_meta_var_prefix+tname)
+		tname+nm_meta_var_suffix)
 
 	var list = make([]string, len(x.Values))
 	for i, v := range x.Values {

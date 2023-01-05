@@ -73,7 +73,9 @@ func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 	var meta_type = tname + nm_meta_suffix
 	var vt_type = tname + nm_VT_suffix
 
-	genc.genVTable(x, meta_type, vt_type)
+	var vtable = collectVTable(x)
+
+	genc.genVTable(x, vtable, meta_type, vt_type)
 
 	var fields = make([]string, len(x.Fields)+1)
 	fields[0] = fmt.Sprintf("%s* %s;", vt_type, nm_VT_field)
@@ -91,33 +93,67 @@ func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 	genc.c("typedef %s* %s;", tname_st, tname)
 	genc.c("")
 
-	genc.genClassInit(x, tname, tname_st, meta_type, vt_type)
+	genc.genClassInit(x, vtable, tname, tname_st, meta_type, vt_type)
 }
 
-func (genc *genContext) genVTable(x *ast.ClassType, meta_type, vt_type string) {
+func (genc *genContext) genVTable(x *ast.ClassType, vtable []*ast.Function, meta_type, vt_type string) {
 
 	genc.c("typedef struct %s { size_t object_size; } %s;", meta_type, meta_type)
 
-	var methods []string //TODO
-
 	genc.c("typedef struct %s {", vt_type)
 	genc.c("size_t self_size;")
-	genc.code = append(genc.code, methods...)
+
+	for _, f := range vtable {
+		genc.c("%s %s;", "ftype", genc.outName(f.Name))
+	}
+
 	genc.c("} %s;", vt_type)
 }
 
-func (genc *genContext) genClassInit(x *ast.ClassType, tname, tname_st, meta_type, vt_type string) {
+func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, tname, tname_st, meta_type, vt_type string) {
 
-	var meta_var = nm_meta_var_prefix + tname
+	var meta_var = tname + nm_meta_var_suffix
 	genc.c("struct { %s vt; %s meta; } %s;", vt_type, meta_type, meta_var)
 
-	var meta_init_fn = "init_" + tname
+	var meta_init_fn = tname + "_init"
 
 	genc.c("void %s() {", meta_init_fn)
 	genc.c("%s.vt.self_size = sizeof(%s);", meta_var, vt_type)
 	genc.c("%s.meta.object_size = sizeof(%s);", meta_var, tname_st)
 
+	for _, f := range vtable {
+		genc.c("%s.vt.%s = %s;", meta_var, genc.outName(f.Name), genc.outFnName(f))
+	}
+
 	genc.c("}")
 
 	genc.init = append(genc.init, fmt.Sprintf("%s();", meta_init_fn))
+}
+
+func collectVTable(x *ast.ClassType) []*ast.Function {
+
+	var vtable = make([]*ast.Function, 0)
+
+	if x.BaseTyp != nil {
+		vtable = addMethodsToVT(vtable, x, ast.UnderType(x.BaseTyp).(*ast.ClassType))
+	}
+	vtable = addMethodsToVT(vtable, x, x)
+
+	fmt.Printf("! len = %d\n", len(vtable))
+
+	return vtable
+}
+
+func addMethodsToVT(vtable []*ast.Function, cl, sub *ast.ClassType) []*ast.Function {
+
+	for _, m := range sub.Methods {
+
+		d, ok := cl.Members[m.Name]
+		if !ok {
+			panic("assert")
+		}
+		vtable = append(vtable, d.(*ast.Function))
+		fmt.Printf("! add %s\n", d.GetName())
+	}
+	return vtable
 }
