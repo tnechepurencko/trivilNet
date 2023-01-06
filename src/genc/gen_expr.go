@@ -40,8 +40,21 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 	}
 }
 
-func (genc *genContext) genIdent(x *ast.IdentExpr) string {
-	return genc.outName(x.Name)
+func (genc *genContext) genIdent(id *ast.IdentExpr) string {
+
+	c, ok := id.Obj.(*ast.ConstDecl)
+	if ok {
+		blit, ok := c.Value.(*ast.BoolLiteral)
+		if ok {
+			if blit.Value {
+				return "true"
+			} else {
+				return "false"
+			}
+		}
+	}
+
+	return genc.outName(id.Name)
 }
 
 func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
