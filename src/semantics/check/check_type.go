@@ -57,6 +57,8 @@ func (cc *checkContext) classType(td *ast.TypeDecl, cl *ast.ClassType) {
 				var res = cc.compareFuncTypes(m.Typ, prevM.Typ)
 				if res != "" {
 					env.AddError(m.Pos, "СЕМ-РАЗНЫЕ-ТИПЫ-МЕТОДОВ", m.Name, res)
+				} else {
+					cl.Members[m.Name] = m
 				}
 			} else {
 				env.AddError(m.Pos, "СЕМ-ДУБЛЬ-В-КЛАССЕ", m.Name, env.PosString(prev.(ast.Node).GetPos()))
@@ -107,7 +109,7 @@ func (cc *checkContext) compareFuncTypes(t1, t2 ast.Type) string {
 	}
 
 	for i, p := range ft1.Params {
-		if p.Typ != ft2.Params[i].Typ {
+		if !equalTypes(p.Typ, ft2.Params[i].Typ) {
 			return fmt.Sprintf("не совпадает тип у параметра '%s'", p.Name)
 		}
 	}

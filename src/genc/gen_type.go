@@ -105,10 +105,12 @@ func (genc *genContext) genClassDesc(td *ast.TypeDecl, x *ast.ClassType) {
 
 	genc.genMeta(x, meta_type)
 
-	var vtable = collectVTable(x)
+	var col collector
 
-	genc.genVTable(x, vtable, tname, meta_type, vt_type)
-	genc.genClassInit(x, vtable, tname, tname_st, meta_type, vt_type)
+	col.collectVTable(x)
+
+	genc.genVTable(x, col.vtable, tname, meta_type, vt_type)
+	genc.genClassInit(x, col.vtable, tname, tname_st, meta_type, vt_type)
 }
 
 func (genc *genContext) genMeta(x *ast.ClassType, meta_type string) {
@@ -177,30 +179,45 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 	genc.init = append(genc.init, fmt.Sprintf("%s();", meta_init_fn))
 }
 
-func collectVTable(x *ast.ClassType) []*ast.Function {
+//=== collect methods
 
-	var vtable = make([]*ast.Function, 0)
-
-	if x.BaseTyp != nil {
-		vtable = addMethodsToVT(vtable, x, ast.UnderType(x.BaseTyp).(*ast.ClassType))
-	}
-	vtable = addMethodsToVT(vtable, x, x)
-
-	//fmt.Printf("! len = %d\n", len(vtable))
-
-	return vtable
+type collector struct {
+	cl     *ast.ClassType
+	vtable []*ast.Function
+	done   map[string]struct{}
 }
 
-func addMethodsToVT(vtable []*ast.Function, cl, sub *ast.ClassType) []*ast.Function {
+func (col *collector) collectVTable(x *ast.ClassType) {
+
+	col.cl = x
+	col.vtable = make([]*ast.Function, 0)
+	col.done = make(map[string]struct{})
+
+	if x.BaseTyp != nil {
+		col.addMethods(ast.UnderType(x.BaseTyp).(*ast.ClassType))
+	}
+	col.addMethods(x)
+
+	//fmt.Printf("! len = %d\n", len(col.vtable))
+}
+
+func (col *collector) addMethods(sub *ast.ClassType) {
 
 	for _, m := range sub.Methods {
 
-		d, ok := cl.Members[m.Name]
+		d, ok := col.cl.Members[m.Name]
 		if !ok {
 			panic("assert")
 		}
-		vtable = append(vtable, d.(*ast.Function))
-		//fmt.Printf("! add %s\n", d.GetName())
+
+		f := d.(*ast.Function)
+
+		_, ok = col.done[f.Name]
+		if !ok {
+			col.vtable = append(col.vtable, d.(*ast.Function))
+			col.done[f.Name] = struct{}{}
+			//fmt.Printf("! add %s\n", f.Name)
+		}
 	}
-	return vtable
+
 }
