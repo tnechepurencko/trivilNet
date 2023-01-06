@@ -213,7 +213,7 @@ literal
 	
 selector: '.' ident;
 arguments: '(' expression_list? ')'
-conversion: '‹' type_ref '›';
+conversion: '(:' type_ref ')';
 not_null_check: '!';  // or ^ a^.b 
 
 expression_list
