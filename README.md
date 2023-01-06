@@ -14,5 +14,8 @@ Compiler lines:
 (dir -Include *.go -Recurse ).Count
 
 
+UTF-8: https://github.com/JuliaStrings/utf8proc
+
+
 Руссификация консоли: https://remontka.pro/fix-cyrillic-windows-10/
 

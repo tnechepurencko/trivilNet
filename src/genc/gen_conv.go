@@ -32,12 +32,10 @@ func (genc *genContext) genConversion(x *ast.ConversionExpr) string {
 		return genc.castPredefined(expr, ast.Float64)
 	case ast.Symbol:
 		return genc.convertPredefined(expr, from, ast.Symbol)
-		/*
-			case ast.String:
-				cc.conversionToString(x)
-				return
-		*/
+	case ast.String:
+		return genc.convertToString(expr, ast.UnderType(x.X.GetType()))
 	}
+
 	switch /*xt :=*/ to.(type) {
 	/*
 		case *ast.VectorType:
@@ -58,4 +56,11 @@ func (genc *genContext) castPredefined(expr string, to *ast.PredefinedType) stri
 	return fmt.Sprintf("(%s)(%s)", predefinedTypeName(to.Name), expr)
 }
 
-//cast
+func (genc *genContext) convertToString(expr string, from ast.Type) string {
+
+	if from == ast.Symbol {
+		return genc.convertPredefined(expr, ast.Symbol, ast.String)
+	}
+
+	panic("ni")
+}
