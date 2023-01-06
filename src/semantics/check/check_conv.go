@@ -194,8 +194,10 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 		x.Typ = ast.Symbol
 		return
 	case ast.String:
-		var lit = oneSymbolString(x.X)
-		if lit != nil {
+		var li = oneSymbolString(x.X)
+		if li != nil {
+			li.Kind = ast.Lit_Symbol
+			li.Typ = ast.Symbol
 			x.Typ = ast.Symbol
 			x.Done = true
 			return
