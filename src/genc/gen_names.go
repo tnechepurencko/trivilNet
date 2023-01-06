@@ -9,13 +9,17 @@ var _ = fmt.Printf
 
 const typeNamePrefix = "T"
 
-// meta информация
+// класс струкура и мета информация
 const (
+	nm_class_struct_suffix = "_ST"
+	nm_class_fields        = "f"
+	nm_base_fields         = "_B"
+	nm_VT_field            = "vtable"
+
 	nm_VT_suffix       = "_VT"
-	nm_VT_field        = "_vtable_"
 	nm_meta_suffix     = "_Meta"
 	nm_meta_field      = "_meta_"
-	nm_meta_var_suffix = "_desc"
+	nm_desc_var_suffix = "_desc"
 )
 
 // prefixes for generated names

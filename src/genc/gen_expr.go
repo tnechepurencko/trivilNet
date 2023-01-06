@@ -23,11 +23,7 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 	case *ast.BinaryExpr:
 		return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), x.Op.String(), genc.genExpr(x.Y))
 	case *ast.SelectorExpr:
-		if x.X == nil {
-			panic("ni")
-		} else {
-			return fmt.Sprintf("%s->%s", genc.genExpr(x.X), genc.outName(x.Name))
-		}
+		return genc.genSelector(x)
 	case *ast.CallExpr:
 		return genc.genCall(x)
 	case *ast.GeneralBracketExpr:
@@ -57,6 +53,8 @@ func (genc *genContext) genIdent(id *ast.IdentExpr) string {
 	return genc.outName(id.Name)
 }
 
+//==== literals
+
 func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
 	switch li.Kind {
 	case lexer.INT, lexer.FLOAT:
@@ -77,6 +75,36 @@ func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
 		rt_newLiteralString,
 		name, len(li.Lit), utf8.RuneCountInString(li.Lit), "\""+li.Lit+"\"")
 }
+
+//==== selector
+
+func (genc *genContext) genSelector(x *ast.SelectorExpr) string {
+	if x.X == nil {
+		panic("ni")
+	}
+
+	var cl = ast.UnderType(x.X.GetType()).(*ast.ClassType)
+	return fmt.Sprintf("%s->%s.%s%s", genc.genExpr(x.X), nm_class_fields, pathToField(cl, x.Name), genc.outName(x.Name))
+}
+
+func pathToField(cl *ast.ClassType, name string) string {
+	var path = ""
+	for {
+		if cl.BaseTyp == nil {
+			break
+		}
+		cl = ast.UnderType(cl.BaseTyp).(*ast.ClassType)
+
+		_, ok := cl.Members[name]
+		if !ok {
+			break
+		}
+		path += nm_base_fields + "."
+	}
+	return path
+}
+
+//==== call
 
 func (genc *genContext) genCall(call *ast.CallExpr) string {
 
@@ -140,7 +168,8 @@ func (genc *genContext) genMethodCall(call *ast.CallExpr) string {
 			genc.genExpr(sel.X))
 	}
 
-	var args = name
+	var args = fmt.Sprintf("(%s)%s", genc.typeRef(f.Recv.Typ), name)
+
 	if len(call.Args) > 0 {
 		args += ", " + genc.genArgs(call)
 	}
@@ -230,18 +259,19 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
 	var name = genc.localName("loc")
 
-	//	var ct = ast.UnderType(x.Typ).(*ast.ClassType)
 	var tname = genc.typeRef(x.Typ)
 	var s = fmt.Sprintf("%s %s = %s(&%s);",
 		tname,
 		name,
 		rt_newObject,
-		tname+nm_meta_var_suffix)
+		tname+nm_desc_var_suffix)
+
+	var cl = ast.UnderType(x.Typ).(*ast.ClassType)
 
 	var list = make([]string, len(x.Values))
 	for i, v := range x.Values {
-		list[i] = fmt.Sprintf("%s->%s = %s;",
-			name, genc.outName(v.Name), genc.genExpr(v.Value))
+		list[i] = fmt.Sprintf("%s->%s.%s%s = %s;",
+			name, nm_class_fields, pathToField(cl, v.Name), genc.outName(v.Name), genc.genExpr(v.Value))
 	}
 	s += strings.Join(list, " ")
 
