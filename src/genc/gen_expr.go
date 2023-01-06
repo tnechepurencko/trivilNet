@@ -26,6 +26,8 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 		return genc.genSelector(x)
 	case *ast.CallExpr:
 		return genc.genCall(x)
+	case *ast.ConversionExpr:
+		return genc.genConversion(x)
 	case *ast.GeneralBracketExpr:
 		return genc.genBracketExpr(x)
 	case *ast.ClassCompositeExpr:
