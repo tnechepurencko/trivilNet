@@ -101,6 +101,8 @@ func (lc *lookContext) lookFunction(f *ast.Function) {
 		lc.lookTypeRef(f.Recv.Typ)
 
 		lc.addMethodToType(f)
+
+		lc.addVarForParameter(f.Recv)
 	}
 
 	var ft = f.Typ.(*ast.FuncType)

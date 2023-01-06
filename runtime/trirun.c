@@ -90,10 +90,9 @@ void* tri_newObject(void* meta) {
 	
 	VTMini* vt = meta;
 	size_t vt_sz = vt->self_size;
-	printf("vt sz=%lld\n", vt_sz);
+
 	MetaMini* m = meta + vt_sz;
 	size_t o_sz = m->object_size;
-	printf("o sz=%lld\n", o_sz);
 	
 	ClassMini* c = mm_allocate(o_sz);
 	c->meta = meta;
