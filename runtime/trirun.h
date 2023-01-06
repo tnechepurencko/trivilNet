@@ -37,6 +37,11 @@ TInt64 tri_vcheck(void* vd, TInt64 inx);
 void* tri_newObject(void* meta);
 
 
+//==== conversions
+
+TByte tri_TInt64_to_TByte(TInt64 x);
+TByte tri_TSymbol_to_TByte(TSymbol x);
+
 //==== console
 
 //void print_int(int i);

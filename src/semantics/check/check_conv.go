@@ -103,10 +103,9 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 			} else {
 				env.AddError(x.Pos, "СЕМ-ДЛИНА-СТРОКИ-НЕ-1")
 			}
-
+			x.Typ = ast.Byte
+			return
 		}
-		x.Typ = ast.Byte
-		return
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Byte.Name)

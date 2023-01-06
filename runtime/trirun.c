@@ -84,8 +84,6 @@ typedef struct VTMini { size_t self_size; } VTMini;
 typedef struct MetaMini { size_t object_size; } MetaMini;
 typedef struct ClassMini { void* meta; } ClassMini;
 
-
-
 void* tri_newObject(void* meta) {
 	
 	VTMini* vt = meta;
@@ -100,6 +98,21 @@ void* tri_newObject(void* meta) {
 	return c;
 }
 
+//==== conversions
+
+TByte tri_TInt64_to_TByte(TInt64 x) {
+	if (x < 0 || x > 255) {
+		crash("conversion to byte out of range");
+	}
+	return (TByte)x;
+}
+
+TByte tri_TSymbol_to_TByte(TSymbol x) {
+	if (x > 255) {
+		crash("conversion to byte out of range");
+	}
+	return (TByte)x;
+}
 
 //==== console
 
