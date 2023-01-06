@@ -176,6 +176,7 @@ func (genc *genContext) genMethodCall(call *ast.CallExpr) string {
 			genc.genExpr(sel.X))
 	}
 
+	//TODO - можно убрать каст, если лишний
 	var args = fmt.Sprintf("(%s)%s", genc.typeRef(f.Recv.Typ), name)
 
 	if len(call.Args) > 0 {

@@ -22,20 +22,17 @@ func (genc *genContext) genConversion(x *ast.ConversionExpr) string {
 	switch to {
 	case ast.Byte:
 		return genc.convertPredefined(expr, from, ast.Byte)
+	case ast.Int64:
+		if from == ast.Byte || from == ast.Symbol {
+			return genc.castPredefined(expr, ast.Int64)
+		} else {
+			return genc.convertPredefined(expr, from, ast.Int64)
+		}
+	case ast.Float64:
+		return genc.castPredefined(expr, ast.Float64)
+	case ast.Symbol:
+		return genc.convertPredefined(expr, from, ast.Symbol)
 		/*
-			case ast.Int64:
-				cc.conversionToInt64(x)
-				return
-			case ast.Float64:
-				cc.conversionToFloat64(x)
-				return
-			case ast.Bool:
-				env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Bool.Name)
-				x.Typ = invalidType(x.Pos)
-				return
-			case ast.Symbol:
-				cc.conversionToSymbol(x)
-				return
 			case ast.String:
 				cc.conversionToString(x)
 				return
@@ -55,6 +52,10 @@ func (genc *genContext) genConversion(x *ast.ConversionExpr) string {
 
 func (genc *genContext) convertPredefined(expr string, from, to *ast.PredefinedType) string {
 	return fmt.Sprintf("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(from.Name), predefinedTypeName(to.Name), expr)
+}
+
+func (genc *genContext) castPredefined(expr string, to *ast.PredefinedType) string {
+	return fmt.Sprintf("(%s)(%s)", predefinedTypeName(to.Name), expr)
 }
 
 //cast
