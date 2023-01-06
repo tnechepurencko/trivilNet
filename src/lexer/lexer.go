@@ -411,7 +411,7 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 			tok = SEMI
 			lit = ";"
 		case '(':
-			tok = LPAR
+			tok = s.checkNext(LPAR, ':', LCONV)
 		case ')':
 			tok = RPAR
 		case '[':
@@ -422,10 +422,6 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 			tok = LBRACE
 		case '}':
 			tok = RBRACE
-		case '‹':
-			tok = LCONV
-		case '›':
-			tok = RCONV
 		case '+':
 			tok = s.checkNext(ADD, '+', INC)
 		case '-':

@@ -202,7 +202,7 @@ func (p *Parser) parseConversion(x ast.Expr) ast.Expr {
 	p.next()
 	n.TargetTyp = p.parseTypeRef()
 
-	p.expect(lexer.RCONV)
+	p.expect(lexer.RPAR)
 
 	return n
 }

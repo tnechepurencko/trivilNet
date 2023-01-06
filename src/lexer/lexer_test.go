@@ -17,6 +17,22 @@ type one struct {
 }
 
 var tests = []one{
+	{"#", []pair{{NEQ, ""}}},
+	{"~", []pair{{NOT, ""}}},
+
+	{"(:", []pair{{LCONV, ""}}},
+	{"++", []pair{{INC, ""}}},
+	{"<=", []pair{{LEQ, ""}}},
+	{">=", []pair{{GEQ, ""}}},
+	{":=", []pair{{ASSIGN, ""}}},
+
+	{"1", []pair{{INT, "1"}}},
+	{"0x1", []pair{{INT, "0x1"}}},
+	{"0xA", []pair{{INT, "0xA"}}},
+	{"0xa", []pair{{INT, "0xa"}}},
+	{"1.", []pair{{FLOAT, "1."}}},
+	{"1.0", []pair{{FLOAT, "1.0"}}},
+
 	{"модуль", []pair{{MODULE, "модуль"}}},
 	{"модуль ", []pair{{MODULE, "модуль"}}},
 	{"модуль\n", []pair{{MODULE, "модуль"}, {NL, ""}}},
