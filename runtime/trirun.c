@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 //==== crash
 
@@ -19,6 +20,35 @@ void* mm_allocate(size_t size) {
 	}
 	return a;
 }	
+
+//==== utf-8
+
+// Сохраняет code point в буфер, не менее 4 байтов
+size_t encode_symbol(TSymbol uc, TByte *buf) {
+  if (uc < 0x00) {
+    return 0;
+  } else if (uc < 0x80) {
+    buf[0] = (TByte) uc;
+    return 1;
+  } else if (uc < 0x800) {
+    buf[0] = (TByte)(0xC0 + (uc >> 6));
+    buf[1] = (TByte)(0x80 + (uc & 0x3F));
+    return 2;
+  // Не учитываю диапазон 0xd800-0xdfff, хотя полученный UTF-8 будет не корректным
+  } else if (uc < 0x10000) {
+    buf[0] = (TByte)(0xE0 + (uc >> 12));
+    buf[1] = (TByte)(0x80 + ((uc >> 6) & 0x3F));
+    buf[2] = (TByte)(0x80 + (uc & 0x3F));
+    return 3;
+  } else if (uc < 0x110000) {
+    buf[0] = (TByte)(0xF0 + (uc >> 18));
+    buf[1] = (TByte)(0x80 + ((uc >> 12) & 0x3F));
+    buf[2] = (TByte)(0x80 + ((uc >> 6) & 0x3F));
+    buf[3] = (TByte)(0x80 + (uc & 0x3F));
+    return 4;
+  } else return 0;
+}
+
 
 //==== strings
 
@@ -42,6 +72,22 @@ TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* 
 	
 	return s;
 }
+
+TString tri_newString(TInt64 bytes, TInt64 symbols, char* body) {
+
+	size_t sz = sizeof(StringDesc) + bytes + 1; // +1 для 0x0
+	void* mem = mm_allocate(sz);
+
+	TString s = mem;
+	s->bytes = bytes;
+	s->symbols = symbols;
+	s->body = mem + sizeof(StringDesc);
+	memcpy(s->body, body, bytes);
+	s->body[bytes] = 0x0;
+
+	return s;
+}
+
 
 TInt64 tri_lenString(TString s) {
 	if (s->symbols >= 0) return s->symbols;
@@ -114,6 +160,26 @@ TByte tri_TSymbol_to_TByte(TSymbol x) {
 	return (TByte)x;
 }
 
+TInt64 tri_TFloat64_to_TInt64(TFloat64 x) {
+	return llround(x);
+}
+
+#define MaxSymbol 0x10FFFF
+
+TSymbol tri_TInt64_to_TSymbol(TInt64 x) {
+	if (x < 0 || x > MaxSymbol) {
+		crash("conversion to symbol out of range");
+	}
+	return (TSymbol)x;	
+}
+
+TString tri_TSymbol_to_TString(TSymbol x) {
+	TByte buf[8];
+	size_t bytes = encode_symbol(x, buf);
+	
+	return tri_newString(bytes, 1, (char *)buf);
+}
+
 //==== console
 
 /*
@@ -125,6 +191,14 @@ void print_int(int i) {
 void print_int64(TInt64 i) {
   printf("%lld", i);
 }
+
+void print_float64(TFloat64 f) {
+  printf("%g", f);
+}
+
+void print_symbol(TSymbol s) {
+  printf("0x%x", s);
+}	
 
 void print_string(TString s) {
   printf("%s", s->body);
