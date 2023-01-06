@@ -50,9 +50,19 @@ type UnaryExpr struct {
 	X  Expr
 }
 
+type LiteralKind int
+
+const (
+	Lit_Byte = iota
+	Lit_Int
+	Lit_Float
+	Lit_Symbol
+	Lit_String
+)
+
 type LiteralExpr struct {
 	ExprBase
-	Kind lexer.Token // если STRING - см. Typ - может быть Символ или Байт
+	Kind LiteralKind
 	Lit  string
 }
 

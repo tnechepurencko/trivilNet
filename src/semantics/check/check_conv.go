@@ -8,7 +8,6 @@ import (
 
 	"trivil/ast"
 	"trivil/env"
-	"trivil/lexer"
 )
 
 var _ = fmt.Printf
@@ -139,7 +138,7 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 		var li = oneSymbolString(x.X)
 		if li != nil {
 			r, _ := utf8.DecodeRuneInString(li.Lit)
-			li.Kind = lexer.INT
+			li.Kind = ast.Lit_Int
 			li.Lit = fmt.Sprintf("0x%x", r)
 			x.Typ = ast.Int64
 			x.Done = true
@@ -305,7 +304,7 @@ func oneSymbolString(expr ast.Expr) *ast.LiteralExpr {
 	if li == nil {
 		return nil
 	}
-	if li.Kind != lexer.STRING {
+	if li.Kind != ast.Lit_String {
 		return nil
 	}
 

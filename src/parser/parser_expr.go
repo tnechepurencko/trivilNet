@@ -98,10 +98,24 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 	var x ast.Expr
 
 	switch p.tok {
-	case lexer.INT, lexer.FLOAT, lexer.STRING:
+	case lexer.INT:
 		x = &ast.LiteralExpr{
 			ExprBase: ast.ExprBase{Pos: p.pos},
-			Kind:     p.tok,
+			Kind:     ast.Lit_Int,
+			Lit:      p.lit,
+		}
+		p.next()
+	case lexer.FLOAT:
+		x = &ast.LiteralExpr{
+			ExprBase: ast.ExprBase{Pos: p.pos},
+			Kind:     ast.Lit_Float,
+			Lit:      p.lit,
+		}
+		p.next()
+	case lexer.STRING:
+		x = &ast.LiteralExpr{
+			ExprBase: ast.ExprBase{Pos: p.pos},
+			Kind:     ast.Lit_String,
 			Lit:      p.lit,
 		}
 		p.next()

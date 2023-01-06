@@ -53,11 +53,11 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		cc.classComposite(x)
 	case *ast.LiteralExpr:
 		switch x.Kind {
-		case lexer.INT:
+		case ast.Lit_Int:
 			x.Typ = ast.Int64
-		case lexer.FLOAT:
+		case ast.Lit_Float:
 			x.Typ = ast.Float64
-		case lexer.STRING:
+		case ast.Lit_String:
 			x.Typ = ast.String
 		default:
 			panic(fmt.Sprintf("LiteralExpr - bad kind: ni %v", x))

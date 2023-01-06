@@ -136,6 +136,7 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		var lit = oneSymbolString(r)
 		if lit != nil {
 			lit.Typ = ast.Symbol
+			lit.Kind = ast.Lit_Symbol
 			return true
 		}
 	}

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"trivil/ast"
-	"trivil/lexer"
 	"unicode/utf8"
 )
 
@@ -59,9 +58,16 @@ func (genc *genContext) genIdent(id *ast.IdentExpr) string {
 
 func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
 	switch li.Kind {
-	case lexer.INT, lexer.FLOAT:
+	case ast.Lit_Byte:
 		return li.Lit
-	case lexer.STRING:
+	case ast.Lit_Int:
+		return li.Lit
+	case ast.Lit_Float:
+		return li.Lit
+	case ast.Lit_Symbol:
+		r, _ := utf8.DecodeRuneInString(li.Lit)
+		return fmt.Sprintf("0x%x", r)
+	case ast.Lit_String:
 		return genc.genStringLiteral(li)
 	default:
 		panic("ni")
