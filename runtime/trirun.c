@@ -23,7 +23,7 @@ void* mm_allocate(size_t size) {
 
 //==== utf-8
 
-// Сохраняет code point в буфер, не менее 4 байтов
+// Сохраняет code point в буфер, должен быть не менее 4 байтов
 size_t encode_symbol(TSymbol cp, TByte *buf) {
   if (cp < 0x00) {
     return 0;
@@ -63,6 +63,61 @@ size_t encode_bytes(TSymbol cp) {
     return 4;
   } else return 0;
 }
+
+#define utf_cont(ch)  (((ch) & 0xc0) == 0x80)
+
+// Извлекает code point из UTF-8 буфера.
+// Если успешно: code point записан в cp_ref, возвращает число прочитанных байтов
+// Если ошибк, возвращает -1
+size_t decode_symbol(TByte* buf, size_t buflen, TSymbol* cp_ref) {
+  int32_t cp;
+  const TByte *end;
+
+  if (!buflen) return -1;
+
+  *cp_ref = 0;
+  end = buf + ((buflen < 0) ? 4 : buflen);
+  
+  cp = *buf++;
+  if (cp < 0x80) {
+    *cp_ref = cp;
+    return 1;
+  }
+  // Первый байт должен быть в диапазоне [0xc2..0xf4]
+  if ((TSymbol)(cp - 0xc2) > (0xf4-0xc2)) return -1;
+
+  if (cp < 0xe0) {         // 2-byte sequence
+     // Must have valid continuation character
+     if (buf >= end || !utf_cont(*buf)) return -1;
+     *cp_ref = ((cp & 0x1f)<<6) | (*buf & 0x3f);
+     return 2;
+  }
+  if (cp < 0xf0) {        // 3-byte sequence
+     if ((buf + 1 >= end) || !utf_cont(*buf) || !utf_cont(buf[1]))
+        return -1;
+     // Check for surrogate chars
+     if (cp == 0xed && *buf > 0x9f)
+         return -1;
+     cp = ((cp & 0xf)<<12) | ((*buf & 0x3f)<<6) | (buf[1] & 0x3f);
+     if (cp < 0x800)
+         return -1;
+     *cp_ref = cp;
+     return 3;
+  }
+  // 4-byte sequence
+  // Must have 3 valid continuation characters
+  if ((buf + 2 >= end) || !utf_cont(*buf) || !utf_cont(buf[1]) || !utf_cont(buf[2]))
+     return -1;
+  // Make sure in correct range (0x10000 - 0x10ffff)
+  if (cp == 0xf0) {
+    if (*buf < 0x90) return -1;
+  } else if (cp == 0xf4) {
+    if (*buf > 0x8f) return -1;
+  }
+  *cp_ref = ((cp & 7)<<18) | ((*buf & 0x3f)<<12) | ((buf[1] & 0x3f)<<6) | (buf[2] & 0x3f);
+  return 4;
+}
+
 
 //==== strings
 
@@ -119,8 +174,24 @@ TString tri_newStringDesc(TInt64 bytes, TInt64 symbols) {
 
 TInt64 tri_lenString(TString s) {
 	if (s->symbols >= 0) return s->symbols;
-	crash("string len ni");
-	return 0;
+	
+	TInt64 count = 0;
+	TSymbol cp;
+
+	size_t i = 0;
+	size_t symlen;
+	TByte* buf = s->body;
+	while (i < s->bytes) {
+		symlen = decode_symbol(buf, s->bytes - i, &cp);
+		if (symlen < 0) {
+			break;
+		}
+		count++;
+		i += symlen;
+		buf += symlen;
+	}	
+
+	return count;
 }
 
 //==== vector
@@ -135,6 +206,11 @@ void* tri_newVector(size_t element_size, TInt64 len) {
 	v->body = mm_allocate(element_size * len);
 	
 	memset(v->body, 0x0, element_size * len);
+	return v;
+}
+
+void* tri_newVectorDesc() {
+	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
 	return v;
 }
 
@@ -237,6 +313,51 @@ TString tri_Symbols_to_TString(void *vd) {
 
 	return s;	
 }	
+
+void* tri_TString_to_Bytes(TString s) {
+	VectorDesc* v = tri_newVectorDesc();
+	
+	v->len = s->bytes;
+	v->body = mm_allocate(sizeof(TByte) * v->len);
+	memcpy(v->body, s->body, s->bytes);
+	
+	return v;
+}
+
+void* tri_TString_to_Symbols(TString s) {
+	TInt64 count = 0;
+	TSymbol cp;
+
+	size_t i = 0;
+	size_t symlen;
+	TByte* buf = s->body;
+	while (i < s->bytes) {
+		symlen = decode_symbol(buf, s->bytes - i, &cp);
+		if (symlen < 0) {
+			crash("invalid utf-8 bytes");
+			return NULL;
+		}
+		count++;
+		i += symlen;
+		buf += symlen;
+	}
+
+	VectorDesc* v = tri_newVectorDesc();
+	v->len = count;
+	v->body = mm_allocate(sizeof(TSymbol) * count);	
+	
+	TSymbol* symbuf = v->body;
+	i = 0;
+	buf = s->body;
+	while (i < count) {
+		symlen = decode_symbol(buf, s->bytes - i, &cp);
+		symbuf[i] = cp;
+		buf += symlen;
+		i++;
+	}	
+	
+	return v;
+}
 
 //==== console
 

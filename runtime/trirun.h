@@ -44,10 +44,15 @@ TSymbol tri_TInt64_to_TSymbol(TInt64 x);
 
 TString tri_TSymbol_to_TString(TSymbol x);
 
-// []Байт
+// Параметр []Байт
 TString tri_Bytes_to_TString(void *vd);
-// []Символ
+// Параметр []Символ
 TString tri_Symbols_to_TString(void *vd);
+
+// Возвращает []Байт
+void* tri_TString_to_Bytes(TString s);
+// Возвращает []Символ
+void* tri_TString_to_Symbols(TString s);
 
 //==== console
 
