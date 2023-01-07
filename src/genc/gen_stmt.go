@@ -26,7 +26,9 @@ func (genc *genContext) genStatement(s ast.Statement) {
 	case *ast.AssignStatement:
 		l := genc.genExpr(x.L)
 		r := genc.genExpr(x.R)
-		genc.c(l + "=" + r + ";")
+
+		var cast = genc.assignCast(x.L.GetType(), x.R.GetType())
+		genc.c("%s = %s%s;", l, cast, r)
 	case *ast.IncStatement:
 		l := genc.genExpr(x.L)
 		genc.c(l + "++;")
@@ -48,7 +50,13 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		panic(fmt.Sprintf("gen statement: ni %T", s))
 
 	}
+}
 
+func (genc *genContext) assignCast(lt, rt ast.Type) string {
+	if ast.UnderType(lt) != ast.UnderType(rt) {
+		return "(" + genc.typeRef(lt) + ")"
+	}
+	return ""
 }
 
 func (genc *genContext) genIf(x *ast.If, prefix string) {

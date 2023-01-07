@@ -152,6 +152,14 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		}
 	}
 
+	switch xt := t.(type) {
+	case *ast.ClassType:
+		rcl, ok := ast.UnderType(r.GetType()).(*ast.ClassType)
+		if ok && isDerivedClass(xt, rcl) {
+			return true
+		}
+	}
+
 	// TODO: function types, целые литералы?, ...
 	return false
 }
@@ -165,7 +173,7 @@ func (cc *checkContext) checkAssignable(lt ast.Type, r ast.Expr) {
 	}
 
 	env.AddError(r.GetPos(), "СЕМ-НЕСОВМЕСТИМО-ПРИСВ", cc.errorHint,
-		ast.TypeString(lt), ast.TypeString(r.GetType()))
+		ast.TypeName(lt), ast.TypeName(r.GetType()))
 }
 
 func equalTypes(t1, t2 ast.Type) bool {

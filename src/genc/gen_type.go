@@ -91,7 +91,7 @@ func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 
 	genc.c("struct %s;", vt_type)
 
-	genc.c("typedef struct { struct %s* %s; %s %s;} *%s;", vt_type, nm_VT_field, tname_st, nm_class_fields, tname)
+	genc.c("typedef struct %s { struct %s* %s; %s %s;} *%s;", tname, vt_type, nm_VT_field, tname_st, nm_class_fields, tname)
 
 	genc.c("")
 }
@@ -164,7 +164,7 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 	if x.BaseTyp != nil {
 		base = "&" + genc.typeRef(x.BaseTyp) + nm_desc_var_suffix
 	}
-	genc.c("%s.meta.object_size = sizeof(%s);", desc_var, tname_st)
+	genc.c("%s.meta.object_size = sizeof(struct %s);", desc_var, tname)
 	genc.c("%s.meta.base = %s;", desc_var, base)
 
 	//-- VT
