@@ -232,7 +232,7 @@ TInt64 tri_vcheck(void* vd, TInt64 inx) {
 
 typedef struct VTMini { size_t self_size; } VTMini;
 typedef struct MetaMini { size_t object_size; } MetaMini;
-typedef struct ClassMini { void* meta; } ClassMini;
+typedef struct ClassMini { void* vtable; } ClassMini;
 
 void* tri_newObject(void* meta) {
 	
@@ -243,7 +243,8 @@ void* tri_newObject(void* meta) {
 	size_t o_sz = m->object_size;
 	
 	ClassMini* c = mm_allocate(o_sz);
-	c->meta = meta;
+	memset(c, 0x0, o_sz);
+	c->vtable = vt;
 	
 	return c;
 }
