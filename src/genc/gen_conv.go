@@ -40,10 +40,8 @@ func (genc *genContext) genConversion(x *ast.ConversionExpr) string {
 	switch xt := to.(type) {
 	case *ast.VectorType:
 		return genc.convertToVector(expr, from, xt)
-	/*
-		case *ast.ClassType:
-			cc.conversionToClass(x, xt)
-	*/
+	case *ast.ClassType:
+		return genc.convertToClass(expr, x.TargetTyp)
 	default:
 		panic(fmt.Sprintf("ni %T '%s'", to, ast.TypeString(to)))
 	}
@@ -93,4 +91,10 @@ func (genc *genContext) convertToVector(expr string, from ast.Type, to *ast.Vect
 	} else {
 		panic("ni")
 	}
+}
+
+func (genc *genContext) convertToClass(expr string, target ast.Type) string {
+	var tname = genc.typeRef(target)
+
+	return fmt.Sprintf("((%s)%s(%s, &%s))", tname, rt_checkClassType, expr, tname+nm_desc_var_suffix)
 }

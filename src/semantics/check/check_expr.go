@@ -86,7 +86,7 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 
 	var cl = getClassType(t)
 	if cl == nil {
-		env.AddError(x.X.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeString(t))
+		env.AddError(x.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeString(t))
 		x.Typ = invalidType(x.X.GetPos())
 		return
 	}

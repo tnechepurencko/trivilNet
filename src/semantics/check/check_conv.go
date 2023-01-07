@@ -277,6 +277,7 @@ func (cc *checkContext) conversionToClass(x *ast.ConversionExpr, target *ast.Cla
 		if !isDerivedClass(tClass, target) {
 			env.AddError(x.Pos, "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
 		}
+		x.Typ = x.TargetTyp
 		return
 	}
 

@@ -38,7 +38,8 @@ const (
 	rt_lenVector = rt_prefix + "lenVector"
 	rt_vcheck    = rt_prefix + "vcheck"
 
-	rt_newObject = rt_prefix + "newObject"
+	rt_newObject      = rt_prefix + "newObject"
+	rt_checkClassType = rt_prefix + "checkClassType"
 
 	rt_convert = rt_prefix
 )
