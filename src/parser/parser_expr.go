@@ -161,13 +161,13 @@ func (p *Parser) parseSelector(x ast.Expr) ast.Expr {
 	if p.trace {
 		defer un(trace(p, "Селектор"))
 	}
+	p.next()
 
 	var n = &ast.SelectorExpr{
 		ExprBase: ast.ExprBase{Pos: p.pos},
 		X:        x,
 	}
 
-	p.next()
 	n.Name = p.parseIdent()
 
 	return n
