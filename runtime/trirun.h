@@ -32,6 +32,15 @@ TInt64 tri_vcheck(void* vd, TInt64 inx);
 
 //==== class
 
+/*
+  object -> vtable ---> vtable size
+			fields		(vtable fn)*
+						------------ meta info
+						object size (for allocation)
+						other meta info
+
+*/
+
 void* tri_newObject(void* meta);
 
 
