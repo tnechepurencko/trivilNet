@@ -5,12 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"trivil/ast"
 	"trivil/env"
-	"trivil/genc"
 	"trivil/lexer"
-	"trivil/parser"
-	"trivil/semantics"
 )
 
 func main() {
@@ -46,6 +42,7 @@ func main() {
 
 }
 
+/*
 func compile(src *env.Source) {
 	var m = parser.Parse(src)
 	if env.ErrorCount() != 0 {
@@ -68,8 +65,8 @@ func compile(src *env.Source) {
 	if *env.DoGen {
 		genc.Generate(m)
 	}
-
 }
+*/
 
 func testLexer(src *env.Source) {
 	var lex = new(lexer.Lexer)

@@ -48,7 +48,7 @@ func NewModule() *Module {
 type Import struct {
 	Pos  int
 	Path string
-	Mod  Module
+	Mod  *Module
 }
 
 func (n *Import) GetPos() int {

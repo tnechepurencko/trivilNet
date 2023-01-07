@@ -3,9 +3,14 @@ package env
 import (
 	"fmt"
 	"io/ioutil"
+	"path"
 )
 
 var _ = fmt.Printf
+
+const (
+	file_extension = ".tri"
+)
 
 type Source struct {
 	Path  string
@@ -21,15 +26,19 @@ func initSources() {
 	sources = make([]*Source, 0)
 }
 
-func AddSource(path string) *Source {
+func AddSource(fpath string) *Source {
+
+	if path.Ext(fpath) == "" {
+		fpath += file_extension
+	}
 
 	var src = &Source{
-		Path:  path,
+		Path:  fpath,
 		Lines: make([]int, 0),
 		No:    len(sources) + 1,
 	}
 
-	buf, err := ioutil.ReadFile(path)
+	buf, err := ioutil.ReadFile(fpath)
 	if err != nil {
 		src.Err = err
 		return src
