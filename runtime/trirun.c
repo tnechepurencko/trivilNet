@@ -24,31 +24,45 @@ void* mm_allocate(size_t size) {
 //==== utf-8
 
 // Сохраняет code point в буфер, не менее 4 байтов
-size_t encode_symbol(TSymbol uc, TByte *buf) {
-  if (uc < 0x00) {
+size_t encode_symbol(TSymbol cp, TByte *buf) {
+  if (cp < 0x00) {
     return 0;
-  } else if (uc < 0x80) {
-    buf[0] = (TByte) uc;
+  } else if (cp < 0x80) {
+    buf[0] = (TByte) cp;
     return 1;
-  } else if (uc < 0x800) {
-    buf[0] = (TByte)(0xC0 + (uc >> 6));
-    buf[1] = (TByte)(0x80 + (uc & 0x3F));
+  } else if (cp < 0x800) {
+    buf[0] = (TByte)(0xC0 + (cp >> 6));
+    buf[1] = (TByte)(0x80 + (cp & 0x3F));
     return 2;
   // Не учитываю диапазон 0xd800-0xdfff, хотя полученный UTF-8 будет не корректным
-  } else if (uc < 0x10000) {
-    buf[0] = (TByte)(0xE0 + (uc >> 12));
-    buf[1] = (TByte)(0x80 + ((uc >> 6) & 0x3F));
-    buf[2] = (TByte)(0x80 + (uc & 0x3F));
+  } else if (cp < 0x10000) {
+    buf[0] = (TByte)(0xE0 + (cp >> 12));
+    buf[1] = (TByte)(0x80 + ((cp >> 6) & 0x3F));
+    buf[2] = (TByte)(0x80 + (cp & 0x3F));
     return 3;
-  } else if (uc < 0x110000) {
-    buf[0] = (TByte)(0xF0 + (uc >> 18));
-    buf[1] = (TByte)(0x80 + ((uc >> 12) & 0x3F));
-    buf[2] = (TByte)(0x80 + ((uc >> 6) & 0x3F));
-    buf[3] = (TByte)(0x80 + (uc & 0x3F));
+  } else if (cp < 0x110000) {
+    buf[0] = (TByte)(0xF0 + (cp >> 18));
+    buf[1] = (TByte)(0x80 + ((cp >> 12) & 0x3F));
+    buf[2] = (TByte)(0x80 + ((cp >> 6) & 0x3F));
+    buf[3] = (TByte)(0x80 + (cp & 0x3F));
     return 4;
   } else return 0;
 }
 
+// Возвращает число байтов кодировки code point в UTF-8
+size_t encode_bytes(TSymbol cp) {
+  if (cp < 0x00) {
+    return 0;
+  } else if (cp < 0x80) {
+    return 1;
+  } else if (cp < 0x800) {
+    return 2;
+  } else if (cp < 0x10000) {
+    return 3;
+  } else if (cp < 0x110000) {
+    return 4;
+  } else return 0;
+}
 
 //==== strings
 
@@ -88,6 +102,20 @@ TString tri_newString(TInt64 bytes, TInt64 symbols, char* body) {
 	return s;
 }
 
+// Делает дескриптор, но не копирует содержимое
+TString tri_newStringDesc(TInt64 bytes, TInt64 symbols) {
+
+	size_t sz = sizeof(StringDesc) + bytes + 1; // +1 для 0x0
+	void* mem = mm_allocate(sz);
+
+	TString s = mem;
+	s->bytes = bytes;
+	s->symbols = symbols;
+	s->body = mem + sizeof(StringDesc);
+
+	return s;
+}
+
 
 TInt64 tri_lenString(TString s) {
 	if (s->symbols >= 0) return s->symbols;
@@ -98,7 +126,7 @@ TInt64 tri_lenString(TString s) {
 //==== vector
 
 
-typedef struct VectorDesc { TInt64 len; TInt64* body; } VectorDesc;
+typedef struct VectorDesc { TInt64 len; void* body; } VectorDesc;
 
 
 void* tri_newVector(size_t element_size, TInt64 len) {
@@ -179,6 +207,36 @@ TString tri_TSymbol_to_TString(TSymbol x) {
 	
 	return tri_newString(bytes, 1, (char *)buf);
 }
+
+TString tri_Bytes_to_TString(void *vd) {
+	VectorDesc* v = vd;
+	//TODO: check meta and crash
+
+	//TODO: calculate symbols? lazy?
+	return tri_newString(v->len, -1, (char *)v->body);	
+}	
+
+TString tri_Symbols_to_TString(void *vd) {
+	VectorDesc* v = vd;
+	//TODO: check meta and crash
+
+	TInt64 bytes = 0;
+	TSymbol *symbuf = v->body;
+	for (int i = 0; i < v->len; i++) {
+		bytes += encode_bytes(symbuf[i]);
+	}	
+
+	TString s = tri_newStringDesc(bytes, v->len);
+	
+	TByte *bytebuf = s->body;
+	int len;
+	for (int i = 0; i < v->len; i++) {
+		len = encode_symbol(symbuf[i], bytebuf);
+		bytebuf += len;
+	}	
+
+	return s;	
+}	
 
 //==== console
 

@@ -44,6 +44,11 @@ TSymbol tri_TInt64_to_TSymbol(TInt64 x);
 
 TString tri_TSymbol_to_TString(TSymbol x);
 
+// []Байт
+TString tri_Bytes_to_TString(void *vd);
+// []Символ
+TString tri_Symbols_to_TString(void *vd);
+
 //==== console
 
 //void print_int(int i);

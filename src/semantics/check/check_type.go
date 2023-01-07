@@ -2,6 +2,8 @@ package check
 
 import (
 	"fmt"
+	"strconv"
+
 	"trivil/ast"
 	"trivil/env"
 )
@@ -133,11 +135,20 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 	var t = ast.UnderType(lt)
 
 	if t == ast.Symbol {
-		var lit = oneSymbolString(r)
-		if lit != nil {
-			lit.Typ = ast.Symbol
-			lit.Kind = ast.Lit_Symbol
+		var li = oneSymbolString(r)
+		if li != nil {
+			li.Typ = ast.Symbol
+			li.Kind = ast.Lit_Symbol
 			return true
+		}
+	} else if t == ast.Byte {
+		var li = literal(r)
+		if li != nil && li.Kind == ast.Lit_Int {
+			i, err := strconv.ParseInt(li.Lit, 0, 64)
+			if err == nil && i >= 0 || i <= 255 {
+				li.Typ = ast.Byte
+				return true
+			}
 		}
 	}
 
