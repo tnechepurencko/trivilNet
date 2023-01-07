@@ -41,8 +41,9 @@ TInt64 tri_vcheck(void* vd, TInt64 inx);
 
 */
 
-void* tri_newObject(void* meta);
+void* tri_newObject(void* class_desc);
 
+void* tri_checkClassType(void* object, void* class_desc);
 
 //==== conversions
 
@@ -54,9 +55,9 @@ TSymbol tri_TInt64_to_TSymbol(TInt64 x);
 TString tri_TSymbol_to_TString(TSymbol x);
 
 // Параметр []Байт
-TString tri_Bytes_to_TString(void *vd);
+TString tri_Bytes_to_TString(void* vd);
 // Параметр []Символ
-TString tri_Symbols_to_TString(void *vd);
+TString tri_Symbols_to_TString(void* vd);
 
 // Возвращает []Байт
 void* tri_TString_to_Bytes(TString s);
@@ -71,6 +72,7 @@ void print_float64(TFloat64 f);
 
 void print_symbol(TSymbol s);
 void print_string(TString s);
+void print_bool(TBool b);
 
 void println();
 

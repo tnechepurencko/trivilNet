@@ -231,15 +231,15 @@ TInt64 tri_vcheck(void* vd, TInt64 inx) {
 //==== class
 
 typedef struct VTMini { size_t self_size; } VTMini;
-typedef struct MetaMini { size_t object_size; } MetaMini;
+typedef struct MetaMini { size_t object_size; void* base_desc; } MetaMini;
 typedef struct ClassMini { void* vtable; } ClassMini;
 
-void* tri_newObject(void* meta) {
+void* tri_newObject(void* class_desc) {
 	
-	VTMini* vt = meta;
+	VTMini* vt = class_desc;
 	size_t vt_sz = vt->self_size;
 
-	MetaMini* m = meta + vt_sz;
+	MetaMini* m = class_desc + vt_sz;
 	size_t o_sz = m->object_size;
 	
 	ClassMini* c = mm_allocate(o_sz);
@@ -247,6 +247,34 @@ void* tri_newObject(void* meta) {
 	c->vtable = vt;
 	
 	return c;
+}
+
+void* tri_checkClassType(void* object, void* target_desc) {
+	
+	VTMini* current_vt = ((ClassMini*)object)->vtable;
+
+printf("object_vt = %p\n", current_vt);
+printf("target_desc = %p\n", target_desc);
+	
+	if (current_vt == target_desc) {
+printf("found self\n");
+		return object;
+	}
+	
+	MetaMini* m = (void *)current_vt + current_vt->self_size;
+	
+	while (m->base_desc != NULL) {
+		printf("base_desc = %p\n", m->base_desc);
+		
+		if (m->base_desc == target_desc) return object;
+		
+		current_vt = m->base_desc;
+		m = (void *)current_vt + current_vt->self_size;
+	}
+	
+	crash("wrong class type check");
+	
+	return NULL;
 }
 
 //==== conversions
@@ -383,6 +411,10 @@ void print_symbol(TSymbol s) {
 void print_string(TString s) {
   printf("%s", s->body);
 }	
+
+void print_bool(TBool b) {
+	if (b) printf("истина"); else printf("ложь");
+}
 
 void println() {
   printf("\n");
