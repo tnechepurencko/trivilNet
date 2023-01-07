@@ -17,29 +17,30 @@ func (genc *genContext) genConversion(x *ast.ConversionExpr) string {
 
 	var to = ast.UnderType(x.TargetTyp)
 
-	from, _ /*is_predefined*/ := ast.UnderType(x.X.GetType()).(*ast.PredefinedType)
+	var from = ast.UnderType(x.X.GetType())
+	fromPred, _ := from.(*ast.PredefinedType)
 
 	switch to {
 	case ast.Byte:
-		return genc.convertPredefined(expr, from, ast.Byte)
+		return genc.convertPredefined(expr, fromPred, ast.Byte)
 	case ast.Int64:
-		if from == ast.Byte || from == ast.Symbol {
+		if fromPred == ast.Byte || fromPred == ast.Symbol {
 			return genc.castPredefined(expr, ast.Int64)
 		} else {
-			return genc.convertPredefined(expr, from, ast.Int64)
+			return genc.convertPredefined(expr, fromPred, ast.Int64)
 		}
 	case ast.Float64:
 		return genc.castPredefined(expr, ast.Float64)
 	case ast.Symbol:
-		return genc.convertPredefined(expr, from, ast.Symbol)
+		return genc.convertPredefined(expr, fromPred, ast.Symbol)
 	case ast.String:
 		return genc.convertToString(expr, ast.UnderType(x.X.GetType()))
 	}
 
-	switch /*xt :=*/ to.(type) {
+	switch xt := to.(type) {
+	case *ast.VectorType:
+		return genc.convertToVector(expr, from, xt)
 	/*
-		case *ast.VectorType:
-			cc.conversionToVector(x, xt)
 		case *ast.ClassType:
 			cc.conversionToClass(x, xt)
 	*/
@@ -76,4 +77,20 @@ func (genc *genContext) convertToString(expr string, from ast.Type) string {
 		panic("ni")
 	}
 
+}
+
+func (genc *genContext) convertToVector(expr string, from ast.Type, to *ast.VectorType) string {
+
+	if from != ast.String {
+		panic("ni")
+	}
+
+	var et = ast.UnderType(to.ElementTyp)
+	if et == ast.Byte {
+		return fmt.Sprintf("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(ast.String.Name), "Bytes", expr)
+	} else if et == ast.Symbol {
+		return fmt.Sprintf("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(ast.String.Name), "Symbols", expr)
+	} else {
+		panic("ni")
+	}
 }
