@@ -49,22 +49,6 @@ func compile(src *env.Source) {
 	}
 }
 
-func (cc *compileContext) process(m *ast.Module) {
-	semantics.Analyse(m)
-
-	if env.ErrorCount() != 0 {
-		return
-	}
-
-	if *env.ShowAST >= 2 {
-		fmt.Println(ast.SExpr(m))
-	}
-
-	if *env.DoGen {
-		genc.Generate(m)
-	}
-}
-
 func (cc *compileContext) parse(src *env.Source) *ast.Module {
 	var m = parser.Parse(src)
 	if env.ErrorCount() != 0 {
@@ -98,5 +82,21 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 
 	if i.Mod.Name != src.LastName {
 		env.AddError(i.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", i.Mod.Name, src.LastName)
+	}
+}
+
+func (cc *compileContext) process(m *ast.Module) {
+	semantics.Analyse(m)
+
+	if env.ErrorCount() != 0 {
+		return
+	}
+
+	if *env.ShowAST >= 2 {
+		fmt.Println(ast.SExpr(m))
+	}
+
+	if *env.DoGen {
+		genc.Generate(m, m == cc.modules[0])
 	}
 }
