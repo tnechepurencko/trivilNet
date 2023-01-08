@@ -38,35 +38,11 @@ func main() {
 
 	if env.ErrorCount() == 0 {
 		fmt.Printf("Без ошибок\n")
+	} else {
+		os.Exit(1)
 	}
 
 }
-
-/*
-func compile(src *env.Source) {
-	var m = parser.Parse(src)
-	if env.ErrorCount() != 0 {
-		return
-	}
-
-	if *env.ShowAST >= 1 {
-		fmt.Println(ast.SExpr(m))
-	}
-
-	semantics.Analyse(m)
-	if env.ErrorCount() != 0 {
-		return
-	}
-
-	if *env.ShowAST >= 2 {
-		fmt.Println(ast.SExpr(m))
-	}
-
-	if *env.DoGen {
-		genc.Generate(m)
-	}
-}
-*/
 
 func testLexer(src *env.Source) {
 	var lex = new(lexer.Lexer)
