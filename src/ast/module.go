@@ -32,6 +32,10 @@ func (n *Module) GetType() Type {
 	panic("assert")
 }
 
+func (n *Module) GetHost() *Module {
+	panic("assert")
+}
+
 func (n *Module) IsExported() bool {
 	return false
 }

@@ -13,6 +13,7 @@ type DeclBase struct {
 	Pos      int
 	Name     string
 	Typ      Type
+	Host     *Module
 	Exported bool
 }
 
@@ -28,6 +29,10 @@ func (n *DeclBase) GetName() string {
 
 func (n *DeclBase) GetType() Type {
 	return n.Typ
+}
+
+func (n *DeclBase) GetHost() *Module {
+	return n.Host
 }
 
 func (n *DeclBase) IsExported() bool {

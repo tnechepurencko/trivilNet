@@ -22,6 +22,7 @@ type Decl interface {
 	DeclNode()
 	GetName() string
 	GetType() Type
+	GetHost() *Module // только для объектов уровня модуля, для остальных - nil
 	IsExported() bool
 }
 
