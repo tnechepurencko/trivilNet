@@ -25,7 +25,7 @@ func (p *Parser) parseFn() *ast.Function {
 		p.next()
 
 		n.Recv = &ast.Param{
-			TypeBase: ast.TypeBase{Pos: p.pos},
+			DeclBase: ast.DeclBase{Pos: p.pos},
 		}
 
 		n.Recv.Name = p.parseIdent()
@@ -97,7 +97,7 @@ func (p *Parser) parseParameters(ft *ast.FuncType) {
 	for p.tok != lexer.RPAR && p.tok != lexer.EOF {
 
 		var param = &ast.Param{
-			TypeBase: ast.TypeBase{Pos: p.pos},
+			DeclBase: ast.DeclBase{Pos: p.pos},
 		}
 
 		param.Name = p.parseIdent()

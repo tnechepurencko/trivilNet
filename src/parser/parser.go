@@ -164,23 +164,27 @@ func (p *Parser) parseDeclarations() {
 		defer un(trace(p, "Описания"))
 	}
 
-	var d ast.Decl
-
 	for p.tok != lexer.EOF {
 
-		d = nil
 		switch p.tok {
 		case lexer.TYPE:
-			d = p.parseTypeDecl()
+			var d = p.parseTypeDecl()
+			d.Host = p.module
+			p.module.Decls = append(p.module.Decls, d)
 		case lexer.CONST:
 			var cs = p.parseConstDecls()
 			for _, c := range cs {
+				c.Host = p.module
 				p.module.Decls = append(p.module.Decls, c)
 			}
 		case lexer.VAR:
-			d = p.parseVarDecl()
+			var d = p.parseVarDecl()
+			d.Host = p.module
+			p.module.Decls = append(p.module.Decls, d)
 		case lexer.FN:
-			d = p.parseFn()
+			var d = p.parseFn()
+			d.Host = p.module
+			p.module.Decls = append(p.module.Decls, d)
 		case lexer.ENTRY:
 			p.parseEntry()
 		default:
@@ -190,11 +194,6 @@ func (p *Parser) parseDeclarations() {
 		}
 
 		p.sep()
-
-		if d != nil {
-			p.module.Decls = append(p.module.Decls, d)
-		}
-
 	}
 }
 
