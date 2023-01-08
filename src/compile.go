@@ -36,11 +36,16 @@ func compile(src *env.Source) {
 		}
 
 		var m = cc.modules[i]
-		fmt.Printf("> %s\n", m.Name)
+
+		if *env.TraceCompile {
+			fmt.Printf("-->анализ и генерация модуля '%s'\n", m.Name)
+		}
 
 		cc.process(m)
 
-		fmt.Printf("< %s\n", m.Name)
+		if *env.TraceCompile {
+			fmt.Printf("<-- '%s'\n", m.Name)
+		}
 	}
 }
 
