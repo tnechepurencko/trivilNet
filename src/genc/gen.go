@@ -13,26 +13,26 @@ import (
 var _ = fmt.Printf
 
 type genContext struct {
-	module   *ast.Module
-	outname  string
-	outNames map[string]string
-	autoNo   int // used for names
-	header   []string
-	code     []string
-	globals  []string
-	init     []string
+	module    *ast.Module
+	outname   string
+	declNames map[ast.Decl]string
+	autoNo    int // used for additional names
+	header    []string
+	code      []string
+	globals   []string
+	init      []string
 }
 
 func Generate(m *ast.Module) {
 
 	var genc = &genContext{
-		module:   m,
-		outname:  env.OutName(m.Name),
-		outNames: make(map[string]string),
-		header:   make([]string, 0),
-		code:     make([]string, 0),
-		globals:  make([]string, 0),
-		init:     make([]string, 0),
+		module:    m,
+		outname:   env.OutName(m.Name),
+		declNames: make(map[ast.Decl]string),
+		header:    make([]string, 0),
+		code:      make([]string, 0),
+		globals:   make([]string, 0),
+		init:      make([]string, 0),
 	}
 
 	genc.startCode()
@@ -94,22 +94,6 @@ func (genc *genContext) finishCode() {
 	}
 
 	genc.code = append(genc.code, lines...)
-}
-
-//====
-
-func (genc *genContext) outName(name string) string {
-	out, ok := genc.outNames[name]
-	if ok {
-		return out
-	}
-	out = env.OutName(name)
-	genc.outNames[name] = out
-
-	return out
-}
-func (genc *genContext) outTypeName(name string) string {
-	return genc.outName(typeNamePrefix + name)
 }
 
 //====

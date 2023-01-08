@@ -13,7 +13,7 @@ func (genc *genContext) genModule() {
 
 	//=== import
 	for _, i := range genc.module.Imports {
-		genc.h("#include \"%s\"", genc.outName(i.Mod.Name)+".h")
+		genc.h("#include \"%s\"", genc.declName(i.Mod)+".h")
 	}
 
 	//=== gen types
@@ -60,7 +60,7 @@ func (genc *genContext) genFunction(f *ast.Function) {
 	if f.Recv != nil {
 		receiver = fmt.Sprintf("%s %s",
 			genc.typeRef(f.Recv.Typ),
-			genc.outName(f.Recv.Name))
+			genc.declName(f.Recv))
 		if len(ft.Params) > 0 {
 			receiver += ", "
 		}
@@ -68,7 +68,7 @@ func (genc *genContext) genFunction(f *ast.Function) {
 
 	var fn_header = fmt.Sprintf("%s %s(%s%s)",
 		genc.returnType(ft),
-		genc.outFnName(f),
+		genc.functionName(f),
 		receiver,
 		genc.params(ft))
 
@@ -94,23 +94,13 @@ func (genc *genContext) params(ft *ast.FuncType) string {
 
 	for i, p := range ft.Params {
 
-		b.WriteString(fmt.Sprintf("%s %s", genc.typeRef(p.Typ), genc.outName(p.Name)))
+		b.WriteString(fmt.Sprintf("%s %s", genc.typeRef(p.Typ), genc.declName(p)))
 		if i < len(ft.Params)-1 {
 			b.WriteRune(',')
 		}
 	}
 
 	return b.String()
-}
-
-func (genc *genContext) outFnName(f *ast.Function) string {
-
-	var name = genc.outName(f.Name)
-
-	if f.Recv != nil {
-		name = genc.typeRef(f.Recv.Typ) + "_" + name
-	}
-	return name
 }
 
 //==== entry
@@ -141,7 +131,7 @@ func (genc *genContext) genLocalDecl(d ast.Decl) string {
 
 		return fmt.Sprintf("%s %s = %s%s;",
 			genc.typeRef(x.Typ),
-			genc.outName(x.Name),
+			genc.declName(x),
 			genc.assignCast(x.Typ, x.Init.GetType()),
 			genc.genExpr(x.Init))
 	default:

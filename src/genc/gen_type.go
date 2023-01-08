@@ -22,7 +22,7 @@ func (genc *genContext) typeRef(t ast.Type) string {
 			panic("ni")
 		}
 
-		return genc.outName(typeNamePrefix + x.TypeName)
+		return genc.declName(x.TypeDecl)
 
 	default:
 		panic(fmt.Sprintf("assert: %T", t))
@@ -54,12 +54,12 @@ func predefinedTypeName(name string) string {
 func (genc *genContext) genTypeDecl(td *ast.TypeDecl) {
 	switch x := td.Typ.(type) {
 	case *ast.VectorType:
-		var tname = genc.outTypeName(td.Name)
+		var tname = genc.declName(td)
 		var desc = tname + "Desc"
 		var et = genc.typeRef(x.ElementTyp)
 		//TODO meta
-		genc.c("typedef struct %s { TInt64 len; %s* body; } %s;", desc, et, desc)
-		genc.c("typedef %s* %s;", desc, tname)
+		genc.h("typedef struct %s { TInt64 len; %s* body; } %s;", desc, et, desc)
+		genc.h("typedef %s* %s;", desc, tname)
 	case *ast.ClassType:
 		genc.genClassType(td, x)
 	default:
@@ -71,7 +71,7 @@ func (genc *genContext) genTypeDecl(td *ast.TypeDecl) {
 // genClassDesc - before entry
 func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 
-	var tname = genc.outTypeName(td.Name)
+	var tname = genc.declName(td)
 	var tname_st = tname + nm_class_struct_suffix
 	var vt_type = tname + nm_VT_suffix
 
@@ -79,26 +79,26 @@ func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 	for i, f := range x.Fields {
 		fields[i] = fmt.Sprintf("%s %s;",
 			genc.typeRef(f.Typ),
-			genc.outName(f.Name))
+			genc.declName(f))
 	}
 
-	genc.c("typedef struct %s {", tname_st)
+	genc.h("typedef struct %s {", tname_st)
 	if x.BaseTyp != nil {
 		genc.c("%s%s _B;", genc.typeRef(x.BaseTyp), nm_class_struct_suffix)
 	}
-	genc.code = append(genc.code, fields...)
-	genc.c("} %s;", tname_st)
+	genc.header = append(genc.header, fields...)
+	genc.h("} %s;", tname_st)
 
-	genc.c("struct %s;", vt_type)
+	genc.h("struct %s;", vt_type)
 
-	genc.c("typedef struct %s { struct %s* %s; %s %s;} *%s;", tname, vt_type, nm_VT_field, tname_st, nm_class_fields, tname)
+	genc.h("typedef struct %s { struct %s* %s; %s %s;} *%s;", tname, vt_type, nm_VT_field, tname_st, nm_class_fields, tname)
 
-	genc.c("")
+	genc.h("")
 }
 
 func (genc *genContext) genClassDesc(td *ast.TypeDecl, x *ast.ClassType) {
 
-	var tname = genc.outTypeName(td.Name)
+	var tname = genc.declName(td)
 	var tname_st = tname + "_ST"
 	var meta_type = tname + nm_meta_suffix
 	var vt_type = tname + nm_VT_suffix
@@ -146,7 +146,7 @@ func (genc *genContext) genMethodField(f *ast.Function, tname string) string {
 
 	return fmt.Sprintf("%s (*%s)(%s);",
 		genc.returnType(ft),
-		genc.outName(f.Name),
+		genc.outName(f.Name), // только имя, без префикса модуля
 		strings.Join(ps, ", "))
 }
 
@@ -171,7 +171,7 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 	genc.c("%s.vt.self_size = sizeof(%s);", desc_var, vt_type)
 
 	for _, f := range vtable {
-		genc.c("%s.vt.%s = &%s;", desc_var, genc.outName(f.Name), genc.outFnName(f))
+		genc.c("%s.vt.%s = &%s;", desc_var, genc.outName(f.Name), genc.functionName(f))
 	}
 
 	genc.c("}")

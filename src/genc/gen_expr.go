@@ -51,7 +51,7 @@ func (genc *genContext) genIdent(id *ast.IdentExpr) string {
 		}
 	}
 
-	return genc.outName(id.Name)
+	return genc.declName(id.Obj.(ast.Decl))
 }
 
 //==== literals
@@ -88,12 +88,15 @@ func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
 
 func (genc *genContext) genSelector(x *ast.SelectorExpr) string {
 	if x.X == nil {
-		//TODO - правильное имя
-		return genc.outName(x.Name)
+		return genc.declName(x.Obj.(ast.Decl))
 	}
 
 	var cl = ast.UnderType(x.X.GetType()).(*ast.ClassType)
-	return fmt.Sprintf("%s->%s.%s%s", genc.genExpr(x.X), nm_class_fields, pathToField(cl, x.Name), genc.outName(x.Name))
+	return fmt.Sprintf("%s->%s.%s%s",
+		genc.genExpr(x.X),
+		nm_class_fields,
+		pathToField(cl, x.Name),
+		genc.declName(x.Obj.(ast.Decl)))
 }
 
 func pathToField(cl *ast.ClassType, name string) string {
@@ -184,7 +187,7 @@ func (genc *genContext) genMethodCall(call *ast.CallExpr) string {
 		args += ", " + genc.genArgs(call)
 	}
 
-	return fmt.Sprintf("%s->%s->%s(%s)", name, nm_VT_field, genc.outName(f.Name), args)
+	return fmt.Sprintf("%s->%s->%s(%s)", name, nm_VT_field, genc.declName(f), args)
 }
 
 func (genc *genContext) genStdFuncCall(call *ast.CallExpr) string {

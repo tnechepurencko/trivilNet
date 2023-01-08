@@ -2,7 +2,8 @@ package genc
 
 import (
 	"fmt"
-	//	"trivil/ast"
+	"trivil/ast"
+	"trivil/env"
 )
 
 var _ = fmt.Printf
@@ -47,4 +48,47 @@ const (
 func (genc *genContext) localName(prefix string) string {
 	genc.autoNo++
 	return fmt.Sprintf("%s%d", prefix, genc.autoNo)
+}
+
+//====
+
+func (genc *genContext) declName(d ast.Decl) string {
+
+	out, ok := genc.declNames[d]
+	if ok {
+		return out
+	}
+
+	out = ""
+	var host = d.GetHost()
+	if host != nil {
+
+		if f, ok := d.(*ast.Function); ok && f.External {
+		} else {
+			out = genc.declName(host) + "__"
+		}
+	}
+
+	var prefix = ""
+	if _, ok := d.(*ast.TypeDecl); ok {
+		prefix = typeNamePrefix
+	}
+
+	out += prefix + env.OutName(d.GetName())
+
+	genc.declNames[d] = out
+
+	return out
+}
+
+func (genc *genContext) outName(name string) string {
+	return env.OutName(name)
+}
+
+func (genc *genContext) functionName(f *ast.Function) string {
+
+	if f.Recv != nil {
+		return genc.typeRef(f.Recv.Typ) + "_" + genc.outName(f.Name)
+	}
+	return genc.declName(f)
 }
