@@ -301,11 +301,11 @@ punctuation
 	;
 
 modifier
-	: '@' letter+ '(' (attribute (',' attribute)*)? ')'
+	: '@' letter+ ('(' (attribute (',' attribute)*)? ')')?
 	;
 
 attribute
-    : ident ':' str_lit
+    : str_lit ':' str_lit
 
 // special symbols
 
