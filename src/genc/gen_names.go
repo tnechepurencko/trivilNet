@@ -59,14 +59,22 @@ func (genc *genContext) declName(d ast.Decl) string {
 		return out
 	}
 
+	f, is_fn := d.(*ast.Function)
+
+	if is_fn && f.External {
+		var name = f.ExternalName
+		if name == "" {
+			name = env.OutName(f.Name)
+		}
+		genc.declNames[d] = name
+
+		return name
+	}
+
 	out = ""
 	var host = d.GetHost()
 	if host != nil {
-
-		if f, ok := d.(*ast.Function); ok && f.External {
-		} else {
-			out = genc.declName(host) + "__"
-		}
+		out = genc.declName(host) + "__"
 	}
 
 	var prefix = ""
