@@ -96,10 +96,10 @@ var tokens = [...]string{
 
 	MODIFIER: "@",
 
-	IDENT:  "IDENT",
-	INT:    "INT Literal",
-	FLOAT:  "FLOAT Literal",
-	STRING: "STRING Literal",
+	IDENT:  "идентификатор",
+	INT:    "целый литерал",
+	FLOAT:  "вещественный литерал",
+	STRING: "строковый литерал",
 
 	ADD: "+",
 	SUB: "-",
