@@ -49,6 +49,9 @@ func sexpr(v reflect.Value) string {
 		if v.Type().Field(i).Name == "Obj" {
 			continue
 		}
+		if v.Type().Field(i).Name == "Mod" {
+			continue
+		}
 
 		//fmt.Println(f.Type().String())
 
