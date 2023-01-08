@@ -155,7 +155,6 @@ var skipToDeclaration = tokens{
 	lexer.VAR:   true,
 	lexer.CONST: true,
 	lexer.FN:    true,
-	//lexer.MODIFIER: true,
 	lexer.ENTRY: true,
 }
 
@@ -410,4 +409,58 @@ func (p *Parser) parseExportMark() bool {
 		return true
 	}
 	return false
+}
+
+//====
+
+type modifier struct {
+	name   string
+	attrs  []string
+	values []string
+}
+
+func (p *Parser) parseModifier() modifier {
+
+	var mod = modifier{
+		name: p.lit,
+	}
+	p.next()
+
+	if p.tok != lexer.LPAR {
+		return mod
+	}
+
+	p.next()
+
+	for p.tok != lexer.RPAR && p.tok != lexer.EOF {
+		var attr = ""
+		var value = ""
+
+		if p.tok == lexer.STRING {
+			attr = p.lit
+			p.next()
+		} else {
+			p.expect(lexer.STRING)
+		}
+
+		p.expect(lexer.COLON)
+
+		if p.tok == lexer.STRING {
+			value = p.lit
+			p.next()
+		} else {
+			p.expect(lexer.STRING)
+		}
+
+		mod.attrs = append(mod.attrs, attr)
+		mod.values = append(mod.values, value)
+
+		if p.tok == lexer.RPAR {
+			break
+		}
+		p.expect(lexer.COMMA)
+	}
+	p.expect(lexer.RPAR)
+
+	return mod
 }
