@@ -23,7 +23,7 @@ type genContext struct {
 	init      []string
 }
 
-func Generate(m *ast.Module) {
+func Generate(m *ast.Module, main bool) {
 
 	var genc = &genContext{
 		module:    m,
@@ -36,7 +36,7 @@ func Generate(m *ast.Module) {
 	}
 
 	genc.startCode()
-	genc.genModule()
+	genc.genModule(main)
 	genc.finishCode()
 
 	//genc.show()

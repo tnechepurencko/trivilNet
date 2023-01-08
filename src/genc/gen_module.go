@@ -9,12 +9,13 @@ import (
 
 var _ = fmt.Printf
 
-func (genc *genContext) genModule() {
+func (genc *genContext) genModule(main bool) {
 
 	//=== import
 	for _, i := range genc.module.Imports {
 		genc.h("#include \"%s\"", genc.declName(i.Mod)+".h")
 	}
+	genc.h("")
 
 	//=== gen types
 	for _, d := range genc.module.Decls {
@@ -43,7 +44,7 @@ func (genc *genContext) genModule() {
 		}
 	}
 
-	genc.genEntry(genc.module.Entry, true)
+	genc.genEntry(genc.module.Entry, main)
 }
 
 //=== functions
@@ -105,13 +106,29 @@ func (genc *genContext) params(ft *ast.FuncType) string {
 
 //==== entry
 
+const (
+	init_fn  = "init"
+	init_var = "init_done"
+)
+
 func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 
-	if !main {
-		panic("ni")
+	if main {
+		genc.c("int main() {")
+	} else {
+		var init_header = fmt.Sprintf("void %s__%s()", genc.outname, init_fn)
+
+		genc.h("%s;", init_header)
+
+		genc.c("static TBool %s = false;", init_var)
+		genc.c("%s {", init_header)
+		genc.c("if (%s) return;", init_var)
+		genc.c("%s = true;", init_var)
 	}
 
-	genc.c("int main() {")
+	for _, i := range genc.module.Imports {
+		genc.c("%s__%s();", genc.declName(i.Mod), init_fn)
+	}
 
 	genc.code = append(genc.code, genc.init...)
 
@@ -119,7 +136,9 @@ func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 		genc.genStatementSeq(entry.Seq)
 	}
 
-	genc.c("  return 0;")
+	if main {
+		genc.c("  return 0;")
+	}
 	genc.c("}")
 }
 
