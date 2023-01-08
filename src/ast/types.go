@@ -68,9 +68,7 @@ type FuncType struct {
 }
 
 type Param struct {
-	TypeBase
-	Name string
-	Typ  Type
+	DeclBase
 }
 
 //==== predicates

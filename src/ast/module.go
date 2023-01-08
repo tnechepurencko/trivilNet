@@ -33,7 +33,7 @@ func (n *Module) GetType() Type {
 }
 
 func (n *Module) GetHost() *Module {
-	panic("assert")
+	return nil
 }
 
 func (n *Module) IsExported() bool {
