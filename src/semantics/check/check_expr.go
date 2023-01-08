@@ -78,6 +78,8 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 		if _, ok := x.Obj.(*ast.TypeRef); ok {
 			env.AddError(x.Pos, "СЕМ-ТИП-В-ВЫРАЖЕНИИ")
 			x.Typ = invalidType(x.Pos)
+		} else {
+			x.Typ = x.Obj.(ast.Decl).GetType()
 		}
 		return
 	}
@@ -150,7 +152,7 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	ft, ok := x.X.GetType().(*ast.FuncType)
 	if !ok {
 
-		env.AddError(x.X.GetPos(), "СЕМ-ВЫЗОВ-НЕ_ФУНКТИП")
+		env.AddError(x.X.GetPos(), "СЕМ-ВЫЗОВ-НЕ_ФУНКТИП", ast.TypeName(x.X.GetType()))
 		return
 	}
 

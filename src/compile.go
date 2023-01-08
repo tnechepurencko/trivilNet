@@ -11,20 +11,42 @@ import (
 )
 
 type compileContext struct {
-	//main *ast.Module
+	modules []*ast.Module
 }
 
 func compile(src *env.Source) {
 
-	var cc = &compileContext{}
+	var cc = &compileContext{
+		modules: make([]*ast.Module, 0),
+	}
 
-	var m = cc.parse(src)
+	//var main =
+	cc.parse(src)
 
 	if env.ErrorCount() != 0 {
 		return
 	}
 
+	//TODO: reorder and check cycles
+
+	for i := len(cc.modules) - 1; i >= 0; i-- {
+
+		if env.ErrorCount() != 0 {
+			break
+		}
+
+		var m = cc.modules[i]
+		fmt.Printf("> %s\n", m.Name)
+
+		cc.process(m)
+
+		fmt.Printf("< %s\n", m.Name)
+	}
+}
+
+func (cc *compileContext) process(m *ast.Module) {
 	semantics.Analyse(m)
+
 	if env.ErrorCount() != 0 {
 		return
 	}
@@ -44,6 +66,8 @@ func (cc *compileContext) parse(src *env.Source) *ast.Module {
 		return m
 	}
 
+	cc.modules = append(cc.modules, m)
+
 	if *env.ShowAST >= 1 {
 		fmt.Println(ast.SExpr(m))
 	}
@@ -57,13 +81,17 @@ func (cc *compileContext) parse(src *env.Source) *ast.Module {
 
 func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 
+	//check already imported
+
 	src := env.AddSource(i.Path)
 	if src.Err != nil {
-		fmt.Printf("Ошибка чтения исходного файла '%s': %s\n", i.Path, src.Err.Error())
-		//TODO: error
+		env.AddError(i.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", src.Path, src.Err.Error())
 		return
 	}
 
 	i.Mod = cc.parse(src)
-	//TODO добавить в область видимости
+
+	if i.Mod.Name != src.LastName {
+		env.AddError(i.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", i.Mod.Name, src.LastName)
+	}
 }

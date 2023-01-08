@@ -18,6 +18,11 @@ func Process(m *ast.Module) {
 		scope: m.Inner,
 	}
 
+	// добавление импорта
+	for _, i := range m.Imports {
+		addToScope(i.Mod.Name, i.Mod, m.Inner)
+	}
+
 	// добавление имен
 	for _, d := range m.Decls {
 		switch x := d.(type) {

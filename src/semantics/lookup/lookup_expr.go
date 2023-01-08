@@ -3,6 +3,7 @@ package lookup
 import (
 	"fmt"
 	"trivil/ast"
+	"trivil/env"
 )
 
 var _ = fmt.Printf
@@ -25,7 +26,8 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 
 	case *ast.SelectorExpr:
 		lc.lookExpr(x.X)
-		lc.lookImported(x)
+		lc.lookAccessToImported(x)
+		// проверка поля/метода делается на контроле типов
 
 	case *ast.CallExpr:
 		lc.lookExpr(x.X)
@@ -83,7 +85,7 @@ func (lc *lookContext) considerTypeRef(d ast.Decl, pos int) ast.Node {
 
 }
 
-func (lc *lookContext) lookImported(x *ast.SelectorExpr) {
+func (lc *lookContext) lookAccessToImported(x *ast.SelectorExpr) {
 
 	ident, ok := x.X.(*ast.IdentExpr)
 	if !ok {
@@ -103,7 +105,8 @@ func (lc *lookContext) lookImported(x *ast.SelectorExpr) {
 		}
 		x.Obj = inv
 		m.Inner.Names[x.Name] = inv
-		panic("add and test error")
+		env.AddError(x.Pos, "СЕМ-НЕ-НАЙДЕНО-В-МОДУЛЕ", m.Name, x.Name)
+		//TODO: add test for this error
 	}
 	x.X = nil
 }

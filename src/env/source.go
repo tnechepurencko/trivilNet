@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path"
+	"strings"
 )
 
 var _ = fmt.Printf
@@ -13,11 +14,13 @@ const (
 )
 
 type Source struct {
-	Path  string
-	Bytes []byte
-	Lines []int
-	Err   error
-	No    int // in sources +1
+	Original string // исходный путь
+	Path     string // путь, используемый для чтения, может быть с расширением файла
+	LastName string // последнее имя в пути
+	Bytes    []byte
+	Lines    []int
+	Err      error
+	No       int // in sources +1
 }
 
 var sources []*Source
@@ -26,19 +29,28 @@ func initSources() {
 	sources = make([]*Source, 0)
 }
 
-func AddSource(fpath string) *Source {
-
-	if path.Ext(fpath) == "" {
-		fpath += file_extension
-	}
+func AddSource(spath string) *Source {
 
 	var src = &Source{
-		Path:  fpath,
-		Lines: make([]int, 0),
-		No:    len(sources) + 1,
+		Original: spath,
+		Path:     spath,
+		Lines:    make([]int, 0),
+		No:       len(sources) + 1,
 	}
 
-	buf, err := ioutil.ReadFile(fpath)
+	if path.Ext(spath) == "" {
+		src.Path += file_extension
+	}
+
+	_, filename := path.Split(src.Path)
+
+	var ext = path.Ext(filename)
+	if ext != "" {
+		filename = strings.TrimSuffix(filename, ext)
+	}
+	src.LastName = filename
+
+	buf, err := ioutil.ReadFile(src.Path)
 	if err != nil {
 		src.Err = err
 		return src
