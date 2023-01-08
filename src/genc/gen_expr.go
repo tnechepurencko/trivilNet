@@ -77,7 +77,7 @@ func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
 func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
 
 	var name = genc.localName(nm_stringLiteral)
-	genc.g("TString %s = NULL;", name)
+	genc.g("static TString %s = NULL;", name)
 
 	return fmt.Sprintf("%s(&%s, %d, %d, %s)",
 		rt_newLiteralString,
