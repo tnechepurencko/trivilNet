@@ -98,6 +98,9 @@ func (lc *lookContext) lookAccessToImported(x *ast.SelectorExpr) {
 	}
 
 	if d, ok := m.Inner.Names[x.Name]; ok {
+		if !d.IsExported() {
+			env.AddError(x.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", x.Name, m.Name)
+		}
 		x.Obj = lc.considerTypeRef(d, x.Pos)
 	} else {
 		var inv = &ast.InvalidDecl{
