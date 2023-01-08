@@ -88,7 +88,8 @@ func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
 
 func (genc *genContext) genSelector(x *ast.SelectorExpr) string {
 	if x.X == nil {
-		panic("ni")
+		//TODO - правильное имя
+		return genc.outName(x.Name)
 	}
 
 	var cl = ast.UnderType(x.X.GetType()).(*ast.ClassType)

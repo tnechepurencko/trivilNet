@@ -11,6 +11,11 @@ var _ = fmt.Printf
 
 func (genc *genContext) genModule() {
 
+	//=== import
+	for _, i := range genc.module.Imports {
+		genc.h("#include \"%s\"", genc.outName(i.Mod.Name)+".h")
+	}
+
 	//=== gen types
 	for _, d := range genc.module.Decls {
 		d, ok := d.(*ast.TypeDecl)
@@ -61,11 +66,14 @@ func (genc *genContext) genFunction(f *ast.Function) {
 		}
 	}
 
-	genc.c("%s %s(%s%s) {",
+	var fn_header = fmt.Sprintf("%s %s(%s%s)",
 		genc.returnType(ft),
 		genc.outFnName(f),
 		receiver,
 		genc.params(ft))
+
+	genc.h("%s;", fn_header)
+	genc.c("%s {", fn_header)
 
 	genc.genStatementSeq(f.Seq)
 
