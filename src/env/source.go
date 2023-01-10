@@ -29,6 +29,7 @@ func initSources() {
 	sources = make([]*Source, 0)
 }
 
+//TODO: каноническое имя для сравнения - сейчас используется Path
 func AddSource(spath string) *Source {
 
 	var src = &Source{

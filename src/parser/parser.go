@@ -110,6 +110,7 @@ func (p *Parser) skipTo(ts tokens) {
 func (p *Parser) parseModule() {
 
 	p.module = ast.NewModule()
+	p.module.Pos = p.pos
 
 	if p.tok != lexer.MODULE {
 		p.error(p.pos, "ПАР-ОЖИДАЛСЯ", lexer.MODULE.String())

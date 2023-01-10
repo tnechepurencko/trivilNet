@@ -11,31 +11,39 @@ import (
 )
 
 type compileContext struct {
-	modules []*ast.Module
+	main    *ast.Module
+	modules map[string]*ast.Module
+
+	list   []*ast.Module
+	status map[*ast.Module]int
 }
 
 func Compile(src *env.Source) {
 
 	var cc = &compileContext{
-		modules: make([]*ast.Module, 0),
+		modules: make(map[string]*ast.Module),
 	}
 
-	//var main =
-	cc.parse(src)
+	cc.main = cc.parse(src)
+	cc.modules[src.Original] = cc.main
 
 	if env.ErrorCount() != 0 {
 		return
 	}
 
-	//TODO: reorder and check cycles
+	cc.orderedList()
 
-	for i := len(cc.modules) - 1; i >= 0; i-- {
+	/*
+		for i, m := range cc.list {
+			fmt.Printf("%d: %v %p\n", i, m.Name, m)
+		}
+	*/
+
+	for _, m := range cc.list {
 
 		if env.ErrorCount() != 0 {
 			break
 		}
-
-		var m = cc.modules[i]
 
 		if *env.TraceCompile {
 			fmt.Printf("-->анализ и генерация модуля '%s'\n", m.Name)
@@ -50,12 +58,18 @@ func Compile(src *env.Source) {
 }
 
 func (cc *compileContext) parse(src *env.Source) *ast.Module {
-	var m = parser.Parse(src)
-	if env.ErrorCount() != 0 {
+
+	m, ok := cc.modules[src.Path]
+	if ok {
 		return m
 	}
 
-	cc.modules = append(cc.modules, m)
+	m = parser.Parse(src)
+	cc.modules[src.Path] = m
+
+	if env.ErrorCount() != 0 {
+		return m
+	}
 
 	if *env.ShowAST >= 1 {
 		fmt.Println(ast.SExpr(m))
@@ -97,6 +111,40 @@ func (cc *compileContext) process(m *ast.Module) {
 	}
 
 	if *env.DoGen {
-		genc.Generate(m, m == cc.modules[0])
+		genc.Generate(m, m == cc.main)
 	}
+}
+
+func (cc *compileContext) orderedList() {
+
+	cc.list = make([]*ast.Module, 0)
+	cc.status = make(map[*ast.Module]int)
+
+	cc.traverse(cc.main, cc.main.Pos)
+}
+
+const (
+	processing = 1
+	processed  = 2
+)
+
+func (cc *compileContext) traverse(m *ast.Module, pos int) {
+
+	s, ok := cc.status[m]
+	if ok {
+		if s == processing {
+			env.AddError(pos, "СЕМ-ЦИКЛ-ИМПОРТА", m.Name)
+			cc.status[m] = processed
+		}
+		return
+	}
+
+	cc.status[m] = processing
+
+	for _, i := range m.Imports {
+		cc.traverse(i.Mod, i.Pos)
+	}
+
+	cc.status[m] = processed
+	cc.list = append(cc.list, m)
 }

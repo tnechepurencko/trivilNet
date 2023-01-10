@@ -11,6 +11,7 @@ var _ = fmt.Printf
 
 type Module struct {
 	//source *env.Source
+	Pos     int
 	Name    string
 	Imports []*Import
 	Decls   []Decl
@@ -21,7 +22,7 @@ type Module struct {
 func (n *Module) DeclNode() {}
 
 func (n *Module) GetPos() int {
-	panic("assert")
+	return n.Pos
 }
 
 func (n *Module) GetName() string {
@@ -42,8 +43,9 @@ func (n *Module) IsExported() bool {
 
 func NewModule() *Module {
 	return &Module{
-		Inner: NewScope(topScope),
-		Decls: make([]Decl, 0),
+		Inner:   NewScope(topScope),
+		Decls:   make([]Decl, 0),
+		Imports: make([]*Import, 0),
 	}
 }
 
