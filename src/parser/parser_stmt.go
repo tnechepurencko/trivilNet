@@ -86,9 +86,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseIf()
 	case lexer.WHILE:
 		return p.parseWhile()
-
 	case lexer.RETURN:
 		return p.parseReturn()
+	case lexer.BREAK:
+		return p.parseBreak()
 
 	default:
 		if validSimpleStmToken[p.tok] {
@@ -215,6 +216,20 @@ func (p *Parser) parseReturn() ast.Statement {
 	}
 
 	n.X = p.parseExpression()
+
+	return n
+}
+
+func (p *Parser) parseBreak() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор прервать"))
+	}
+
+	var n = &ast.Break{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+	}
+
+	p.next()
 
 	return n
 }

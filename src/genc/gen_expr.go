@@ -3,9 +3,10 @@ package genc
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"trivil/ast"
-	"unicode/utf8"
+	"trivil/lexer"
 )
 
 var _ = fmt.Printf
@@ -18,9 +19,9 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 	case *ast.LiteralExpr:
 		return genc.genLiteral(x)
 	case *ast.UnaryExpr:
-		return fmt.Sprintf("%s(%s)", x.Op.String(), genc.genExpr(x.X))
+		return fmt.Sprintf("%s(%s)", unaryOp(x.Op), genc.genExpr(x.X))
 	case *ast.BinaryExpr:
-		return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), x.Op.String(), genc.genExpr(x.Y))
+		return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), binaryOp(x.Op), genc.genExpr(x.Y))
 	case *ast.SelectorExpr:
 		return genc.genSelector(x)
 	case *ast.CallExpr:
@@ -34,6 +35,56 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 
 	default:
 		panic(fmt.Sprintf("gen expression: ni %T", expr))
+	}
+}
+
+func unaryOp(op lexer.Token) string {
+	switch op {
+	case lexer.SUB:
+		return "-"
+	case lexer.NOT:
+		return "!"
+
+	default:
+		panic("ni unary" + op.String())
+	}
+}
+
+func binaryOp(op lexer.Token) string {
+	switch op {
+	case lexer.OR:
+		return "||"
+	case lexer.AND:
+		return "&&"
+	case lexer.EQ:
+		return "=="
+	case lexer.NEQ:
+		return "!="
+	case lexer.LSS:
+		return "<"
+	case lexer.LEQ:
+		return "<="
+	case lexer.GTR:
+		return ">"
+	case lexer.GEQ:
+		return ">="
+	case lexer.ADD:
+		return "+"
+	case lexer.SUB:
+		return "-"
+	case lexer.BITOR:
+		return "|"
+	case lexer.MUL:
+		return "*"
+	case lexer.QUO:
+		return "/"
+	case lexer.REM:
+		return "%"
+	case lexer.BITAND:
+		return "&"
+
+	default:
+		panic("ni binary" + op.String())
 	}
 }
 

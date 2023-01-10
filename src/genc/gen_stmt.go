@@ -46,6 +46,9 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		}
 		genc.c("return" + r + ";")
 
+	case *ast.Break:
+		genc.c("break;")
+
 	default:
 		panic(fmt.Sprintf("gen statement: ni %T", s))
 

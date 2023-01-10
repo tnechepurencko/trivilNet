@@ -146,6 +146,8 @@ func (cc *checkContext) statement(s ast.Statement) {
 		} else if cc.returnTyp != nil {
 			env.AddError(x.Pos, "СЕМ-ОШ-ВЕРНУТЬ-НУЖНО")
 		}
+	case *ast.Break:
+		//TODO - check in cycle
 
 	default:
 		panic(fmt.Sprintf("statement: ni %T", s))

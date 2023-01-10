@@ -70,3 +70,7 @@ type Return struct {
 	StatementBase
 	X Expr
 }
+
+type Break struct {
+	StatementBase
+}
