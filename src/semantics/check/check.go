@@ -13,6 +13,7 @@ type checkContext struct {
 	checkedTypes map[string]struct{}
 	returnTyp    ast.Type
 	errorHint    string
+	loopCount    int
 }
 
 func Process(m *ast.Module) {
@@ -69,6 +70,7 @@ func (cc *checkContext) function(f *ast.Function) {
 	if f.Seq != nil {
 		cc.returnTyp = f.Typ.(*ast.FuncType).ReturnTyp
 
+		cc.loopCount = 0
 		cc.statements(f.Seq)
 
 		cc.returnTyp = nil
@@ -76,6 +78,7 @@ func (cc *checkContext) function(f *ast.Function) {
 }
 
 func (cc *checkContext) entry(e *ast.EntryFn) {
+	cc.loopCount = 0
 	cc.statements(e.Seq)
 }
 
@@ -133,7 +136,9 @@ func (cc *checkContext) statement(s ast.Statement) {
 		if !ast.IsBoolType(x.Cond.GetType()) {
 			env.AddError(x.Cond.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.Bool.Name)
 		}
+		cc.loopCount++
 		cc.statements(x.Seq)
+		cc.loopCount--
 	case *ast.Return:
 		if x.X != nil {
 			cc.expr(x.X)
@@ -147,7 +152,9 @@ func (cc *checkContext) statement(s ast.Statement) {
 			env.AddError(x.Pos, "СЕМ-ОШ-ВЕРНУТЬ-НУЖНО")
 		}
 	case *ast.Break:
-		//TODO - check in cycle
+		if cc.loopCount == 0 {
+			env.AddError(x.Pos, "СЕМ-ПРЕРВАТЬ-ВНЕ-ЦИКЛА")
+		}
 
 	default:
 		panic(fmt.Sprintf("statement: ni %T", s))
