@@ -70,9 +70,11 @@ const (
 	keyword_beg
 	BREAK
 	CONST
+	CRASH
 	ELSE
 	ENTRY
 	FN
+	GUARD
 	IF
 	IMPORT
 	MODULE
@@ -148,6 +150,7 @@ var tokens = [...]string{
 	SEMI:  ";",
 	COLON: ":",
 
+	CRASH:  "авария",
 	RETURN: "вернуть",
 	ENTRY:  "вход",
 	IF:     "если",
@@ -156,6 +159,7 @@ var tokens = [...]string{
 	CLASS:  "класс",
 	CONST:  "конст",
 	MODULE: "модуль",
+	GUARD:  "надо",
 	WHILE:  "пока",
 	BREAK:  "прервать",
 	VAR:    "пусть",
