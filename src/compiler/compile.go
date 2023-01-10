@@ -1,4 +1,4 @@
-package main
+package compiler
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ type compileContext struct {
 	modules []*ast.Module
 }
 
-func compile(src *env.Source) {
+func Compile(src *env.Source) {
 
 	var cc = &compileContext{
 		modules: make([]*ast.Module, 0),

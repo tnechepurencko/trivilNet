@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"trivil/compiler"
 	"trivil/env"
 	"trivil/lexer"
 )
@@ -31,7 +32,7 @@ func main() {
 	if *env.JustLexer {
 		testLexer(src)
 	} else {
-		compile(src)
+		compiler.Compile(src)
 	}
 
 	env.ShowErrors()
