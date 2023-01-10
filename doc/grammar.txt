@@ -92,7 +92,7 @@ const_expression // to be extended later
 	;
 
 var_decl
-	: 'пусть' name (':' type_ref)? '=' expression // 'дано' for let
+	: 'пусть' name (':' type_ref)? (':=' | '=') expression 
 	
 //=== function
 
@@ -139,9 +139,11 @@ statement_or_decl
 statement
 	: if_stm
 	| while_stm
+    | guard_stm
 	//| switch_stm
-	| 'прервать'
-	| 'вернуть' (expression | sep)
+	| return_stm
+    | crash_stm
+	| break_stm 'прервать'
 	| simple_stm
 	;
 
@@ -152,6 +154,28 @@ if_stm
 while_stm
 	: 'пока' expression statement_seq 
 	;
+
+guard_stm
+	: 'надо' expression 'иначе' (terminating_stm | statement_seq )
+	;
+
+terminating_stm
+    : return_stm
+    | crash_stm
+    | break_stm
+    ;
+
+return_stm 
+    : 'вернуть' (expression | sep)
+    ;
+
+crash_stm
+    : 'авария' '(' expression ')'
+    ;
+
+
+    : 'прервать'
+    ;
 
 //switch_stm // TBD
 //	: 'выбор' 
