@@ -43,6 +43,8 @@ const (
 	rt_checkClassType = rt_prefix + "checkClassType"
 
 	rt_convert = rt_prefix
+
+	rt_crash = rt_prefix + "crash"
 )
 
 func (genc *genContext) localName(prefix string) string {

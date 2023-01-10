@@ -66,6 +66,17 @@ type While struct {
 	Seq  *StatementSeq
 }
 
+type Guard struct {
+	StatementBase
+	Cond Expr
+	Else Statement
+}
+
+type Crash struct {
+	StatementBase
+	X Expr //
+}
+
 type Return struct {
 	StatementBase
 	X Expr

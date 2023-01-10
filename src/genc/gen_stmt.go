@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"trivil/ast"
+	"trivil/env"
 )
 
 var _ = fmt.Printf
@@ -48,10 +49,11 @@ func (genc *genContext) genStatement(s ast.Statement) {
 
 	case *ast.Break:
 		genc.c("break;")
+	case *ast.Crash:
+		genc.genCrash(x)
 
 	default:
 		panic(fmt.Sprintf("gen statement: ni %T", s))
-
 	}
 }
 
@@ -83,4 +85,35 @@ func (genc *genContext) genWhile(x *ast.While) {
 	genc.c("while (%s) {", genc.genExpr(x.Cond))
 	genc.genStatementSeq(x.Seq)
 	genc.c("}")
+}
+
+func (genc *genContext) genCrash(x *ast.Crash) {
+
+	var expr string
+	var li = literal(x.X)
+	if li != nil {
+		expr = "\"" + li.Lit + "\""
+	} else {
+		expr = genc.genExpr(x.X) + "->body"
+	}
+
+	genc.c("%s(%s,%s);", rt_crash, expr, genPos(x.Pos))
+}
+
+func genPos(pos int) string {
+	src, line, col := env.SourcePos(pos)
+	return fmt.Sprintf("\"%s:%d:%d\"", src.Path, line, col)
+}
+
+func literal(expr ast.Expr) *ast.LiteralExpr {
+
+	switch x := expr.(type) {
+	case *ast.LiteralExpr:
+		return x
+	case *ast.ConversionExpr:
+		if x.Done {
+			return literal(x.X)
+		}
+	}
+	return nil
 }

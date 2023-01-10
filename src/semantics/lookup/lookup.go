@@ -198,6 +198,8 @@ func (lc *lookContext) lookStatement(seq *ast.StatementSeq, s ast.Statement) {
 		}
 	case *ast.Break:
 		//nothing
+	case *ast.Crash:
+		lc.lookExpr(x.X)
 
 	default:
 		panic(fmt.Sprintf("statement: ni %T", s))

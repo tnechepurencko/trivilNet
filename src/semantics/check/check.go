@@ -155,6 +155,11 @@ func (cc *checkContext) statement(s ast.Statement) {
 		if cc.loopCount == 0 {
 			env.AddError(x.Pos, "СЕМ-ПРЕРВАТЬ-ВНЕ-ЦИКЛА")
 		}
+	case *ast.Crash:
+		cc.expr(x.X)
+		if !ast.IsStringType(x.X.GetType()) {
+			env.AddError(x.X.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.String.Name)
+		}
 
 	default:
 		panic(fmt.Sprintf("statement: ni %T", s))

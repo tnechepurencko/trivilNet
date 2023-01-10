@@ -105,6 +105,14 @@ func IsBoolType(t Type) bool {
 	return t == Bool
 }
 
+func IsStringType(t Type) bool {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	return t == String
+}
+
 func IsIndexableType(t Type) bool {
 	if tr, ok := t.(*TypeRef); ok {
 		t = tr.Typ
