@@ -20,9 +20,12 @@ func (cc *checkContext) expr(expr ast.Expr) {
 
 		x.Typ = x.Obj.(ast.Decl).GetType()
 
-		_, isVar := x.Obj.(*ast.VarDecl)
-		x.ReadOnly = !isVar
-		//fmt.Printf("ident %v %v\n", x.Obj, x.Typ)
+		if v, isVar := x.Obj.(*ast.VarDecl); isVar {
+			x.ReadOnly = v.ReadOnly
+		} else {
+			x.ReadOnly = true
+		}
+		//fmt.Printf("ident %v %v %v\n", x.Name, v.ReadOnly, x.ReadOnly)
 
 	case *ast.UnaryExpr:
 		cc.expr(x.X)
@@ -412,7 +415,7 @@ func isLValue(expr ast.Expr) bool {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		return true
+		return !x.ReadOnly
 	case *ast.GeneralBracketExpr:
 		return x.Index != nil
 	case *ast.SelectorExpr:

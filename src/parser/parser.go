@@ -357,12 +357,16 @@ func (p *Parser) parseVarDecl() *ast.VarDecl {
 		n.Typ = p.parseTypeRef()
 	}
 
-	if p.tok != lexer.EQ {
+	if p.tok == lexer.EQ {
+		n.ReadOnly = true
+		p.next()
+	} else if p.tok == lexer.ASSIGN {
+		p.next()
+	} else {
 		env.AddError(p.pos, "ПАР-ПЕРЕМ-ИНИТ")
 		return n
 	}
 
-	p.expect(lexer.EQ)
 	n.Init = p.parseExpression()
 
 	return n

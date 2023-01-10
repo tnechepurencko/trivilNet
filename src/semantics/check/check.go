@@ -75,30 +75,6 @@ func (cc *checkContext) function(f *ast.Function) {
 	}
 }
 
-/*
-func (cc *checkContext) addMethodToType(f *ast.Function) {
-
-	var rt = f.Recv.Typ.(*ast.TypeRef)
-
-	cl, ok := rt.Typ.(*ast.ClassType)
-	if !ok {
-		env.AddError(f.Recv.Pos, "СЕМ-ПОЛУЧАТЕЛЬ-КЛАСС")
-		return
-	}
-
-	cl.Methods = append(cl.Methods, f)
-
-}
-
-func (cc *checkContext) addVarForParameter(p *ast.Param) {
-	var v = &ast.VarDecl{
-		Typ: p.Typ,
-	}
-	v.Name = p.Name
-	addToScope(v.Name, v, lc.scope)
-}
-*/
-
 func (cc *checkContext) entry(e *ast.EntryFn) {
 	cc.statements(e.Seq)
 }
@@ -118,7 +94,9 @@ func (cc *checkContext) statement(s ast.Statement) {
 		cc.statements(x) // из else
 	case *ast.ExprStatement:
 		cc.expr(x.X)
-		//TODO: проверить, что есть вызов, иначе ошибка
+		if _, isCall := x.X.(*ast.CallExpr); !isCall {
+			env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-ИСПОЛЬЗУЕТСЯ")
+		}
 	case *ast.DeclStatement:
 		cc.localDecl(x.D)
 	case *ast.AssignStatement:
