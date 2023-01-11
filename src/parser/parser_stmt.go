@@ -267,6 +267,9 @@ func (p *Parser) parseGuard() ast.Statement {
 	p.next()
 
 	n.Cond = p.parseExpression()
+
+	p.expect(lexer.ELSE)
+
 	switch p.tok {
 	case lexer.RETURN:
 		n.Else = p.parseReturn()
