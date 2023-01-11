@@ -82,7 +82,7 @@ func (genc *genContext) finishCode() {
 	lines = genc.code
 	genc.code = make([]string, 0)
 
-	genc.c("#include \"trirun.h\"")
+	genc.c("#include \"rt_api.h\"")
 	genc.c("#include \"%s\"", genc.outname+".h")
 	genc.c("")
 

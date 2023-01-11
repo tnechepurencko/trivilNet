@@ -1,8 +1,10 @@
-#include "trirun.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
+#include "rt_defs.h"
+#include "rt_api.h"
 
 //==== crash
 
@@ -125,7 +127,7 @@ size_t decode_symbol(TByte* buf, size_t buflen, TSymbol* cp_ref) {
 
 //==== strings
 
-TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* body) {
+EXPORTED TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* body) {
 
 	if (*sptr != NULL) return *sptr;
 
@@ -146,7 +148,7 @@ TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* 
 	return s;
 }
 
-TString tri_newString(TInt64 bytes, TInt64 symbols, char* body) {
+EXPORTED TString tri_newString(TInt64 bytes, TInt64 symbols, char* body) {
 
 	size_t sz = sizeof(StringDesc) + bytes + 1; // +1 для 0x0
 	void* mem = mm_allocate(sz);
@@ -162,7 +164,7 @@ TString tri_newString(TInt64 bytes, TInt64 symbols, char* body) {
 }
 
 // Делает дескриптор, но не копирует содержимое
-TString tri_newStringDesc(TInt64 bytes, TInt64 symbols) {
+EXPORTED TString tri_newStringDesc(TInt64 bytes, TInt64 symbols) {
 
 	size_t sz = sizeof(StringDesc) + bytes + 1; // +1 для 0x0
 	void* mem = mm_allocate(sz);
@@ -176,7 +178,7 @@ TString tri_newStringDesc(TInt64 bytes, TInt64 symbols) {
 }
 
 
-TInt64 tri_lenString(TString s) {
+EXPORTED TInt64 tri_lenString(TString s) {
 	if (s->symbols >= 0) return s->symbols;
 	
 	TInt64 count = 0;
@@ -204,7 +206,7 @@ TInt64 tri_lenString(TString s) {
 typedef struct VectorDesc { TInt64 len; void* body; } VectorDesc;
 
 
-void* tri_newVector(size_t element_size, TInt64 len) {
+EXPORTED void* tri_newVector(size_t element_size, TInt64 len) {
 	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
 	v->len = len;
 	v->body = mm_allocate(element_size * len);
@@ -213,17 +215,17 @@ void* tri_newVector(size_t element_size, TInt64 len) {
 	return v;
 }
 
-void* tri_newVectorDesc() {
+EXPORTED void* tri_newVectorDesc() {
 	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
 	return v;
 }
 
-TInt64 tri_lenVector(void* vd) {
+EXPORTED TInt64 tri_lenVector(void* vd) {
 	VectorDesc* v = vd;
 	return v->len;	
 }
 
-TInt64 tri_vcheck(void* vd, TInt64 inx) {
+EXPORTED TInt64 tri_vcheck(void* vd, TInt64 inx) {
 	VectorDesc* v = vd;
 	if (inx < 0 || inx >= v->len) {
 		runtime_crash("vector index out of bounds");
@@ -238,7 +240,7 @@ typedef struct VTMini { size_t self_size; } VTMini;
 typedef struct MetaMini { size_t object_size; void* base_desc; } MetaMini;
 typedef struct ClassMini { void* vtable; } ClassMini;
 
-void* tri_newObject(void* class_desc) {
+EXPORTED void* tri_newObject(void* class_desc) {
 	
 	VTMini* vt = class_desc;
 	size_t vt_sz = vt->self_size;
@@ -253,15 +255,15 @@ void* tri_newObject(void* class_desc) {
 	return c;
 }
 
-void* tri_checkClassType(void* object, void* target_desc) {
+EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 	
 	VTMini* current_vt = ((ClassMini*)object)->vtable;
 
-printf("object_vt = %p\n", current_vt);
-printf("target_desc = %p\n", target_desc);
+//printf("object_vt = %p\n", current_vt);
+//printf("target_desc = %p\n", target_desc);
 	
 	if (current_vt == target_desc) {
-printf("found self\n");
+//printf("found self\n");
 		return object;
 	}
 	
@@ -276,48 +278,48 @@ printf("found self\n");
 		m = (void *)current_vt + current_vt->self_size;
 	}
 	
-	runtime_crash("wrong class type check");
+	runtime_crash("failed class type check");
 	
 	return NULL;
 }
 
 //==== conversions
 
-TByte tri_TInt64_to_TByte(TInt64 x) {
+EXPORTED TByte tri_TInt64_to_TByte(TInt64 x) {
 	if (x < 0 || x > 255) {
 		runtime_crash("conversion to byte out of range");
 	}
 	return (TByte)x;
 }
 
-TByte tri_TSymbol_to_TByte(TSymbol x) {
+EXPORTED TByte tri_TSymbol_to_TByte(TSymbol x) {
 	if (x > 255) {
 		runtime_crash("conversion to byte out of range");
 	}
 	return (TByte)x;
 }
 
-TInt64 tri_TFloat64_to_TInt64(TFloat64 x) {
+EXPORTED TInt64 tri_TFloat64_to_TInt64(TFloat64 x) {
 	return llround(x);
 }
 
 #define MaxSymbol 0x10FFFF
 
-TSymbol tri_TInt64_to_TSymbol(TInt64 x) {
+EXPORTED TSymbol tri_TInt64_to_TSymbol(TInt64 x) {
 	if (x < 0 || x > MaxSymbol) {
 		runtime_crash("conversion to symbol out of range");
 	}
 	return (TSymbol)x;	
 }
 
-TString tri_TSymbol_to_TString(TSymbol x) {
+EXPORTED TString tri_TSymbol_to_TString(TSymbol x) {
 	TByte buf[8];
 	size_t bytes = encode_symbol(x, buf);
 	
 	return tri_newString(bytes, 1, (char *)buf);
 }
 
-TString tri_Bytes_to_TString(void *vd) {
+EXPORTED TString tri_Bytes_to_TString(void *vd) {
 	VectorDesc* v = vd;
 	//TODO: check meta and crash
 
@@ -325,7 +327,7 @@ TString tri_Bytes_to_TString(void *vd) {
 	return tri_newString(v->len, -1, (char *)v->body);	
 }	
 
-TString tri_Symbols_to_TString(void *vd) {
+EXPORTED TString tri_Symbols_to_TString(void *vd) {
 	VectorDesc* v = vd;
 	//TODO: check meta and crash
 
@@ -347,7 +349,7 @@ TString tri_Symbols_to_TString(void *vd) {
 	return s;	
 }	
 
-void* tri_TString_to_Bytes(TString s) {
+EXPORTED void* tri_TString_to_Bytes(TString s) {
 	VectorDesc* v = tri_newVectorDesc();
 	
 	v->len = s->bytes;
@@ -357,7 +359,7 @@ void* tri_TString_to_Bytes(TString s) {
 	return v;
 }
 
-void* tri_TString_to_Symbols(TString s) {
+EXPORTED void* tri_TString_to_Symbols(TString s) {
 	TInt64 count = 0;
 	TSymbol cp;
 
@@ -400,39 +402,34 @@ void print_int(int i) {
 }
 */
 
-void print_int64(TInt64 i) {
+EXPORTED void print_int64(TInt64 i) {
   printf("%lld", i);
 }
 
-void print_float64(TFloat64 f) {
+EXPORTED void print_float64(TFloat64 f) {
   printf("%g", f);
 }
 
-void print_symbol(TSymbol s) {
+EXPORTED void print_symbol(TSymbol s) {
   printf("0x%x", s);
 }	
 
-void print_string(TString s) {
+EXPORTED void print_string(TString s) {
   printf("%s", s->body);
 }	
 
-void print_bool(TBool b) {
+EXPORTED void print_bool(TBool b) {
 	if (b) printf("истина"); else printf("ложь");
 }
 
-void println() {
+EXPORTED void println() {
   printf("\n");
 }
 
 //==== crash
 
-void tri_crash(char* msg, char* pos) {
+EXPORTED void tri_crash(char* msg, char* pos) {
 	printf("авария '%s' в позиции %s\n", msg, pos);
     panic();
 }
 
-//==== other
-
-void tri_welcome() {
-  printf("Trivil!\n");
-}
