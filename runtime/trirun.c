@@ -6,9 +6,13 @@
 
 //==== crash
 
-void crash(char* s) {
-	printf("! crash: %s\n", s);
-	exit(1);
+void panic() {
+    exit(1);
+}
+
+void runtime_crash(char* s) {
+	printf("!runtime_crash: %s\n", s);
+    panic();
 }
 
 //==== memory
@@ -16,7 +20,7 @@ void crash(char* s) {
 void* mm_allocate(size_t size) {
 	void* a = malloc(size);
 	if (a == NULL) {
-		crash("memory not allocated");
+		runtime_crash("memory not allocated");
 	}
 	return a;
 }	
@@ -222,7 +226,7 @@ TInt64 tri_lenVector(void* vd) {
 TInt64 tri_vcheck(void* vd, TInt64 inx) {
 	VectorDesc* v = vd;
 	if (inx < 0 || inx >= v->len) {
-		crash("vector index out of bounds");
+		runtime_crash("vector index out of bounds");
 	}
 	
 	return inx;
@@ -272,7 +276,7 @@ printf("found self\n");
 		m = (void *)current_vt + current_vt->self_size;
 	}
 	
-	crash("wrong class type check");
+	runtime_crash("wrong class type check");
 	
 	return NULL;
 }
@@ -281,14 +285,14 @@ printf("found self\n");
 
 TByte tri_TInt64_to_TByte(TInt64 x) {
 	if (x < 0 || x > 255) {
-		crash("conversion to byte out of range");
+		runtime_crash("conversion to byte out of range");
 	}
 	return (TByte)x;
 }
 
 TByte tri_TSymbol_to_TByte(TSymbol x) {
 	if (x > 255) {
-		crash("conversion to byte out of range");
+		runtime_crash("conversion to byte out of range");
 	}
 	return (TByte)x;
 }
@@ -301,7 +305,7 @@ TInt64 tri_TFloat64_to_TInt64(TFloat64 x) {
 
 TSymbol tri_TInt64_to_TSymbol(TInt64 x) {
 	if (x < 0 || x > MaxSymbol) {
-		crash("conversion to symbol out of range");
+		runtime_crash("conversion to symbol out of range");
 	}
 	return (TSymbol)x;	
 }
@@ -363,7 +367,7 @@ void* tri_TString_to_Symbols(TString s) {
 	while (i < s->bytes) {
 		symlen = decode_symbol(buf, s->bytes - i, &cp);
 		if (symlen < 0) {
-			crash("invalid utf-8 bytes");
+			runtime_crash("invalid utf-8 bytes");
 			return NULL;
 		}
 		count++;
@@ -418,6 +422,13 @@ void print_bool(TBool b) {
 
 void println() {
   printf("\n");
+}
+
+//==== crash
+
+void tri_crash(char* msg, char* pos) {
+	printf("авария '%s' в позиции %s\n", msg, pos);
+    panic();
 }
 
 //==== other

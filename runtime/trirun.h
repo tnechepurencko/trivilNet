@@ -11,7 +11,7 @@ typedef struct StringDesc {
 //TODO meta
   int64_t bytes;
   int64_t symbols;
-  uint8_t* body;
+  TByte* body;
 } StringDesc;
 
 typedef StringDesc* TString;
@@ -75,6 +75,10 @@ void print_string(TString s);
 void print_bool(TBool b);
 
 void println();
+
+//==== crash
+
+void tri_crash(char* msg, char* pos);
 
 //==== other
 
