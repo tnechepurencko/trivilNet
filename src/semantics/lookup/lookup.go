@@ -192,6 +192,9 @@ func (lc *lookContext) lookStatement(seq *ast.StatementSeq, s ast.Statement) {
 	case *ast.While:
 		lc.lookExpr(x.Cond)
 		lc.lookStatements(x.Seq)
+	case *ast.Guard:
+		lc.lookExpr(x.Cond)
+		lc.lookStatement(nil, x.Else)
 	case *ast.Return:
 		if x.X != nil {
 			lc.lookExpr(x.X)

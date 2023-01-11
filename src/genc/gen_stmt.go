@@ -40,6 +40,8 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		genc.genIf(x, "")
 	case *ast.While:
 		genc.genWhile(x)
+	case *ast.Guard:
+		genc.genGuard(x)
 	case *ast.Return:
 		r := ""
 		if x.X != nil {
@@ -85,6 +87,17 @@ func (genc *genContext) genWhile(x *ast.While) {
 	genc.c("while (%s) {", genc.genExpr(x.Cond))
 	genc.genStatementSeq(x.Seq)
 	genc.c("}")
+}
+
+func (genc *genContext) genGuard(x *ast.Guard) {
+	genc.c("if (!(%s)) {", genc.genExpr(x.Cond))
+	seq, ok := x.Else.(*ast.StatementSeq)
+	if ok {
+		genc.genStatementSeq(seq)
+	} else {
+		genc.genStatement(x.Else)
+		genc.c("}")
+	}
 }
 
 func (genc *genContext) genCrash(x *ast.Crash) {

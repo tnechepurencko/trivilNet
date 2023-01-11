@@ -139,6 +139,19 @@ func (cc *checkContext) statement(s ast.Statement) {
 		cc.loopCount++
 		cc.statements(x.Seq)
 		cc.loopCount--
+
+	case *ast.Guard:
+		cc.expr(x.Cond)
+		if !ast.IsBoolType(x.Cond.GetType()) {
+			env.AddError(x.Cond.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.Bool.Name)
+		}
+		cc.statement(x.Else)
+		if seq, ok := x.Else.(*ast.StatementSeq); ok {
+			if !isTerminating(seq) {
+				env.AddError(x.Else.GetPos(), "СЕМ-НЕ-ЗАВЕРШАЮЩИЙ")
+			}
+		}
+
 	case *ast.Return:
 		if x.X != nil {
 			cc.expr(x.X)
@@ -177,3 +190,17 @@ func (cc *checkContext) localDecl(decl ast.Decl) {
 }
 
 //====
+
+func isTerminating(seq *ast.StatementSeq) bool {
+	if len(seq.Statements) == 0 {
+		return false
+	}
+	var st = seq.Statements[len(seq.Statements)-1]
+	switch st.(type) {
+	case *ast.Return, *ast.Break, *ast.Crash:
+		return true
+	default:
+		return false
+	}
+
+}
