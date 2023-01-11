@@ -81,6 +81,3 @@ EXPORTED void println();
 
 EXPORTED void tri_crash(char* msg, char* pos);
 
-//==== other
-
-void tri_welcome();
