@@ -163,66 +163,71 @@ func (s *Lexer) scanBlockComment() int {
 
 func (s *Lexer) scanIdentifier() (Token, string) {
 	var ofs = s.offset
-	var afterWordSep = false
-	var sep = ' '
-	var firstSpace = true
+	var wordStart = s.offset
+	// состояние после слова
+	var we_ch rune
+	var we_offset, we_rdOffest, we_uOffset int
 
-loop:
 	for {
-		s.next()
-		switch {
-		case isLetter(s.ch):
-			afterWordSep = false
-		case s.ch == ' ':
-			if firstSpace {
-				lit := string(s.src[ofs:s.offset])
-				tok := Lookup(lit)
-				if tok != IDENT {
-					return tok, lit
-				}
-				firstSpace = false
-			}
-			if afterWordSep {
-				break loop
-			}
-			afterWordSep = true
-			sep = ' '
-		case s.ch == '-':
-			if afterWordSep {
-				break loop
-			}
-			afterWordSep = true
-			sep = '-'
-		case isDigit(s.ch):
-			if afterWordSep {
-				break loop
-			}
-			afterWordSep = false
-		case s.ch == '?' || s.ch == '!':
-			if afterWordSep {
-				break loop
-			}
-			afterWordSep = false
+		for {
 			s.next()
-			break loop
-		case s.ch == -1:
-			break loop
-		default:
-			break loop
+			if !isLetter(s.ch) && !isDigit(s.ch) {
+				break
+			}
+		}
+		//fmt.Printf("word '%s' %d:%d\n", string(s.src[wordStart:s.offset]), wordStart, s.offset)
+		if s.ch == '-' {
+			_ch, _offset, _rdOffest, _uOffset := s.ch, s.offset, s.rdOffset, s.uOffset
+			s.next()
+			if !isLetter(s.ch) {
+				s.ch, s.offset, s.rdOffset, s.uOffset = _ch, _offset, _rdOffest, _uOffset
+				break
+			}
+		} else if s.ch == '!' || s.ch == '?' {
+			s.next()
+			break
+		} else {
+			// это пробел или не часть идентификатора, проверяю последнее слово на keyword
+			lit := string(s.src[wordStart:s.offset])
+			//fmt.Printf("проверка keyword '%s' %d:%d rdO=%d\n", lit, wordStart, s.offset, s.rdOffset)
+			tok := Lookup(lit)
+			if tok != IDENT {
+				if wordStart == ofs {
+					// первое слово - ключевое
+					return tok, lit
+				} else {
+					// второе слово - ключевое, возвращаю предыдущую часть
+					// ключевое слово будет взято следующим вызовом
+					//fmt.Printf("берем предудущую часть %d:%d\n", ofs, wordEnd)
+					lit := string(s.src[ofs:we_offset])
+					//fmt.Printf("not keyword '%s' %d:%d next rdO=%d\n", lit, ofs, wordEnd, wordEnd)
+					s.ch, s.offset, s.rdOffset, s.uOffset = we_ch, we_offset, we_rdOffest, we_uOffset
+
+					return IDENT, lit
+				}
+			}
+
+			if s.ch != ' ' {
+				break
+			}
+
+			we_ch, we_offset, we_rdOffest, we_uOffset = s.ch, s.offset, s.rdOffset, s.uOffset
+
+			s.next()
+			if !isLetter(s.ch) {
+				s.ch, s.offset, s.rdOffset, s.uOffset = we_ch, we_offset, we_rdOffest, we_uOffset
+
+				//fmt.Printf("выход на пробеле ofs=%d rdO=%d\n", s.offset, s.rdOffset)
+
+				break
+			}
+			wordStart = s.offset
 		}
 	}
 
-	last := s.offset
-	if afterWordSep {
-		last--
-		if sep == '-' {
-			s.rdOffset--
-		}
-	}
+	lit := string(s.src[ofs:s.offset])
 
-	lit := string(s.src[ofs:last])
-
-	return Lookup(lit), lit
+	return IDENT, lit
 }
 
 func (s *Lexer) scanString(opening rune) string {
@@ -371,14 +376,6 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 	switch {
 	case isLetter(ch):
 		tok, lit = s.scanIdentifier()
-		/*
-			if len(lit) > 1 {
-				// все ключевые слова длиннее одного символа
-				tok = Lookup(lit)
-			} else {
-				tok = IDENT
-			}
-		*/
 	case isDecimal(ch):
 		tok, lit = s.scanNumber()
 	default:
