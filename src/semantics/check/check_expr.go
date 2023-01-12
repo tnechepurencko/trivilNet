@@ -99,9 +99,10 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 	d, ok := cl.Members[x.Name]
 	if !ok {
 		env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПОЛЕ-ИЛИ-МЕТОД", x.Name)
-	} else if d.GetHost() != cc.module && !d.IsExported() {
-		env.AddError(x.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", d.GetName(), d.GetHost().Name)
 	} else {
+		if d.GetHost() != cc.module && !d.IsExported() {
+			env.AddError(x.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", d.GetName(), d.GetHost().Name)
+		}
 		x.Typ = d.GetType()
 		x.Obj = d
 	}
