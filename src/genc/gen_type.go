@@ -17,11 +17,6 @@ func (genc *genContext) typeRef(t ast.Type) string {
 		if pt, ok := x.Typ.(*ast.PredefinedType); ok {
 			return predefinedTypeName(pt.Name)
 		}
-
-		if x.ModuleName != "" {
-			panic("ni")
-		}
-
 		return genc.declName(x.TypeDecl)
 
 	default:
@@ -84,7 +79,7 @@ func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 
 	genc.h("typedef struct %s {", tname_st)
 	if x.BaseTyp != nil {
-		genc.c("%s%s _B;", genc.typeRef(x.BaseTyp), nm_class_struct_suffix)
+		genc.h("%s%s _B;", genc.typeRef(x.BaseTyp), nm_class_struct_suffix)
 	}
 	genc.header = append(genc.header, fields...)
 	genc.h("} %s;", tname_st)
