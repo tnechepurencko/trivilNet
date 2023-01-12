@@ -106,7 +106,10 @@ func (p *Parser) parseClassType() *ast.ClassType {
 	for p.tok != lexer.RBRACE && p.tok != lexer.EOF {
 
 		var f = &ast.Field{
-			DeclBase: ast.DeclBase{Pos: p.pos},
+			DeclBase: ast.DeclBase{
+				Pos:  p.pos,
+				Host: p.module,
+			},
 		}
 
 		f.Name = p.parseIdent()

@@ -92,7 +92,6 @@ func (cc *checkContext) classBaseType(cl *ast.ClassType, members map[string]ast.
 		cc.classBaseType(baseClass, members)
 	}
 
-	//TODO: Учесть экспорт для типов из другого модуля!
 	for _, f := range baseClass.Fields {
 		members[f.Name] = f
 	}

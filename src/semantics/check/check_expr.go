@@ -98,8 +98,9 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 
 	d, ok := cl.Members[x.Name]
 	if !ok {
-		//TODO: проверить экспорт
 		env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПОЛЕ-ИЛИ-МЕТОД", x.Name)
+	} else if d.GetHost() != cc.module && !d.IsExported() {
+		env.AddError(x.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", d.GetName(), d.GetHost().Name)
 	} else {
 		x.Typ = d.GetType()
 		x.Obj = d
@@ -302,12 +303,13 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 	for _, vp := range c.Values {
 		d, ok := cl.Members[vp.Name]
 		if !ok {
-			//TODO: проверить экспорт
 			env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕТ-ПОЛЯ", vp.Name)
 		} else {
 			f, ok := d.(*ast.Field)
 			if !ok {
 				env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕ-ПОЛE")
+			} else if f.Host != cc.module && !f.Exported {
+				env.AddError(vp.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", f.Name, f.Host.Name)
 			} else {
 				cc.checkAssignable(f.Typ, vp.Value)
 			}
