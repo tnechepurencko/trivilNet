@@ -3,7 +3,7 @@ package lookup
 import (
 	"fmt"
 	"trivil/ast"
-	//"trivil/env"
+	"trivil/env"
 )
 
 var _ = fmt.Printf
@@ -16,14 +16,12 @@ func (lc *lookContext) lookTypeRef(t ast.Type) {
 		return // уже сделано
 	}
 
-	if tr.ModuleName != "" {
-		panic("ni")
-	}
+	var td *ast.TypeDecl
 
-	var x = findInScopes(lc.scope, tr.TypeName, tr.Pos)
-	td, ok := x.(*ast.TypeDecl)
-	if !ok {
-		return
+	if tr.ModuleName != "" {
+		td = lc.lookTypeDeclInModule(tr.ModuleName, tr.TypeName, tr.Pos)
+	} else {
+		td = lc.lookTypeDeclInScopes(tr.TypeName, tr.Pos)
 	}
 
 	tr.TypeDecl = td
@@ -34,6 +32,74 @@ func (lc *lookContext) lookTypeRef(t ast.Type) {
 	}
 
 	//fmt.Printf("! %v %T\n", tr.TypeDecl, tr.Typ)
+}
+
+func (lc *lookContext) lookTypeDeclInScopes(name string, pos int) *ast.TypeDecl {
+
+	var d = findInScopes(lc.scope, name, pos)
+
+	if d == nil {
+		env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО", name)
+		var td = lc.makeTypeDecl(name, pos)
+		addToScope(name, td, lc.scope)
+		return td
+	}
+
+	td, ok := d.(*ast.TypeDecl)
+	if !ok {
+		env.AddError(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-ТИП", name)
+		return lc.makeTypeDecl(name, pos)
+	}
+
+	return td
+}
+
+func (lc *lookContext) lookTypeDeclInModule(moduleName, name string, pos int) *ast.TypeDecl {
+	var d = findInScopes(lc.scope, moduleName, pos)
+
+	if d == nil {
+		env.AddError(pos, "СЕМ-НЕ-НАЙДЕН-МОДУЛЬ", moduleName)
+		return lc.makeTypeDecl(name, pos)
+	}
+
+	m, ok := d.(*ast.Module)
+	if !ok {
+		env.AddError(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-МОДУЛЬ", moduleName)
+		return lc.makeTypeDecl(name, pos)
+	}
+
+	d, ok = m.Inner.Names[name]
+	if !ok {
+		env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО-В-МОДУЛЕ", m.Name, name)
+		var td = lc.makeTypeDecl(name, pos)
+		addToScope(name, td, lc.scope)
+		return td
+	}
+
+	td, ok := d.(*ast.TypeDecl)
+	if !ok {
+		env.AddError(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-ТИП", name)
+		return lc.makeTypeDecl(name, pos)
+	}
+
+	if !d.IsExported() {
+		env.AddError(pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", name, m.Name)
+	}
+
+	return td
+}
+
+func (lc *lookContext) makeTypeDecl(name string, pos int) *ast.TypeDecl {
+	var td = &ast.TypeDecl{
+		DeclBase: ast.DeclBase{
+			Pos:      pos,
+			Name:     name,
+			Typ:      ast.MakeInvalidType(pos),
+			Host:     lc.module,
+			Exported: true,
+		},
+	}
+	return td
 }
 
 //==== типы

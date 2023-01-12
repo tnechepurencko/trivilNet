@@ -9,13 +9,15 @@ import (
 var _ = fmt.Printf
 
 type lookContext struct {
-	scope *ast.Scope
+	module *ast.Module
+	scope  *ast.Scope
 }
 
 func Process(m *ast.Module) {
 
 	var lc = &lookContext{
-		scope: m.Inner,
+		module: m,
+		scope:  m.Inner,
 	}
 
 	// добавление импорта

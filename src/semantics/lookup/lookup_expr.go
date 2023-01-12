@@ -12,7 +12,7 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		var d = findInScopes(lc.scope, x.Name, x.Pos)
+		var d = lookInScopes(lc.scope, x.Name, x.Pos)
 		x.Obj = lc.considerTypeRef(d, x.Pos)
 
 		//fmt.Printf("found %v => %v\n", x.Name, x.Obj)

@@ -25,15 +25,8 @@ func findInScopes(scope *ast.Scope, name string, pos int) ast.Decl {
 
 	for {
 		if cur == nil {
-
 			//ast.ShowScopes("not found "+name, scope)
-
-			env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО", name)
-			var inv = &ast.InvalidDecl{
-				DeclBase: ast.DeclBase{Pos: pos, Name: name},
-			}
-			addToScope(name, inv, scope)
-			return inv
+			return nil
 		}
 
 		d, ok := cur.Names[name]
@@ -43,5 +36,19 @@ func findInScopes(scope *ast.Scope, name string, pos int) ast.Decl {
 
 		cur = cur.Outer
 	}
+}
 
+// Всегда возвращает объект, возможно InvalidDesc
+func lookInScopes(scope *ast.Scope, name string, pos int) ast.Decl {
+
+	var d = findInScopes(scope, name, pos)
+	if d != nil {
+		return d
+	}
+	env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО", name)
+	var inv = &ast.InvalidDecl{
+		DeclBase: ast.DeclBase{Pos: pos, Name: name},
+	}
+	addToScope(name, inv, scope)
+	return inv
 }

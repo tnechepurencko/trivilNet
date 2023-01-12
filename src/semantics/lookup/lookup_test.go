@@ -28,8 +28,21 @@ var valid_texts = []string{
 	"модуль м; тип К = класс { я: Цел64; б: Цел64 }; вход { К{я: 1, б: 2} }",
 }
 
-var invalid_texts = []string{
-	"иначе м",
+type one struct {
+	text string
+	id   string
+}
+
+var error_tests = []one{
+	{"модуль м; вход { я := 1 }", "СЕМ-НЕ-НАЙДЕНО"},
+	{"модуль м; вход { пусть я: Т := 1 }", "СЕМ-НЕ-НАЙДЕНО"},
+
+	{"модуль м; вход { пусть я := 1; пусть я = 2 }", "СЕМ-УЖЕ-ОПИСАНО"},
+
+	{"модуль м; вход { пусть я := 1; пусть ф: я = 2 }", "СЕМ-ДОЛЖЕН-БЫТЬ-ТИП"},
+
+	{"модуль м; вход { пусть я: М.Т = 1 }", "СЕМ-НЕ-НАЙДЕН-МОДУЛЬ"},
+	{"модуль м; конст М: Цел64 = 1; вход { пусть я: М.Т = 1 }", "СЕМ-ДОЛЖЕН-БЫТЬ-МОДУЛЬ"},
 }
 
 //===
@@ -51,24 +64,28 @@ func checkValid(t *testing.T, text string) {
 	}
 }
 
-/*
-func TestInvalid(t *testing.T) {
-	t.Run("invalid tests", func(t *testing.T) {
-		for _, text := range invalid_texts {
-			checkInvalid(t, text)
+func TestErrors(t *testing.T) {
+	fmt.Printf("--- tests for errors: %d ---\n", len(error_tests))
+	t.Run("error tests", func(t *testing.T) {
+		for _, e := range error_tests {
+			checkForError(t, e.text, e.id)
 		}
 	})
 }
 
-func checkInvalid(t *testing.T, text string) {
-	parseSrc(text)
-	if env.ErrorCount() > 0 {
-		env.ClearErrors()
-	} else {
-		t.Errorf("Error(s) expected in text:\n%s\n", text)
+func checkForError(t *testing.T, text, id string) {
+	compile(text)
+	if env.ErrorCount() == 0 {
+		t.Errorf("An error is expected in text:\n%s\n", text)
+		return
 	}
+	if id != "" {
+		if env.GetErrorId(0) != id {
+			t.Errorf("Expected '%s' error, got '%s' in text:\n%s\n", id, env.GetErrorId(0), text)
+		}
+	}
+	env.ClearErrors()
 }
-*/
 
 func compile(text string) {
 	var src = env.AddImmSource(text)
