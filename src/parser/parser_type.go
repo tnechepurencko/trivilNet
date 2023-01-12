@@ -23,6 +23,7 @@ func (p *Parser) parseTypeRef() ast.Type {
 	var s = p.parseIdent()
 
 	if p.tok == lexer.DOT {
+		p.next()
 		t.ModuleName = s
 		t.TypeName = p.parseIdent()
 	} else {
