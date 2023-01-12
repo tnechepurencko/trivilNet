@@ -124,14 +124,14 @@ func (genc *genContext) genMeta(x *ast.ClassType, meta_type string) {
 
 func (genc *genContext) genVTable(x *ast.ClassType, vtable []*ast.Function, tname, meta_type, vt_type string) {
 
-	genc.c("typedef struct %s {", vt_type)
-	genc.c("size_t self_size;")
+	genc.h("typedef struct %s {", vt_type)
+	genc.h("size_t self_size;")
 
 	for _, f := range vtable {
-		genc.c("%s", genc.genMethodField(f, tname))
+		genc.h("%s", genc.genMethodField(f, tname))
 	}
 
-	genc.c("} %s;", vt_type)
+	genc.h("} %s;", vt_type)
 }
 
 func (genc *genContext) genMethodField(f *ast.Function, tname string) string {
@@ -152,8 +152,12 @@ func (genc *genContext) genMethodField(f *ast.Function, tname string) string {
 
 func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, tname, tname_st, meta_type, vt_type string) {
 
-	var desc_var = tname + nm_desc_var_suffix
+	var desc_var = tname + nm_class_info_suffix
 	genc.c("struct { %s vt; %s meta; } %s;", vt_type, meta_type, desc_var)
+
+	var ptr = fmt.Sprintf("void * %s;", tname+nm_class_info_ptr_suffix)
+	genc.h("extern %s", ptr)
+	genc.c("%s", ptr)
 
 	var meta_init_fn = tname + "_init"
 
@@ -162,7 +166,7 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 	//-- Meta
 	var base = "NULL"
 	if x.BaseTyp != nil {
-		base = "&" + genc.typeRef(x.BaseTyp) + nm_desc_var_suffix
+		base = genc.typeRef(x.BaseTyp) + nm_class_info_ptr_suffix
 	}
 	genc.c("%s.meta.object_size = sizeof(struct %s);", desc_var, tname)
 	genc.c("%s.meta.base = %s;", desc_var, base)
@@ -174,6 +178,7 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 		genc.c("%s.vt.%s = &%s;", desc_var, genc.outName(f.Name), genc.functionName(f))
 	}
 
+	genc.c("%s = &%s;", tname+nm_class_info_ptr_suffix, desc_var)
 	genc.c("}")
 
 	genc.init = append(genc.init, fmt.Sprintf("%s();", meta_init_fn))

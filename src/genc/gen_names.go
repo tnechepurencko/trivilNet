@@ -17,10 +17,11 @@ const (
 	nm_base_fields         = "_B"
 	nm_VT_field            = "vtable"
 
-	nm_VT_suffix       = "_VT"
-	nm_meta_suffix     = "_Meta"
-	nm_meta_field      = "_meta_"
-	nm_desc_var_suffix = "_desc"
+	nm_VT_suffix             = "_VT"
+	nm_meta_suffix           = "_Meta"
+	nm_meta_field            = "_meta_"
+	nm_class_info_suffix     = "_class_info"
+	nm_class_info_ptr_suffix = "_class_info_ptr"
 )
 
 // prefixes for generated names

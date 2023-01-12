@@ -96,5 +96,5 @@ func (genc *genContext) convertToVector(expr string, from ast.Type, to *ast.Vect
 func (genc *genContext) convertToClass(expr string, target ast.Type) string {
 	var tname = genc.typeRef(target)
 
-	return fmt.Sprintf("((%s)%s(%s, &%s))", tname, rt_checkClassType, expr, tname+nm_desc_var_suffix)
+	return fmt.Sprintf("((%s)%s(%s, %s))", tname, rt_checkClassType, expr, tname+nm_class_info_ptr_suffix)
 }

@@ -238,7 +238,7 @@ func (genc *genContext) genMethodCall(call *ast.CallExpr) string {
 		args += ", " + genc.genArgs(call)
 	}
 
-	return fmt.Sprintf("%s->%s->%s(%s)", name, nm_VT_field, genc.declName(f), args)
+	return fmt.Sprintf("%s->%s->%s(%s)", name, nm_VT_field, genc.outName(f.Name), args)
 }
 
 func (genc *genContext) genStdFuncCall(call *ast.CallExpr) string {
@@ -324,11 +324,11 @@ func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
 	var name = genc.localName("loc")
 
 	var tname = genc.typeRef(x.Typ)
-	var s = fmt.Sprintf("%s %s = %s(&%s);",
+	var s = fmt.Sprintf("%s %s = %s(%s);",
 		tname,
 		name,
 		rt_newObject,
-		tname+nm_desc_var_suffix)
+		tname+nm_class_info_ptr_suffix)
 
 	var cl = ast.UnderType(x.Typ).(*ast.ClassType)
 
