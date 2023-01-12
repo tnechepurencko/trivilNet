@@ -144,21 +144,23 @@ func IsClassType(t Type) bool {
 	return ok
 }
 
-func IsInvalidType(t Type) bool {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
-
-	_, ok := t.(*InvalidType)
-	return ok
-}
-
 func UnderType(t Type) Type {
 	if tr, ok := t.(*TypeRef); ok {
 		t = tr.Typ
 	}
 
 	return t
+}
+
+//==== invalid type
+
+func IsInvalidType(t Type) bool {
+	_, ok := UnderType(t).(*InvalidType)
+	return ok
+}
+
+func MakeInvalidType(pos int) *InvalidType {
+	return &InvalidType{TypeBase: TypeBase{Pos: pos}}
 }
 
 //==== for error messages
