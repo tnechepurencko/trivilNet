@@ -42,7 +42,7 @@ func (cc *checkContext) conversion(x *ast.ConversionExpr) {
 		return
 	case ast.Bool:
 		env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Bool.Name)
-		x.Typ = invalidType(x.Pos)
+		x.Typ = ast.MakeInvalidType(x.Pos)
 		return
 	case ast.Symbol:
 		cc.conversionToSymbol(x)
@@ -108,7 +108,7 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Byte.Name)
-	x.Typ = invalidType(x.Pos)
+	x.Typ = ast.MakeInvalidType(x.Pos)
 
 }
 
@@ -147,7 +147,7 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Int64.Name)
-	x.Typ = invalidType(x.Pos)
+	x.Typ = ast.MakeInvalidType(x.Pos)
 }
 
 func (cc *checkContext) conversionToFloat64(x *ast.ConversionExpr) {
@@ -166,7 +166,7 @@ func (cc *checkContext) conversionToFloat64(x *ast.ConversionExpr) {
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Float64.Name)
-	x.Typ = invalidType(x.Pos)
+	x.Typ = ast.MakeInvalidType(x.Pos)
 
 }
 
@@ -205,7 +205,7 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Symbol.Name)
-	x.Typ = invalidType(x.Pos)
+	x.Typ = ast.MakeInvalidType(x.Pos)
 
 }
 
@@ -240,7 +240,7 @@ func (cc *checkContext) conversionToString(x *ast.ConversionExpr) {
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.String.Name)
-	x.Typ = invalidType(x.Pos)
+	x.Typ = ast.MakeInvalidType(x.Pos)
 }
 
 func (cc *checkContext) conversionToVector(x *ast.ConversionExpr, target *ast.VectorType) {
@@ -258,7 +258,7 @@ func (cc *checkContext) conversionToVector(x *ast.ConversionExpr, target *ast.Ve
 	}
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА",
 		ast.TypeString(x.X.GetType()), ast.TypeString(x.TargetTyp))
-	x.Typ = invalidType(x.Pos)
+	x.Typ = ast.MakeInvalidType(x.Pos)
 
 }
 
@@ -283,7 +283,7 @@ func (cc *checkContext) conversionToClass(x *ast.ConversionExpr, target *ast.Cla
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА",
 		ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
-	x.Typ = invalidType(x.Pos)
+	x.Typ = ast.MakeInvalidType(x.Pos)
 
 }
 

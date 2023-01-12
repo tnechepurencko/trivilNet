@@ -11,7 +11,10 @@ import (
 var _ = fmt.Printf
 
 func (cc *checkContext) isCheckedType(v *ast.TypeDecl) bool {
-	// if other module return true
+
+	if v.Host != cc.module {
+		return true
+	}
 	_, ok := cc.checkedTypes[v.Name]
 	return ok
 }

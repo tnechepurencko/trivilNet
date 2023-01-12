@@ -14,7 +14,7 @@ func (cc *checkContext) expr(expr ast.Expr) {
 	case *ast.IdentExpr:
 		if _, ok := x.Obj.(*ast.TypeRef); ok {
 			env.AddError(x.Pos, "СЕМ-ТИП-В-ВЫРАЖЕНИИ")
-			x.Typ = invalidType(x.Pos)
+			x.Typ = ast.MakeInvalidType(x.Pos)
 			return
 		}
 
@@ -80,7 +80,7 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 		// imported object
 		if _, ok := x.Obj.(*ast.TypeRef); ok {
 			env.AddError(x.Pos, "СЕМ-ТИП-В-ВЫРАЖЕНИИ")
-			x.Typ = invalidType(x.Pos)
+			x.Typ = ast.MakeInvalidType(x.Pos)
 		} else {
 			x.Typ = x.Obj.(ast.Decl).GetType()
 		}
@@ -92,7 +92,7 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 	var cl = getClassType(t)
 	if cl == nil {
 		env.AddError(x.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeString(t))
-		x.Typ = invalidType(x.X.GetPos())
+		x.Typ = ast.MakeInvalidType(x.X.GetPos())
 		return
 	}
 
@@ -106,7 +106,7 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 	}
 
 	if x.Typ == nil {
-		x.Typ = invalidType(x.X.GetPos())
+		x.Typ = ast.MakeInvalidType(x.X.GetPos())
 	}
 }
 
@@ -183,7 +183,7 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 		cc.arrayComposite(x.Composite, t)
 
 		if t == nil {
-			t = invalidType(x.X.GetPos())
+			t = ast.MakeInvalidType(x.X.GetPos())
 		}
 		x.Typ = t
 		x.X = nil
@@ -197,7 +197,7 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 
 	if !ast.IsIndexableType(t) {
 		env.AddError(x.X.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-МАССИВА", ast.TypeString(t))
-		x.Typ = invalidType(x.Pos)
+		x.Typ = ast.MakeInvalidType(x.Pos)
 	} else {
 		x.Index = x.Composite.Elements[0].Value
 		cc.expr(x.Index)
@@ -278,14 +278,14 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 
 	if t == nil {
 		env.AddError(c.Pos, "СЕМ-КОМПОЗИТ-НЕТ-ТИПА")
-		c.Typ = invalidType(c.X.GetPos())
+		c.Typ = ast.MakeInvalidType(c.X.GetPos())
 		return
 	}
 
 	var cl = getClassType(t)
 	if cl == nil {
 		env.AddError(c.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-ОШ-ТИП")
-		c.Typ = invalidType(c.X.GetPos())
+		c.Typ = ast.MakeInvalidType(c.X.GetPos())
 	} else {
 		c.Typ = t
 	}
@@ -432,8 +432,4 @@ func (cc *checkContext) checkLValue(expr ast.Expr) {
 		return
 	}
 	env.AddError(expr.GetPos(), "СЕМ-НЕ-ПРИСВОИТЬ")
-}
-
-func invalidType(pos int) *ast.InvalidType {
-	return &ast.InvalidType{TypeBase: ast.TypeBase{Pos: pos}}
 }

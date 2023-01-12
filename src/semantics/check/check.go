@@ -10,6 +10,7 @@ import (
 var _ = fmt.Printf
 
 type checkContext struct {
+	module       *ast.Module
 	checkedTypes map[string]struct{}
 	returnTyp    ast.Type
 	errorHint    string
@@ -18,6 +19,7 @@ type checkContext struct {
 
 func Process(m *ast.Module) {
 	var cc = &checkContext{
+		module:       m,
 		checkedTypes: make(map[string]struct{}),
 	}
 
