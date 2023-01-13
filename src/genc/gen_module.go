@@ -26,6 +26,14 @@ func (genc *genContext) genModule(main bool) {
 	}
 
 	//=== gen vars, consts
+	for _, d := range genc.module.Decls {
+		switch x := d.(type) {
+		case *ast.ConstDecl:
+			genc.genGlobalConst(x)
+		case *ast.VarDecl:
+			genc.genGlobalVar(x)
+		}
+	}
 
 	//=== gen functions
 	for _, d := range genc.module.Decls {
@@ -144,6 +152,39 @@ func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 }
 
 //===
+
+func (genc *genContext) genGlobalConst(x *ast.ConstDecl) {
+
+	var name = genc.declName(x)
+	var def = fmt.Sprintf("%s %s", genc.typeRef(x.Typ), name)
+	var val = genc.genExpr(x.Value)
+
+	if initializeInPlace(x.Typ) {
+		def = "const " + def
+		genc.c("%s = %s;", def, val)
+	} else {
+		genc.c("%s;", def)
+		genc.init = append(genc.init, fmt.Sprintf("%s = %s;", name, val))
+	}
+
+	if x.Exported {
+		genc.h("extern %s;", def)
+	}
+}
+
+func initializeInPlace(t ast.Type) bool {
+
+	t = ast.UnderType(t)
+	switch t {
+	case ast.Byte, ast.Int64, ast.Float64, ast.Bool, ast.Symbol:
+		return true
+	}
+	return false
+}
+
+func (genc *genContext) genGlobalVar(x *ast.VarDecl) {
+	panic("ni")
+}
 
 func (genc *genContext) genLocalDecl(d ast.Decl) string {
 	switch x := d.(type) {

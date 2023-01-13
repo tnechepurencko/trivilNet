@@ -30,7 +30,7 @@ func Process(m *ast.Module) {
 		case *ast.VarDecl:
 			cc.varDecl(x)
 		case *ast.ConstDecl:
-		//
+			cc.constDecl(x)
 		case *ast.Function:
 			cc.function(x)
 		default:
@@ -58,12 +58,19 @@ func (cc *checkContext) varDecl(v *ast.VarDecl) {
 	}
 }
 
-/*
-func (cc *checkContext) lookConstDecl(v *ast.ConstDecl) {
-	cc.TypeRef(v.Typ)
+func (cc *checkContext) constDecl(v *ast.ConstDecl) {
+	cc.expr(v.Value)
+
+	if v.Typ != nil {
+		cc.checkAssignable(v.Typ, v.Value)
+	} else {
+		v.Typ = v.Value.GetType()
+		if v.Typ == nil {
+			panic("assert - не задан тип константы")
+		}
+	}
 
 }
-*/
 
 //==== functions
 

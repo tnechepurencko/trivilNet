@@ -79,9 +79,6 @@ func (p *Parser) parseStatement() ast.Statement {
 			StatementBase: ast.StatementBase{Pos: p.pos},
 			D:             p.parseVarDecl(),
 		}
-	case lexer.CONST:
-		panic("ni")
-
 	case lexer.IF:
 		return p.parseIf()
 	case lexer.WHILE:

@@ -229,8 +229,10 @@ func (p *Parser) parseSingleConst() *ast.ConstDecl {
 		n.Exported = true
 	}
 
-	p.expect(lexer.COLON)
-	n.Typ = p.parseTypeRef()
+	if p.tok == lexer.COLON {
+		p.next()
+		n.Typ = p.parseTypeRef()
+	}
 
 	p.expect(lexer.EQ)
 	n.Value = p.parseExpression() //! const expression
