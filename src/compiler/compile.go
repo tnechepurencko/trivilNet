@@ -55,6 +55,10 @@ func Compile(src *env.Source) {
 			fmt.Printf("<-- '%s'\n", m.Name)
 		}
 	}
+
+	if *env.DoGen && *env.BuildExe {
+		genc.BuildExe(cc.list)
+	}
 }
 
 func (cc *compileContext) parse(src *env.Source) *ast.Module {

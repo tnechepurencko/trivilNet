@@ -1,0 +1,1 @@
+exe-windows: clang #files# -llibwelrt -fno-omit-frame-pointer -o #target#.exe
