@@ -2,7 +2,7 @@ package env
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -23,7 +23,7 @@ func initErrors() {
 	errors = make([]*Error, 0)
 	messages = make(map[string]string)
 
-	buf, err := ioutil.ReadFile("errors.txt")
+	buf, err := os.ReadFile("errors.txt")
 	if err != nil {
 		fmt.Println("! error reading errors.txt file ", err.Error())
 		return
@@ -65,6 +65,31 @@ func AddError(pos int, id string, args ...interface{}) string {
 	}
 
 	err.text = fmt.Sprintf("%s:%d:%d:%s: %s", source.Path, line, col, id, msg)
+
+	errors = append(errors, err)
+
+	return err.text
+}
+
+func AddProgramError(id string, args ...interface{}) string {
+
+	var err = &Error{
+		id:     id,
+		source: nil,
+		line:   0,
+		col:    0,
+	}
+
+	template, ok := messages[id]
+	msg := ""
+
+	if ok {
+		msg = fmt.Sprintf(template, args...)
+	} else {
+		msg = fmt.Sprintf("сообщение для ошибки '%s' не задано!", id)
+	}
+
+	err.text = fmt.Sprintf("%s: %s", id, msg)
 
 	errors = append(errors, err)
 

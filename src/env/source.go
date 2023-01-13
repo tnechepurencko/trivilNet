@@ -2,7 +2,7 @@ package env
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path"
 	"strings"
 )
@@ -51,7 +51,7 @@ func AddSource(spath string) *Source {
 	}
 	src.LastName = filename
 
-	buf, err := ioutil.ReadFile(src.Path)
+	buf, err := os.ReadFile(src.Path)
 	if err != nil {
 		src.Err = err
 		return src
