@@ -56,7 +56,7 @@ func Compile(src *env.Source) {
 		}
 	}
 
-	if *env.DoGen && *env.BuildExe {
+	if env.ErrorCount() == 0 && *env.DoGen && *env.BuildExe {
 		genc.BuildExe(cc.list)
 	}
 }
