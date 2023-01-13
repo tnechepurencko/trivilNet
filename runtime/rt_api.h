@@ -23,6 +23,9 @@ EXPORTED TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbol
 
 EXPORTED TInt64 tri_lenString(TString s);
 
+EXPORTED TString tri_emptyString();
+
+
 //==== vector
 
 EXPORTED void* tri_newVector(size_t element_size, TInt64 len);
@@ -81,3 +84,6 @@ EXPORTED void println();
 
 EXPORTED void tri_crash(char* msg, char* pos);
 
+//==== init
+
+EXPORTED void tri_init();

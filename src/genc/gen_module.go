@@ -115,6 +115,7 @@ func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 
 	if main {
 		genc.c("int main() {")
+		genc.c("%s();", rt_init)
 	} else {
 		var init_header = fmt.Sprintf("void %s__%s()", genc.outname, init_fn)
 

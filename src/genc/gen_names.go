@@ -33,8 +33,11 @@ const (
 const (
 	rt_prefix = "tri_"
 
+	rt_init = rt_prefix + "init"
+
 	rt_newLiteralString = rt_prefix + "newLiteralString"
 	rt_lenString        = rt_prefix + "lenString"
+	rt_emptyString      = rt_prefix + "emptyString"
 
 	rt_newVector = rt_prefix + "newVector"
 	rt_lenVector = rt_prefix + "lenVector"

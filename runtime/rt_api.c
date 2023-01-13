@@ -163,6 +163,13 @@ EXPORTED TString tri_newString(TInt64 bytes, TInt64 symbols, char* body) {
 	return s;
 }
 
+// Initialized in tri_init
+StringDesc emptyStringDesc;
+
+EXPORTED TString tri_emptyString() {
+    return &emptyStringDesc;
+}
+
 // Делает дескриптор, но не копирует содержимое
 EXPORTED TString tri_newStringDesc(TInt64 bytes, TInt64 symbols) {
 
@@ -433,3 +440,10 @@ EXPORTED void tri_crash(char* msg, char* pos) {
     panic();
 }
 
+//==== init
+
+EXPORTED void tri_init() {
+    emptyStringDesc.bytes = 0;
+    emptyStringDesc.symbols = 0;
+    emptyStringDesc.body = (TByte*)"";
+}

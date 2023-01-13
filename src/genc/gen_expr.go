@@ -127,6 +127,10 @@ func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
 
 func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
 
+	if len(li.Lit) == 0 {
+		return fmt.Sprintf("%s()", rt_emptyString)
+	}
+
 	var name = genc.localName(nm_stringLiteral)
 	genc.g("static TString %s = NULL;", name)
 
