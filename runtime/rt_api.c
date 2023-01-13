@@ -207,6 +207,17 @@ EXPORTED TInt64 tri_lenString(TString s) {
 	return count;
 }
 
+EXPORTED TBool tri_equalStrings(TString s1, TString s2) {
+    if (s1 == s2) {
+        return true;
+    }
+    if (s1->bytes != s2->bytes) {
+        return false;
+    }
+    
+    return memcmp(s1->body, s2->body, s1->bytes) == 0;
+}
+
 //==== vector
 
 

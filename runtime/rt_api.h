@@ -25,6 +25,7 @@ EXPORTED TInt64 tri_lenString(TString s);
 
 EXPORTED TString tri_emptyString();
 
+EXPORTED TBool tri_equalStrings(TString s1, TString s2); 
 
 //==== vector
 

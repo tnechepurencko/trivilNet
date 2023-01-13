@@ -21,7 +21,7 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 	case *ast.UnaryExpr:
 		return fmt.Sprintf("%s(%s)", unaryOp(x.Op), genc.genExpr(x.X))
 	case *ast.BinaryExpr:
-		return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), binaryOp(x.Op), genc.genExpr(x.Y))
+		return genc.genBinaryExpr(x)
 	case *ast.SelectorExpr:
 		return genc.genSelector(x)
 	case *ast.CallExpr:
@@ -35,56 +35,6 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 
 	default:
 		panic(fmt.Sprintf("gen expression: ni %T", expr))
-	}
-}
-
-func unaryOp(op lexer.Token) string {
-	switch op {
-	case lexer.SUB:
-		return "-"
-	case lexer.NOT:
-		return "!"
-
-	default:
-		panic("ni unary" + op.String())
-	}
-}
-
-func binaryOp(op lexer.Token) string {
-	switch op {
-	case lexer.OR:
-		return "||"
-	case lexer.AND:
-		return "&&"
-	case lexer.EQ:
-		return "=="
-	case lexer.NEQ:
-		return "!="
-	case lexer.LSS:
-		return "<"
-	case lexer.LEQ:
-		return "<="
-	case lexer.GTR:
-		return ">"
-	case lexer.GEQ:
-		return ">="
-	case lexer.ADD:
-		return "+"
-	case lexer.SUB:
-		return "-"
-	case lexer.BITOR:
-		return "|"
-	case lexer.MUL:
-		return "*"
-	case lexer.QUO:
-		return "/"
-	case lexer.REM:
-		return "%"
-	case lexer.BITAND:
-		return "&"
-
-	default:
-		panic("ni binary" + op.String())
 	}
 }
 
@@ -137,6 +87,74 @@ func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
 	return fmt.Sprintf("%s(&%s, %d, %d, %s)",
 		rt_newLiteralString,
 		name, len(li.Lit), utf8.RuneCountInString(li.Lit), "\""+li.Lit+"\"")
+}
+
+//==== унарные операции
+
+func unaryOp(op lexer.Token) string {
+	switch op {
+	case lexer.SUB:
+		return "-"
+	case lexer.NOT:
+		return "!"
+
+	default:
+		panic("ni unary" + op.String())
+	}
+}
+
+//==== бинарные операции
+
+func binaryOp(op lexer.Token) string {
+	switch op {
+	case lexer.OR:
+		return "||"
+	case lexer.AND:
+		return "&&"
+	case lexer.EQ:
+		return "=="
+	case lexer.NEQ:
+		return "!="
+	case lexer.LSS:
+		return "<"
+	case lexer.LEQ:
+		return "<="
+	case lexer.GTR:
+		return ">"
+	case lexer.GEQ:
+		return ">="
+	case lexer.ADD:
+		return "+"
+	case lexer.SUB:
+		return "-"
+	case lexer.BITOR:
+		return "|"
+	case lexer.MUL:
+		return "*"
+	case lexer.QUO:
+		return "/"
+	case lexer.REM:
+		return "%"
+	case lexer.BITAND:
+		return "&"
+
+	default:
+		panic("ni binary" + op.String())
+	}
+}
+
+func (genc *genContext) genBinaryExpr(x *ast.BinaryExpr) string {
+
+	if ast.IsStringType(x.X.GetType()) {
+		var not = ""
+		if x.Op == lexer.NEQ {
+			not = "!"
+		}
+
+		return fmt.Sprintf("%s%s(%s, %s)", not, rt_equalStrings, genc.genExpr(x.X), genc.genExpr(x.Y))
+	}
+
+	return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), binaryOp(x.Op), genc.genExpr(x.Y))
 }
 
 //==== selector

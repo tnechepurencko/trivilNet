@@ -362,10 +362,11 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 
 	//case lexer.BITAND, lexer.BITOR:
 	case lexer.EQ, lexer.NEQ:
-		if ast.IsIntegerType(x.X.GetType()) || ast.IsFloatType(x.X.GetType()) {
+		var t = ast.UnderType(x.X.GetType())
+		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Symbol || t == ast.String {
 			checkOperandTypes(x)
-
-			//TODO: add other
+		} else if ast.IsClassType(t) {
+			checkOperandTypes(x)
 		} else {
 			env.AddError(x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(x.X.GetType()), x.Op.String())
