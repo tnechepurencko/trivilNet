@@ -251,15 +251,17 @@ func (p *Parser) parseNextConst() *ast.ConstDecl {
 		n.Exported = true
 	}
 
-	if p.tok != lexer.COLON {
-		return n
+	if p.tok == lexer.COLON {
+		p.next()
+		n.Typ = p.parseTypeRef()
+
+		p.expect(lexer.EQ)
+		n.Value = p.parseExpression()
+
+	} else if p.tok == lexer.EQ {
+		p.next()
+		n.Value = p.parseExpression()
 	}
-
-	p.next()
-	n.Typ = p.parseTypeRef()
-
-	p.expect(lexer.EQ)
-	n.Value = p.parseExpression()
 
 	return n
 }
@@ -301,7 +303,7 @@ func (p *Parser) completeConstGroup(cs []*ast.ConstDecl) {
 	var val int
 
 	for _, c := range cs {
-		if c.Typ != nil {
+		if c.Value != nil {
 			base = c
 			first = true
 		} else {
