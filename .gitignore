@@ -1,4 +1,7 @@
 *.exe
 *.bak
+*.dll
+*.exp
+*.lib
 _genc/*
 модули/*
