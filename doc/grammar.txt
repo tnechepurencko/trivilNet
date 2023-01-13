@@ -132,7 +132,7 @@ statement_seq
 
 statement_or_decl
 	: statement
-	| const_decl
+	//| const_decl
 	| var_decl
 	;
 
