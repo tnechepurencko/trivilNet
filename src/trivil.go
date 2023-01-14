@@ -15,7 +15,7 @@ func main() {
 	flag.Parse()
 	arg := flag.Arg(0)
 	if arg == "" {
-		fmt.Println("Использование: trivil name.tri")
+		fmt.Println("Использование: tric (folder | file.tri)")
 		os.Exit(1)
 	}
 
