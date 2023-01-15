@@ -11,9 +11,12 @@ import (
 )
 
 type compileContext struct {
-	main    *ast.Module
-	modules map[string]*ast.Module
+	main *ast.Module
+	//modules map[string]*ast.Module
+	imported map[string]*ast.Module // map[folder]
 
+	// упорядоченный список для обработки
+	// головной модуль - в конце
 	list   []*ast.Module
 	status map[*ast.Module]int
 }
@@ -28,11 +31,12 @@ func Compile(spath string) {
 	}
 
 	var cc = &compileContext{
-		modules: make(map[string]*ast.Module),
+		imported: make(map[string]*ast.Module),
 	}
 
 	cc.main = cc.parse(src)
-	cc.modules[src.Original] = cc.main
+	//TODO: добавить главный в imported[folder]
+	//cc.modules[src.Original] = cc.main
 
 	if env.ErrorCount() != 0 {
 		return
@@ -70,13 +74,15 @@ func Compile(spath string) {
 
 func (cc *compileContext) parse(src *env.Source) *ast.Module {
 
+	/* в импорте
 	m, ok := cc.modules[src.Path]
 	if ok {
 		return m
 	}
+	*/
 
-	m = parser.Parse(src)
-	cc.modules[src.Path] = m
+	m := parser.Parse(src)
+	//	cc.modules[src.Path] = m
 
 	if env.ErrorCount() != 0 {
 		return m
@@ -95,21 +101,47 @@ func (cc *compileContext) parse(src *env.Source) *ast.Module {
 
 func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 
-	//TODO: check already imported
-
-	var files = env.AddSource(i.Path)
-	var src = files[0]
-	if src.Err != nil {
-		env.AddError(i.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", src.Path, src.Err.Error())
+	var npath = env.NormalizeFolderPath(i.Path)
+	m, ok := cc.imported[npath]
+	if ok {
+		// Модуль уже был импортирован
+		i.Mod = m
+		//fmt.Printf("already imported %s\n", i.Path)
 		return
 	}
 
-	i.Mod = cc.parse(src)
-
-	if i.Mod.Name != src.LastName {
-		env.AddError(i.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", i.Mod.Name, src.LastName)
+	var err = env.CheckFolder(i.Path)
+	if err != nil {
+		env.AddError(i.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", i.Path, err.Error())
+		return
 	}
 
+	var list = env.GetFolderSources(i.Path)
+
+	if len(list) == 0 {
+		env.AddError(i.Pos, "ОКР-ИМПОРТ-ПУСТАЯ-ПАПКА", i.Path)
+		return
+	}
+
+	if len(list) == 1 && list[0].Err != nil {
+		env.AddError(i.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", list[0].Path, list[0].Err.Error())
+		return
+	}
+
+	for _, src := range list {
+
+		i.Mod = cc.parse(src)
+
+		if i.Mod.Name != src.FolderName {
+			env.AddError(i.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", i.Mod.Name, src.FolderName)
+		}
+	}
+
+	if len(list) > 1 {
+		panic("ni слияние")
+	}
+
+	cc.imported[npath] = i.Mod
 }
 
 func (cc *compileContext) process(m *ast.Module) {
