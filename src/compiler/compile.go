@@ -18,7 +18,14 @@ type compileContext struct {
 	status map[*ast.Module]int
 }
 
-func Compile(src *env.Source) {
+func Compile(spath string) {
+
+	var files = env.AddSource(spath)
+	var src = files[0]
+	if src.Err != nil {
+		env.FatalError("ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", spath, src.Err.Error())
+		return
+	}
 
 	var cc = &compileContext{
 		modules: make(map[string]*ast.Module),
@@ -88,9 +95,10 @@ func (cc *compileContext) parse(src *env.Source) *ast.Module {
 
 func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 
-	//check already imported
+	//TODO: check already imported
 
-	src := env.AddSource(i.Path)
+	var files = env.AddSource(i.Path)
+	var src = files[0]
 	if src.Err != nil {
 		env.AddError(i.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", src.Path, src.Err.Error())
 		return
@@ -101,6 +109,7 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 	if i.Mod.Name != src.LastName {
 		env.AddError(i.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", i.Mod.Name, src.LastName)
 	}
+
 }
 
 func (cc *compileContext) process(m *ast.Module) {

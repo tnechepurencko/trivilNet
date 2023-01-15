@@ -96,6 +96,12 @@ func AddProgramError(id string, args ...interface{}) string {
 	return err.text
 }
 
+func FatalError(id string, args ...interface{}) {
+	AddProgramError(id, args...)
+	ShowErrors()
+	os.Exit(1)
+}
+
 func ShowErrors() {
 	for _, e := range errors {
 		fmt.Println(e.text)

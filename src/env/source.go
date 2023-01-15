@@ -30,7 +30,7 @@ func initSources() {
 }
 
 //TODO: каноническое имя для сравнения - сейчас используется Path
-func AddSource(spath string) *Source {
+func AddSource(spath string) []*Source {
 
 	var src = &Source{
 		Original: spath,
@@ -51,17 +51,21 @@ func AddSource(spath string) *Source {
 	}
 	src.LastName = filename
 
+	var list = make([]*Source, 1)
+	list[0] = src
+
 	buf, err := os.ReadFile(src.Path)
 	if err != nil {
 		src.Err = err
-		return src
+		// set err to 1st src?
+		return list
 	}
 
 	src.Bytes = buf
 
 	sources = append(sources, src)
 
-	return src
+	return list
 }
 
 func AddImmSource(text string) *Source {

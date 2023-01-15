@@ -13,8 +13,8 @@ import (
 func main() {
 	// флаги определены в env.flags
 	flag.Parse()
-	arg := flag.Arg(0)
-	if arg == "" {
+	spath := flag.Arg(0)
+	if spath == "" {
 		fmt.Println("Использование: tric (folder | file.tri)")
 		os.Exit(1)
 	}
@@ -22,17 +22,11 @@ func main() {
 	fmt.Println("Тривиль-0 компилятор v0.0")
 	env.Init()
 
-	src := env.AddSource(arg)
-	if src.Err != nil {
-		fmt.Printf("Ошибка чтения исходного файла '%s': %s\n", arg, src.Err.Error())
-		os.Exit(1)
-	}
-
 	//fmt.Printf("%v\n", src.Bytes)
 	if *env.JustLexer {
-		testLexer(src)
+		testLexer(spath)
 	} else {
-		compiler.Compile(src)
+		compiler.Compile(spath)
 	}
 
 	env.ShowErrors()
@@ -45,7 +39,15 @@ func main() {
 
 }
 
-func testLexer(src *env.Source) {
+func testLexer(arg string) {
+
+	var files = env.AddSource(arg)
+	var src = files[0]
+	if src.Err != nil {
+		fmt.Printf("Ошибка чтения исходного файла '%s': %s\n", arg, src.Err.Error())
+		os.Exit(1)
+	}
+
 	var lex = new(lexer.Lexer)
 	lex.Init(src)
 
