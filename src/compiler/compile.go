@@ -128,20 +128,34 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 		return
 	}
 
-	for _, src := range list {
+	var moduleName = ""
+	var mods = make([]*ast.Module, len(list))
+	for n, src := range list {
 
-		i.Mod = cc.parse(src)
+		var m = cc.parse(src)
+		mods[n] = m
 
-		if i.Mod.Name != src.FolderName {
-			env.AddError(i.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", i.Mod.Name, src.FolderName)
+		if env.ErrorCount() == 0 {
+			if n == 0 {
+				moduleName = m.Name
+
+				if cc.main != nil && m.Name != src.FolderName {
+					// не проверяю соответствие имени папки для головного модуля
+					env.AddError(i.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", m.Name, src.FolderName)
+				}
+			} else if moduleName != m.Name {
+				env.AddError(i.Pos, "ОКР-ОШ-МОДУЛИ-В-ПАПКЕ", moduleName, m.Name, src.FolderPath)
+			}
 		}
+
 	}
 
-	if len(list) > 1 {
+	if env.ErrorCount() == 0 && len(list) > 1 {
 		panic("ni слияние")
 	}
 
-	cc.imported[npath] = i.Mod
+	i.Mod = mods[0]
+	cc.imported[npath] = mods[0]
 }
 
 func (cc *compileContext) process(m *ast.Module) {
