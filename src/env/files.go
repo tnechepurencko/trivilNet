@@ -1,7 +1,7 @@
 package env
 
 import (
-	e "errors"
+	er "errors"
 	"fmt"
 	"os"
 	//"path"
@@ -16,7 +16,7 @@ func CheckFolder(fpath string) error {
 		return err
 	}
 	if !fi.IsDir() {
-		return e.New("это файл")
+		return er.New("это файл")
 	}
 	return nil
 }

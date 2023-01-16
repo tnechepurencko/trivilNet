@@ -1,6 +1,7 @@
 package env
 
 import (
+	er "errors"
 	"fmt"
 	"os"
 	"path"
@@ -32,40 +33,66 @@ func initSources() {
 	sources = make([]*Source, 0)
 }
 
-//TODO: каноническое имя для сравнения - сейчас используется Path
-func AddSource(spath string) []*Source {
+// Если параметр - папка, делаеть GetFolderSource
+// Иначе, читает файл, заданный параметром, и добавляет остальные файлы из папки с нужным расширением
+func GetSources(spath string) []*Source {
+
+	if CheckFolder(spath) == nil {
+		return GetFolderSources(spath)
+	}
+
+	folder, filename := path.Split(spath)
+	if folder == "" {
+		folder = "."
+	}
+	//fmt.Printf("GetSources: '%v' '%v'\n", folder, filename)
 
 	var src = &Source{
-		Path:  spath,
+		FolderPath: folder,
+		FolderName: path.Base(folder),
+		FileName:   filename,
+		Path:       spath,
+
 		Lines: make([]int, 0),
-		No:    len(sources) + 1,
 	}
-
-	if path.Ext(spath) == "" {
-		src.Path += file_extension
-	}
-
-	_, filename := path.Split(src.Path)
-
-	var ext = path.Ext(filename)
-	if ext != "" {
-		filename = strings.TrimSuffix(filename, ext)
-	}
-	//	src.LastName = filename
 
 	var list = make([]*Source, 1)
 	list[0] = src
 
-	buf, err := os.ReadFile(src.Path)
-	if err != nil {
-		src.Err = err
-		// set err to 1st src?
+	if !strings.HasSuffix(filename, file_extension) {
+		src.Err = er.New("неверное расширение файла " + path.Ext(filename))
 		return list
 	}
 
+	buf, err := os.ReadFile(src.Path)
+	if err != nil {
+		src.Err = err
+		return list
+	}
 	src.Bytes = buf
 
-	sources = append(sources, src)
+	f, err := os.Open(folder)
+	if err != nil {
+		panic(fmt.Sprintf("panic GetSources(%s): %s", folder, err.Error()))
+	}
+
+	names, err := f.Readdirnames(0)
+	for _, name := range names {
+		if name != filename && strings.HasSuffix(name, file_extension) {
+			var src = readSource(folder, name)
+			if src.Err != nil {
+				list = make([]*Source, 1)
+				list[0] = src
+				return list
+			}
+			list = append(list, src)
+		}
+	}
+
+	for _, s := range list {
+		sources = append(sources, s)
+		s.No = len(sources)
+	}
 
 	return list
 }
@@ -85,7 +112,7 @@ func GetFolderSources(folder string) []*Source {
 
 	f, err := os.Open(folder)
 	if err != nil {
-		panic(fmt.Sprintf("panic AddFolderSource(%s): %s", folder, err.Error()))
+		panic(fmt.Sprintf("panic GetFolderSources(%s): %s", folder, err.Error()))
 	}
 
 	names, err := f.Readdirnames(0)
@@ -144,6 +171,8 @@ func AddImmSource(text string) *Source {
 
 	return src
 }
+
+//====
 
 func (s *Source) AddLine(ofs int) {
 	s.Lines = append(s.Lines, ofs)

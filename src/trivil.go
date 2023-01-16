@@ -41,7 +41,7 @@ func main() {
 
 func testLexer(arg string) {
 
-	var files = env.AddSource(arg)
+	var files = env.GetSources(arg)
 	var src = files[0]
 	if src.Err != nil {
 		fmt.Printf("Ошибка чтения исходного файла '%s': %s\n", arg, src.Err.Error())

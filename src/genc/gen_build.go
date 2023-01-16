@@ -68,7 +68,7 @@ func BuildExe(modules []*ast.Module) {
 	if err != nil {
 		fmt.Printf("Exec failed: %s\n%s\n", err.Error(), string(out))
 	} else {
-		fmt.Printf("Execute: %s/%s  Rebuild C source: %s/%s\n", folder, target, folder, script)
+		fmt.Printf("Execute: %s/%s  Rebuild C code: %s/%s\n", folder, target, folder, script)
 	}
 }
 

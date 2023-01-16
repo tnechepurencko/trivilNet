@@ -38,34 +38,8 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 		return
 	}
 
-	var moduleName = ""
-	var mods = make([]*ast.Module, len(list))
-	for n, src := range list {
-
-		var m = cc.parse(src)
-		mods[n] = m
-
-		if env.ErrorCount() == 0 {
-			if n == 0 {
-				moduleName = m.Name
-
-				if cc.main != nil && m.Name != src.FolderName {
-					// не проверяю соответствие имени папки для головного модуля
-					env.AddError(i.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", m.Name, src.FolderName)
-				}
-			} else if moduleName != m.Name {
-				env.AddError(i.Pos, "ОКР-ОШ-МОДУЛИ-В-ПАПКЕ", moduleName, m.Name, src.FolderPath)
-			}
-		}
-
-	}
-
-	if env.ErrorCount() == 0 && len(list) > 1 {
-		mergeModules(mods)
-	}
-
-	i.Mod = mods[0]
-	cc.imported[npath] = mods[0]
+	i.Mod = cc.parseList(list)
+	cc.imported[npath] = i.Mod
 }
 
 func mergeModules(mods []*ast.Module) {
