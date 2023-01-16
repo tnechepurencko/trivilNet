@@ -169,7 +169,7 @@ func (genc *genContext) genSelector(x *ast.SelectorExpr) string {
 		genc.genExpr(x.X),
 		nm_class_fields,
 		pathToField(cl, x.Name),
-		genc.declName(x.Obj.(ast.Decl)))
+		genc.outName(x.Name))
 }
 
 func pathToField(cl *ast.ClassType, name string) string {

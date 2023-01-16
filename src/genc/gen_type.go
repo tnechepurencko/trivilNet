@@ -74,7 +74,7 @@ func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 	for i, f := range x.Fields {
 		fields[i] = fmt.Sprintf("%s %s;",
 			genc.typeRef(f.Typ),
-			genc.declName(f))
+			genc.outName(f.Name)) // без префикса модуля
 	}
 
 	genc.h("typedef struct %s {", tname_st)
