@@ -10,6 +10,8 @@ import (
 	"trivil/semantics"
 )
 
+var _ = fmt.Printf
+
 type compileContext struct {
 	main *ast.Module
 	//modules map[string]*ast.Module
@@ -74,13 +76,6 @@ func Compile(spath string) {
 
 func (cc *compileContext) parse(src *env.Source) *ast.Module {
 
-	/* в импорте
-	m, ok := cc.modules[src.Path]
-	if ok {
-		return m
-	}
-	*/
-
 	m := parser.Parse(src)
 	//	cc.modules[src.Path] = m
 
@@ -99,64 +94,7 @@ func (cc *compileContext) parse(src *env.Source) *ast.Module {
 	return m
 }
 
-func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
-
-	var npath = env.NormalizeFolderPath(i.Path)
-	m, ok := cc.imported[npath]
-	if ok {
-		// Модуль уже был импортирован
-		i.Mod = m
-		//fmt.Printf("already imported %s\n", i.Path)
-		return
-	}
-
-	var err = env.CheckFolder(i.Path)
-	if err != nil {
-		env.AddError(i.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", i.Path, err.Error())
-		return
-	}
-
-	var list = env.GetFolderSources(i.Path)
-
-	if len(list) == 0 {
-		env.AddError(i.Pos, "ОКР-ИМПОРТ-ПУСТАЯ-ПАПКА", i.Path)
-		return
-	}
-
-	if len(list) == 1 && list[0].Err != nil {
-		env.AddError(i.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", list[0].Path, list[0].Err.Error())
-		return
-	}
-
-	var moduleName = ""
-	var mods = make([]*ast.Module, len(list))
-	for n, src := range list {
-
-		var m = cc.parse(src)
-		mods[n] = m
-
-		if env.ErrorCount() == 0 {
-			if n == 0 {
-				moduleName = m.Name
-
-				if cc.main != nil && m.Name != src.FolderName {
-					// не проверяю соответствие имени папки для головного модуля
-					env.AddError(i.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", m.Name, src.FolderName)
-				}
-			} else if moduleName != m.Name {
-				env.AddError(i.Pos, "ОКР-ОШ-МОДУЛИ-В-ПАПКЕ", moduleName, m.Name, src.FolderPath)
-			}
-		}
-
-	}
-
-	if env.ErrorCount() == 0 && len(list) > 1 {
-		panic("ni слияние")
-	}
-
-	i.Mod = mods[0]
-	cc.imported[npath] = mods[0]
-}
+//=== process
 
 func (cc *compileContext) process(m *ast.Module) {
 	semantics.Analyse(m)
@@ -186,6 +124,8 @@ const (
 	processing = 1
 	processed  = 2
 )
+
+//=== traverse
 
 func (cc *compileContext) traverse(m *ast.Module, pos int) {
 

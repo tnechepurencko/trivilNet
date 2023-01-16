@@ -392,7 +392,7 @@ func (p *Parser) parseEntry() {
 	n.Seq = p.parseStatementSeq()
 
 	if p.module.Entry != nil {
-		p.error(p.pos, "ПАР-ДУБЛЬ-ВХОД")
+		p.error(p.pos, "ПАР-ДУБЛЬ-ВХОД", env.PosString(p.module.Entry.Pos))
 		return
 	}
 
