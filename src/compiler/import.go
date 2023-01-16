@@ -61,14 +61,14 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 	}
 
 	if env.ErrorCount() == 0 && len(list) > 1 {
-		cc.mergeModules(mods)
+		mergeModules(mods)
 	}
 
 	i.Mod = mods[0]
 	cc.imported[npath] = mods[0]
 }
 
-func (cc *compileContext) mergeModules(mods []*ast.Module) {
+func mergeModules(mods []*ast.Module) {
 	var combined = mods[0]
 
 	// соединить импорт
@@ -91,6 +91,8 @@ func (cc *compileContext) mergeModules(mods []*ast.Module) {
 	// соединить описания
 	for n := 1; n < len(mods); n++ {
 		m := mods[n]
+
+		setHost(combined, m.Decls)
 		combined.Decls = append(combined.Decls, m.Decls...)
 
 		if m.Entry != nil {
@@ -101,4 +103,21 @@ func (cc *compileContext) mergeModules(mods []*ast.Module) {
 			}
 		}
 	}
+}
+
+func setHost(combined *ast.Module, decls []ast.Decl) {
+
+	for _, d := range decls {
+		d.SetHost(combined)
+
+		if td, ok := d.(*ast.TypeDecl); ok {
+			if cl, ok := td.Typ.(*ast.ClassType); ok {
+				for _, f := range cl.Fields {
+					f.SetHost(combined)
+				}
+			}
+		}
+
+	}
+
 }

@@ -35,6 +35,10 @@ func (n *DeclBase) GetHost() *Module {
 	return n.Host
 }
 
+func (n *DeclBase) SetHost(host *Module) {
+	n.Host = host
+}
+
 func (n *DeclBase) IsExported() bool {
 	return n.Exported
 }

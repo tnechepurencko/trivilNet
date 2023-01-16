@@ -37,6 +37,9 @@ func (n *Module) GetHost() *Module {
 	return nil
 }
 
+func (n *Module) SetHost(host *Module) {
+}
+
 func (n *Module) IsExported() bool {
 	return false
 }

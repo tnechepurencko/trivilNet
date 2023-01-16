@@ -23,6 +23,7 @@ type Decl interface {
 	GetName() string
 	GetType() Type
 	GetHost() *Module // только для объектов уровня модуля, для остальных - nil
+	SetHost(host *Module)
 	IsExported() bool
 }
 
