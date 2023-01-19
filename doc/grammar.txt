@@ -111,7 +111,7 @@ param_list
 	: param (',' param)* ','?
 	;
 param
-	: ident ':' type_ref
+	: ident ':' '...'? ('*' | type_ref)  
 	;
 
 result_type
