@@ -209,17 +209,49 @@ func (genc *genContext) genCall(call *ast.CallExpr) string {
 }
 
 func (genc *genContext) genArgs(call *ast.CallExpr) string {
-	var cargs = ""
-	for i, a := range call.Args {
-		var ca = genc.genExpr(a)
 
-		cargs += ca
+	var ft = call.X.GetType().(*ast.FuncType)
 
-		if i < len(call.Args)-1 {
-			cargs += ", "
+	var vPar = ast.VariadicParam(ft)
+
+	if vPar == nil {
+		var cargs = make([]string, len(call.Args))
+		for i, a := range call.Args {
+			cargs[i] = genc.genExpr(a)
 		}
+		return strings.Join(cargs, ", ")
+	} else {
+		var cargs = make([]string, len(ft.Params))
+		var normCount = len(ft.Params) - 1
+
+		for i := 0; i < normCount; i++ {
+			cargs[i] = genc.genExpr(call.Args[i])
+		}
+
+		cargs[normCount] = genc.genVariadicArgs(call, vPar, normCount)
+
+		return strings.Join(cargs, ", ")
 	}
-	return cargs
+}
+
+func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, normCount int) string {
+
+	var loc = genc.localName("loc")
+	var et = genc.typeRef(vPar.Typ.(*ast.VariadicType).ElementTyp)
+	var vLen = len(call.Args) - normCount
+
+	genc.c("struct { TInt64 len; %s body[%d]; } %s;", et, vLen, loc)
+
+	//TODO: нужно ли выдержать какой-то порядок вычисления аргументов?
+	var cargs = make([]string, vLen)
+	var n = 0
+	for i := normCount; i < len(call.Args); i++ {
+		cargs[n] = fmt.Sprintf("%s.body[%d]=%s;", loc, n, genc.genExpr(call.Args[i]))
+		n++
+	}
+	genc.c("%s.len=%d;%s", loc, vLen, strings.Join(cargs, ""))
+
+	return "&" + loc
 }
 
 func isMethodCall(left ast.Expr) bool {

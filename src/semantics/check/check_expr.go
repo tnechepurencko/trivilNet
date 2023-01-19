@@ -167,7 +167,7 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 		x.Typ = ft.ReturnTyp
 	}
 
-	var vPar = variadicParam(ft)
+	var vPar = ast.VariadicParam(ft)
 
 	if vPar == nil {
 		if len(x.Args) != len(ft.Params) {
@@ -189,23 +189,12 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 			cc.checkAssignable(ft.Params[i].Typ, x.Args[i])
 		}
 
-		vTyp := vPar.Typ.(*ast.VariadicType)
+		var vTyp = vPar.Typ.(*ast.VariadicType)
 		for i := normCount; i < len(x.Args); i++ {
 			cc.checkAssignable(vTyp.ElementTyp, x.Args[i])
 		}
 
 	}
-}
-
-func variadicParam(ft *ast.FuncType) *ast.Param {
-	if len(ft.Params) == 0 {
-		return nil
-	}
-	var last = ft.Params[len(ft.Params)-1]
-	if ast.IsVariadicType(last.Typ) {
-		return last
-	}
-	return nil
 }
 
 func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {

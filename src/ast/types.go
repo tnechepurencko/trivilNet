@@ -71,6 +71,17 @@ type Param struct {
 	DeclBase
 }
 
+func VariadicParam(ft *FuncType) *Param {
+	if len(ft.Params) == 0 {
+		return nil
+	}
+	var last = ft.Params[len(ft.Params)-1]
+	if IsVariadicType(last.Typ) {
+		return last
+	}
+	return nil
+}
+
 //==== variadic type
 
 type VariadicType struct {

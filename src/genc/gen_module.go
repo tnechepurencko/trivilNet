@@ -103,9 +103,16 @@ func (genc *genContext) params(ft *ast.FuncType) string {
 
 	for i, p := range ft.Params {
 
-		b.WriteString(fmt.Sprintf("%s %s", genc.typeRef(p.Typ), genc.declName(p)))
+		var t string
+		if ast.IsVariadicType(p.Typ) {
+			t = "void*"
+		} else {
+			t = genc.typeRef(p.Typ)
+		}
+
+		b.WriteString(fmt.Sprintf("%s %s", t, genc.declName(p)))
 		if i < len(ft.Params)-1 {
-			b.WriteRune(',')
+			b.WriteString(", ")
 		}
 	}
 
