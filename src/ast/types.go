@@ -71,6 +71,13 @@ type Param struct {
 	DeclBase
 }
 
+//==== variadic type
+
+type VariadicType struct {
+	TypeBase
+	ElementTyp Type
+}
+
 //==== predicates
 
 func IsIntegerType(t Type) bool {
@@ -132,6 +139,15 @@ func ElementType(t Type) Type {
 		panic("assert - должен быть индексируемый тип")
 	}
 	return v.ElementTyp
+}
+
+func IsVariadicType(t Type) bool {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+
+	_, ok := t.(*VariadicType)
+	return ok
 }
 
 func IsClassType(t Type) bool {

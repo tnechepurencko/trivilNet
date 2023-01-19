@@ -16,6 +16,7 @@ var (
 	String  *PredefinedType
 
 	Void *PredefinedType // только для вызова функции без результата
+	Any  *PredefinedType // только в тип параметров и в типе элемента variadic
 )
 
 type Scope struct {
@@ -42,6 +43,7 @@ func initScopes() {
 	addBoolConst("ложь", false)
 
 	Void = &PredefinedType{Name: "нет результата"}
+	Any = &PredefinedType{Name: "Любой"}
 
 	addStdFunction("длина")
 

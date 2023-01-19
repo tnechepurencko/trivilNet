@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"trivil/ast"
+	"trivil/env"
 	"trivil/lexer"
 )
 
@@ -111,7 +112,29 @@ func (p *Parser) parseParameters(ft *ast.FuncType) {
 
 		p.expect(lexer.COLON)
 
-		param.Typ = p.parseTypeRef()
+		var variadic = p.tok == lexer.ELLIPSIS
+		var variadic_pos = p.pos
+		if variadic {
+			p.next()
+		}
+
+		if p.tok == lexer.MUL {
+			param.Typ = &ast.TypeRef{
+				TypeBase: ast.TypeBase{Pos: p.pos},
+				Typ:      ast.Any,
+			}
+			p.next()
+
+		} else {
+			param.Typ = p.parseTypeRef()
+		}
+
+		if variadic {
+			param.Typ = &ast.VariadicType{
+				TypeBase:   ast.TypeBase{Pos: variadic_pos},
+				ElementTyp: param.Typ,
+			}
+		}
 
 		ft.Params = append(ft.Params, param)
 
@@ -120,4 +143,11 @@ func (p *Parser) parseParameters(ft *ast.FuncType) {
 		}
 		p.expect(lexer.COMMA)
 	}
+
+	for i, p := range ft.Params {
+		if ast.IsVariadicType(p.Typ) && i != len(ft.Params)-1 {
+			env.AddError(p.Pos, "ПАР-МЕСТО-ВАРИАДИК")
+		}
+	}
+
 }

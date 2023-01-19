@@ -84,14 +84,12 @@ func (s *Lexer) next() {
 	}
 }
 
-/* может пригодится
 func (s *Lexer) peek() byte {
 	if s.rdOffset < len(s.src) {
 		return s.src[s.rdOffset]
 	}
 	return 0
 }
-*/
 
 //====
 
@@ -401,7 +399,12 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 		case ':':
 			tok = s.checkEqu(COLON, ASSIGN)
 		case '.':
-			tok = DOT // s.checkNext(DOT, '<', LCONV)
+			tok = DOT
+			if s.ch == '.' && s.peek() == '.' {
+				s.next()
+				s.next() // consume last '.'
+				tok = ELLIPSIS
+			}
 		case ',':
 			tok = COMMA
 		case ';':

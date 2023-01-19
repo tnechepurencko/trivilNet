@@ -50,7 +50,8 @@ const (
 	NNQUERY // ?
 	NNCHECK // !
 
-	ASSIGN // :=
+	ELLIPSIS // ...
+	ASSIGN   // :=
 
 	LPAR   // (
 	RPAR   // )
@@ -128,10 +129,11 @@ var tokens = [...]string{
 	LEQ: "<=",
 	GEQ: ">=",
 
-	NNQUERY: "?",
-	NNCHECK: "!",
+	NNQUERY: "?", // так ли?
+	NNCHECK: "!", // так ли?
 
-	ASSIGN: ":=",
+	ELLIPSIS: "...",
+	ASSIGN:   ":=",
 
 	LPAR: "(",
 	RPAR: ")",
