@@ -132,24 +132,27 @@ func IsStringType(t Type) bool {
 }
 
 func IsIndexableType(t Type) bool {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
+	t = UnderType(t)
 
-	_, ok := t.(*VectorType)
-	return ok
+	switch t.(type) {
+	case *VectorType, *VariadicType:
+		return true
+	default:
+		return false
+	}
 }
 
 func ElementType(t Type) Type {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
+	t = UnderType(t)
 
-	v, ok := t.(*VectorType)
-	if !ok {
+	switch x := t.(type) {
+	case *VectorType:
+		return x.ElementTyp
+	case *VariadicType:
+		return x.ElementTyp
+	default:
 		panic("assert - должен быть индексируемый тип")
 	}
-	return v.ElementTyp
 }
 
 func IsVariadicType(t Type) bool {

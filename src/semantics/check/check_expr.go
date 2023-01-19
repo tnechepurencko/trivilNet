@@ -134,13 +134,9 @@ func (cc *checkContext) callStdLen(x *ast.CallExpr) {
 		return
 	}
 
-	var t = x.Args[0].GetType()
+	var t = ast.UnderType(x.Args[0].GetType())
 
-	if tr, ok := t.(*ast.TypeRef); ok {
-		t = tr.Typ
-	}
-
-	if _, ok := t.(*ast.VectorType); ok || t == ast.String {
+	if ast.IsIndexableType(t) || t == ast.String {
 		// ok
 	} else {
 		env.AddError(x.Pos, "СЕМ-ДЛИНА-ОШ-ТИП-АРГ", x.StdFunc.Name)

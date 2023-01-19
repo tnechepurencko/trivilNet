@@ -311,12 +311,15 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 
 	var t = ast.UnderType(a.GetType())
 	if t == ast.String {
-
 		return fmt.Sprintf("%s(%s)", rt_lenString, genc.genExpr(a))
+	}
 
-	} else if _, ok := t.(*ast.VectorType); ok {
+	switch t.(type) {
+	case *ast.VectorType:
 		return fmt.Sprintf("%s(%s)", rt_lenVector, genc.genExpr(a))
-	} else {
+	case *ast.VariadicType:
+		return fmt.Sprintf("(*(TInt64 *)%s)", genc.genExpr(a))
+	default:
 		panic("ni")
 	}
 }
@@ -324,26 +327,51 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 
 	if x.Index != nil {
-		var name string
-		if id, ok := x.X.(*ast.IdentExpr); ok {
-			name = genc.genIdent(id)
-		} else {
-			name = genc.localName("loc")
 
-			genc.c("%s %s = %s;",
-				genc.typeRef(x.X.GetType()),
-				name,
-				genc.genExpr(x.X))
+		switch xt := ast.UnderType(x.X.GetType()).(type) {
+		case *ast.VectorType:
+			return genc.genVectorIndex(x.X, x.Index)
+		case *ast.VariadicType:
+			return genc.genVariadicIndex(xt, x.X, x.Index)
+		default:
+			panic("assert")
 		}
-		return fmt.Sprintf("%s->body[%s(%s, %s)]",
-			name,
-			rt_vcheck,
-			name,
-			genc.genExpr(x.Index))
 	}
 
 	return genc.genArrayComposite(x.Composite)
+}
 
+func (genc *genContext) genVectorIndex(x, inx ast.Expr) string {
+	var name string
+	if id, ok := x.(*ast.IdentExpr); ok {
+		name = genc.genIdent(id)
+	} else {
+		name = genc.localName("loc")
+
+		genc.c("%s %s = %s;",
+			genc.typeRef(x.GetType()),
+			name,
+			genc.genExpr(x))
+	}
+	return fmt.Sprintf("%s->body[%s(%s, %s->len)]",
+		name,
+		rt_indexcheck,
+		genc.genExpr(inx),
+		name)
+
+}
+
+func (genc *genContext) genVariadicIndex(vt *ast.VariadicType, x, inx ast.Expr) string {
+
+	var et = genc.typeRef(vt.ElementTyp)
+	var vPar = genc.genExpr(x)
+
+	return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[%s(%s, *(TInt64 *)%s)]",
+		et,
+		vPar,
+		rt_indexcheck,
+		genc.genExpr(inx),
+		vPar)
 }
 
 func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
