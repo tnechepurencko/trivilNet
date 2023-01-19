@@ -248,14 +248,13 @@ EXPORTED TInt64 tri_lenVector(void* vd) {
 	return v->len;	
 }
 
-EXPORTED TInt64 tri_vcheck(void* vd, TInt64 inx) {
-	VectorDesc* v = vd;
-	if (inx < 0 || inx >= v->len) {
-		runtime_crash("vector index out of bounds");
+EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len) {
+	if (inx < 0 || inx >= len) {
+		runtime_crash("index out of bounds");
 	}
 	
 	return inx;
-}
+}    
 
 //==== class
 

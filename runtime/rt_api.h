@@ -33,7 +33,7 @@ EXPORTED void* tri_newVector(size_t element_size, TInt64 len);
 
 EXPORTED TInt64 tri_lenVector(void* vd);
 
-EXPORTED TInt64 tri_vcheck(void* vd, TInt64 inx);
+EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len);
 
 //==== class
 
