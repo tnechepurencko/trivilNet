@@ -11,7 +11,19 @@ var _ = fmt.Printf
 //==== ссылка на тип
 
 func (lc *lookContext) lookTypeRef(t ast.Type) {
-	var tr = t.(*ast.TypeRef)
+
+	var tr, ok = t.(*ast.TypeRef)
+	if !ok {
+		if t == nil {
+			panic("assert")
+		}
+		vTyp, ok := t.(*ast.VariadicType)
+		if ok {
+			lc.lookTypeRef(vTyp.ElementTyp)
+		}
+		return
+	}
+
 	if tr.Typ != nil {
 		return // уже сделано
 	}

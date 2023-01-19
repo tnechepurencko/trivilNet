@@ -167,14 +167,45 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 		x.Typ = ft.ReturnTyp
 	}
 
-	if len(x.Args) != len(ft.Params) {
-		env.AddError(x.X.GetPos(), "СЕМ-ЧИСЛО-АРГУМЕНТОВ", len(x.Args), len(ft.Params))
-		return
-	}
+	var vPar = variadicParam(ft)
 
-	for i, p := range ft.Params {
-		cc.checkAssignable(p.Typ, x.Args[i])
+	if vPar == nil {
+		if len(x.Args) != len(ft.Params) {
+			env.AddError(x.X.GetPos(), "СЕМ-ЧИСЛО-АРГУМЕНТОВ", len(x.Args), len(ft.Params))
+			return
+		}
+
+		for i, p := range ft.Params {
+			cc.checkAssignable(p.Typ, x.Args[i])
+		}
+	} else {
+		var normCount = len(ft.Params) - 1
+		if len(x.Args) < normCount {
+			env.AddError(x.X.GetPos(), "СЕМ-ВАРИАДИК-ЧИСЛО-АРГУМЕНТОВ", normCount, len(x.Args))
+			return
+		}
+
+		for i := 0; i < normCount; i++ {
+			cc.checkAssignable(ft.Params[i].Typ, x.Args[i])
+		}
+
+		vTyp := vPar.Typ.(*ast.VariadicType)
+		for i := normCount; i < len(x.Args); i++ {
+			cc.checkAssignable(vTyp.ElementTyp, x.Args[i])
+		}
+
 	}
+}
+
+func variadicParam(ft *ast.FuncType) *ast.Param {
+	if len(ft.Params) == 0 {
+		return nil
+	}
+	var last = ft.Params[len(ft.Params)-1]
+	if ast.IsVariadicType(last.Typ) {
+		return last
+	}
+	return nil
 }
 
 func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
