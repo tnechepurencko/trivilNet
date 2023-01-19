@@ -221,7 +221,12 @@ EXPORTED TBool tri_equalStrings(TString s1, TString s2) {
 //==== vector
 
 
-typedef struct VectorDesc { TInt64 len; void* body; } VectorDesc;
+typedef struct VectorDesc { 
+    //TODO: Tag
+    TInt64 len;
+    //TODO: capacity
+    void* body; 
+} VectorDesc;
 
 
 EXPORTED void* tri_newVector(size_t element_size, TInt64 len) {

@@ -12,7 +12,7 @@ typedef struct StringDesc {
 //TODO meta
   int64_t bytes;
   int64_t symbols;
-  TByte* body;
+  TByte* body; // использовать смещение, убрать лишнее обращение к памяти
 } StringDesc;
 
 typedef StringDesc* TString;
