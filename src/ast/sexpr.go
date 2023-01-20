@@ -159,6 +159,8 @@ func shortType(i interface{}) string {
 		return "class"
 	case *VectorType:
 		return "[]" + shortType(x.ElementTyp)
+	case *VariadicType:
+		return "..." + shortType(x.ElementTyp)
 	}
 
 	return fmt.Sprintf("*%T*", i)
