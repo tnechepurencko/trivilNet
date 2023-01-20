@@ -223,6 +223,13 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 			env.AddError(x.Index.GetPos(), "СЕМ-ОШ-ТИП-ИНДЕКСА", ast.TypeString(x.Index.GetType()))
 		}
 		x.Typ = ast.ElementType(t)
+		if ast.IsAnyType(x.Typ) {
+			x.Typ = ast.Int64 //TODO: нужен ли тип Слово64?
+		}
+
+		if ast.IsVariadicType(t) {
+			x.ReadOnly = true
+		}
 	}
 	x.Composite = nil
 

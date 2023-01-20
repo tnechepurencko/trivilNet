@@ -228,16 +228,22 @@ func (genc *genContext) genArgs(call *ast.CallExpr) string {
 			cargs[i] = genc.genExpr(call.Args[i])
 		}
 
-		cargs[normCount] = genc.genVariadicArgs(call, vPar, normCount)
+		var vTyp = vPar.Typ.(*ast.VariadicType)
+
+		if ast.IsAnyType(vTyp.ElementTyp) {
+			cargs[normCount] = genc.genVariadicAnyArgs(call, vPar, normCount)
+		} else {
+			cargs[normCount] = genc.genVariadicArgs(call, vPar, vTyp, normCount)
+		}
 
 		return strings.Join(cargs, ", ")
 	}
 }
 
-func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, normCount int) string {
+func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTyp *ast.VariadicType, normCount int) string {
 
 	var loc = genc.localName("loc")
-	var et = genc.typeRef(vPar.Typ.(*ast.VariadicType).ElementTyp)
+	var et = genc.typeRef(vTyp.ElementTyp)
 	var vLen = len(call.Args) - normCount
 
 	genc.c("struct { TInt64 len; %s body[%d]; } %s;", et, vLen, loc)
@@ -248,6 +254,26 @@ func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, nor
 	for i := normCount; i < len(call.Args); i++ {
 		cargs[n] = fmt.Sprintf("%s.body[%d]=%s;", loc, n, genc.genExpr(call.Args[i]))
 		n++
+	}
+	genc.c("%s.len=%d;%s", loc, vLen, strings.Join(cargs, ""))
+
+	return "&" + loc
+}
+
+func (genc *genContext) genVariadicAnyArgs(call *ast.CallExpr, vPar *ast.Param, normCount int) string {
+
+	var loc = genc.localName("loc")
+	var vLen = len(call.Args) - normCount
+
+	genc.c("struct { TInt64 len; TInt64 body[%d]; } %s;", vLen*2, loc)
+
+	var cargs = make([]string, vLen*2)
+	var n = 0
+	for i := normCount; i < len(call.Args); i++ {
+		cargs[n] = fmt.Sprintf("%s.body[%d]=(%s)%s;",
+			loc, n, predefinedTypeName(ast.Int64.Name), genc.genExpr(call.Args[i]))
+		cargs[n+1] = fmt.Sprintf("%s.body[%d]=%d;", loc, n+1, 0)
+		n += 2
 	}
 	genc.c("%s.len=%d;%s", loc, vLen, strings.Join(cargs, ""))
 
@@ -363,15 +389,24 @@ func (genc *genContext) genVectorIndex(x, inx ast.Expr) string {
 
 func (genc *genContext) genVariadicIndex(vt *ast.VariadicType, x, inx ast.Expr) string {
 
-	var et = genc.typeRef(vt.ElementTyp)
 	var vPar = genc.genExpr(x)
 
-	return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[%s(%s, *(TInt64 *)%s)]",
-		et,
-		vPar,
-		rt_indexcheck,
-		genc.genExpr(inx),
-		vPar)
+	if ast.IsAnyType(vt.ElementTyp) {
+		return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[%s(%s, *(TInt64 *)%s) << 1]",
+			predefinedTypeName(ast.Int64.Name),
+			vPar,
+			rt_indexcheck,
+			genc.genExpr(inx),
+			vPar)
+	} else {
+
+		return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[%s(%s, *(TInt64 *)%s)]",
+			genc.typeRef(vt.ElementTyp),
+			vPar,
+			rt_indexcheck,
+			genc.genExpr(inx),
+			vPar)
+	}
 }
 
 func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {

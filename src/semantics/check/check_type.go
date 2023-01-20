@@ -136,14 +136,15 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 
 	var t = ast.UnderType(lt)
 
-	if t == ast.Symbol {
+	switch t {
+	case ast.Symbol:
 		var li = oneSymbolString(r)
 		if li != nil {
 			li.Typ = ast.Symbol
 			li.Kind = ast.Lit_Symbol
 			return true
 		}
-	} else if t == ast.Byte {
+	case ast.Byte:
 		var li = literal(r)
 		if li != nil && li.Kind == ast.Lit_Int {
 			i, err := strconv.ParseInt(li.Lit, 0, 64)
@@ -152,6 +153,8 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 				return true
 			}
 		}
+	case ast.Any:
+		return !ast.IsVariadicType(r.GetType())
 	}
 
 	switch xt := t.(type) {
