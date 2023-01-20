@@ -458,10 +458,10 @@ EXPORTED TTag tri_tagTSymbol() {
 }
 
 EXPORTED TTag tri_tagTString() {
-    return 1 << size_shift | tag_string << tag_id_shift | flag_lang;
+    return 8 << size_shift | tag_string << tag_id_shift | flag_lang;
 }
 EXPORTED TTag tri_tagTTag() {
-    return 1 << size_shift | tag_tag << tag_id_shift | flag_lang;
+    return 8 << size_shift | tag_tag << tag_id_shift | flag_lang;
 }
 
 
