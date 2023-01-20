@@ -152,10 +152,15 @@ func (cc *checkContext) callStdTag(x *ast.CallExpr) {
 	}
 
 	var t = cc.typeExpr(x.Args[0])
-	if t == nil {
+	if t != nil {
+		var prev = x.Args[0]
+		x.Args[0] = &ast.TypeExpr{
+			ExprBase: ast.ExprBase{Pos: prev.GetPos(), Typ: t, ReadOnly: true},
+		}
+	} else {
+		//TODO: параметр или вариадик Any
 		env.AddError(x.Pos, "СЕМ-ОЖИДАЛСЯ-ТИП")
 	}
-	x.Args[0].SetType(t)
 }
 
 func (cc *checkContext) call(x *ast.CallExpr) {

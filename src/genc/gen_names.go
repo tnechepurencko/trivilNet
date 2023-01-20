@@ -51,6 +51,8 @@ const (
 	rt_convert = rt_prefix
 
 	rt_crash = rt_prefix + "crash"
+
+	rt_tag = rt_prefix + "tag"
 )
 
 func (genc *genContext) localName(prefix string) string {

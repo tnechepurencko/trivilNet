@@ -102,6 +102,11 @@ type ConversionExpr struct {
 	Done      bool // X уже преобразован к целевому типу
 }
 
+// Используется если тип передается, как параметр, например в функции тег()
+type TypeExpr struct {
+	ExprBase
+}
+
 //==== index
 
 type GeneralBracketExpr struct {
