@@ -160,6 +160,14 @@ func UnderType(t Type) Type {
 	return t
 }
 
+//==== tags
+
+// Объекты каких типов имеют тег
+func HasTag(t Type) bool {
+	return !IsVariadicType(t) //пока так, можно разрешить для всех, но потом
+
+}
+
 //==== invalid type
 
 func IsInvalidType(t Type) bool {

@@ -158,8 +158,12 @@ func (cc *checkContext) callStdTag(x *ast.CallExpr) {
 			ExprBase: ast.ExprBase{Pos: prev.GetPos(), Typ: t, ReadOnly: true},
 		}
 	} else {
-		//TODO: параметр или вариадик Any
-		env.AddError(x.Pos, "СЕМ-ОЖИДАЛСЯ-ТИП")
+		cc.expr(x.Args[0])
+
+		if !ast.HasTag(x.Args[0].GetType()) {
+			env.AddError(x.Pos, "СЕМ-ОЖИДАЛСЯ-ТИП-ИЛИ-ТЕГ")
+			return
+		}
 	}
 }
 

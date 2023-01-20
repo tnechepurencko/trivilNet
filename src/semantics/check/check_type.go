@@ -154,7 +154,7 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 			}
 		}
 	case ast.Any:
-		return !ast.IsVariadicType(r.GetType())
+		return ast.HasTag(r.GetType())
 	}
 
 	switch xt := t.(type) {
