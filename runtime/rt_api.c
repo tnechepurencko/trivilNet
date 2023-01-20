@@ -250,7 +250,9 @@ EXPORTED TInt64 tri_lenVector(void* vd) {
 
 EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len) {
 	if (inx < 0 || inx >= len) {
-		runtime_crash("index out of bounds");
+        char buf[128];
+        sprintf_s(buf, 128, "index %lld out of bounds [0..%lld[", inx, len);
+		runtime_crash(buf);
 	}
 	
 	return inx;
