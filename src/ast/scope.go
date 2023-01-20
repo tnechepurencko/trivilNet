@@ -14,6 +14,7 @@ var (
 	Bool    *PredefinedType
 	Symbol  *PredefinedType
 	String  *PredefinedType
+	Tag     *PredefinedType
 
 	Void *PredefinedType // только для вызова функции без результата
 	Any  *PredefinedType // только в тип параметров и в типе элемента variadic
@@ -38,6 +39,7 @@ func initScopes() {
 	Bool = addType("Лог")
 	Symbol = addType("Символ")
 	String = addType("Строка")
+	Tag = addType("Тег")
 
 	addBoolConst("истина", true)
 	addBoolConst("ложь", false)
@@ -46,6 +48,7 @@ func initScopes() {
 	Any = &PredefinedType{Name: "Любой"}
 
 	addStdFunction("длина")
+	addStdFunction("тег")
 
 	//	ShowScopes("top", topScope)
 }

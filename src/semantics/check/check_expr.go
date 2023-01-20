@@ -113,13 +113,11 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 }
 
 func (cc *checkContext) callStdFunction(x *ast.CallExpr) {
-	for _, a := range x.Args {
-		cc.expr(a)
-	}
-
 	switch x.StdFunc.Name {
 	case "длина":
 		cc.callStdLen(x)
+	case "тег":
+		cc.callStdTag(x)
 
 	default:
 		panic("assert: не реализована стандартная функция " + x.StdFunc.Name)
@@ -134,6 +132,8 @@ func (cc *checkContext) callStdLen(x *ast.CallExpr) {
 		return
 	}
 
+	cc.expr(x.Args[0])
+
 	var t = ast.UnderType(x.Args[0].GetType())
 
 	if ast.IsIndexableType(t) || t == ast.String {
@@ -141,6 +141,21 @@ func (cc *checkContext) callStdLen(x *ast.CallExpr) {
 	} else {
 		env.AddError(x.Pos, "СЕМ-ДЛИНА-ОШ-ТИП-АРГ", x.StdFunc.Name)
 	}
+}
+
+func (cc *checkContext) callStdTag(x *ast.CallExpr) {
+	x.Typ = ast.Tag
+
+	if len(x.Args) != 1 {
+		env.AddError(x.Pos, "СЕМ-ОШ-ЧИСЛО-АРГ-СТДФУНК", x.StdFunc.Name, "1")
+		return
+	}
+
+	var t = cc.typeExpr(x.Args[0])
+	if t == nil {
+		env.AddError(x.Pos, "СЕМ-ОЖИДАЛСЯ-ТИП")
+	}
+	x.Args[0].SetType(t)
 }
 
 func (cc *checkContext) call(x *ast.CallExpr) {
@@ -195,7 +210,7 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 
 func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 
-	var t = cc.typeName(x.X)
+	var t = cc.typeExpr(x.X)
 
 	if t != nil || len(x.Composite.Elements) != 1 || x.Composite.Keys { // composite
 		cc.arrayComposite(x.Composite, t)
@@ -238,7 +253,7 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 	}
 }
 
-func (cc *checkContext) typeName(expr ast.Expr) ast.Type {
+func (cc *checkContext) typeExpr(expr ast.Expr) ast.Type {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
@@ -299,7 +314,7 @@ func getClassType(t ast.Type) *ast.ClassType {
 
 func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 
-	var t = cc.typeName(c.X)
+	var t = cc.typeExpr(c.X)
 
 	if t == nil {
 		env.AddError(c.Pos, "СЕМ-КОМПОЗИТ-НЕТ-ТИПА")

@@ -326,6 +326,8 @@ func (genc *genContext) genStdFuncCall(call *ast.CallExpr) string {
 	switch call.StdFunc.Name {
 	case "длина":
 		return genc.genStdLen(call)
+	case "тег":
+		return genc.genStdTag(call)
 
 	default:
 		panic("assert: не реализована стандартная функция " + call.StdFunc.Name)
@@ -365,6 +367,10 @@ func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 	}
 
 	return genc.genArrayComposite(x.Composite)
+}
+
+func (genc *genContext) genStdTag(call *ast.CallExpr) string {
+	return ""
 }
 
 func (genc *genContext) genVectorIndex(x, inx ast.Expr) string {

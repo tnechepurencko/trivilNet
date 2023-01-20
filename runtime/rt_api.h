@@ -7,6 +7,7 @@ typedef int64_t TInt64;
 typedef double TFloat64;
 typedef _Bool TBool;
 typedef uint32_t TSymbol;
+typedef uint64_t TTag;
 
 typedef struct StringDesc {
 //TODO meta

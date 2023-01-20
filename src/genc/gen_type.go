@@ -41,6 +41,8 @@ func predefinedTypeName(name string) string {
 		return "TSymbol"
 	case "Строка":
 		return "TString"
+	case "Тег":
+		return "TTag"
 	default:
 		panic(fmt.Sprintf("predefinedTypeName: ni %s", name))
 	}

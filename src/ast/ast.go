@@ -31,6 +31,7 @@ type Expr interface {
 	Node
 	ExprNode()
 	GetType() Type
+	SetType(t Type)
 	IsReadOnly() bool
 }
 

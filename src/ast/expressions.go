@@ -25,6 +25,10 @@ func (n *ExprBase) GetType() Type {
 	return n.Typ
 }
 
+func (n *ExprBase) SetType(t Type) {
+	n.Typ = t
+}
+
 func (n *ExprBase) IsReadOnly() bool {
 	return n.ReadOnly
 }
