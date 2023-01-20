@@ -70,6 +70,16 @@ EXPORTED void* tri_TString_to_Bytes(TString s);
 // Возвращает []Символ
 EXPORTED void* tri_TString_to_Symbols(TString s);
 
+//==== tags
+
+EXPORTED TTag tri_tagTByte();
+EXPORTED TTag tri_tagTInt64();
+EXPORTED TTag tri_tagTFloat64();
+EXPORTED TTag tri_tagTBool();
+EXPORTED TTag tri_tagTSymbol();
+EXPORTED TTag tri_tagTString();
+EXPORTED TTag tri_tagTTag();
+
 //==== console
 
 //void print_int(int i);
@@ -79,6 +89,7 @@ EXPORTED void print_float64(TFloat64 f);
 EXPORTED void print_symbol(TSymbol s);
 EXPORTED void print_string(TString s);
 EXPORTED void print_bool(TBool b);
+EXPORTED void print_tag(TTag t);
 
 EXPORTED void println();
 

@@ -418,6 +418,53 @@ EXPORTED void* tri_TString_to_Symbols(TString s) {
 	return v;
 }
 
+//==== tags
+
+enum Tags {
+    tag_unsigned = 1,
+    tag_signed,
+    tag_float,
+    tag_bool,
+    tag_symbol,
+    tag_string,
+    tag_tag,
+    
+    tag_class
+};
+
+#define size_shift 8
+#define tag_id_shift 3
+
+#define flag_lang 1
+
+EXPORTED TTag tri_tagTByte() {
+    return 1 << size_shift | tag_unsigned << tag_id_shift | flag_lang;
+}
+
+EXPORTED TTag tri_tagTInt64() {
+    return (8 << size_shift) | (tag_signed << tag_id_shift) | flag_lang;
+}
+
+EXPORTED TTag tri_tagTFloat64() {
+    return 8 << size_shift | tag_float << tag_id_shift | flag_lang;
+}
+
+EXPORTED TTag tri_tagTBool() {
+    return 1 << size_shift | tag_bool << tag_id_shift | flag_lang;
+}
+
+EXPORTED TTag tri_tagTSymbol() {
+    return 4 << size_shift | tag_symbol << tag_id_shift | flag_lang;
+}
+
+EXPORTED TTag tri_tagTString() {
+    return 1 << size_shift | tag_string << tag_id_shift | flag_lang;
+}
+EXPORTED TTag tri_tagTTag() {
+    return 1 << size_shift | tag_tag << tag_id_shift | flag_lang;
+}
+
+
 //==== console
 
 /*
@@ -445,6 +492,11 @@ EXPORTED void print_string(TString s) {
 EXPORTED void print_bool(TBool b) {
 	if (b) printf("истина"); else printf("ложь");
 }
+
+EXPORTED void print_tag(TTag t) {
+  printf("0x%llx", t);
+}	
+
 
 EXPORTED void println() {
   printf("\n");
