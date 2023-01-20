@@ -119,10 +119,7 @@ func (p *Parser) parseParameters(ft *ast.FuncType) {
 		}
 
 		if p.tok == lexer.MUL {
-			param.Typ = &ast.TypeRef{
-				TypeBase: ast.TypeBase{Pos: p.pos},
-				Typ:      ast.Any,
-			}
+			param.Typ = ast.Any
 			p.next()
 
 		} else {
