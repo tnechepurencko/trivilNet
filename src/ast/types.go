@@ -91,44 +91,30 @@ type VariadicType struct {
 
 //==== predicates
 
-func IsIntegerType(t Type) bool {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
+func IsAnyType(t Type) bool {
+	t = UnderType(t)
+	return t == Any
+}
 
+func IsIntegerType(t Type) bool {
+	t = UnderType(t)
 	return t == Int64 || t == Byte
 }
 
 func IsInt64(t Type) bool {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
-
-	return t == Int64
+	return UnderType(t) == Int64
 }
 
 func IsFloatType(t Type) bool {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
-
-	return t == Float64
+	return UnderType(t) == Float64
 }
 
 func IsBoolType(t Type) bool {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
-
-	return t == Bool
+	return UnderType(t) == Bool
 }
 
 func IsStringType(t Type) bool {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
-
-	return t == String
+	return UnderType(t) == String
 }
 
 func IsIndexableType(t Type) bool {
@@ -156,20 +142,12 @@ func ElementType(t Type) Type {
 }
 
 func IsVariadicType(t Type) bool {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
-
-	_, ok := t.(*VariadicType)
+	_, ok := UnderType(t).(*VariadicType)
 	return ok
 }
 
 func IsClassType(t Type) bool {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
-
-	_, ok := t.(*ClassType)
+	_, ok := UnderType(t).(*ClassType)
 
 	return ok
 }
@@ -197,9 +175,7 @@ func MakeInvalidType(pos int) *InvalidType {
 
 func TypeString(t Type) string {
 
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
+	t = UnderType(t)
 
 	switch x := t.(type) {
 	case nil:
@@ -210,6 +186,8 @@ func TypeString(t Type) string {
 		return x.Name
 	case *VectorType:
 		return "[]" + TypeString(x.ElementTyp)
+	case *VariadicType:
+		return "..." + TypeString(x.ElementTyp)
 	default:
 		return fmt.Sprintf("TypeString ni: %T", t)
 	}
