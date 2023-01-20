@@ -179,7 +179,12 @@ func (genc *genContext) genStdTag(call *ast.CallExpr) string {
 	if tExpr, ok := a.(*ast.TypeExpr); ok {
 		return genc.genTypeTag(tExpr.Typ)
 	} else {
-		panic("ni")
+		var t = call.Args[0].GetType()
+		if ast.IsAnyType(t) {
+			panic("ni")
+		} else {
+			return genc.genTypeTag(t)
+		}
 	}
 }
 
