@@ -90,9 +90,9 @@ func (genc *genContext) genVariadicTaggedArgs(call *ast.CallExpr, vPar *ast.Para
 	var cargs = make([]string, vLen*2)
 	var n = 0
 	for i := normCount; i < len(call.Args); i++ {
-		cargs[n] = fmt.Sprintf("%s.body[%d]=(%s)%s;",
-			loc, n, predefinedTypeName(ast.Int64.Name), genc.genExpr(call.Args[i]))
-		cargs[n+1] = fmt.Sprintf("%s.body[%d]=%s;", loc, n+1, genc.genTypeTag(call.Args[i].GetType()))
+		cargs[n] = fmt.Sprintf("%s.body[%d]=%s;", loc, n, genc.genTypeTag(call.Args[i].GetType()))
+		cargs[n+1] = fmt.Sprintf("%s.body[%d]=(%s)%s;",
+			loc, n+1, predefinedTypeName(ast.Int64.Name), genc.genExpr(call.Args[i]))
 		n += 2
 	}
 	genc.c("%s.len=%d;%s", loc, vLen, strings.Join(cargs, ""))
@@ -144,10 +144,12 @@ func (genc *genContext) genMethodCall(call *ast.CallExpr) string {
 func (genc *genContext) genStdFuncCall(call *ast.CallExpr) string {
 
 	switch call.StdFunc.Name {
-	case "длина":
+	case ast.StdLen:
 		return genc.genStdLen(call)
-	case "тег":
+	case ast.StdTag:
 		return genc.genStdTag(call)
+	case ast.StdSomething:
+		return genc.genStdSomething(call)
 
 	default:
 		panic("assert: не реализована стандартная функция " + call.StdFunc.Name)
@@ -200,6 +202,36 @@ func (genc *genContext) genTypeTag(t ast.Type) string {
 
 func (genc *genContext) genExprTag(e ast.Expr) string {
 	switch x := e.(type) {
+	case *ast.GeneralBracketExpr:
+		if x.Index == nil {
+			panic("assert")
+		}
+
+		var left = genc.genExpr(x.X)
+
+		return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[%s(%s, *(TInt64 *)%s) << 1]",
+			predefinedTypeName(ast.Word64.Name),
+			left,
+			rt_indexcheck,
+			genc.genExpr(x.Index),
+			left)
+
+	case *ast.IdentExpr:
+		panic("ni")
+	}
+	panic("assert")
+}
+
+func (genc *genContext) genStdSomething(call *ast.CallExpr) string {
+
+	var a = call.Args[0]
+
+	var t = a.GetType()
+	if !ast.IsTagPairType(t) {
+		panic("assert")
+	}
+
+	switch x := a.(type) {
 	case *ast.GeneralBracketExpr:
 		if x.Index == nil {
 			panic("assert")

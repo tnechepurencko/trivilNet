@@ -62,10 +62,12 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 
 func (cc *checkContext) callStdFunction(x *ast.CallExpr) {
 	switch x.StdFunc.Name {
-	case "длина":
+	case ast.StdLen:
 		cc.callStdLen(x)
-	case "тег":
+	case ast.StdTag:
 		cc.callStdTag(x)
+	case ast.StdSomething:
+		cc.callStdSomething(x)
 
 	default:
 		panic("assert: не реализована стандартная функция " + x.StdFunc.Name)
@@ -76,7 +78,7 @@ func (cc *checkContext) callStdLen(x *ast.CallExpr) {
 	x.Typ = ast.Int64
 
 	if len(x.Args) != 1 {
-		env.AddError(x.Pos, "СЕМ-ОШ-ЧИСЛО-АРГ-СТДФУНК", x.StdFunc.Name, "1")
+		env.AddError(x.Pos, "СЕМ-СТДФУНК-ОШ-ЧИСЛО-АРГ", x.StdFunc.Name, "1")
 		return
 	}
 
@@ -87,7 +89,7 @@ func (cc *checkContext) callStdLen(x *ast.CallExpr) {
 	if ast.IsIndexableType(t) || t == ast.String {
 		// ok
 	} else {
-		env.AddError(x.Pos, "СЕМ-ДЛИНА-ОШ-ТИП-АРГ", x.StdFunc.Name)
+		env.AddError(x.Pos, "СЕМ-СТД-ДЛИНА-ОШ-ТИП-АРГ", x.StdFunc.Name)
 	}
 }
 
@@ -95,7 +97,7 @@ func (cc *checkContext) callStdTag(x *ast.CallExpr) {
 	x.Typ = ast.Word64
 
 	if len(x.Args) != 1 {
-		env.AddError(x.Pos, "СЕМ-ОШ-ЧИСЛО-АРГ-СТДФУНК", x.StdFunc.Name, "1")
+		env.AddError(x.Pos, "СЕМ-СТДФУНК-ОШ-ЧИСЛО-АРГ", x.StdFunc.Name, "1")
 		return
 	}
 
@@ -109,8 +111,24 @@ func (cc *checkContext) callStdTag(x *ast.CallExpr) {
 		cc.expr(x.Args[0])
 
 		if !ast.HasTag(x.Args[0].GetType()) {
-			env.AddError(x.Pos, "СЕМ-ОЖИДАЛСЯ-ТИП-ИЛИ-ТЕГ-ПАРА")
+			env.AddError(x.Pos, "СЕМ-СТД-ТЕГ-ОШ-АРГ")
 			return
 		}
+	}
+}
+
+func (cc *checkContext) callStdSomething(x *ast.CallExpr) {
+	x.Typ = ast.Word64
+
+	if len(x.Args) != 1 {
+		env.AddError(x.Pos, "СЕМ-СТДФУНК-ОШ-ЧИСЛО-АРГ", x.StdFunc.Name, "1")
+		return
+	}
+
+	cc.expr(x.Args[0])
+
+	if !ast.IsTagPairType(x.Args[0].GetType()) {
+		env.AddError(x.Pos, "СЕМ-СТД-НЕЧТО-ОШ-АРГ")
+		return
 	}
 }

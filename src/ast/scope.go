@@ -25,6 +25,12 @@ type Scope struct {
 	Names map[string]Decl
 }
 
+const (
+	StdLen       = "длина"
+	StdTag       = "тег"
+	StdSomething = "нечто"
+)
+
 var topScope *Scope
 
 func initScopes() {
@@ -47,8 +53,10 @@ func initScopes() {
 	Void = &PredefinedType{Name: "нет результата"}
 	TagPair = &PredefinedType{Name: "ТегСлово"}
 
-	addStdFunction("длина")
-	addStdFunction("тег")
+	addStdFunction(StdLen)
+
+	addStdFunction(StdTag)
+	addStdFunction(StdSomething)
 
 	//	ShowScopes("top", topScope)
 }
