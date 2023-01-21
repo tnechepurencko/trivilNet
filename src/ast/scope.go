@@ -14,10 +14,10 @@ var (
 	Bool    *PredefinedType
 	Symbol  *PredefinedType
 	String  *PredefinedType
-	Tag     *PredefinedType
+	Word64  *PredefinedType
 
-	Void *PredefinedType // только для вызова функции без результата
-	Any  *PredefinedType // только в тип параметров и в типе элемента variadic
+	Void    *PredefinedType // только для вызова функции без результата
+	TagPair *PredefinedType // только в типе параметров и в типе элемента variadic
 )
 
 type Scope struct {
@@ -36,16 +36,16 @@ func initScopes() {
 	//	Int32 = addType("Цел32")
 	Int64 = addType("Цел64")
 	Float64 = addType("Вещ64")
+	Word64 = addType("Слово64")
 	Bool = addType("Лог")
 	Symbol = addType("Символ")
 	String = addType("Строка")
-	Tag = addType("Тег")
 
 	addBoolConst("истина", true)
 	addBoolConst("ложь", false)
 
 	Void = &PredefinedType{Name: "нет результата"}
-	Any = &PredefinedType{Name: "Любой"}
+	TagPair = &PredefinedType{Name: "ТегСлово"}
 
 	addStdFunction("длина")
 	addStdFunction("тег")

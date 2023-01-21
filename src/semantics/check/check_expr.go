@@ -142,8 +142,8 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 			env.AddError(x.Index.GetPos(), "СЕМ-ОШ-ТИП-ИНДЕКСА", ast.TypeString(x.Index.GetType()))
 		}
 		x.Typ = ast.ElementType(t)
-		if ast.IsAnyType(x.Typ) {
-			x.Typ = ast.Int64 //TODO: нужен ли тип Слово64 или Бит64?
+		if ast.IsTagPairType(x.Typ) {
+			x.Typ = ast.TagPair //TODO: нужен ли тип Слово64 или Бит64?
 		}
 
 		if ast.IsVariadicType(t) {
@@ -285,13 +285,14 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 
 	switch x.Op {
 	case lexer.ADD, lexer.SUB, lexer.MUL, lexer.REM, lexer.QUO:
-		if ast.IsInt64(x.X.GetType()) || ast.IsFloatType(x.X.GetType()) {
+		var t = x.X.GetType()
+		if ast.IsInt64(t) || ast.IsFloatType(t) {
 			checkOperandTypes(x)
 		} else {
 			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
-				ast.TypeString(x.X.GetType()), x.Op.String())
+				ast.TypeString(t), x.Op.String())
 		}
-		x.Typ = x.X.GetType()
+		x.Typ = t
 	case lexer.AND, lexer.OR:
 		if !ast.IsBoolType(x.X.GetType()) {
 			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
@@ -305,7 +306,7 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 	//case lexer.BITAND, lexer.BITOR:
 	case lexer.EQ, lexer.NEQ:
 		var t = ast.UnderType(x.X.GetType())
-		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Symbol || t == ast.String {
+		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 || t == ast.Symbol || t == ast.String {
 			checkOperandTypes(x)
 		} else if ast.IsClassType(t) {
 			checkOperandTypes(x)

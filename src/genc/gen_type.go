@@ -35,14 +35,14 @@ func predefinedTypeName(name string) string {
 		return "TInt64"
 	case "Вещ64":
 		return "TFloat64"
+	case "Слово64":
+		return "TWord64"
 	case "Лог":
 		return "TBool"
 	case "Символ":
 		return "TSymbol"
 	case "Строка":
 		return "TString"
-	case "Тег":
-		return "TTag"
 	default:
 		panic(fmt.Sprintf("predefinedTypeName: ni %s", name))
 	}

@@ -50,8 +50,8 @@ func (genc *genContext) genArgs(call *ast.CallExpr) string {
 
 		var vTyp = vPar.Typ.(*ast.VariadicType)
 
-		if ast.IsAnyType(vTyp.ElementTyp) {
-			cargs[normCount] = genc.genVariadicAnyArgs(call, vPar, normCount)
+		if ast.IsTagPairType(vTyp.ElementTyp) {
+			cargs[normCount] = genc.genVariadicTaggedArgs(call, vPar, normCount)
 		} else {
 			cargs[normCount] = genc.genVariadicArgs(call, vPar, vTyp, normCount)
 		}
@@ -80,7 +80,7 @@ func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTy
 	return "&" + loc
 }
 
-func (genc *genContext) genVariadicAnyArgs(call *ast.CallExpr, vPar *ast.Param, normCount int) string {
+func (genc *genContext) genVariadicTaggedArgs(call *ast.CallExpr, vPar *ast.Param, normCount int) string {
 
 	var loc = genc.localName("loc")
 	var vLen = len(call.Args) - normCount
@@ -179,9 +179,9 @@ func (genc *genContext) genStdTag(call *ast.CallExpr) string {
 	if tExpr, ok := a.(*ast.TypeExpr); ok {
 		return genc.genTypeTag(tExpr.Typ)
 	} else {
-		var t = call.Args[0].GetType()
-		if ast.IsAnyType(t) {
-			panic("ni")
+		var t = a.GetType()
+		if ast.IsTagPairType(t) {
+			return genc.genExprTag(a)
 		} else {
 			return genc.genTypeTag(t)
 		}
@@ -196,4 +196,26 @@ func (genc *genContext) genTypeTag(t ast.Type) string {
 	default:
 		panic(("ni"))
 	}
+}
+
+func (genc *genContext) genExprTag(e ast.Expr) string {
+	switch x := e.(type) {
+	case *ast.GeneralBracketExpr:
+		if x.Index == nil {
+			panic("assert")
+		}
+
+		var left = genc.genExpr(x.X)
+
+		return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[(%s(%s, *(TInt64 *)%s) << 1)+1]",
+			predefinedTypeName(ast.Word64.Name),
+			left,
+			rt_indexcheck,
+			genc.genExpr(x.Index),
+			left)
+
+	case *ast.IdentExpr:
+		panic("ni")
+	}
+	panic("assert")
 }

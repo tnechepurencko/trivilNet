@@ -437,33 +437,33 @@ enum Tags {
 
 #define flag_lang 1
 
-EXPORTED TTag tri_tagTByte() {
+EXPORTED TWord64 tri_tagTByte() {
     return 1 << size_shift | tag_unsigned << tag_id_shift | flag_lang;
 }
 
-EXPORTED TTag tri_tagTInt64() {
+EXPORTED TWord64 tri_tagTInt64() {
     return (8 << size_shift) | (tag_signed << tag_id_shift) | flag_lang;
 }
 
-EXPORTED TTag tri_tagTFloat64() {
+EXPORTED TWord64 tri_tagTFloat64() {
     return 8 << size_shift | tag_float << tag_id_shift | flag_lang;
 }
 
-EXPORTED TTag tri_tagTBool() {
+EXPORTED TWord64 tri_tagTWord64() {
+    return 8 << size_shift | tag_unsigned << tag_id_shift | flag_lang;
+}
+
+EXPORTED TWord64 tri_tagTBool() {
     return 1 << size_shift | tag_bool << tag_id_shift | flag_lang;
 }
 
-EXPORTED TTag tri_tagTSymbol() {
+EXPORTED TWord64 tri_tagTSymbol() {
     return 4 << size_shift | tag_symbol << tag_id_shift | flag_lang;
 }
 
-EXPORTED TTag tri_tagTString() {
+EXPORTED TWord64 tri_tagTString() {
     return 8 << size_shift | tag_string << tag_id_shift | flag_lang;
 }
-EXPORTED TTag tri_tagTTag() {
-    return 8 << size_shift | tag_tag << tag_id_shift | flag_lang;
-}
-
 
 //==== console
 
@@ -481,6 +481,10 @@ EXPORTED void print_float64(TFloat64 f) {
   printf("%g", f);
 }
 
+EXPORTED void print_word64(TWord64 x) {
+  printf("0x%llx", x);
+}	
+
 EXPORTED void print_symbol(TSymbol s) {
   printf("0x%x", s);
 }	
@@ -492,11 +496,6 @@ EXPORTED void print_string(TString s) {
 EXPORTED void print_bool(TBool b) {
 	if (b) printf("истина"); else printf("ложь");
 }
-
-EXPORTED void print_tag(TTag t) {
-  printf("0x%llx", t);
-}	
-
 
 EXPORTED void println() {
   printf("\n");

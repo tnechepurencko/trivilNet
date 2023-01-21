@@ -89,12 +89,16 @@ type VariadicType struct {
 	ElementTyp Type
 }
 
-//==== predicates
+//====
 
-func IsAnyType(t Type) bool {
-	t = UnderType(t)
-	return t == Any
+func UnderType(t Type) Type {
+	if tr, ok := t.(*TypeRef); ok {
+		t = tr.Typ
+	}
+	return t
 }
+
+//==== predicates
 
 func IsIntegerType(t Type) bool {
 	t = UnderType(t)
@@ -107,6 +111,10 @@ func IsInt64(t Type) bool {
 
 func IsFloatType(t Type) bool {
 	return UnderType(t) == Float64
+}
+
+func IsWord64(t Type) bool {
+	return UnderType(t) == Word64
 }
 
 func IsBoolType(t Type) bool {
@@ -152,12 +160,9 @@ func IsClassType(t Type) bool {
 	return ok
 }
 
-func UnderType(t Type) Type {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
-	}
-
-	return t
+func IsTagPairType(t Type) bool {
+	t = UnderType(t)
+	return t == TagPair
 }
 
 //==== tags

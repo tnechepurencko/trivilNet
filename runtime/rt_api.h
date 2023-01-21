@@ -5,9 +5,9 @@
 typedef uint8_t TByte;
 typedef int64_t TInt64;
 typedef double TFloat64;
+typedef uint64_t TWord64;
 typedef _Bool TBool;
 typedef uint32_t TSymbol;
-typedef uint64_t TTag;
 
 typedef struct StringDesc {
 //TODO meta
@@ -72,24 +72,24 @@ EXPORTED void* tri_TString_to_Symbols(TString s);
 
 //==== tags
 
-EXPORTED TTag tri_tagTByte();
-EXPORTED TTag tri_tagTInt64();
-EXPORTED TTag tri_tagTFloat64();
-EXPORTED TTag tri_tagTBool();
-EXPORTED TTag tri_tagTSymbol();
-EXPORTED TTag tri_tagTString();
-EXPORTED TTag tri_tagTTag();
+EXPORTED TWord64 tri_tagTByte();
+EXPORTED TWord64 tri_tagTInt64();
+EXPORTED TWord64 tri_tagTFloat64();
+EXPORTED TWord64 tri_tagTWord64();
+EXPORTED TWord64 tri_tagTBool();
+EXPORTED TWord64 tri_tagTSymbol();
+EXPORTED TWord64 tri_tagTString();
 
 //==== console
 
 //void print_int(int i);
 EXPORTED void print_int64(TInt64 i);
 EXPORTED void print_float64(TFloat64 f);
+EXPORTED void print_word64(TWord64 w);
 
 EXPORTED void print_symbol(TSymbol s);
 EXPORTED void print_string(TString s);
 EXPORTED void print_bool(TBool b);
-EXPORTED void print_tag(TTag t);
 
 EXPORTED void println();
 

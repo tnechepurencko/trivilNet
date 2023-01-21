@@ -92,7 +92,7 @@ func (cc *checkContext) callStdLen(x *ast.CallExpr) {
 }
 
 func (cc *checkContext) callStdTag(x *ast.CallExpr) {
-	x.Typ = ast.Tag
+	x.Typ = ast.Word64
 
 	if len(x.Args) != 1 {
 		env.AddError(x.Pos, "СЕМ-ОШ-ЧИСЛО-АРГ-СТДФУНК", x.StdFunc.Name, "1")
@@ -109,7 +109,7 @@ func (cc *checkContext) callStdTag(x *ast.CallExpr) {
 		cc.expr(x.Args[0])
 
 		if !ast.HasTag(x.Args[0].GetType()) {
-			env.AddError(x.Pos, "СЕМ-ОЖИДАЛСЯ-ТИП-ИЛИ-ТЕГ")
+			env.AddError(x.Pos, "СЕМ-ОЖИДАЛСЯ-ТИП-ИЛИ-ТЕГ-ПАРА")
 			return
 		}
 	}

@@ -153,7 +153,7 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 				return true
 			}
 		}
-	case ast.Any:
+	case ast.TagPair:
 		return ast.HasTag(r.GetType())
 	}
 

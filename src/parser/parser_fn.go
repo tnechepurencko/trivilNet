@@ -119,7 +119,7 @@ func (p *Parser) parseParameters(ft *ast.FuncType) {
 		}
 
 		if p.tok == lexer.MUL {
-			param.Typ = ast.Any
+			param.Typ = ast.TagPair
 			p.next()
 
 		} else {

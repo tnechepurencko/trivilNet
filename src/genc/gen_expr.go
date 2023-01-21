@@ -232,7 +232,7 @@ func (genc *genContext) genVariadicIndex(vt *ast.VariadicType, x, inx ast.Expr) 
 
 	var vPar = genc.genExpr(x)
 
-	if ast.IsAnyType(vt.ElementTyp) {
+	if ast.IsTagPairType(vt.ElementTyp) {
 		return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[%s(%s, *(TInt64 *)%s) << 1]",
 			predefinedTypeName(ast.Int64.Name),
 			vPar,
