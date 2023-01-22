@@ -79,4 +79,5 @@ type TypeDecl struct {
 
 type StdFunction struct {
 	DeclBase
+	Method bool
 }

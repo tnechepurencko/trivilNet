@@ -11,6 +11,14 @@ var _ = fmt.Printf
 func (cc *checkContext) call(x *ast.CallExpr) {
 
 	cc.expr(x.X)
+
+	var m = stdMethod(x)
+	if m != nil {
+		x.StdFunc = m
+		cc.callStdFunction(x)
+		return
+	}
+
 	for _, a := range x.Args {
 		cc.expr(a)
 	}
@@ -61,7 +69,10 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 //=== стд. функции
 
 func (cc *checkContext) callStdFunction(x *ast.CallExpr) {
+
 	switch x.StdFunc.Name {
+	case "":
+		return
 	case ast.StdLen:
 		cc.callStdLen(x)
 	case ast.StdTag:
@@ -131,4 +142,14 @@ func (cc *checkContext) callStdSomething(x *ast.CallExpr) {
 		env.AddError(x.Pos, "СЕМ-СТД-НЕЧТО-ОШ-АРГ")
 		return
 	}
+}
+
+//====
+
+func stdMethod(x *ast.CallExpr) *ast.StdFunction {
+	sel, ok := x.X.(*ast.SelectorExpr)
+	if !ok {
+		return nil
+	}
+	return sel.StdMethod
 }

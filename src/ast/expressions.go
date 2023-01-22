@@ -83,9 +83,10 @@ type IdentExpr struct {
 
 type SelectorExpr struct {
 	ExprBase
-	X    Expr // == nil, если импортированный объект
-	Name string
-	Obj  Node // импортированный объект или поле или метод
+	X         Expr // == nil, если импортированный объект
+	Name      string
+	Obj       Node // импортированный объект или поле или метод
+	StdMethod *StdFunction
 }
 
 type CallExpr struct {

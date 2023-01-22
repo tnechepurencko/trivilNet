@@ -25,13 +25,21 @@ type Scope struct {
 	Names map[string]Decl
 }
 
+// Стандартные функции
 const (
 	StdLen       = "длина"
 	StdTag       = "тег"
 	StdSomething = "нечто"
 )
 
-var topScope *Scope
+// Методы
+const (
+	VectorAppend = "добавить"
+)
+
+var topScope *Scope // верхняя область видимости
+
+var vectorMethods map[string]*StdFunction
 
 func initScopes() {
 	topScope = &Scope{
@@ -57,6 +65,9 @@ func initScopes() {
 
 	addStdFunction(StdTag)
 	addStdFunction(StdSomething)
+
+	vectorMethods = make(map[string]*StdFunction)
+	addVectorMethod(VectorAppend)
 
 	//	ShowScopes("top", topScope)
 }
@@ -92,6 +103,14 @@ func addStdFunction(name string) {
 	topScope.Names[name] = f
 }
 
+func addVectorMethod(name string) {
+	var f = &StdFunction{Method: true}
+	f.Typ = Void
+	f.Name = name
+
+	vectorMethods[name] = f
+}
+
 func NewScope(outer *Scope) *Scope {
 	return &Scope{
 		Outer: outer,
@@ -117,4 +136,14 @@ func ShowScopes(label string, cur *Scope) {
 		cur = cur.Outer
 	}
 	fmt.Printf("--- end scopes\n")
+}
+
+//=== методы для всех векторов
+
+func VectorMethod(name string) *StdFunction {
+	f, ok := vectorMethods[name]
+	if ok {
+		return f
+	}
+	return nil
 }

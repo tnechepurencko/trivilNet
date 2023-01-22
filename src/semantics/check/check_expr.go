@@ -87,28 +87,38 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 		return
 	}
 	cc.expr(x.X)
+
 	var t = x.X.GetType()
 
-	var cl = getClassType(t)
-	if cl == nil {
-		env.AddError(x.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeString(t))
+	switch xt := ast.UnderType(t).(type) {
+	case *ast.ClassType:
+		d, ok := xt.Members[x.Name]
+		if !ok {
+			env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПОЛЕ-ИЛИ-МЕТОД", x.Name)
+		} else {
+			if d.GetHost() != cc.module && !d.IsExported() {
+				env.AddError(x.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", d.GetName(), d.GetHost().Name)
+			}
+			x.Typ = d.GetType()
+			x.Obj = d
+
+			if f, ok := d.(*ast.Field); ok && f.ReadOnly {
+				x.ReadOnly = true
+			}
+		}
+	case *ast.VectorType:
+		var m = ast.VectorMethod(x.Name)
+		if m == nil {
+			env.AddError(x.GetPos(), "СЕМ-НЕ-НАЙДЕН-МЕТОД-ВЕКТОРА", x.Name)
+			x.StdMethod = &ast.StdFunction{Method: true}
+			x.StdMethod.Name = "" // отметить ошибку
+		} else {
+			x.StdMethod = m
+		}
+	default:
+		env.AddError(x.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeName(t))
 		x.Typ = ast.MakeInvalidType(x.X.GetPos())
 		return
-	}
-
-	d, ok := cl.Members[x.Name]
-	if !ok {
-		env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПОЛЕ-ИЛИ-МЕТОД", x.Name)
-	} else {
-		if d.GetHost() != cc.module && !d.IsExported() {
-			env.AddError(x.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", d.GetName(), d.GetHost().Name)
-		}
-		x.Typ = d.GetType()
-		x.Obj = d
-
-		if f, ok := d.(*ast.Field); ok && f.ReadOnly {
-			x.ReadOnly = true
-		}
 	}
 
 	if x.Typ == nil {
@@ -211,15 +221,6 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 	}
 }
 
-func getClassType(t ast.Type) *ast.ClassType {
-	if tr, ok := t.(*ast.TypeRef); ok {
-		t = tr.Typ
-	}
-
-	cl, _ := t.(*ast.ClassType)
-	return cl
-}
-
 func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 
 	var t = cc.typeExpr(c.X)
@@ -230,8 +231,8 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 		return
 	}
 
-	var cl = getClassType(t)
-	if cl == nil {
+	cl, ok := ast.UnderType(t).(*ast.ClassType)
+	if !ok {
 		env.AddError(c.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-ОШ-ТИП")
 		c.Typ = ast.MakeInvalidType(c.X.GetPos())
 	} else {
