@@ -59,7 +59,7 @@ class_field_list
 	;
 	
 class_field
-	: name ':' type_ref
+	: name (':' type_ref)? (':=' | '=') expression 
 	;
 
 type_ref
