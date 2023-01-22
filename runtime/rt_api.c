@@ -27,6 +27,15 @@ void* mm_allocate(size_t size) {
 	return a;
 }	
 
+void* mm_reallocate(void* ptr, size_t size) {
+	void* a = realloc(ptr, size);
+	if (a == NULL) {
+		runtime_crash("memory not reallocated");
+	}
+	return a;
+}	
+
+
 //==== utf-8
 
 // Сохраняет code point в буфер, должен быть не менее 4 байтов
@@ -224,7 +233,7 @@ EXPORTED TBool tri_equalStrings(TString s1, TString s2) {
 typedef struct VectorDesc { 
     //TODO: Tag
     TInt64 len;
-    //TODO: capacity
+    TInt64 capacity;
     void* body; 
 } VectorDesc;
 
@@ -232,9 +241,15 @@ typedef struct VectorDesc {
 EXPORTED void* tri_newVector(size_t element_size, TInt64 len) {
 	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
 	v->len = len;
-	v->body = mm_allocate(element_size * len);
+    v->capacity = len;
+    if (len == 0) {
+        v->body = NULL;
+    }
+    else {
+        v->body = mm_allocate(element_size * len);
+        memset(v->body, 0x0, element_size * len); //TODO: надо?
+    }
 	
-	memset(v->body, 0x0, element_size * len);
 	return v;
 }
 
@@ -257,6 +272,33 @@ EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len) {
 	
 	return inx;
 }    
+
+//=== vector methods
+
+void vectorExtend(VectorDesc* v, size_t element_size, TInt64 new_cap) {
+    if (new_cap < v->capacity * 2) new_cap = v->capacity * 2;
+
+    //TODO: нужно копировать по длине (не по capacity)
+    v->body = mm_reallocate(v->body, new_cap * element_size);
+    v->capacity = new_cap;
+}    
+
+
+EXPORTED void tri_vectorAppend(void* vd, size_t element_size, TInt64 len, void* add_body) {
+
+    if (len <= 0) return;
+
+	VectorDesc* v = vd;
+    TInt64 new_len = v->len + len;
+
+    if (new_len > v->capacity) {
+        vectorExtend(v, element_size, new_len);
+    }    
+
+    memcpy(v->body + v->len * element_size, add_body, len * element_size);
+    
+    v->len = new_len;
+}
 
 //==== class
 
@@ -379,6 +421,7 @@ EXPORTED void* tri_TString_to_Bytes(TString s) {
 	VectorDesc* v = tri_newVectorDesc();
 	
 	v->len = s->bytes;
+    v->capacity = s->bytes;
 	v->body = mm_allocate(sizeof(TByte) * v->len);
 	memcpy(v->body, s->body, s->bytes);
 	
@@ -405,6 +448,7 @@ EXPORTED void* tri_TString_to_Symbols(TString s) {
 
 	VectorDesc* v = tri_newVectorDesc();
 	v->len = count;
+    v->capacity = count;
 	v->body = mm_allocate(sizeof(TSymbol) * count);	
 	
 	TSymbol* symbuf = v->body;

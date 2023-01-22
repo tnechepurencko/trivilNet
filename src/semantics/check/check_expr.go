@@ -114,6 +114,8 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 			x.StdMethod.Name = "" // отметить ошибку
 		} else {
 			x.StdMethod = m
+			// x.Typ - не задан
+			return
 		}
 	default:
 		env.AddError(x.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeName(t))

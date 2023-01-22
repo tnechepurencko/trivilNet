@@ -54,6 +54,8 @@ const (
 	rt_crash = rt_prefix + "crash"
 
 	rt_tag = rt_prefix + "tag"
+
+	rt_vector_append = rt_prefix + "vectorAppend"
 )
 
 func (genc *genContext) localName(prefix string) string {

@@ -151,6 +151,9 @@ func (genc *genContext) genStdFuncCall(call *ast.CallExpr) string {
 	case ast.StdSomething:
 		return genc.genStdSomething(call)
 
+	case ast.VectorAppend:
+		return genc.genVectorAppend(call)
+
 	default:
 		panic("assert: не реализована стандартная функция " + call.StdFunc.Name)
 	}
@@ -250,4 +253,23 @@ func (genc *genContext) genStdSomething(call *ast.CallExpr) string {
 		panic("ni")
 	}
 	panic("assert")
+}
+
+//==== векторные
+
+func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
+
+	var vt = ast.UnderType(call.X.GetType()).(*ast.VectorType)
+
+	var loc = genc.localName("loc")
+	var et = genc.typeRef(vt.ElementTyp)
+
+	var cargs = make([]string, len(call.Args))
+	for i, a := range call.Args {
+		cargs[i] = genc.genExpr(a)
+	}
+
+	genc.c("%s %s[%d] = {%s};", et, loc, len(call.Args), strings.Join(cargs, ", "))
+
+	return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)", rt_vector_append, genc.genExpr(call.X), et, len(call.Args), loc)
 }

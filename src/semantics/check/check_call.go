@@ -12,9 +12,10 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 
 	cc.expr(x.X)
 
-	var m = stdMethod(x)
-	if m != nil {
-		x.StdFunc = m
+	sel, ok := x.X.(*ast.SelectorExpr)
+	if ok && sel.StdMethod != nil {
+		x.StdFunc = sel.StdMethod
+		x.X = sel.X // убрал лишний селектор
 		cc.callStdFunction(x)
 		return
 	}
@@ -80,6 +81,9 @@ func (cc *checkContext) callStdFunction(x *ast.CallExpr) {
 	case ast.StdSomething:
 		cc.callStdSomething(x)
 
+	case ast.VectorAppend:
+		cc.callVectorAppend(x)
+
 	default:
 		panic("assert: не реализована стандартная функция " + x.StdFunc.Name)
 	}
@@ -144,12 +148,15 @@ func (cc *checkContext) callStdSomething(x *ast.CallExpr) {
 	}
 }
 
-//====
+//==== векторные
 
-func stdMethod(x *ast.CallExpr) *ast.StdFunction {
-	sel, ok := x.X.(*ast.SelectorExpr)
-	if !ok {
-		return nil
+func (cc *checkContext) callVectorAppend(x *ast.CallExpr) {
+
+	var vt = ast.UnderType(x.X.GetType()).(*ast.VectorType)
+
+	for _, a := range x.Args {
+		cc.expr(a)
+		cc.checkAssignable(vt.ElementTyp, a)
 	}
-	return sel.StdMethod
+	x.Typ = ast.Void
 }

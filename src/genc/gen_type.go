@@ -55,7 +55,7 @@ func (genc *genContext) genTypeDecl(td *ast.TypeDecl) {
 		var desc = tname + "Desc"
 		var et = genc.typeRef(x.ElementTyp)
 		//TODO meta
-		genc.h("typedef struct %s { TInt64 len; %s* body; } %s;", desc, et, desc)
+		genc.h("typedef struct %s { TInt64 len; TInt64 capacity; %s* body; } %s;", desc, et, desc)
 		genc.h("typedef %s* %s;", desc, tname)
 	case *ast.ClassType:
 		genc.genClassType(td, x)
