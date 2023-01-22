@@ -58,7 +58,7 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 		}
 
 		var vTyp = vPar.Typ.(*ast.VariadicType)
-		if checkUnfold(x.Args, normCount, vTyp.ElementTyp) {
+		if cc.checkUnfold(x.Args, normCount, vTyp.ElementTyp) {
 			// проверено
 		} else {
 			for i := normCount; i < len(x.Args); i++ {
@@ -70,12 +70,26 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	}
 }
 
-func checkUnfold(args []ast.Expr, start int, elementTyp ast.Type) bool {
+func (cc *checkContext) checkUnfold(args []ast.Expr, start int, elementTyp ast.Type) bool {
 	for i := start; i < len(args); i++ {
-		if _, ok := args[i].(*ast.UnfoldExpr); ok {
+		if u, ok := args[i].(*ast.UnfoldExpr); ok {
+
+			cc.expr(u.X)
+
 			if i != start || len(args)-start > 1 {
 				env.AddError(args[i].GetPos(), "СЕМ-ОДНО-РАЗВОРАЧИВАНИЕ")
 			}
+			var t = u.X.GetType()
+			switch xt := ast.UnderType(t).(type) {
+			case *ast.VectorType:
+				if !equalTypes(elementTyp, xt.ElementTyp) {
+					env.AddError(args[i].GetPos(), "СЕМ-ТИПЫ-ЭЛЕМЕНТОВ-НЕ-СОВПАДАЮТ",
+						ast.TypeName(elementTyp), ast.TypeName(xt.ElementTyp))
+				}
+			default:
+				env.AddError(args[i].GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-ВЕКТОРА", ast.TypeName(t))
+			}
+
 			return true
 		}
 	}
@@ -169,7 +183,7 @@ func (cc *checkContext) callVectorAppend(x *ast.CallExpr) {
 
 	var vt = ast.UnderType(x.X.GetType()).(*ast.VectorType)
 
-	if checkUnfold(x.Args, 0, vt.ElementTyp) {
+	if cc.checkUnfold(x.Args, 0, vt.ElementTyp) {
 		// проверено
 	} else {
 		for _, a := range x.Args {

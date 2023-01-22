@@ -151,6 +151,11 @@ func ElementType(t Type) Type {
 	}
 }
 
+func IsVectorType(t Type) bool {
+	_, ok := UnderType(t).(*VectorType)
+	return ok
+}
+
 func IsVariadicType(t Type) bool {
 	_, ok := UnderType(t).(*VariadicType)
 	return ok
