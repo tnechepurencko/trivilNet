@@ -93,24 +93,25 @@ func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 	genc.h("")
 }
 
-func (genc *genContext) genClassDesc(td *ast.TypeDecl, x *ast.ClassType) {
+func (genc *genContext) genClassDesc(td *ast.TypeDecl, cl *ast.ClassType) {
 
 	var tname = genc.declName(td)
 	var tname_st = tname + "_ST"
 	var meta_type = tname + nm_meta_suffix
 	var vt_type = tname + nm_VT_suffix
 
-	genc.genMeta(x, meta_type)
+	genc.genMeta(cl, meta_type)
 
 	var col collector
 
-	col.collectVTable(x)
+	col.collectVTable(cl)
 
-	genc.genVTable(x, col.vtable, tname, meta_type, vt_type)
-	genc.genClassInit(x, col.vtable, tname, tname_st, meta_type, vt_type)
+	genc.genVTable(col.vtable, tname, meta_type, vt_type)
+	genc.genObjectInit(cl, tname)
+	genc.genClassInit(cl, col.vtable, tname, tname_st, meta_type, vt_type)
 }
 
-func (genc *genContext) genMeta(x *ast.ClassType, meta_type string) {
+func (genc *genContext) genMeta(cl *ast.ClassType, meta_type string) {
 
 	genc.c("typedef struct %s {", meta_type)
 	genc.c("size_t object_size;")
@@ -119,16 +120,32 @@ func (genc *genContext) genMeta(x *ast.ClassType, meta_type string) {
 	genc.c("} %s;", meta_type)
 }
 
-func (genc *genContext) genVTable(x *ast.ClassType, vtable []*ast.Function, tname, meta_type, vt_type string) {
+func (genc *genContext) genVTable(vtable []*ast.Function, tname, meta_type, vt_type string) {
 
 	genc.h("typedef struct %s {", vt_type)
 	genc.h("size_t self_size;")
+	genc.h("void (*%s)(%s);", nm_object_init_suffux, tname)
 
 	for _, f := range vtable {
 		genc.h("%s", genc.genMethodField(f, tname))
 	}
 
 	genc.h("} %s;", vt_type)
+}
+
+func (genc *genContext) genObjectInit(cl *ast.ClassType, tname string) {
+	genc.c("void %s%s(%s o) {", tname, nm_object_init_suffux, tname)
+
+	if cl.BaseTyp != nil {
+		var base = genc.typeRef(cl.BaseTyp)
+		genc.c("%s.vt.%s((void*)o);", base+nm_class_info_suffix, nm_object_init_suffux)
+	}
+
+	for _, f := range cl.Fields {
+		genc.c("o->%s.%s = %s;", nm_class_fields, genc.outName(f.Name), genc.genExpr(f.Init))
+	}
+
+	genc.c("}")
 }
 
 func (genc *genContext) genMethodField(f *ast.Function, tname string) string {
@@ -160,6 +177,14 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 
 	genc.c("void %s() {", meta_init_fn)
 
+	//-- VT
+	genc.c("%s.vt.self_size = sizeof(%s);", desc_var, vt_type)
+	genc.c("%s.vt.%s = &%s%s;", desc_var, nm_object_init_suffux, tname, nm_object_init_suffux)
+
+	for _, f := range vtable {
+		genc.c("%s.vt.%s = &%s;", desc_var, genc.outName(f.Name), genc.functionName(f))
+	}
+
 	//-- Meta
 	var base = "NULL"
 	if x.BaseTyp != nil {
@@ -168,13 +193,7 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 	genc.c("%s.meta.object_size = sizeof(struct %s);", desc_var, tname)
 	genc.c("%s.meta.base = %s;", desc_var, base)
 
-	//-- VT
-	genc.c("%s.vt.self_size = sizeof(%s);", desc_var, vt_type)
-
-	for _, f := range vtable {
-		genc.c("%s.vt.%s = &%s;", desc_var, genc.outName(f.Name), genc.functionName(f))
-	}
-
+	//--
 	genc.c("%s = &%s;", tname+nm_class_info_ptr_suffix, desc_var)
 	genc.c("}")
 

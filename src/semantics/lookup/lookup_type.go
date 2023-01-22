@@ -126,7 +126,10 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 			lc.lookTypeRef(x.BaseTyp)
 		}
 		for _, f := range x.Fields {
-			lc.lookTypeRef(f.Typ)
+			if f.Typ != nil {
+				lc.lookTypeRef(f.Typ)
+			}
+			lc.lookExpr(f.Init)
 		}
 
 	default:

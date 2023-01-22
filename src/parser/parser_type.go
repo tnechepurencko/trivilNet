@@ -3,6 +3,7 @@ package parser
 import (
 	"fmt"
 	"trivil/ast"
+	"trivil/env"
 	"trivil/lexer"
 )
 
@@ -105,32 +106,50 @@ func (p *Parser) parseClassType() *ast.ClassType {
 
 	for p.tok != lexer.RBRACE && p.tok != lexer.EOF {
 
-		var f = &ast.Field{
-			DeclBase: ast.DeclBase{
-				Pos:  p.pos,
-				Host: p.module,
-			},
-		}
-
-		f.Name = p.parseIdent()
-		if p.parseExportMark() {
-			f.Exported = true
-		}
-
-		p.expect(lexer.COLON)
-
-		f.Typ = p.parseTypeRef()
-
+		var f = p.parseField()
 		t.Fields = append(t.Fields, f)
 
 		if p.tok == lexer.RBRACE {
 			break
 		}
 		p.sep()
-
 	}
 
 	p.expect(lexer.RBRACE)
 
 	return t
+}
+
+func (p *Parser) parseField() *ast.Field {
+
+	var n = &ast.Field{
+		DeclBase: ast.DeclBase{
+			Pos:  p.pos,
+			Host: p.module,
+		},
+	}
+
+	n.Name = p.parseIdent()
+	if p.parseExportMark() {
+		n.Exported = true
+	}
+
+	if p.tok == lexer.COLON {
+		p.next()
+		n.Typ = p.parseTypeRef()
+	}
+
+	if p.tok == lexer.EQ {
+		n.ReadOnly = true
+		p.next()
+	} else if p.tok == lexer.ASSIGN {
+		p.next()
+	} else {
+		env.AddError(p.pos, "ПАР-ПЕРЕМ-ИНИТ")
+		return n
+	}
+
+	n.Init = p.parseExpression()
+
+	return n
 }

@@ -260,9 +260,9 @@ EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len) {
 
 //==== class
 
-typedef struct VTMini { size_t self_size; } VTMini;
+typedef struct VTMini { size_t self_size; void (*__init__)(void*); } VTMini;
 typedef struct MetaMini { size_t object_size; void* base_desc; } MetaMini;
-typedef struct ClassMini { void* vtable; } ClassMini;
+typedef struct ObjectMini { void* vtable; } ObjectMini;
 
 EXPORTED void* tri_newObject(void* class_desc) {
 	
@@ -272,16 +272,18 @@ EXPORTED void* tri_newObject(void* class_desc) {
 	MetaMini* m = class_desc + vt_sz;
 	size_t o_sz = m->object_size;
 	
-	ClassMini* c = mm_allocate(o_sz);
-	memset(c, 0x0, o_sz);
-	c->vtable = vt;
+	ObjectMini* o = mm_allocate(o_sz);
+	memset(o, 0x0, o_sz);
+	o->vtable = vt;
+    
+    vt->__init__(o);
 	
-	return c;
+	return o;
 }
 
 EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 	
-	VTMini* current_vt = ((ClassMini*)object)->vtable;
+	VTMini* current_vt = ((ObjectMini*)object)->vtable;
 
 //printf("object_vt = %p\n", current_vt);
 //printf("target_desc = %p\n", target_desc);

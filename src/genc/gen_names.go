@@ -22,6 +22,7 @@ const (
 	nm_meta_field            = "_meta_"
 	nm_class_info_suffix     = "_class_info"
 	nm_class_info_ptr_suffix = "_class_info_ptr"
+	nm_object_init_suffux    = "__init__"
 )
 
 // prefixes for generated names

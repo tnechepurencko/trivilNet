@@ -105,6 +105,10 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 		}
 		x.Typ = d.GetType()
 		x.Obj = d
+
+		if f, ok := d.(*ast.Field); ok && f.ReadOnly {
+			x.ReadOnly = true
+		}
 	}
 
 	if x.Typ == nil {

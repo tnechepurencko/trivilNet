@@ -57,6 +57,8 @@ type ClassType struct {
 
 type Field struct {
 	DeclBase
+	Init     Expr
+	ReadOnly bool
 }
 
 //==== function type
