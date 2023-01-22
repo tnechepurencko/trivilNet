@@ -236,13 +236,17 @@ literal
 	;
 	
 selector: '.' ident;
-arguments: '(' expression_list? ')'
+arguments: '(' argument_list? ')'
 conversion: '(:' type_ref ')';
 not_null_check: '!';  // or ^ a^.b 
 
-expression_list
-	: expression (',' expression)* ','? // trailing comma allowed
+argument_list
+	: argument (',' argument)* ','? // trailing comma allowed
 	;
+
+argument
+    : expression '...'?
+    ;
 
 index // index or array composite
 	: '[' element_value_list? ']' 
