@@ -190,6 +190,15 @@ func (p *Parser) parseArguments(x ast.Expr) ast.Expr {
 
 		var expr = p.parseExpression()
 
+		if p.tok == lexer.ELLIPSIS {
+			var u = &ast.UnfoldExpr{
+				ExprBase: ast.ExprBase{Pos: p.pos},
+				X:        expr,
+			}
+			expr = u
+			p.next()
+		}
+
 		n.Args = append(n.Args, expr)
 
 		if p.tok == lexer.RPAR {

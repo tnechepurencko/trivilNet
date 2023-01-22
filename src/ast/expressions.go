@@ -96,6 +96,11 @@ type CallExpr struct {
 	StdFunc *StdFunction
 }
 
+type UnfoldExpr struct {
+	ExprBase
+	X Expr
+}
+
 type ConversionExpr struct {
 	ExprBase
 	X         Expr

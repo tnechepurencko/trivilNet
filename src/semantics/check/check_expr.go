@@ -46,6 +46,10 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		}
 		cc.call(x)
 
+	case *ast.UnfoldExpr:
+		env.AddError(x.Pos, "СЕМ-РАЗВОРАЧИВАНИЕ-ТОЛЬКО-ВАРИАДИК")
+		x.Typ = ast.MakeInvalidType(x.Pos)
+
 	case *ast.ConversionExpr:
 		cc.conversion(x)
 

@@ -36,6 +36,9 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 		}
 		lc.lookStdFunction(x)
 
+	case *ast.UnfoldExpr:
+		lc.lookExpr(x.X)
+
 	case *ast.ConversionExpr:
 		lc.lookExpr(x.X)
 		lc.lookTypeRef(x.TargetTyp)

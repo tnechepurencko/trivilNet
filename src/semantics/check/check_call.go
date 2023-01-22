@@ -20,10 +20,6 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 		return
 	}
 
-	for _, a := range x.Args {
-		cc.expr(a)
-	}
-
 	ft, ok := x.X.GetType().(*ast.FuncType)
 	if !ok {
 
@@ -46,6 +42,7 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 		}
 
 		for i, p := range ft.Params {
+			cc.expr(x.Args[i])
 			cc.checkAssignable(p.Typ, x.Args[i])
 		}
 	} else {
@@ -56,15 +53,33 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 		}
 
 		for i := 0; i < normCount; i++ {
+			cc.expr(x.Args[i])
 			cc.checkAssignable(ft.Params[i].Typ, x.Args[i])
 		}
 
 		var vTyp = vPar.Typ.(*ast.VariadicType)
-		for i := normCount; i < len(x.Args); i++ {
-			cc.checkAssignable(vTyp.ElementTyp, x.Args[i])
+		if checkUnfold(x.Args, normCount, vTyp.ElementTyp) {
+			// проверено
+		} else {
+			for i := normCount; i < len(x.Args); i++ {
+				cc.expr(x.Args[i])
+				cc.checkAssignable(vTyp.ElementTyp, x.Args[i])
+			}
 		}
 
 	}
+}
+
+func checkUnfold(args []ast.Expr, start int, elementTyp ast.Type) bool {
+	for i := start; i < len(args); i++ {
+		if _, ok := args[i].(*ast.UnfoldExpr); ok {
+			if i != start || len(args)-start > 1 {
+				env.AddError(args[i].GetPos(), "СЕМ-ОДНО-РАЗВОРАЧИВАНИЕ")
+			}
+			return true
+		}
+	}
+	return false
 }
 
 //=== стд. функции
@@ -154,9 +169,13 @@ func (cc *checkContext) callVectorAppend(x *ast.CallExpr) {
 
 	var vt = ast.UnderType(x.X.GetType()).(*ast.VectorType)
 
-	for _, a := range x.Args {
-		cc.expr(a)
-		cc.checkAssignable(vt.ElementTyp, a)
+	if checkUnfold(x.Args, 0, vt.ElementTyp) {
+		// проверено
+	} else {
+		for _, a := range x.Args {
+			cc.expr(a)
+			cc.checkAssignable(vt.ElementTyp, a)
+		}
 	}
 	x.Typ = ast.Void
 }
