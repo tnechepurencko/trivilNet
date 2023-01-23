@@ -60,24 +60,22 @@ func (genc *genContext) genArgs(call *ast.CallExpr) string {
 	}
 }
 
+//TODO: нужно ли выдержать какой-то порядок вычисления аргументов?
 func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTyp *ast.VariadicType, normCount int) string {
 
 	var loc = genc.localName("loc")
 	var et = genc.typeRef(vTyp.ElementTyp)
 	var vLen = len(call.Args) - normCount
 
-	genc.c("struct { TInt64 len; %s body[%d]; } %s;", et, vLen, loc)
-
-	//TODO: нужно ли выдержать какой-то порядок вычисления аргументов?
 	var cargs = make([]string, vLen)
 	var n = 0
 	for i := normCount; i < len(call.Args); i++ {
-		cargs[n] = fmt.Sprintf("%s.body[%d]=%s;", loc, n, genc.genExpr(call.Args[i]))
+		cargs[n] = genc.genExpr(call.Args[i])
 		n++
 	}
-	genc.c("%s.len=%d;%s", loc, vLen, strings.Join(cargs, ""))
+	genc.c("%s %s[%d] ={%s};", et, loc, vLen, strings.Join(cargs, ", "))
 
-	return "&" + loc
+	return fmt.Sprintf("%d, &%s", vLen, loc)
 }
 
 func (genc *genContext) genVariadicTaggedArgs(call *ast.CallExpr, vPar *ast.Param, normCount int) string {
@@ -85,19 +83,30 @@ func (genc *genContext) genVariadicTaggedArgs(call *ast.CallExpr, vPar *ast.Para
 	var loc = genc.localName("loc")
 	var vLen = len(call.Args) - normCount
 
-	genc.c("struct { TInt64 len; TInt64 body[%d]; } %s;", vLen*2, loc)
+	//genc.c("struct { TInt64 len; TInt64 body[%d]; } %s;", vLen*2, loc)
 
 	var cargs = make([]string, vLen*2)
 	var n = 0
 	for i := normCount; i < len(call.Args); i++ {
-		cargs[n] = fmt.Sprintf("%s.body[%d]=%s;", loc, n, genc.genTypeTag(call.Args[i].GetType()))
-		cargs[n+1] = fmt.Sprintf("%s.body[%d]=(%s)%s;",
-			loc, n+1, predefinedTypeName(ast.Int64.Name), genc.genExpr(call.Args[i]))
+		cargs[n] = genc.genTypeTag(call.Args[i].GetType())
+		cargs[n+1] = genc.castToWord64(call.Args[i])
 		n += 2
 	}
-	genc.c("%s.len=%d;%s", loc, vLen, strings.Join(cargs, ""))
+	genc.c("TWord64 %s[%d] = {%s};", loc, vLen*2, strings.Join(cargs, ", "))
 
-	return "&" + loc
+	return fmt.Sprintf("%d, &%s", vLen, loc)
+}
+
+func (genc *genContext) castToWord64(e ast.Expr) string {
+	var s = genc.genExpr(e)
+	switch ast.UnderType(e.GetType()) {
+	case ast.Float64:
+		return fmt.Sprintf("((%s)%s).w", rt_cast_union, s)
+	case ast.Word64:
+		return s
+	default:
+		return fmt.Sprintf("(%s)%s", predefinedTypeName(ast.Word64.Name), s)
+	}
 }
 
 func isMethodCall(left ast.Expr) bool {
@@ -171,7 +180,7 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 	case *ast.VectorType:
 		return fmt.Sprintf("%s(%s)", rt_lenVector, genc.genExpr(a))
 	case *ast.VariadicType:
-		return fmt.Sprintf("(*(TInt64 *)%s)", genc.genExpr(a))
+		return fmt.Sprintf("%s%s", genc.genExpr(a), nm_variadic_len_suffic)
 	default:
 		panic("ni")
 	}
@@ -212,12 +221,13 @@ func (genc *genContext) genExprTag(e ast.Expr) string {
 
 		var left = genc.genExpr(x.X)
 
-		return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[%s(%s, *(TInt64 *)%s) << 1]",
+		return fmt.Sprintf("((%s*)(%s))[%s(%s, %s%s) << 1]",
 			predefinedTypeName(ast.Word64.Name),
 			left,
 			rt_indexcheck,
 			genc.genExpr(x.Index),
-			left)
+			left,
+			nm_variadic_len_suffic)
 
 	case *ast.IdentExpr:
 		panic("ni")
@@ -242,12 +252,13 @@ func (genc *genContext) genStdSomething(call *ast.CallExpr) string {
 
 		var left = genc.genExpr(x.X)
 
-		return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[(%s(%s, *(TInt64 *)%s) << 1)+1]",
+		return fmt.Sprintf("((%s*)(%s))[(%s(%s, %s%s) << 1)+1]",
 			predefinedTypeName(ast.Word64.Name),
 			left,
 			rt_indexcheck,
 			genc.genExpr(x.Index),
-			left)
+			left,
+			nm_variadic_len_suffic)
 
 	case *ast.IdentExpr:
 		panic("ni")

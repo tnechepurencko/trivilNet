@@ -99,24 +99,18 @@ func (genc *genContext) returnType(ft *ast.FuncType) string {
 
 func (genc *genContext) params(ft *ast.FuncType) string {
 
-	var b strings.Builder
+	var list = make([]string, len(ft.Params))
 
 	for i, p := range ft.Params {
 
-		var t string
 		if ast.IsVariadicType(p.Typ) {
-			t = "void*"
+			list[i] = fmt.Sprintf("TInt64 %s%s", genc.declName(p), nm_variadic_len_suffic)
+			list = append(list, fmt.Sprintf("void* %s", genc.declName(p)))
 		} else {
-			t = genc.typeRef(p.Typ)
-		}
-
-		b.WriteString(fmt.Sprintf("%s %s", t, genc.declName(p)))
-		if i < len(ft.Params)-1 {
-			b.WriteString(", ")
+			list[i] = fmt.Sprintf("%s %s", genc.typeRef(p.Typ), genc.declName(p))
 		}
 	}
-
-	return b.String()
+	return strings.Join(list, ", ")
 }
 
 //==== entry

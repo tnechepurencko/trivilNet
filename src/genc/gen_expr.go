@@ -244,12 +244,13 @@ func (genc *genContext) genVariadicIndex(vt *ast.VariadicType, x, inx ast.Expr) 
 		panic("assert")
 	} else {
 
-		return fmt.Sprintf("((%s*)(%s + sizeof(TInt64)))[%s(%s, *(TInt64 *)%s)]",
+		return fmt.Sprintf("((%s*)%s)[%s(%s, %s%s)]",
 			genc.typeRef(vt.ElementTyp),
 			vPar,
 			rt_indexcheck,
 			genc.genExpr(inx),
-			vPar)
+			vPar,
+			nm_variadic_len_suffic)
 	}
 }
 

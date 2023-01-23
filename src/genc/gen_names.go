@@ -23,6 +23,8 @@ const (
 	nm_class_info_suffix     = "_class_info"
 	nm_class_info_ptr_suffix = "_class_info_ptr"
 	nm_object_init_suffux    = "__init__"
+
+	nm_variadic_len_suffic = "_len"
 )
 
 // prefixes for generated names
@@ -33,6 +35,8 @@ const (
 // run-time API
 const (
 	rt_prefix = "tri_"
+
+	rt_cast_union = "TUnion64"
 
 	rt_init = rt_prefix + "init"
 
