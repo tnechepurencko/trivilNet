@@ -60,22 +60,40 @@ func (genc *genContext) genArgs(call *ast.CallExpr) string {
 	}
 }
 
+func getUnfold(call *ast.CallExpr) *ast.UnfoldExpr {
+	if len(call.Args) == 0 {
+		return nil
+	}
+	var last = call.Args[len(call.Args)-1]
+	if u, ok := last.(*ast.UnfoldExpr); ok {
+		return u
+	}
+	return nil
+}
+
 //TODO: нужно ли выдержать какой-то порядок вычисления аргументов?
 func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTyp *ast.VariadicType, normCount int) string {
 
-	var loc = genc.localName("loc")
-	var et = genc.typeRef(vTyp.ElementTyp)
-	var vLen = len(call.Args) - normCount
+	var unfold = getUnfold(call)
+	if unfold != nil {
+		var loc = genc.localName("loc")
+		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
+		return fmt.Sprintf("%s(%s), %s->body", rt_lenVector, loc, loc)
+	} else {
+		var loc = genc.localName("loc")
+		var et = genc.typeRef(vTyp.ElementTyp)
+		var vLen = len(call.Args) - normCount
 
-	var cargs = make([]string, vLen)
-	var n = 0
-	for i := normCount; i < len(call.Args); i++ {
-		cargs[n] = genc.genExpr(call.Args[i])
-		n++
+		var cargs = make([]string, vLen)
+		var n = 0
+		for i := normCount; i < len(call.Args); i++ {
+			cargs[n] = genc.genExpr(call.Args[i])
+			n++
+		}
+		genc.c("%s %s[%d] ={%s};", et, loc, vLen, strings.Join(cargs, ", "))
+
+		return fmt.Sprintf("%d, &%s", vLen, loc)
 	}
-	genc.c("%s %s[%d] ={%s};", et, loc, vLen, strings.Join(cargs, ", "))
-
-	return fmt.Sprintf("%d, &%s", vLen, loc)
 }
 
 func (genc *genContext) genVariadicTaggedArgs(call *ast.CallExpr, vPar *ast.Param, normCount int) string {
@@ -271,16 +289,24 @@ func (genc *genContext) genStdSomething(call *ast.CallExpr) string {
 func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 
 	var vt = ast.UnderType(call.X.GetType()).(*ast.VectorType)
-
-	var loc = genc.localName("loc")
 	var et = genc.typeRef(vt.ElementTyp)
 
-	var cargs = make([]string, len(call.Args))
-	for i, a := range call.Args {
-		cargs[i] = genc.genExpr(a)
+	var unfold = getUnfold(call)
+	if unfold != nil {
+		var loc = genc.localName("loc")
+		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
+		return fmt.Sprintf("%s(%s, sizeof(%s), %s(%s), %s->body)", rt_vector_append, genc.genExpr(call.X), et, rt_lenVector, loc, loc)
+
+	} else {
+		var loc = genc.localName("loc")
+
+		var cargs = make([]string, len(call.Args))
+		for i, a := range call.Args {
+			cargs[i] = genc.genExpr(a)
+		}
+
+		genc.c("%s %s[%d] = {%s};", et, loc, len(call.Args), strings.Join(cargs, ", "))
+
+		return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)", rt_vector_append, genc.genExpr(call.X), et, len(call.Args), loc)
 	}
-
-	genc.c("%s %s[%d] = {%s};", et, loc, len(call.Args), strings.Join(cargs, ", "))
-
-	return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)", rt_vector_append, genc.genExpr(call.X), et, len(call.Args), loc)
 }
