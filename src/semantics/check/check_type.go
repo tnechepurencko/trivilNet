@@ -46,14 +46,20 @@ func (cc *checkContext) classType(td *ast.TypeDecl, cl *ast.ClassType) {
 
 	for _, f := range cl.Fields {
 
-		cc.expr(f.Init)
-
-		if f.Typ != nil {
-			cc.checkAssignable(f.Typ, f.Init)
-		} else {
-			f.Typ = f.Init.GetType()
+		if f.Later {
 			if f.Typ == nil {
-				panic("assert - не задан тип поля")
+				env.AddError(f.Pos, "СЕМ-ДЛЯ-ПОЗЖЕ-НУЖЕН-ТИП")
+			}
+		} else {
+			cc.expr(f.Init)
+
+			if f.Typ != nil {
+				cc.checkAssignable(f.Typ, f.Init)
+			} else {
+				f.Typ = f.Init.GetType()
+				if f.Typ == nil {
+					panic("assert - не задан тип поля")
+				}
 			}
 		}
 

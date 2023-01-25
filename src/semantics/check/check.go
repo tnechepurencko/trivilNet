@@ -46,14 +46,24 @@ func Process(m *ast.Module) {
 //==== константы и переменные
 
 func (cc *checkContext) varDecl(v *ast.VarDecl) {
-	cc.expr(v.Init)
 
-	if v.Typ != nil {
-		cc.checkAssignable(v.Typ, v.Init)
-	} else {
-		v.Typ = v.Init.GetType()
+	if v.Later {
 		if v.Typ == nil {
-			panic("assert - не задан тип переменной")
+			env.AddError(v.Pos, "СЕМ-ДЛЯ-ПОЗЖЕ-НУЖЕН-ТИП")
+		}
+		if v.Host == nil {
+			env.AddError(v.Pos, "СЕМ-ПОЗЖЕ-ЛОК-ПЕРЕМЕННАЯ")
+		}
+	} else {
+		cc.expr(v.Init)
+
+		if v.Typ != nil {
+			cc.checkAssignable(v.Typ, v.Init)
+		} else {
+			v.Typ = v.Init.GetType()
+			if v.Typ == nil {
+				panic("assert - не задан тип переменной")
+			}
 		}
 	}
 }

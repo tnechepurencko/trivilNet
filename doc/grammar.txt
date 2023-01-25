@@ -59,7 +59,7 @@ class_field_list
 	;
 	
 class_field
-	: name (':' type_ref)? (':=' | '=') expression 
+	: name (':' type_ref)? (':=' | '=') ('позже' | expression)
 	;
 
 type_ref
@@ -92,7 +92,7 @@ const_expression // to be extended later
 	;
 
 var_decl
-	: 'пусть' name (':' type_ref)? (':=' | '=') expression 
+	: 'пусть' name (':' type_ref)? (':=' | '=') ('позже' | expression)
 	
 //=== function
 

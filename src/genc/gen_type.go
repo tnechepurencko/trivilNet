@@ -142,7 +142,9 @@ func (genc *genContext) genObjectInit(cl *ast.ClassType, tname string) {
 	}
 
 	for _, f := range cl.Fields {
-		genc.c("o->%s.%s = %s;", nm_class_fields, genc.outName(f.Name), genc.genExpr(f.Init))
+		if !f.Later {
+			genc.c("o->%s.%s = %s;", nm_class_fields, genc.outName(f.Name), genc.genExpr(f.Init))
+		}
 	}
 
 	genc.c("}")

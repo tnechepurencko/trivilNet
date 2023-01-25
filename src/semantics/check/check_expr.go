@@ -254,6 +254,7 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 	}
 
 	// проверяю поля и типы
+	var vals = make(map[string]bool)
 	for _, vp := range c.Values {
 		d, ok := cl.Members[vp.Name]
 		if !ok {
@@ -265,11 +266,20 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 			} else if f.Host != cc.module && !f.Exported {
 				env.AddError(vp.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", f.Name, f.Host.Name)
 			} else {
+				vals[vp.Name] = true
 				cc.checkAssignable(f.Typ, vp.Value)
 			}
 		}
 	}
-	//TODO: проверить обязательные значения (без умолчания)
+	// проверяю позднюю инициализацию
+	for name, d := range cl.Members {
+		if f, ok := d.(*ast.Field); ok && f.Later {
+			_, ok := vals[name]
+			if !ok {
+				env.AddError(c.Pos, "СЕМ-НЕТ-ПОЗЖЕ-ПОЛЯ", name)
+			}
+		}
+	}
 }
 
 func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {

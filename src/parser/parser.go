@@ -372,7 +372,12 @@ func (p *Parser) parseVarDecl() *ast.VarDecl {
 		return n
 	}
 
-	n.Init = p.parseExpression()
+	if p.tok == lexer.LATER {
+		n.Later = true
+		p.next()
+	} else {
+		n.Init = p.parseExpression()
+	}
 
 	return n
 }

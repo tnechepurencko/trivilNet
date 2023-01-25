@@ -78,6 +78,7 @@ const (
 	GUARD
 	IF
 	IMPORT
+	LATER
 	MODULE
 	RETURN
 	CLASS
@@ -163,6 +164,7 @@ var tokens = [...]string{
 	MODULE: "модуль",
 	GUARD:  "надо",
 	WHILE:  "пока",
+	LATER:  "позже",
 	BREAK:  "прервать",
 	VAR:    "пусть",
 	TYPE:   "тип",

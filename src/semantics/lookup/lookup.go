@@ -89,7 +89,9 @@ func (lc *lookContext) lookVarDecl(v *ast.VarDecl) {
 	if v.Typ != nil {
 		lc.lookTypeRef(v.Typ)
 	}
-	lc.lookExpr(v.Init)
+	if !v.Later {
+		lc.lookExpr(v.Init)
+	}
 }
 
 func (lc *lookContext) lookConstDecl(v *ast.ConstDecl) {

@@ -63,6 +63,7 @@ type Function struct {
 type VarDecl struct {
 	DeclBase
 	Init     Expr
+	Later    bool
 	ReadOnly bool
 }
 
