@@ -157,7 +157,12 @@ func (genc *genContext) genMethodField(f *ast.Function, tname string) string {
 
 	ps[0] = genc.typeRef(f.Recv.Typ)
 	for i, p := range ft.Params {
-		ps[i+1] = genc.typeRef(p.Typ)
+		if ast.IsVariadicType(p.Typ) {
+			ps[i+1] = "TInt64"
+			ps = append(ps, "void*")
+		} else {
+			ps[i+1] = genc.typeRef(p.Typ)
+		}
 	}
 
 	return fmt.Sprintf("%s (*%s)(%s);",
