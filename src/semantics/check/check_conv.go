@@ -20,7 +20,7 @@ var _ = fmt.Printf
 	Лог: -
 	Символ: Цел64, Строковый литерал (из 1-го символа)
 	Строка: Символ, []Символ, []Байт
-	[]Байт: Строка
+	[]Байт: Строка, Символ
 	[]Символ: Строка
 	Класс: Класс (вверх или вниз)
 */
@@ -255,7 +255,11 @@ func (cc *checkContext) conversionToVector(x *ast.ConversionExpr, target *ast.Ve
 			x.Typ = x.TargetTyp
 			return
 		}
+	} else if t == ast.Symbol {
+		x.Typ = x.TargetTyp
+		return
 	}
+
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА",
 		ast.TypeString(x.X.GetType()), ast.TypeString(x.TargetTyp))
 	x.Typ = ast.MakeInvalidType(x.Pos)

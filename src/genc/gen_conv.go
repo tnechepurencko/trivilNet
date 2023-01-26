@@ -79,15 +79,18 @@ func (genc *genContext) convertToString(expr string, from ast.Type) string {
 
 func (genc *genContext) convertToVector(expr string, from ast.Type, to *ast.VectorType) string {
 
-	if from != ast.String {
-		panic("ni")
-	}
+	if from == ast.String {
 
-	var et = ast.UnderType(to.ElementTyp)
-	if et == ast.Byte {
-		return fmt.Sprintf("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(ast.String.Name), "Bytes", expr)
-	} else if et == ast.Symbol {
-		return fmt.Sprintf("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(ast.String.Name), "Symbols", expr)
+		var et = ast.UnderType(to.ElementTyp)
+		if et == ast.Byte {
+			return fmt.Sprintf("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(ast.String.Name), "Bytes", expr)
+		} else if et == ast.Symbol {
+			return fmt.Sprintf("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(ast.String.Name), "Symbols", expr)
+		} else {
+			panic("ni")
+		}
+	} else if from == ast.Symbol {
+		return fmt.Sprintf("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(ast.Symbol.Name), "Bytes", expr)
 	} else {
 		panic("ni")
 	}
