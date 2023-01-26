@@ -41,6 +41,10 @@ EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len);
 
 EXPORTED void tri_vectorAppend(void* vd, size_t element_size, TInt64 len, void* body);
 
+// Добавляет символ к []Байт
+// Используется строковой библиотекой, не используется компилятором
+EXPORTED void tri_vectorAppend_TSymbol_to_Bytes(void *vd, TSymbol x);
+
 //==== class
 
 /*
@@ -72,6 +76,8 @@ EXPORTED TString tri_Symbols_to_TString(void* vd);
 
 // Возвращает []Байт
 EXPORTED void* tri_TString_to_Bytes(TString s);
+EXPORTED void* tri_TSymbol_to_Bytes(TSymbol x);
+
 // Возвращает []Символ
 EXPORTED void* tri_TString_to_Symbols(TString s);
 
@@ -88,6 +94,7 @@ EXPORTED TWord64 tri_tagTString();
 //==== console
 
 //void print_int(int i);
+EXPORTED void print_byte(TByte i);
 EXPORTED void print_int64(TInt64 i);
 EXPORTED void print_float64(TFloat64 f);
 EXPORTED void print_word64(TWord64 w);

@@ -300,6 +300,23 @@ EXPORTED void tri_vectorAppend(void* vd, size_t element_size, TInt64 len, void* 
     v->len = new_len;
 }
 
+EXPORTED void tri_vectorAppend_TSymbol_to_Bytes(void *vd, TSymbol x) {
+
+    TByte buf[4];
+    size_t len = encode_symbol(x, buf);
+
+	VectorDesc* v = vd;
+    TInt64 new_len = v->len + len;
+
+    if (new_len > v->capacity) {
+        vectorExtend(v, sizeof(TByte), new_len);
+    }    
+
+    memcpy(v->body + v->len * sizeof(TByte), buf, len * sizeof(TByte));
+    
+    v->len = new_len;
+}
+
 //==== class
 
 typedef struct VTMini { size_t self_size; void (*__init__)(void*); } VTMini;
@@ -428,6 +445,21 @@ EXPORTED void* tri_TString_to_Bytes(TString s) {
 	return v;
 }
 
+EXPORTED void* tri_TSymbol_to_Bytes(TSymbol x) {
+
+    TByte buf[4];
+    size_t len = encode_symbol(x, buf);
+
+	VectorDesc* v = tri_newVectorDesc();
+
+ 	v->len = len;
+    v->capacity = len;
+	v->body = mm_allocate(sizeof(TByte) * len);
+	memcpy(v->body, buf, len);
+	
+	return v;   
+}
+
 EXPORTED void* tri_TString_to_Symbols(TString s) {
 	TInt64 count = 0;
 	TSymbol cp;
@@ -518,6 +550,10 @@ void print_int(int i) {
   printf("%d", i);
 }
 */
+
+EXPORTED void print_byte(TByte i) {
+  printf("%02x", i);
+}
 
 EXPORTED void print_int64(TInt64 i) {
   printf("%lld", i);
