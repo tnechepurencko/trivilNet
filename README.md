@@ -21,5 +21,7 @@ Compiler lines (Go):
 UTF-8: https://github.com/JuliaStrings/utf8proc
 
 
-Руссификация консоли: https://remontka.pro/fix-cyrillic-windows-10/
+Руссификация консоли, см: https://remontka.pro/fix-cyrillic-windows-10/
+Панель управления -> Региональные стандарты -> Дополнительное -> Изменить язык системы:
+  включить галочку: Использовать UTF-8
 
