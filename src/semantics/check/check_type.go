@@ -155,13 +155,6 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 	var t = ast.UnderType(lt)
 
 	switch t {
-	case ast.Symbol:
-		var li = oneSymbolString(r)
-		if li != nil {
-			li.Typ = ast.Symbol
-			li.Kind = ast.Lit_Symbol
-			return true
-		}
 	case ast.Byte:
 		var li = literal(r)
 		if li != nil && li.Kind == ast.Lit_Int {

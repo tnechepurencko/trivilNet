@@ -66,6 +66,8 @@ func (cc *checkContext) expr(expr ast.Expr) {
 			x.Typ = ast.Float64
 		case ast.Lit_String:
 			x.Typ = ast.String
+		case ast.Lit_Symbol:
+			x.Typ = ast.Symbol
 		default:
 			panic(fmt.Sprintf("LiteralExpr - bad kind: ni %v", x))
 		}

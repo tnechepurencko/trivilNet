@@ -16,6 +16,7 @@ var validSimpleStmToken = tokens{
 	lexer.INT:    true,
 	lexer.FLOAT:  true,
 	lexer.STRING: true,
+	lexer.SYMBOL: true,
 
 	// unary ops
 	lexer.ADD: true,

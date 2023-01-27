@@ -119,6 +119,13 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 			Lit:      p.lit,
 		}
 		p.next()
+	case lexer.SYMBOL:
+		x = &ast.LiteralExpr{
+			ExprBase: ast.ExprBase{Pos: p.pos},
+			Kind:     ast.Lit_Symbol,
+			Lit:      p.lit,
+		}
+		p.next()
 	case lexer.IDENT:
 		x = &ast.IdentExpr{
 			ExprBase: ast.ExprBase{Pos: p.pos},
