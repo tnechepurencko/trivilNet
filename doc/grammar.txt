@@ -307,7 +307,7 @@ symbol_lit
 escape_value
 	: '\\'
 	( 'u' hex_digit hex_digit hex_digit hex_digit
-	| [a-tv-zA-TV-Z] // not 'u'
+    | 'n' | 'r' | 't' 
 	| '"'
 	| "'"
 	)
