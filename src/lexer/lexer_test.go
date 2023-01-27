@@ -33,6 +33,14 @@ var tests = []one{
 	{"1.", []pair{{FLOAT, "1."}}},
 	{"1.0", []pair{{FLOAT, "1.0"}}},
 
+	{"'a'", []pair{{SYMBOL, "a"}}},
+	{"'\t'", []pair{{SYMBOL, "\t"}}},
+	{"'\\''", []pair{{SYMBOL, "\\'"}}},
+
+	{"\"a\"", []pair{{STRING, "a"}}},
+	{"\"\t\"", []pair{{STRING, "\t"}}},
+	{"\"'\"", []pair{{STRING, "'"}}},
+
 	{"модуль", []pair{{MODULE, "модуль"}}},
 	{"модуль ", []pair{{MODULE, "модуль"}}},
 	{"модуль\n", []pair{{MODULE, "модуль"}, {NL, ""}}},
@@ -77,9 +85,9 @@ func check(t *testing.T, test one) {
 
 	for i := 0; i < len(actual) && i < len(test.pairs); i++ {
 		if actual[i].tok != test.pairs[i].tok {
-			t.Errorf("Лексема %s вместо %s в тексте\n'%s'", actual[i].tok, test.pairs[i].tok, test.text)
+			t.Errorf("Лексема %s вместо %s в тесте:\n'%s'", actual[i].tok, test.pairs[i].tok, test.text)
 		} else if actual[i].lit != test.pairs[i].lit {
-			t.Errorf("Текст лексемы '%s' вместо '%s' в тексте\n'%s'", actual[i].lit, test.pairs[i].lit, test.text)
+			t.Errorf("Текст лексемы '%s' вместо '%s' в тесте:\n'%s'", actual[i].lit, test.pairs[i].lit, test.text)
 		}
 	}
 

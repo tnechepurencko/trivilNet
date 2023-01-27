@@ -22,6 +22,7 @@ const (
 	INT
 	FLOAT
 	STRING
+	SYMBOL
 
 	// operators
 	ADD // +
@@ -104,6 +105,7 @@ var tokens = [...]string{
 	INT:    "целый литерал",
 	FLOAT:  "вещественный литерал",
 	STRING: "строковый литерал",
+	SYMBOL: "символьный литерал",
 
 	ADD: "+",
 	SUB: "-",
@@ -198,23 +200,3 @@ func Lookup(ident string) Token {
 	}
 	return IDENT
 }
-
-/*
-func IsKeyword(name string) bool {
-	// TODO: opt: use a perfect hash function instead of a global map.
-	_, ok := keywords[name]
-	return ok
-}
-
-func IsIdentifier(name string) bool {
-	if name == "" || IsKeyword(name) {
-		return false
-	}
-	for i, c := range name {
-		if !unicode.IsLetter(c) && c != '_' && (i == 0 || !unicode.IsDigit(c)) {
-			return false
-		}
-	}
-	return true
-}
-*/

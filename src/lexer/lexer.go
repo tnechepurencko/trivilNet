@@ -235,16 +235,64 @@ func (s *Lexer) scanString(opening rune) string {
 	for {
 		ch := s.ch
 		if ch == '\n' || ch < 0 {
-			s.error(ofs, "ЛЕК-ОШ-СТРОКА")
+			s.error(ofs, "ЛЕК-СТРОКА-ЗАВЕРШЕНИЕ")
 			break
 		}
 		s.next()
 		if ch == opening {
 			break
 		}
-		if ch == '\\' {
+		if ch < ' ' {
+			s.error(ofs, "ЛЕК-ОШ-СИМ", ch)
+		} else if ch == '\\' {
 			s.scanEscape(opening)
 		}
+	}
+
+	if ofs >= s.offset {
+		return "!" // ошибка уже выдана
+	}
+
+	return string(s.src[ofs : s.offset-1])
+}
+
+func (s *Lexer) scanSymbol(opening rune) string {
+	// первая кавычка уже взята
+	var ofs = s.offset
+
+	var valid = true
+	var n = 0
+
+	for {
+		ch := s.ch
+		if ch == '\n' || ch < 0 {
+			if valid {
+				s.error(ofs, "ЛЕК-СТРОКА-ЗАВЕРШЕНИЕ")
+				valid = false
+			}
+			break
+		}
+		s.next()
+		if ch == opening {
+			break
+		}
+		n++
+		if ch < ' ' {
+			s.error(ofs, "ЛЕК-ОШ-СИМ", ch)
+			valid = false
+		} else if ch == '\\' {
+			if !s.scanEscape(opening) {
+				valid = false
+			}
+		}
+	}
+
+	if valid && n != 1 {
+		s.error(ofs, "ЛЕК-ОШ-ДЛИНА-СИМВОЛА")
+	}
+
+	if !valid && ofs >= s.offset {
+		return "!" // ошибка уже выдана
 	}
 
 	return string(s.src[ofs : s.offset-1])
@@ -256,23 +304,26 @@ func (s *Lexer) scanEscape(quote rune) bool {
 	ofs := s.offset
 
 	var n int
-	if s.ch == 'u' { // \uABCD
-		n = 4
-	} else {
-		if s.ch < 0 {
-			s.error(ofs, "ЛЕК-ОШ-ESCAPE")
-			return false
-		}
+	switch s.ch {
+	case 'n', 'r', 't', '\'', '"':
 		s.next()
 		return true
-
+	case 'u': // \uABCD
+		n = 4
+	default:
+		if s.ch < 0 {
+			s.error(ofs, "ЛЕК-ESCAPE-ЗАВЕРШЕНИЕ")
+		} else {
+			s.error(ofs, "ЛЕК-ОШ-ESCAPE")
+		}
+		return false
 	}
 
 	for n > 0 {
 		d := uint32(digitVal(s.ch))
 		if d >= 16 {
 			if s.ch < 0 {
-				s.error(s.offset, "ЛЕК-ОШ-ESCAPE")
+				s.error(s.offset, "ЛЕК-ESCAPE-ЗАВЕРШЕНИЕ")
 			} else {
 				s.error(s.offset, "ЛЕК-ОШ-СИМ", s.ch)
 				return false
@@ -391,8 +442,8 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 			tok = STRING
 			lit = s.scanString('"')
 		case '\'':
-			tok = STRING
-			lit = s.scanString('\'')
+			tok = SYMBOL
+			lit = s.scanSymbol('\'')
 		case '@':
 			tok = MODIFIER
 			lit = s.scanModifier()
