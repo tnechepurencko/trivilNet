@@ -20,10 +20,10 @@ func (genc *genContext) genStatement(s ast.Statement) {
 	switch x := s.(type) {
 	case *ast.DeclStatement:
 		s := genc.genLocalDecl(x.D)
-		genc.c(s)
+		genc.c("%s", s)
 	case *ast.ExprStatement:
 		s := genc.genExpr(x.X)
-		genc.c(s + ";")
+		genc.c("%s;", s)
 	case *ast.AssignStatement:
 		l := genc.genExpr(x.L)
 		r := genc.genExpr(x.R)
@@ -32,10 +32,10 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		genc.c("%s = %s%s;", l, cast, r)
 	case *ast.IncStatement:
 		l := genc.genExpr(x.L)
-		genc.c(l + "++;")
+		genc.c("%s++;", l)
 	case *ast.DecStatement:
 		l := genc.genExpr(x.L)
-		genc.c(l + "--;")
+		genc.c("%s--;", l)
 	case *ast.If:
 		genc.genIf(x, "")
 	case *ast.While:
@@ -47,7 +47,7 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		if x.X != nil {
 			r = " " + genc.genExpr(x.X)
 		}
-		genc.c("return" + r + ";")
+		genc.c("return %s;", r)
 
 	case *ast.Break:
 		genc.c("break;")

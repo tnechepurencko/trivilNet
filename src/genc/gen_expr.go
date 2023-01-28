@@ -84,9 +84,7 @@ func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
 	var name = genc.localName(nm_stringLiteral)
 	genc.g("static TString %s = NULL;", name)
 
-	return fmt.Sprintf("%s(&%s, %d, %d, %s)",
-		rt_newLiteralString,
-		name, len(li.Lit), utf8.RuneCountInString(li.Lit), "\""+li.Lit+"\"")
+	return fmt.Sprintf("%s(&%s, %d, %d, \"%s\")", rt_newLiteralString, name, len(li.Lit), utf8.RuneCountInString(li.Lit), li.Lit)
 }
 
 //==== унарные операции
@@ -277,7 +275,7 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 	}
 	s += strings.Join(list, " ")
 
-	genc.c(s)
+	genc.c("%s", s)
 
 	return name
 }
@@ -301,6 +299,6 @@ func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
 	}
 	s += strings.Join(list, " ")
 
-	genc.c(s)
+	genc.c("%s", s)
 	return name
 }
