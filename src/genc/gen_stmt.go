@@ -96,8 +96,8 @@ func (genc *genContext) genGuard(x *ast.Guard) {
 		genc.genStatementSeq(seq)
 	} else {
 		genc.genStatement(x.Else)
-		genc.c("}")
 	}
+	genc.c("}")
 }
 
 func (genc *genContext) genCrash(x *ast.Crash) {
