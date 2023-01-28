@@ -340,7 +340,8 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 
 		x.Typ = ast.Bool
 	case lexer.LSS, lexer.LEQ, lexer.GTR, lexer.GEQ:
-		if ast.IsIntegerType(x.X.GetType()) || ast.IsFloatType(x.X.GetType()) {
+		var t = ast.UnderType(x.X.GetType())
+		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 || t == ast.Symbol {
 			checkOperandTypes(x)
 		} else {
 			env.AddError(x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
