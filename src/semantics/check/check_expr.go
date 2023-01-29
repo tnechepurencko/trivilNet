@@ -292,7 +292,9 @@ func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
 	switch x.Op {
 	case lexer.SUB:
 		var t = x.X.GetType()
-		if !ast.IsInt64(t) && !ast.IsFloatType(t) {
+		if ast.IsInt64(t) || ast.IsWord64(t) || ast.IsFloatType(t) {
+			// ok
+		} else {
 			env.AddError(x.X.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
 				ast.TypeString(x.X.GetType()), x.Op.String())
 		}
@@ -313,7 +315,7 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 	switch x.Op {
 	case lexer.ADD, lexer.SUB, lexer.MUL, lexer.REM, lexer.QUO:
 		var t = x.X.GetType()
-		if ast.IsInt64(t) || ast.IsFloatType(t) {
+		if ast.IsInt64(t) || ast.IsWord64(t) || ast.IsFloatType(t) {
 			checkOperandTypes(x)
 		} else {
 			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",

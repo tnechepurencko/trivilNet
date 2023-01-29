@@ -63,9 +63,14 @@ EXPORTED void* tri_checkClassType(void* object, void* class_desc);
 //==== conversions
 
 EXPORTED TByte tri_TInt64_to_TByte(TInt64 x);
+EXPORTED TByte tri_TWord64_to_TByte(TWord64 x);
+
 EXPORTED TByte tri_TSymbol_to_TByte(TSymbol x);
+
 EXPORTED TInt64 tri_TFloat64_to_TInt64(TFloat64 x);
+
 EXPORTED TSymbol tri_TInt64_to_TSymbol(TInt64 x);
+EXPORTED TSymbol tri_TWord64_to_TSymbol(TWord64 x);
 
 EXPORTED TString tri_TSymbol_to_TString(TSymbol x);
 

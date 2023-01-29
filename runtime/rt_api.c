@@ -377,6 +377,13 @@ EXPORTED TByte tri_TInt64_to_TByte(TInt64 x) {
 	return (TByte)x;
 }
 
+EXPORTED TByte tri_TWord64_to_TByte(TWord64 x) {
+	if (x > 255) {
+		runtime_crash("conversion to byte out of range");
+	}
+	return (TByte)x;
+}
+
 EXPORTED TByte tri_TSymbol_to_TByte(TSymbol x) {
 	if (x > 255) {
 		runtime_crash("conversion to byte out of range");
@@ -392,6 +399,13 @@ EXPORTED TInt64 tri_TFloat64_to_TInt64(TFloat64 x) {
 
 EXPORTED TSymbol tri_TInt64_to_TSymbol(TInt64 x) {
 	if (x < 0 || x > MaxSymbol) {
+		runtime_crash("conversion to symbol out of range");
+	}
+	return (TSymbol)x;	
+}
+
+EXPORTED TSymbol tri_TWord64_to_TSymbol(TWord64 x) {
+	if (x > MaxSymbol) {
 		runtime_crash("conversion to symbol out of range");
 	}
 	return (TSymbol)x;	

@@ -14,18 +14,19 @@ var _ = fmt.Printf
 
 /*
   по целевому типу:
-	Байт: Цел64, Символ (0..255), Строковый литерал (из 1-го символа)
-	Цел64: Байт, Вещ64, Символ, Строковый литерал (из 1-го символа)
+	Байт: Цел64, Слово64, Символ (0..255), Строковый литерал (из 1-го символа)
+	Цел64: Байт, Слово64, Вещ64, Символ, Строковый литерал (из 1-го символа)
+	Слово64: Байт, Символ, Цел64, Строковый литерал (из 1-го символа)
 	Вещ64: Цел64
 	Лог: -
-	Символ: Цел64, Строковый литерал (из 1-го символа)
+	Символ: Байт, Цел64, Слово64, Строковый литерал (из 1-го символа)
 	Строка: Символ, []Символ, []Байт
 	[]Байт: Строка, Символ
 	[]Символ: Строка
 	Класс: Класс (вверх или вниз)
 */
 func (cc *checkContext) conversion(x *ast.ConversionExpr) {
-	
+
 	cc.expr(x.X)
 
 	var target = ast.UnderType(x.TargetTyp)
@@ -36,6 +37,9 @@ func (cc *checkContext) conversion(x *ast.ConversionExpr) {
 		return
 	case ast.Int64:
 		cc.conversionToInt64(x)
+		return
+	case ast.Word64:
+		cc.conversionToWord64(x)
 		return
 	case ast.Float64:
 		cc.conversionToFloat64(x)
@@ -73,8 +77,7 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 		x.Typ = ast.Byte
 		return
 
-	case ast.Int64,
-		ast.Symbol:
+	case ast.Int64:
 		var li = literal(x.X)
 		if li != nil {
 			i, err := strconv.ParseInt(li.Lit, 0, 64)
@@ -86,6 +89,34 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 			}
 		}
 		x.Typ = ast.Byte
+		return
+	case ast.Word64:
+		var li = literal(x.X)
+		if li != nil {
+			i, err := strconv.ParseUint(li.Lit, 0, 64)
+			if err != nil || i > 255 {
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
+			} else {
+				x.Done = true
+				li.Typ = ast.Byte
+			}
+		}
+		x.Typ = ast.Byte
+		return
+	case ast.Symbol:
+		var li = literal(x.X)
+		if li != nil {
+			r, _ := utf8.DecodeRuneInString(li.Lit)
+			if r > 255 {
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
+			} else {
+				li.Kind = ast.Lit_Int
+				li.Lit = fmt.Sprintf("0x%x", r)
+				li.Typ = ast.Int64
+				x.Done = true
+			}
+		}
+		x.Typ = ast.Int64
 		return
 	case ast.String:
 		var li = literal(x.X)
@@ -109,7 +140,6 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Byte.Name)
 	x.Typ = ast.MakeInvalidType(x.Pos)
-
 }
 
 func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
@@ -121,15 +151,40 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 		env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(x.X.GetType()))
 		x.Typ = ast.Int64
 		return
-	case ast.Byte,
-		ast.Symbol:
+	case ast.Byte:
 		var li = literal(x.X)
 		if li != nil {
-			li.Typ = ast.Byte
+			li.Kind = ast.Lit_Int
+			li.Typ = ast.Int64
 			x.Done = true
 		}
 		x.Typ = ast.Int64
 		return
+	case ast.Symbol:
+		var li = literal(x.X)
+		if li != nil {
+			r, _ := utf8.DecodeRuneInString(li.Lit)
+			li.Kind = ast.Lit_Int
+			li.Lit = fmt.Sprintf("0x%x", r)
+			li.Typ = ast.Int64
+			x.Done = true
+		}
+		x.Typ = ast.Int64
+		return
+	case ast.Word64:
+		var li = literal(x.X)
+		if li != nil {
+			u, err := strconv.ParseUint(li.Lit, 0, 64)
+			if err != nil || u > 1<<63-1 {
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Int64.Name)
+			} else {
+				x.Done = true
+				li.Typ = ast.Int64
+			}
+		}
+		x.Typ = ast.Int64
+		return
+
 	case ast.Float64:
 		// пока не работаю с литералами
 		x.Typ = ast.Int64
@@ -147,6 +202,64 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Int64.Name)
+	x.Typ = ast.MakeInvalidType(x.Pos)
+}
+
+func (cc *checkContext) conversionToWord64(x *ast.ConversionExpr) {
+
+	var t = ast.UnderType(x.X.GetType())
+
+	switch t {
+	case ast.Word64:
+		env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(x.X.GetType()))
+		x.Typ = ast.Word64
+		return
+	case ast.Byte:
+		var li = literal(x.X)
+		if li != nil {
+			li.Kind = ast.Lit_Int
+			li.Typ = ast.Word64
+			x.Done = true
+		}
+		x.Typ = ast.Word64
+		return
+	case ast.Symbol:
+		var li = literal(x.X)
+		if li != nil {
+			r, _ := utf8.DecodeRuneInString(li.Lit)
+			li.Kind = ast.Lit_Int
+			li.Lit = fmt.Sprintf("0x%x", r)
+			li.Typ = ast.Word64
+			x.Done = true
+		}
+		x.Typ = ast.Word64
+		return
+	case ast.Int64:
+		var li = literal(x.X)
+		if li != nil {
+			i, err := strconv.ParseInt(li.Lit, 0, 64)
+			if err != nil || i < 0 {
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Word64.Name)
+			} else {
+				x.Done = true
+				li.Typ = ast.Word64
+			}
+		}
+		x.Typ = ast.Word64
+		return
+	case ast.String:
+		var li = oneSymbolString(x.X)
+		if li != nil {
+			r, _ := utf8.DecodeRuneInString(li.Lit)
+			li.Kind = ast.Lit_Int
+			li.Lit = fmt.Sprintf("0x%x", r)
+			x.Typ = ast.Word64
+			x.Done = true
+			return
+		}
+	}
+
+	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.Word64.Name)
 	x.Typ = ast.MakeInvalidType(x.Pos)
 }
 
@@ -179,12 +292,32 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 		env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(x.X.GetType()))
 		x.Typ = ast.Symbol
 		return
-
+	case ast.Byte:
+		var li = literal(x.X)
+		if li != nil {
+			x.Done = true
+			li.Typ = ast.Symbol
+		}
+		x.Typ = ast.Symbol
+		return
 	case ast.Int64:
 		var li = literal(x.X)
 		if li != nil {
 			i, err := strconv.ParseInt(li.Lit, 0, 64)
 			if err != nil || i < 0 || i > unicode.MaxRune {
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Symbol.Name)
+			} else {
+				x.Done = true
+				li.Typ = ast.Symbol
+			}
+		}
+		x.Typ = ast.Symbol
+		return
+	case ast.Word64:
+		var li = literal(x.X)
+		if li != nil {
+			i, err := strconv.ParseUint(li.Lit, 0, 64)
+			if err != nil || i > unicode.MaxRune {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Symbol.Name)
 			} else {
 				x.Done = true

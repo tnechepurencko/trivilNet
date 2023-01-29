@@ -32,7 +32,11 @@ func (genc *genContext) genConversion(x *ast.ConversionExpr) string {
 	case ast.Float64:
 		return genc.castPredefined(expr, ast.Float64)
 	case ast.Symbol:
-		return genc.convertPredefined(expr, fromPred, ast.Symbol)
+		if fromPred == ast.Byte || fromPred == ast.Symbol {
+			return genc.castPredefined(expr, ast.Symbol)
+		} else {
+			return genc.convertPredefined(expr, fromPred, ast.Symbol)
+		}
 	case ast.String:
 		return genc.convertToString(expr, ast.UnderType(x.X.GetType()))
 	}
