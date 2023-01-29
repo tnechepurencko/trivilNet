@@ -128,7 +128,11 @@ entry
 //=== statements
 
 statement_seq
-	: '{' statement_or_decl (sep statement_or_decl)* '}'
+	: '{' statement_list? '}'
+	;
+    
+statement_list
+	: statement_or_decl (sep statement_or_decl)* 
 	;
 
 statement_or_decl
@@ -141,10 +145,10 @@ statement
 	: if_stm
 	| while_stm
     | guard_stm
-	//| switch_stm
+	| switch_stm
 	| return_stm
     | crash_stm
-	| break_stm 'прервать'
+	| break_stm 
 	| simple_stm
 	;
 
@@ -160,6 +164,13 @@ guard_stm
 	: 'надо' expression 'иначе' (terminating_stm | statement_seq )
 	;
 
+switch_stm  // пока единственный вариант
+    : 'выбор' expression '{' 
+      ('|' expression (',' expression)* ':' statement_list?)*
+      ('иначе' statement_list?)?
+      '}'
+    ;
+
 terminating_stm
     : return_stm
     | crash_stm
@@ -174,7 +185,7 @@ crash_stm
     : 'авария' '(' expression ')'
     ;
 
-
+break_stm
     : 'прервать'
     ;
 
