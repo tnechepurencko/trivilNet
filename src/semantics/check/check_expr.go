@@ -51,7 +51,11 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		x.Typ = ast.MakeInvalidType(x.Pos)
 
 	case *ast.ConversionExpr:
-		cc.conversion(x)
+		if x.Caution {
+			cc.cautionCast(x)
+		} else {
+			cc.conversion(x)
+		}
 
 	case *ast.GeneralBracketExpr:
 		cc.generalBracketExpr(x)

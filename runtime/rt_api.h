@@ -10,7 +10,7 @@ typedef _Bool TBool;
 typedef uint32_t TSymbol;
 
 // для преобразования с сохранением битов
-typedef union {TFloat64 f; TInt64 i; TWord64 w; } TUnion64;
+typedef union {TFloat64 f; TInt64 i; TWord64 w; void* a; } TUnion64;
 
 typedef struct StringDesc {
 //TODO meta

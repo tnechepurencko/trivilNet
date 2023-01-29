@@ -173,6 +173,16 @@ func IsTagPairType(t Type) bool {
 	return t == TagPair
 }
 
+func IsReferenceType(t Type) bool {
+	t = UnderType(t)
+	switch t.(type) {
+	case *VectorType, *ClassType:
+		return true
+	default:
+		return t == String
+	}
+}
+
 //==== tags
 
 // Объекты каких типов имеют тег

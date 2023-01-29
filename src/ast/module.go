@@ -17,6 +17,7 @@ type Module struct {
 	Decls   []Decl
 	Entry   *EntryFn
 	Inner   *Scope
+	Caution bool
 }
 
 func (n *Module) DeclNode() {}

@@ -230,6 +230,15 @@ func (p *Parser) parseConversion(x ast.Expr) ast.Expr {
 	}
 
 	p.next()
+
+	if p.tok == lexer.CAUTION {
+		p.next()
+		n.Caution = true
+		if !p.module.Caution {
+			p.error(p.pos, "ПАР-ОШ-ИСП-ОСТОРОЖНО")
+		}
+	}
+
 	n.TargetTyp = p.parseTypeRef()
 
 	p.expect(lexer.RPAR)

@@ -105,6 +105,7 @@ type ConversionExpr struct {
 	ExprBase
 	X         Expr
 	TargetTyp Type
+	Caution   bool
 	Done      bool // X уже преобразован к целевому типу
 }
 

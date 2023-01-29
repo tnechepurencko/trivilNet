@@ -101,3 +101,36 @@ func (genc *genContext) convertToClass(expr string, target ast.Type) string {
 
 	return fmt.Sprintf("((%s)%s(%s, %s))", tname, rt_checkClassType, expr, tname+nm_class_info_ptr_suffix)
 }
+
+func (genc *genContext) genCautionCast(x *ast.ConversionExpr) string {
+
+	var expr = genc.genExpr(x.X)
+	if x.Done {
+		return expr
+	}
+
+	var to = ast.UnderType(x.TargetTyp)
+	var from = ast.UnderType(x.X.GetType())
+
+	switch to {
+	case ast.Int64:
+		return fmt.Sprintf("((%s)%s).i", rt_cast_union, expr)
+	case ast.Float64:
+		return fmt.Sprintf("((%s)%s).f", rt_cast_union, expr)
+	case ast.Word64:
+		if from == ast.Int64 {
+			return fmt.Sprintf("((%s)(%s)%s).w", rt_cast_union, predefinedTypeName(ast.Int64.Name), expr)
+		} else if ast.IsReferenceType(from) {
+			return fmt.Sprintf("((%s)(void*)%s).w", rt_cast_union, expr)
+		} else {
+			return fmt.Sprintf("((%s)%s).w", rt_cast_union, expr)
+		}
+	default:
+		if from == ast.Word64 && ast.IsReferenceType(to) {
+			//TODO: проверить указатель и тег
+			return fmt.Sprintf("(%s)((%s)%s).a", genc.typeRef(x.TargetTyp), rt_cast_union, expr)
+		} else {
+			panic(fmt.Sprintf("ni %T '%s'", to, ast.TypeString(to)))
+		}
+	}
+}

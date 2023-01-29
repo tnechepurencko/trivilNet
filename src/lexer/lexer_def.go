@@ -71,6 +71,7 @@ const (
 	// keywords
 	keyword_beg
 	BREAK
+	CAUTION
 	CONST
 	CRASH
 	ELSE
@@ -155,22 +156,23 @@ var tokens = [...]string{
 	SEMI:  ";",
 	COLON: ":",
 
-	CRASH:  "авария",
-	RETURN: "вернуть",
-	ENTRY:  "вход",
-	IF:     "если",
-	ELSE:   "иначе",
-	IMPORT: "импорт",
-	CLASS:  "класс",
-	CONST:  "конст",
-	MODULE: "модуль",
-	GUARD:  "надо",
-	WHILE:  "пока",
-	LATER:  "позже",
-	BREAK:  "прервать",
-	VAR:    "пусть",
-	TYPE:   "тип",
-	FN:     "фн",
+	CRASH:   "авария",
+	RETURN:  "вернуть",
+	ENTRY:   "вход",
+	IF:      "если",
+	ELSE:    "иначе",
+	IMPORT:  "импорт",
+	CLASS:   "класс",
+	CONST:   "конст",
+	MODULE:  "модуль",
+	GUARD:   "надо",
+	CAUTION: "осторожно",
+	WHILE:   "пока",
+	LATER:   "позже",
+	BREAK:   "прервать",
+	VAR:     "пусть",
+	TYPE:    "тип",
+	FN:      "фн",
 }
 
 func (tok Token) String() string {

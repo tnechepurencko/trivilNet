@@ -120,6 +120,12 @@ func (p *Parser) parseModule() {
 	p.module.Name = p.parseIdent()
 	p.sep()
 
+	if p.tok == lexer.CAUTION {
+		p.next()
+		p.module.Caution = true
+		p.sep()
+	}
+
 	p.parseImportList()
 	p.parseDeclarations()
 }

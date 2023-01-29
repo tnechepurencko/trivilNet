@@ -25,7 +25,7 @@ var _ = fmt.Printf
 	Класс: Класс (вверх или вниз)
 */
 func (cc *checkContext) conversion(x *ast.ConversionExpr) {
-
+	
 	cc.expr(x.X)
 
 	var target = ast.UnderType(x.TargetTyp)
