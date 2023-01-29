@@ -1,6 +1,6 @@
 compilation_unit
 	: 'модуль' ident sep
-      'осторожно'?
+      ('осторожно' sep)?
 	  import_list
 	  declaration_list
 	;
