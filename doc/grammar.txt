@@ -1,5 +1,6 @@
 compilation_unit
 	: 'модуль' ident sep
+      'осторожно'?
 	  import_list
 	  declaration_list
 	;
@@ -237,7 +238,7 @@ literal
 	
 selector: '.' ident;
 arguments: '(' argument_list? ')'
-conversion: '(:' type_ref ')';
+conversion: '(:' 'осторожно'? type_ref ')';
 not_null_check: '!';  // or ^ a^.b 
 
 argument_list
