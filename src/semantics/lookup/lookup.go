@@ -201,6 +201,8 @@ func (lc *lookContext) lookStatement(seq *ast.StatementSeq, s ast.Statement) {
 	case *ast.Guard:
 		lc.lookExpr(x.Cond)
 		lc.lookStatement(nil, x.Else)
+	case *ast.When:
+		lc.lookWhen(x)
 	case *ast.Return:
 		if x.X != nil {
 			lc.lookExpr(x.X)
@@ -229,4 +231,18 @@ func (lc *lookContext) lookLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
 		panic(fmt.Sprintf("local decl: ni %T", decl))
 	}
 	//ast.ShowScopes("", lc.scope)
+}
+
+func (lc *lookContext) lookWhen(x *ast.When) {
+	lc.lookExpr(x.X)
+
+	for _, c := range x.Cases {
+		for _, e := range c.Exprs {
+			lc.lookExpr(e)
+		}
+		lc.lookStatements(c.Seq)
+	}
+	if x.Else != nil {
+		lc.lookStatements(x.Else)
+	}
 }

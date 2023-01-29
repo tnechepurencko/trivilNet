@@ -170,6 +170,8 @@ func (cc *checkContext) statement(s ast.Statement) {
 				env.AddError(x.Else.GetPos(), "СЕМ-НЕ-ЗАВЕРШАЮЩИЙ")
 			}
 		}
+	case *ast.When:
+		cc.checkWhen(x)
 
 	case *ast.Return:
 		if x.X != nil {
@@ -206,6 +208,26 @@ func (cc *checkContext) localDecl(decl ast.Decl) {
 	default:
 		panic(fmt.Sprintf("local decl: ni %T", decl))
 	}
+}
+
+func (cc *checkContext) checkWhen(x *ast.When) {
+
+	cc.expr(x.X)
+	checkWhenExpr(x.X)
+
+}
+
+func checkWhenExpr(x ast.Expr) {
+	var t = ast.UnderType(x.GetType())
+	switch t {
+	case ast.Byte, ast.Int64, ast.Word64, ast.Symbol, ast.String:
+		return
+	default:
+		if ast.IsClassType(t) {
+			return
+		}
+	}
+	env.AddError(x.GetPos(), "СЕМ-ОШ-ВЫБОР-ТИП", ast.TypeName(x.GetType()))
 }
 
 //====

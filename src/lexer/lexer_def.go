@@ -72,6 +72,7 @@ const (
 	keyword_beg
 	BREAK
 	CAUTION
+	CLASS
 	CONST
 	CRASH
 	ELSE
@@ -80,12 +81,13 @@ const (
 	GUARD
 	IF
 	IMPORT
+	IS
 	LATER
 	MODULE
 	RETURN
-	CLASS
 	TYPE
 	VAR
+	WHEN
 	WHILE
 
 	keyword_end
@@ -160,9 +162,11 @@ var tokens = [...]string{
 	RETURN:  "вернуть",
 	ENTRY:   "вход",
 	IF:      "если",
+	IS:      "есть",
 	ELSE:    "иначе",
 	IMPORT:  "импорт",
 	CLASS:   "класс",
+	WHEN:    "когда",
 	CONST:   "конст",
 	MODULE:  "модуль",
 	GUARD:   "надо",

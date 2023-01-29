@@ -72,6 +72,19 @@ type Guard struct {
 	Else Statement
 }
 
+type When struct {
+	StatementBase
+	X     Expr
+	Cases []*Case
+	Else  *StatementSeq
+}
+
+type Case struct {
+	StatementBase
+	Exprs []Expr
+	Seq   *StatementSeq
+}
+
 type Crash struct {
 	StatementBase
 	X Expr //

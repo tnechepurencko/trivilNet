@@ -165,8 +165,8 @@ guard_stm
 	;
 
 switch_stm  // пока единственный вариант
-    : 'выбор' expression '{' 
-      ('|' expression (',' expression)* ':' statement_list?)*
+    : 'когда' expression '{' 
+      ('есть' expression (',' expression)* ':' statement_list? )* 
       ('иначе' statement_list?)?
       '}'
     ;

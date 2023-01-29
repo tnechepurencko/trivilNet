@@ -35,6 +35,19 @@ var skipToStatement = tokens{
 	//TODO
 }
 
+var endStatementSeq = tokens{
+	lexer.EOF:    true,
+	lexer.RBRACE: true,
+}
+
+var endWhenCase = tokens{
+	lexer.EOF:    true,
+	lexer.RBRACE: true,
+
+	lexer.IS:   true,
+	lexer.ELSE: true,
+}
+
 //=== statements
 
 func (p *Parser) parseStatementSeq() *ast.StatementSeq {
@@ -42,29 +55,40 @@ func (p *Parser) parseStatementSeq() *ast.StatementSeq {
 		defer un(trace(p, "Список операторов"))
 	}
 
+	if p.tok != lexer.LBRACE {
+		p.expect(lexer.LBRACE)
+		return &ast.StatementSeq{
+			StatementBase: ast.StatementBase{Pos: p.pos},
+			Statements:    make([]ast.Statement, 0),
+		}
+	}
+	p.next()
+
+	var n = p.parseStatementList(endStatementSeq)
+
+	p.expect(lexer.RBRACE)
+
+	return n
+}
+
+func (p *Parser) parseStatementList(stop tokens) *ast.StatementSeq {
+
 	var n = &ast.StatementSeq{
 		StatementBase: ast.StatementBase{Pos: p.pos},
 		Statements:    make([]ast.Statement, 0),
 	}
 
-	if p.tok != lexer.LBRACE {
-		p.expect(lexer.LBRACE)
-		return n
-	}
-	p.next()
-	for p.tok != lexer.EOF && p.tok != lexer.RBRACE {
+	for !stop[p.tok] {
 		var s = p.parseStatement()
 		if s != nil {
 			n.Statements = append(n.Statements, s)
 		}
 
-		if p.tok == lexer.RBRACE {
+		if stop[p.tok] {
 			break
 		}
 		p.sep()
 	}
-
-	p.expect(lexer.RBRACE)
 
 	return n
 }
@@ -84,6 +108,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseIf()
 	case lexer.WHILE:
 		return p.parseWhile()
+	case lexer.WHEN:
+		return p.parseWhen()
 	case lexer.RETURN:
 		return p.parseReturn()
 	case lexer.BREAK:
@@ -280,4 +306,57 @@ func (p *Parser) parseGuard() ast.Statement {
 	}
 
 	return n
+}
+
+func (p *Parser) parseWhen() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор когда"))
+	}
+
+	var n = &ast.When{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+	}
+
+	p.next()
+	n.X = p.parseExpression()
+	p.expect(lexer.LBRACE)
+
+	for p.tok == lexer.IS {
+		var c = p.parseWhenCase()
+		n.Cases = append(n.Cases, c)
+	}
+
+	if p.tok == lexer.ELSE {
+		p.next()
+		n.Else = p.parseStatementList(endStatementSeq)
+	}
+	p.expect(lexer.RBRACE)
+
+	return n
+}
+
+func (p *Parser) parseWhenCase() *ast.Case {
+	if p.trace {
+		defer un(trace(p, "Оператор когда есть"))
+	}
+
+	var c = &ast.Case{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+		Exprs:         make([]ast.Expr, 0),
+	}
+	p.next()
+
+	for {
+		var x = p.parseExpression()
+		c.Exprs = append(c.Exprs, x)
+		if p.tok != lexer.COMMA {
+			break
+		}
+		p.next()
+	}
+	p.expect(lexer.COLON)
+
+	c.Seq = p.parseStatementList(endWhenCase)
+
+	return c
 }
