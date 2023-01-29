@@ -76,11 +76,11 @@ func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTy
 
 	var unfold = getUnfold(call)
 	if unfold != nil {
-		var loc = genc.localName("loc")
+		var loc = genc.localName("")
 		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
 		return fmt.Sprintf("%s(%s), %s->body", rt_lenVector, loc, loc)
 	} else {
-		var loc = genc.localName("loc")
+		var loc = genc.localName("")
 		var et = genc.typeRef(vTyp.ElementTyp)
 		var vLen = len(call.Args) - normCount
 
@@ -98,7 +98,7 @@ func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTy
 
 func (genc *genContext) genVariadicTaggedArgs(call *ast.CallExpr, vPar *ast.Param, normCount int) string {
 
-	var loc = genc.localName("loc")
+	var loc = genc.localName("")
 	var vLen = len(call.Args) - normCount
 
 	//genc.c("struct { TInt64 len; TInt64 body[%d]; } %s;", vLen*2, loc)
@@ -150,7 +150,7 @@ func (genc *genContext) genMethodCall(call *ast.CallExpr) string {
 	if id, ok := sel.X.(*ast.IdentExpr); ok {
 		name = genc.genIdent(id)
 	} else {
-		name = genc.localName("loc")
+		name = genc.localName("")
 
 		genc.c("%s %s = %s;",
 			genc.typeRef(sel.X.GetType()),
@@ -293,12 +293,12 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 
 	var unfold = getUnfold(call)
 	if unfold != nil {
-		var loc = genc.localName("loc")
+		var loc = genc.localName("")
 		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
 		return fmt.Sprintf("%s(%s, sizeof(%s), %s(%s), %s->body)", rt_vector_append, genc.genExpr(call.X), et, rt_lenVector, loc, loc)
 
 	} else {
-		var loc = genc.localName("loc")
+		var loc = genc.localName("")
 
 		var cargs = make([]string, len(call.Args))
 		for i, a := range call.Args {

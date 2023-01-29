@@ -215,7 +215,7 @@ func (genc *genContext) genVectorIndex(x, inx ast.Expr) string {
 	if id, ok := x.(*ast.IdentExpr); ok {
 		name = genc.genIdent(id)
 	} else {
-		name = genc.localName("loc")
+		name = genc.localName("")
 
 		genc.c("%s %s = %s;",
 			genc.typeRef(x.GetType()),
@@ -257,7 +257,7 @@ func (genc *genContext) genVariadicIndex(vt *ast.VariadicType, x, inx ast.Expr) 
 }
 
 func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
-	var name = genc.localName("loc")
+	var name = genc.localName("")
 
 	var vt = ast.UnderType(x.Typ).(*ast.VectorType)
 	var s = fmt.Sprintf("%s %s = %s(sizeof(%s), %d);",
@@ -285,7 +285,7 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 }
 
 func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
-	var name = genc.localName("loc")
+	var name = genc.localName("")
 
 	var tname = genc.typeRef(x.Typ)
 	var s = fmt.Sprintf("%s %s = %s(%s);",

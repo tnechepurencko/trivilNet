@@ -63,6 +63,10 @@ const (
 )
 
 func (genc *genContext) localName(prefix string) string {
+	if prefix == "" {
+		prefix = "loc"
+	}
+
 	genc.autoNo++
 	return fmt.Sprintf("%s%d", prefix, genc.autoNo)
 }

@@ -2,6 +2,7 @@ package genc
 
 import (
 	"fmt"
+	"strings"
 
 	"trivil/ast"
 	"trivil/env"
@@ -42,6 +43,12 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		genc.genWhile(x)
 	case *ast.Guard:
 		genc.genGuard(x)
+	case *ast.When:
+		if canWhenAsSwitch(x) {
+			genc.genWhenAsSwitch(x)
+		} else {
+			genc.genWhenAsIfs(x)
+		}
 	case *ast.Return:
 		r := ""
 		if x.X != nil {
@@ -129,4 +136,74 @@ func literal(expr ast.Expr) *ast.LiteralExpr {
 		}
 	}
 	return nil
+}
+
+//==== когда
+
+func canWhenAsSwitch(x *ast.When) bool {
+	var t = ast.UnderType(x.X.GetType())
+	switch t {
+	case ast.Byte, ast.Int64, ast.Word64, ast.Symbol:
+	default:
+		return false
+	}
+
+	for _, c := range x.Cases {
+		for _, e := range c.Exprs {
+			if _, ok := e.(*ast.LiteralExpr); !ok {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func (genc *genContext) genWhenAsSwitch(x *ast.When) {
+	genc.c("switch (%s) {", genc.genExpr(x.X))
+
+	for _, c := range x.Cases {
+		for _, e := range c.Exprs {
+			genc.c("case %s: ", genc.genExpr(e))
+		}
+		genc.genStatementSeq(c.Seq)
+		genc.c("break;")
+	}
+
+	if x.Else != nil {
+		genc.c("default:")
+		genc.genStatementSeq(x.Else)
+	}
+
+	genc.c("}")
+}
+
+func (genc *genContext) genWhenAsIfs(x *ast.When) {
+
+	var strCompare = ast.IsStringType(x.X.GetType())
+
+	var loc = genc.localName("")
+	genc.c("%s %s = %s;", genc.typeRef(x.X.GetType()), loc, genc.genExpr(x.X))
+
+	var els = ""
+	for _, c := range x.Cases {
+
+		var conds = make([]string, 0)
+		for _, e := range c.Exprs {
+			if strCompare {
+				conds = append(conds, fmt.Sprintf("%s(%s, %s)", rt_equalStrings, loc, genc.genExpr(e)))
+			} else {
+				conds = append(conds, fmt.Sprintf("%s == %s", loc, genc.genExpr(e)))
+			}
+		}
+		genc.c("%sif (%s) {", els, strings.Join(conds, " || "))
+		els = "else "
+		genc.genStatementSeq(c.Seq)
+		genc.c("}")
+	}
+
+	if x.Else != nil {
+		genc.c("else {")
+		genc.genStatementSeq(x.Else)
+		genc.c("}")
+	}
 }

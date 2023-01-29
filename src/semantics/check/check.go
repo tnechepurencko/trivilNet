@@ -79,7 +79,7 @@ func (cc *checkContext) constDecl(v *ast.ConstDecl) {
 			panic("assert - не задан тип константы")
 		}
 	}
-
+	cc.checkConstExpr(v.Value)
 }
 
 //==== functions
@@ -211,9 +211,21 @@ func (cc *checkContext) localDecl(decl ast.Decl) {
 }
 
 func (cc *checkContext) checkWhen(x *ast.When) {
-
 	cc.expr(x.X)
 	checkWhenExpr(x.X)
+
+	for _, c := range x.Cases {
+		for _, e := range c.Exprs {
+			cc.expr(e)
+			if !equalTypes(x.X.GetType(), e.GetType()) {
+				env.AddError(e.GetPos(), "СЕМ-КОГДА-ОШ-ТИПЫ", ast.TypeName(e.GetType()), ast.TypeName(x.X.GetType()))
+			}
+		}
+		cc.statements(c.Seq)
+	}
+	if x.Else != nil {
+		cc.statements(x.Else)
+	}
 
 }
 
@@ -227,7 +239,7 @@ func checkWhenExpr(x ast.Expr) {
 			return
 		}
 	}
-	env.AddError(x.GetPos(), "СЕМ-ОШ-ВЫБОР-ТИП", ast.TypeName(x.GetType()))
+	env.AddError(x.GetPos(), "СЕМ-КОГДА-ОШ-ТИП", ast.TypeName(x.GetType()))
 }
 
 //====
