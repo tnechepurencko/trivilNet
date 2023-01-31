@@ -3,7 +3,7 @@ package genc
 import (
 	"fmt"
 	"strings"
-	"unicode/utf8"
+	"unicode"
 
 	"trivil/ast"
 	"trivil/lexer"
@@ -63,15 +63,14 @@ func (genc *genContext) genIdent(id *ast.IdentExpr) string {
 
 func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
 	switch li.Kind {
-	case ast.Lit_Byte:
-		return li.Lit
 	case ast.Lit_Int:
-		return li.Lit
+		return fmt.Sprintf("%d", li.IntVal)
+	case ast.Lit_Word:
+		return fmt.Sprintf("0x%x", li.WordVal)
 	case ast.Lit_Float:
-		return li.Lit
+		return li.FloatStr
 	case ast.Lit_Symbol:
-		r, _ := utf8.DecodeRuneInString(li.Lit)
-		return fmt.Sprintf("0x%x", r)
+		return fmt.Sprintf("0x%x", li.WordVal)
 	case ast.Lit_String:
 		return genc.genStringLiteral(li)
 	default:
@@ -81,14 +80,50 @@ func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
 
 func (genc *genContext) genStringLiteral(li *ast.LiteralExpr) string {
 
-	if len(li.Lit) == 0 {
+	if len(li.StrVal) == 0 {
 		return fmt.Sprintf("%s()", rt_emptyString)
 	}
 
 	var name = genc.localName(nm_stringLiteral)
 	genc.g("static TString %s = NULL;", name)
 
-	return fmt.Sprintf("%s(&%s, %d, %d, \"%s\")", rt_newLiteralString, name, len(li.Lit), utf8.RuneCountInString(li.Lit), li.Lit)
+	var outs = encodeLiteralString(li.StrVal)
+	//fmt.Printf("! байты=%d  символы=%d\n", len(outs), len(li.StrVal))
+
+	// передаю -1 в число байтов, чтобы не учитывать Си эскейп последовательности
+	return fmt.Sprintf("%s(&%s, %d, %d, \"%s\")", rt_newLiteralString, name, -1, len(li.StrVal), outs)
+}
+
+func encodeLiteralString(runes []rune) string {
+	var b = strings.Builder{}
+	for _, r := range runes {
+		switch r {
+		case '\a':
+			b.WriteString("\\a")
+		case '\b':
+			b.WriteString("\\b")
+		case '\f':
+			b.WriteString("\\f")
+		case '\n':
+			b.WriteString("\\n")
+		case '\r':
+			b.WriteString("\\r")
+		case '\t':
+			b.WriteString("\\t")
+		case '\v':
+			b.WriteString("\\v")
+		case '\\':
+			b.WriteString("\\")
+		case '"':
+			b.WriteString("\\\"")
+		default:
+			if unicode.IsControl(r) {
+				panic("ni") // можно \0xddd
+			}
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
 }
 
 //==== унарные операции

@@ -139,9 +139,13 @@ size_t decode_symbol(TByte* buf, size_t buflen, TSymbol* cp_ref) {
 EXPORTED TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* body) {
 
 	if (*sptr != NULL) return *sptr;
+    
+    if (bytes < 0) {
+        bytes = strlen(body);
+    	//printf("bytes=%lld symbols=%lld\n", bytes, symbols);
+    }
 
 	size_t sz = sizeof(StringDesc) + bytes + 1; // +1 для 0x0
-//	printf("sz=%lld\n", sz);
 	void* mem = mm_allocate(sz);
 //	printf("mem=%p\n", mem);
 

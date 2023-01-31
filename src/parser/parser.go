@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"strconv"
 
 	"trivil/ast"
 	"trivil/env"
@@ -306,7 +305,7 @@ func (p *Parser) completeConstGroup(cs []*ast.ConstDecl) {
 
 	var base *ast.ConstDecl
 	var first = true
-	var val int
+	var val int64
 
 	for _, c := range cs {
 		if c.Value != nil {
@@ -318,15 +317,9 @@ func (p *Parser) completeConstGroup(cs []*ast.ConstDecl) {
 				literal, ok := base.Value.(*ast.LiteralExpr)
 
 				if ok && literal.Kind == ast.Lit_Int {
-					i, err := strconv.Atoi(literal.Lit)
-					if err != nil {
-						p.error(base.Pos, "ПАР-ОШ-КОНСТ-БАЗА", fmt.Sprintf("(%s)", err.Error()))
-						val = 0
-					} else {
-						val = i
-					}
+					val = literal.IntVal
 				} else {
-					p.error(base.Pos, "ПАР-ОШ-КОНСТ-БАЗА", "")
+					p.error(base.Pos, "ПАР-ОШ-КОНСТ-БАЗА")
 					val = 0
 				}
 				first = false
@@ -338,7 +331,7 @@ func (p *Parser) completeConstGroup(cs []*ast.ConstDecl) {
 			c.Value = &ast.LiteralExpr{
 				ExprBase: ast.ExprBase{Pos: c.Pos},
 				Kind:     ast.Lit_Int,
-				Lit:      strconv.Itoa(val),
+				IntVal:   val,
 			}
 		}
 	}

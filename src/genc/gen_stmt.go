@@ -112,7 +112,7 @@ func (genc *genContext) genCrash(x *ast.Crash) {
 	var expr string
 	var li = literal(x.X)
 	if li != nil {
-		expr = "\"" + li.Lit + "\""
+		expr = "\"" + encodeLiteralString(li.StrVal) + "\""
 	} else {
 		expr = genc.genExpr(x.X) + "->body"
 	}

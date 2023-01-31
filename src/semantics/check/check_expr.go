@@ -66,6 +66,8 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		switch x.Kind {
 		case ast.Lit_Int:
 			x.Typ = ast.Int64
+		case ast.Lit_Word:
+			x.Typ = ast.Word64
 		case ast.Lit_Float:
 			x.Typ = ast.Float64
 		case ast.Lit_String:

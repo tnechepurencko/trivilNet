@@ -310,6 +310,7 @@ func (s *Lexer) scanEscape(quote rune) bool {
 		return true
 	case 'u': // \uABCD
 		n = 4
+		s.next()
 	default:
 		if s.ch < 0 {
 			s.error(ofs, "ЛЕК-ESCAPE-ЗАВЕРШЕНИЕ")

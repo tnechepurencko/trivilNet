@@ -2,7 +2,6 @@ package check
 
 import (
 	"fmt"
-	"strconv"
 
 	"trivil/ast"
 	"trivil/env"
@@ -157,9 +156,11 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 	switch t {
 	case ast.Byte:
 		var li = literal(r)
-		if li != nil && li.Kind == ast.Lit_Int {
-			i, err := strconv.ParseInt(li.Lit, 0, 64)
-			if err == nil && i >= 0 || i <= 255 {
+		if li != nil {
+			if li.Kind == ast.Lit_Int && li.IntVal >= 0 || li.IntVal <= 255 {
+				li.Typ = ast.Byte
+				return true
+			} else if li.Kind == ast.Lit_Word && li.WordVal <= 255 {
 				li.Typ = ast.Byte
 				return true
 			}

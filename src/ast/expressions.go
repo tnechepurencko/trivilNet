@@ -57,8 +57,8 @@ type UnaryExpr struct {
 type LiteralKind int
 
 const (
-	Lit_Byte = iota
-	Lit_Int
+	Lit_Int = iota
+	Lit_Word
 	Lit_Float
 	Lit_Symbol
 	Lit_String
@@ -66,8 +66,11 @@ const (
 
 type LiteralExpr struct {
 	ExprBase
-	Kind LiteralKind
-	Lit  string
+	Kind     LiteralKind
+	IntVal   int64  // Цел
+	WordVal  uint64 // Байт, Слово, Символ
+	FloatStr string // Вещ, чтобы не терять точность
+	StrVal   []rune // Строка
 }
 
 type BoolLiteral struct {

@@ -2,9 +2,7 @@ package check
 
 import (
 	"fmt"
-	"strconv"
 	"unicode"
-	"unicode/utf8"
 
 	"trivil/ast"
 	"trivil/env"
@@ -76,16 +74,16 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 		env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(x.X.GetType()))
 		x.Typ = ast.Byte
 		return
-
 	case ast.Int64:
 		var li = literal(x.X)
 		if li != nil {
-			i, err := strconv.ParseInt(li.Lit, 0, 64)
-			if err != nil || i < 0 || i > 255 {
+			if li.IntVal < 0 || li.IntVal > 255 {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
 			} else {
-				x.Done = true
+				li.Kind = ast.Lit_Word
+				li.WordVal = uint64(li.IntVal)
 				li.Typ = ast.Byte
+				x.Done = true
 			}
 		}
 		x.Typ = ast.Byte
@@ -93,12 +91,11 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 	case ast.Word64:
 		var li = literal(x.X)
 		if li != nil {
-			i, err := strconv.ParseUint(li.Lit, 0, 64)
-			if err != nil || i > 255 {
+			if li.WordVal > 255 {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
 			} else {
-				x.Done = true
 				li.Typ = ast.Byte
+				x.Done = true
 			}
 		}
 		x.Typ = ast.Byte
@@ -106,32 +103,29 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 	case ast.Symbol:
 		var li = literal(x.X)
 		if li != nil {
-			r, _ := utf8.DecodeRuneInString(li.Lit)
-			if r > 255 {
+			if li.WordVal > 255 {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
 			} else {
-				li.Kind = ast.Lit_Int
-				li.Lit = fmt.Sprintf("0x%x", r)
-				li.Typ = ast.Int64
+				li.Kind = ast.Lit_Word
+				li.Typ = ast.Byte
 				x.Done = true
 			}
 		}
-		x.Typ = ast.Int64
+		x.Typ = ast.Byte
 		return
 	case ast.String:
 		var li = literal(x.X)
 		if li != nil {
-			if utf8.RuneCountInString(li.Lit) == 1 {
-				r, _ := utf8.DecodeRuneInString(li.Lit)
-				if r < 0 || r > 255 {
+			if len(li.StrVal) != 1 {
+				env.AddError(x.Pos, "СЕМ-ДЛИНА-СТРОКИ-НЕ-1")
+			} else {
+				if li.StrVal[0] > 255 {
 					env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
 				} else {
-					x.Done = true
+					li.Kind = ast.Lit_Word
 					li.Typ = ast.Byte
+					x.Done = true
 				}
-
-			} else {
-				env.AddError(x.Pos, "СЕМ-ДЛИНА-СТРОКИ-НЕ-1")
 			}
 			x.Typ = ast.Byte
 			return
@@ -155,6 +149,7 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 		var li = literal(x.X)
 		if li != nil {
 			li.Kind = ast.Lit_Int
+			li.IntVal = int64(li.WordVal)
 			li.Typ = ast.Int64
 			x.Done = true
 		}
@@ -163,9 +158,8 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 	case ast.Symbol:
 		var li = literal(x.X)
 		if li != nil {
-			r, _ := utf8.DecodeRuneInString(li.Lit)
 			li.Kind = ast.Lit_Int
-			li.Lit = fmt.Sprintf("0x%x", r)
+			li.IntVal = int64(li.WordVal)
 			li.Typ = ast.Int64
 			x.Done = true
 		}
@@ -174,29 +168,32 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 	case ast.Word64:
 		var li = literal(x.X)
 		if li != nil {
-			u, err := strconv.ParseUint(li.Lit, 0, 64)
-			if err != nil || u > 1<<63-1 {
+			if li.WordVal > 1<<63-1 {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Int64.Name)
 			} else {
-				x.Done = true
+				li.Kind = ast.Lit_Int
+				li.IntVal = int64(li.WordVal)
 				li.Typ = ast.Int64
+				x.Done = true
 			}
 		}
 		x.Typ = ast.Int64
 		return
-
 	case ast.Float64:
-		// пока не работаю с литералами
+		//TODO: литерал
 		x.Typ = ast.Int64
 		return
 	case ast.String:
-		var li = oneSymbolString(x.X)
+		var li = literal(x.X)
 		if li != nil {
-			r, _ := utf8.DecodeRuneInString(li.Lit)
-			li.Kind = ast.Lit_Int
-			li.Lit = fmt.Sprintf("0x%x", r)
-			x.Typ = ast.Int64
-			x.Done = true
+			if len(li.StrVal) != 1 {
+				env.AddError(x.Pos, "СЕМ-ДЛИНА-СТРОКИ-НЕ-1")
+			} else {
+				li.Kind = ast.Lit_Int
+				li.IntVal = int64(li.StrVal[0])
+				x.Typ = ast.Int64
+				x.Done = true
+			}
 			return
 		}
 	}
@@ -217,7 +214,6 @@ func (cc *checkContext) conversionToWord64(x *ast.ConversionExpr) {
 	case ast.Byte:
 		var li = literal(x.X)
 		if li != nil {
-			li.Kind = ast.Lit_Int
 			li.Typ = ast.Word64
 			x.Done = true
 		}
@@ -226,9 +222,6 @@ func (cc *checkContext) conversionToWord64(x *ast.ConversionExpr) {
 	case ast.Symbol:
 		var li = literal(x.X)
 		if li != nil {
-			r, _ := utf8.DecodeRuneInString(li.Lit)
-			li.Kind = ast.Lit_Int
-			li.Lit = fmt.Sprintf("0x%x", r)
 			li.Typ = ast.Word64
 			x.Done = true
 		}
@@ -237,24 +230,28 @@ func (cc *checkContext) conversionToWord64(x *ast.ConversionExpr) {
 	case ast.Int64:
 		var li = literal(x.X)
 		if li != nil {
-			i, err := strconv.ParseInt(li.Lit, 0, 64)
-			if err != nil || i < 0 {
+			if li.IntVal < 0 {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Word64.Name)
 			} else {
-				x.Done = true
+				li.Kind = ast.Lit_Word
+				li.WordVal = uint64(li.IntVal)
 				li.Typ = ast.Word64
+				x.Done = true
 			}
 		}
 		x.Typ = ast.Word64
 		return
 	case ast.String:
-		var li = oneSymbolString(x.X)
+		var li = literal(x.X)
 		if li != nil {
-			r, _ := utf8.DecodeRuneInString(li.Lit)
-			li.Kind = ast.Lit_Int
-			li.Lit = fmt.Sprintf("0x%x", r)
+			if len(li.StrVal) != 1 {
+				env.AddError(x.Pos, "СЕМ-ДЛИНА-СТРОКИ-НЕ-1")
+			} else {
+				li.Kind = ast.Lit_Word
+				li.WordVal = uint64(li.StrVal[0])
+				x.Done = true
+			}
 			x.Typ = ast.Word64
-			x.Done = true
 			return
 		}
 	}
@@ -303,12 +300,13 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 	case ast.Int64:
 		var li = literal(x.X)
 		if li != nil {
-			i, err := strconv.ParseInt(li.Lit, 0, 64)
-			if err != nil || i < 0 || i > unicode.MaxRune {
+			if li.IntVal < 0 || li.IntVal > unicode.MaxRune {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Symbol.Name)
 			} else {
-				x.Done = true
+				li.Kind = ast.Lit_Word
+				li.WordVal = uint64(li.IntVal)
 				li.Typ = ast.Symbol
+				x.Done = true
 			}
 		}
 		x.Typ = ast.Symbol
@@ -316,23 +314,26 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 	case ast.Word64:
 		var li = literal(x.X)
 		if li != nil {
-			i, err := strconv.ParseUint(li.Lit, 0, 64)
-			if err != nil || i > unicode.MaxRune {
+			if li.WordVal > unicode.MaxRune {
 				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Symbol.Name)
 			} else {
-				x.Done = true
 				li.Typ = ast.Symbol
+				x.Done = true
 			}
 		}
 		x.Typ = ast.Symbol
 		return
 	case ast.String:
-		var li = oneSymbolString(x.X)
+		var li = literal(x.X)
 		if li != nil {
-			li.Kind = ast.Lit_Symbol
-			li.Typ = ast.Symbol
+			if len(li.StrVal) != 1 {
+				env.AddError(x.Pos, "СЕМ-ДЛИНА-СТРОКИ-НЕ-1")
+			} else {
+				li.Kind = ast.Lit_Symbol
+				li.WordVal = uint64(li.StrVal[0])
+				x.Done = true
+			}
 			x.Typ = ast.Symbol
-			x.Done = true
 			return
 		}
 	}
@@ -355,6 +356,8 @@ func (cc *checkContext) conversionToString(x *ast.ConversionExpr) {
 		var li = literal(x.X)
 		if li != nil {
 			li.Typ = ast.String
+			li.StrVal = make([]rune, 1)
+			li.StrVal[0] = rune(li.WordVal)
 			x.Done = true
 		}
 		x.Typ = ast.String
@@ -363,7 +366,6 @@ func (cc *checkContext) conversionToString(x *ast.ConversionExpr) {
 
 	vt, ok := t.(*ast.VectorType)
 	if ok {
-
 		var et = ast.UnderType(vt.ElementTyp)
 
 		if et == ast.Byte || et == ast.Symbol {
@@ -381,7 +383,6 @@ func (cc *checkContext) conversionToVector(x *ast.ConversionExpr, target *ast.Ve
 	var t = ast.UnderType(x.X.GetType())
 
 	if t == ast.String {
-
 		var et = ast.UnderType(target.ElementTyp)
 
 		if et == ast.Byte || et == ast.Symbol {
@@ -439,6 +440,7 @@ func literal(expr ast.Expr) *ast.LiteralExpr {
 	return nil
 }
 
+/*!
 func oneSymbolString(expr ast.Expr) *ast.LiteralExpr {
 	var li = literal(expr)
 	if li == nil {
@@ -453,6 +455,7 @@ func oneSymbolString(expr ast.Expr) *ast.LiteralExpr {
 	}
 	return li
 }
+*/
 
 func isDerivedClass(base, derived *ast.ClassType) bool {
 

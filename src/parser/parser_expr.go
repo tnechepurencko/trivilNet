@@ -2,6 +2,10 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"unicode/utf8"
+
 	"trivil/ast"
 	"trivil/lexer"
 )
@@ -99,33 +103,81 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 
 	switch p.tok {
 	case lexer.INT:
-		x = &ast.LiteralExpr{
+		var l = &ast.LiteralExpr{
 			ExprBase: ast.ExprBase{Pos: p.pos},
 			Kind:     ast.Lit_Int,
-			Lit:      p.lit,
+		}
+		if strings.HasPrefix(p.lit, "0x") {
+			u, err := strconv.ParseUint(p.lit, 0, 64)
+			if err != nil {
+				p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", err.Error())
+			} else {
+				l.Kind = ast.Lit_Word
+				l.WordVal = u
+			}
+		} else {
+			i, err := strconv.ParseInt(p.lit, 0, 64)
+			if err != nil {
+				p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", err.Error())
+			} else {
+				l.IntVal = i
+			}
 		}
 		p.next()
-	case lexer.FLOAT:
-		x = &ast.LiteralExpr{
-			ExprBase: ast.ExprBase{Pos: p.pos},
-			Kind:     ast.Lit_Float,
-			Lit:      p.lit,
-		}
-		p.next()
-	case lexer.STRING:
-		x = &ast.LiteralExpr{
-			ExprBase: ast.ExprBase{Pos: p.pos},
-			Kind:     ast.Lit_String,
-			Lit:      p.lit,
-		}
-		p.next()
+		x = l
 	case lexer.SYMBOL:
-		x = &ast.LiteralExpr{
+		var l = &ast.LiteralExpr{
 			ExprBase: ast.ExprBase{Pos: p.pos},
 			Kind:     ast.Lit_Symbol,
-			Lit:      p.lit,
+		}
+		r, _ := utf8.DecodeRuneInString(p.lit)
+		if r == utf8.RuneError {
+			p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "неверная кодировка символа")
+		} else {
+			l.WordVal = uint64(r)
 		}
 		p.next()
+		x = l
+	case lexer.FLOAT:
+		var l = &ast.LiteralExpr{
+			ExprBase: ast.ExprBase{Pos: p.pos},
+			Kind:     ast.Lit_Float,
+		}
+		_, err := strconv.ParseFloat(p.lit, 64)
+		if err != nil {
+			p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", err.Error())
+			l.FloatStr = "1.0"
+		} else {
+			l.FloatStr = p.lit
+		}
+		p.next()
+		x = l
+	case lexer.STRING:
+		var l = &ast.LiteralExpr{
+			ExprBase: ast.ExprBase{Pos: p.pos},
+			Kind:     ast.Lit_String,
+		}
+		if !utf8.ValidString(p.lit) {
+			p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "неверная кодировка строки")
+		} else {
+			s, err := strconv.Unquote("\"" + p.lit + "\"")
+			if err != nil {
+				panic("assert - unquote: " + err.Error())
+			}
+			l.StrVal = make([]rune, utf8.RuneCountInString(s))
+
+			var b = []byte(s)
+			var i = 0
+			for len(b) > 0 {
+				r, size := utf8.DecodeRune(b)
+				l.StrVal[i] = r
+				i++
+				b = b[size:]
+			}
+			//fmt.Printf("!! %v\n", l.StrVal)
+		}
+		p.next()
+		x = l
 	case lexer.IDENT:
 		x = &ast.IdentExpr{
 			ExprBase: ast.ExprBase{Pos: p.pos},
