@@ -209,11 +209,11 @@ expression
 	;
 
 unary_expr
-	: primary_expr not_null_query? 
+	: primary_expr //not_null_query? 
 	| unary_op unary_expr
 	;
 
-not_null_query: '?';
+//not_null_query: '?';
 unary_op: '+' | '-' | '~'; // '~' for not
 binary_op: '|' | '&' | rel_op | add_op | mul_op;
 rel_op: '=' | '#' | '<' | '<=' | '>' | '>=';
@@ -230,7 +230,7 @@ primary_exp
 	| conversion
 	| index
 	| class_composite // no space allowed
-	| not_null_check
+	| maybe_check
 	)*
 	;
 
@@ -245,12 +245,13 @@ literal
 	: int_lit
 	| float_lit
 	| str_lit
+    | symbol_lit
 	;
 	
 selector: '.' ident;
 arguments: '(' argument_list? ')'
 conversion: '(:' 'осторожно'? type_ref ')';
-not_null_check: '!';  // or ^ a^.b 
+maybe_check: '^';  // or ^ a^.b 
 
 argument_list
 	: argument (',' argument)* ','? // trailing comma allowed
