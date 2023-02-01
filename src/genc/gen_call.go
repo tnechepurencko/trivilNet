@@ -98,21 +98,27 @@ func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTy
 
 func (genc *genContext) genVariadicTaggedArgs(call *ast.CallExpr, vPar *ast.Param, normCount int) string {
 
-	var loc = genc.localName("")
-	var vLen = len(call.Args) - normCount
+	var unfold = getUnfold(call)
+	if unfold != nil {
+		var vr = genc.genExpr(unfold.X)
+		return fmt.Sprintf("%s%s, %s", vr, nm_variadic_len_suffic, vr)
+	} else {
+		var loc = genc.localName("")
+		var vLen = len(call.Args) - normCount
 
-	//genc.c("struct { TInt64 len; TInt64 body[%d]; } %s;", vLen*2, loc)
+		//genc.c("struct { TInt64 len; TInt64 body[%d]; } %s;", vLen*2, loc)
 
-	var cargs = make([]string, vLen*2)
-	var n = 0
-	for i := normCount; i < len(call.Args); i++ {
-		cargs[n] = genc.genTypeTag(call.Args[i].GetType())
-		cargs[n+1] = genc.castToWord64(call.Args[i])
-		n += 2
+		var cargs = make([]string, vLen*2)
+		var n = 0
+		for i := normCount; i < len(call.Args); i++ {
+			cargs[n] = genc.genTypeTag(call.Args[i].GetType())
+			cargs[n+1] = genc.castToWord64(call.Args[i])
+			n += 2
+		}
+		genc.c("TWord64 %s[%d] = {%s};", loc, vLen*2, strings.Join(cargs, ", "))
+
+		return fmt.Sprintf("%d, &%s", vLen, loc)
 	}
-	genc.c("TWord64 %s[%d] = {%s};", loc, vLen*2, strings.Join(cargs, ", "))
-
-	return fmt.Sprintf("%d, &%s", vLen, loc)
 }
 
 func (genc *genContext) castToWord64(e ast.Expr) string {

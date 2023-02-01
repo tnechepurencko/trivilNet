@@ -86,8 +86,15 @@ func (cc *checkContext) checkUnfold(args []ast.Expr, start int, elementTyp ast.T
 					env.AddError(args[i].GetPos(), "СЕМ-ТИПЫ-ЭЛЕМЕНТОВ-НЕ-СОВПАДАЮТ",
 						ast.TypeName(elementTyp), ast.TypeName(xt.ElementTyp))
 				}
+
+			case *ast.VariadicType:
+				if !equalTypes(elementTyp, xt.ElementTyp) {
+					env.AddError(args[i].GetPos(), "СЕМ-ТИПЫ-ЭЛЕМЕНТОВ-НЕ-СОВПАДАЮТ",
+						ast.TypeName(elementTyp), ast.TypeName(xt.ElementTyp))
+				}
+
 			default:
-				env.AddError(args[i].GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-ВЕКТОРА", ast.TypeName(t))
+				env.AddError(args[i].GetPos(), "СЕМ-ОШ-ТИП-РАЗВЕРНУТЬ", ast.TypeName(t))
 			}
 
 			return true
