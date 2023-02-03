@@ -10,6 +10,7 @@ Compiler lines (Go):
 2023.01.08 6583 in 44 files, runtime: 509 lines (C)
 2023.01.13 7199 in 45 files, runtime: 568 lines (C)
 2023.01.22 8061 in 50 files, runtime: 685 lines (C)
+2023.02.03 9001 in 51 files, runtime: 767 lines (C)
 
 
 #Count lines in Powershell:
