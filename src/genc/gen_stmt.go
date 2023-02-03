@@ -74,7 +74,7 @@ func (genc *genContext) assignCast(lt, rt ast.Type) string {
 }
 
 func (genc *genContext) genIf(x *ast.If, prefix string) {
-	genc.c("%sif (%s) {", prefix, genc.genExpr(x.Cond))
+	genc.c("%sif (%s) {", prefix, removeExtraPars(genc.genExpr(x.Cond)))
 	genc.genStatementSeq(x.Then)
 	genc.c("}")
 	if x.Else != nil {
@@ -90,14 +90,24 @@ func (genc *genContext) genIf(x *ast.If, prefix string) {
 	}
 }
 
+func removeExtraPars(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	if s[0] == '(' && s[len(s)-1] == ')' {
+		return s[1 : len(s)-1]
+	}
+	return s
+}
+
 func (genc *genContext) genWhile(x *ast.While) {
-	genc.c("while (%s) {", genc.genExpr(x.Cond))
+	genc.c("while (%s) {", removeExtraPars(genc.genExpr(x.Cond)))
 	genc.genStatementSeq(x.Seq)
 	genc.c("}")
 }
 
 func (genc *genContext) genGuard(x *ast.Guard) {
-	genc.c("if (!(%s)) {", genc.genExpr(x.Cond))
+	genc.c("if (!(%s)) {", removeExtraPars(genc.genExpr(x.Cond)))
 	seq, ok := x.Else.(*ast.StatementSeq)
 	if ok {
 		genc.genStatementSeq(seq)
