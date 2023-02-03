@@ -32,8 +32,12 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 		} else {
 			return genc.genConversion(x)
 		}
+	case *ast.NotNilExpr:
+		return genc.genNotNil(x)
+
 	case *ast.GeneralBracketExpr:
 		return genc.genBracketExpr(x)
+
 	case *ast.ClassCompositeExpr:
 		return genc.genClassComposite(x)
 
@@ -224,6 +228,12 @@ func pathToField(cl *ast.ClassType, name string) string {
 		path += nm_base_fields + "."
 	}
 	return path
+}
+
+//==== проверка на nil
+
+func (genc *genContext) genNotNil(x *ast.NotNilExpr) string {
+	return fmt.Sprintf("(%s)%s(%s)", genc.typeRef(x.Typ), rt_nilcheck, genc.genExpr(x.X))
 }
 
 //==== индексация и композит массива

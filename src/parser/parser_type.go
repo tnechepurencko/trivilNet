@@ -16,7 +16,15 @@ func (p *Parser) parseTypeRef() ast.Type {
 		defer un(trace(p, "Cсылка на тип"))
 	}
 
-	//TODO: мб
+	var maybe *ast.MayBeType = nil
+
+	if p.tok == lexer.MAYBE {
+		maybe = &ast.MayBeType{
+			TypeBase: ast.TypeBase{Pos: p.pos},
+		}
+		p.next()
+	}
+
 	var t = &ast.TypeRef{
 		TypeBase: ast.TypeBase{Pos: p.pos},
 	}
@@ -29,6 +37,11 @@ func (p *Parser) parseTypeRef() ast.Type {
 		t.TypeName = p.parseIdent()
 	} else {
 		t.TypeName = s
+	}
+
+	if maybe != nil {
+		maybe.Typ = t
+		return maybe
 	}
 
 	return t

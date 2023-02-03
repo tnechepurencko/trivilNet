@@ -57,11 +57,15 @@ func (cc *checkContext) expr(expr ast.Expr) {
 			cc.conversion(x)
 		}
 
+	case *ast.NotNilExpr:
+		cc.notNil(x)
+
 	case *ast.GeneralBracketExpr:
 		cc.generalBracketExpr(x)
 
 	case *ast.ClassCompositeExpr:
 		cc.classComposite(x)
+
 	case *ast.LiteralExpr:
 		switch x.Kind {
 		case ast.Lit_Int:
@@ -139,6 +143,21 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 		x.Typ = ast.MakeInvalidType(x.X.GetPos())
 	}
 }
+
+func (cc *checkContext) notNil(x *ast.NotNilExpr) {
+	cc.expr(x.X)
+
+	var t = x.X.GetType()
+	maybe, ok := ast.UnderType(t).(*ast.MayBeType)
+	if !ok {
+		env.AddError(x.Pos, "СЕМ-ОЖИДАЛСЯ-МБ-ТИП", ast.TypeName(t))
+		x.Typ = ast.MakeInvalidType(x.Pos)
+		return
+	}
+	x.Typ = maybe.Typ
+}
+
+//=== индексация
 
 func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 

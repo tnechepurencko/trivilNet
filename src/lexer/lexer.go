@@ -495,8 +495,8 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 
 		case '%':
 			tok = REM
-			//		case '^':
-			//			tok = XOR
+		case '^':
+			tok = NOTNIL
 		case '<':
 			tok = s.checkEqu(LSS, LEQ)
 		case '>':
@@ -511,10 +511,6 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 			tok = s.checkNext(AND, '.', BITAND)
 		case '|':
 			tok = s.checkNext(OR, '.', BITOR)
-		case '?':
-			tok = NNQUERY
-		case '!':
-			tok = NNCHECK
 		default:
 			s.error(s.offset, "ЛЕК-ОШ-СИМ", ch)
 			tok = Invalid

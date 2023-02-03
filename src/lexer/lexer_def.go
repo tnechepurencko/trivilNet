@@ -48,8 +48,7 @@ const (
 	LEQ // <=
 	GEQ // >=
 
-	NNQUERY // ?
-	NNCHECK // !
+	NOTNIL // ^
 
 	ELLIPSIS // ...
 	ASSIGN   // :=
@@ -83,6 +82,7 @@ const (
 	IMPORT
 	IS
 	LATER
+	MAYBE
 	MODULE
 	RETURN
 	TYPE
@@ -135,8 +135,7 @@ var tokens = [...]string{
 	LEQ: "<=",
 	GEQ: ">=",
 
-	NNQUERY: "?", // так ли?
-	NNCHECK: "!", // так ли?
+	NOTNIL: "^",
 
 	ELLIPSIS: "...",
 	ASSIGN:   ":=",
@@ -168,6 +167,7 @@ var tokens = [...]string{
 	CLASS:   "класс",
 	WHEN:    "когда",
 	CONST:   "конст",
+	MAYBE:   "мб",
 	MODULE:  "модуль",
 	GUARD:   "надо",
 	CAUTION: "осторожно",

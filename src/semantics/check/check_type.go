@@ -175,6 +175,16 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		if ok && isDerivedClass(xt, rcl) {
 			return true
 		}
+	case *ast.MayBeType:
+		maybe, ok := ast.UnderType(r.GetType()).(*ast.MayBeType)
+		if ok {
+			if equalTypes(xt, maybe.Typ) {
+				return true
+			}
+		} else if equalTypes(xt.Typ, r.GetType()) {
+			return true
+		}
+
 	}
 
 	// TODO: function types, целые литералы?, ...

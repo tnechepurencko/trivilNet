@@ -12,6 +12,15 @@ var _ = fmt.Printf
 
 func (lc *lookContext) lookTypeRef(t ast.Type) {
 
+	if maybe, ok := t.(*ast.MayBeType); ok {
+		lc.lookTypeRef(maybe.Typ)
+
+		if !ast.IsReferenceType(maybe.Typ) {
+			env.AddError(maybe.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(maybe.Typ))
+		}
+		return
+	}
+
 	var tr, ok = t.(*ast.TypeRef)
 	if !ok {
 		if t == nil {

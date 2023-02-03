@@ -117,6 +117,11 @@ type TypeExpr struct {
 	ExprBase
 }
 
+type NotNilExpr struct {
+	ExprBase
+	X Expr
+}
+
 //==== index
 
 type GeneralBracketExpr struct {

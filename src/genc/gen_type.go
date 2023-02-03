@@ -18,7 +18,8 @@ func (genc *genContext) typeRef(t ast.Type) string {
 			return predefinedTypeName(pt.Name)
 		}
 		return genc.declName(x.TypeDecl)
-
+	case *ast.MayBeType:
+		return genc.typeRef(x.Typ)
 	default:
 		panic(fmt.Sprintf("assert: %T", t))
 	}

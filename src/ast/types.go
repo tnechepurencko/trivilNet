@@ -92,6 +92,13 @@ type VariadicType struct {
 	ElementTyp Type
 }
 
+//==== мб тип
+
+type MayBeType struct {
+	TypeBase
+	Typ Type
+}
+
 //====
 
 func UnderType(t Type) Type {
@@ -168,6 +175,12 @@ func IsClassType(t Type) bool {
 	return ok
 }
 
+func IsMayBeType(t Type) bool {
+	_, ok := UnderType(t).(*MayBeType)
+
+	return ok
+}
+
 func IsTagPairType(t Type) bool {
 	t = UnderType(t)
 	return t == TagPair
@@ -177,6 +190,8 @@ func IsReferenceType(t Type) bool {
 	t = UnderType(t)
 	switch t.(type) {
 	case *VectorType, *ClassType:
+		return true
+	case *InvalidType:
 		return true
 	default:
 		return t == String
@@ -216,9 +231,11 @@ func TypeString(t Type) string {
 	case *PredefinedType:
 		return x.Name
 	case *VectorType:
-		return "[]" + TypeString(x.ElementTyp)
+		return "[]" + TypeName(x.ElementTyp)
 	case *VariadicType:
-		return "..." + TypeString(x.ElementTyp)
+		return "..." + TypeName(x.ElementTyp)
+	case *MayBeType:
+		return "мб " + TypeName(x.Typ)
 	default:
 		return fmt.Sprintf("TypeString ni: %T", t)
 	}

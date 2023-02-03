@@ -208,12 +208,12 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 				return x
 			}
 			x = p.parseClassComposite(x)
-
+		case lexer.NOTNIL:
+			x = p.parseNotNil(x)
 		default:
 			return x
 		}
 	}
-
 }
 
 func (p *Parser) parseSelector(x ast.Expr) ast.Expr {
@@ -360,7 +360,7 @@ func (p *Parser) checkElements(n *ast.ArrayCompositeExpr) {
 	}
 }
 
-// class composite
+//=== class composite
 
 func (p *Parser) parseClassComposite(x ast.Expr) ast.Expr {
 	if p.trace {
@@ -392,6 +392,18 @@ func (p *Parser) parseClassComposite(x ast.Expr) ast.Expr {
 	}
 
 	p.expect(lexer.RBRACE)
+
+	return n
+}
+
+func (p *Parser) parseNotNil(x ast.Expr) ast.Expr {
+
+	var n = &ast.NotNilExpr{
+		ExprBase: ast.ExprBase{Pos: p.pos},
+		X:        x,
+	}
+
+	p.next()
 
 	return n
 }

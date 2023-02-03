@@ -43,6 +43,9 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 		lc.lookExpr(x.X)
 		lc.lookTypeRef(x.TargetTyp)
 
+	case *ast.NotNilExpr:
+		lc.lookExpr(x.X)
+
 	case *ast.GeneralBracketExpr:
 		lc.lookExpr(x.X)
 		if x.Index != nil {
