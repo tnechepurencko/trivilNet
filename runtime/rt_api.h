@@ -45,6 +45,10 @@ EXPORTED void tri_vectorAppend(void* vd, size_t element_size, TInt64 len, void* 
 // Используется строковой библиотекой, не используется компилятором
 EXPORTED void tri_vectorAppend_TSymbol_to_Bytes(void *vd, TSymbol x);
 
+//==== nil check
+
+EXPORTED void* tri_nilcheck(void* r);
+
 //==== class
 
 /*

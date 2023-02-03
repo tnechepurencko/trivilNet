@@ -321,6 +321,15 @@ EXPORTED void tri_vectorAppend_TSymbol_to_Bytes(void *vd, TSymbol x) {
     v->len = new_len;
 }
 
+//==== nil check
+
+EXPORTED void* tri_nilcheck(void* r) {
+    if (r == NULL) {
+        runtime_crash("nil check");    
+    }
+    return r;
+}
+
 //==== class
 
 typedef struct VTMini { size_t self_size; void (*__init__)(void*); } VTMini;
