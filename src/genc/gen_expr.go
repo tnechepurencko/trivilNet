@@ -48,19 +48,34 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 
 func (genc *genContext) genIdent(id *ast.IdentExpr) string {
 
-	c, ok := id.Obj.(*ast.ConstDecl)
-	if ok {
-		blit, ok := c.Value.(*ast.BoolLiteral)
-		if ok {
-			if blit.Value {
-				return "true"
-			} else {
-				return "false"
-			}
-		}
+	var d = id.Obj.(ast.Decl)
+	var s = genConstAsLiteral(d)
+	if s != "" {
+		return s
 	}
 
-	return genc.declName(id.Obj.(ast.Decl))
+	return genc.declName(d)
+}
+
+func genConstAsLiteral(d ast.Decl) string {
+
+	c, ok := d.(*ast.ConstDecl)
+	if !ok {
+		return ""
+	}
+	switch x := c.Value.(type) {
+	case *ast.BoolLiteral:
+		if x.Value {
+			return "true"
+		} else {
+			return "false"
+		}
+	case *ast.LiteralExpr:
+		if x.Typ == ast.NullType {
+			return "NULL"
+		}
+	}
+	return ""
 }
 
 //==== literals

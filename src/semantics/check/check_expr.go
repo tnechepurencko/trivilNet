@@ -190,7 +190,7 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 		}
 		x.Typ = ast.ElementType(t)
 		if ast.IsTagPairType(x.Typ) {
-			x.Typ = ast.TagPair //TODO: нужен ли тип Слово64 или Бит64?
+			x.Typ = ast.TagPairType
 		}
 
 		if ast.IsVariadicType(t) {
@@ -360,6 +360,8 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 			checkOperandTypes(x)
 		} else if ast.IsClassType(t) {
 			checkOperandTypes(x)
+		} else if ast.IsMayBeType(t) {
+			checkMayBeOparands(x)
 		} else {
 			env.AddError(x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(x.X.GetType()), x.Op.String())
@@ -383,6 +385,22 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 
 func checkOperandTypes(x *ast.BinaryExpr) {
 	if equalTypes(x.X.GetType(), x.Y.GetType()) {
+		return
+	}
+	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",
+		ast.TypeString(x.X.GetType()), x.Op.String(), ast.TypeString(x.Y.GetType()))
+
+}
+
+// Считаю, что "пусто" может быть только вторым операндом
+func checkMayBeOparands(x *ast.BinaryExpr) {
+
+	var l = ast.UnderType(x.X.GetType()).(*ast.MayBeType)
+	var r = ast.UnderType(x.Y.GetType())
+
+	if r == ast.NullType {
+		return
+	} else if rmb, ok := r.(*ast.MayBeType); ok && equalTypes(l.Typ, rmb.Typ) {
 		return
 	}
 	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",

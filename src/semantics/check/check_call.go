@@ -28,7 +28,7 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	}
 
 	if ft.ReturnTyp == nil {
-		x.Typ = ast.Void
+		x.Typ = ast.VoidType
 	} else {
 		x.Typ = ft.ReturnTyp
 	}
@@ -198,5 +198,5 @@ func (cc *checkContext) callVectorAppend(x *ast.CallExpr) {
 			cc.checkAssignable(vt.ElementTyp, a)
 		}
 	}
-	x.Typ = ast.Void
+	x.Typ = ast.VoidType
 }

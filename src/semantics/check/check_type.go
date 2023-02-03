@@ -165,7 +165,7 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 				return true
 			}
 		}
-	case ast.TagPair:
+	case ast.TagPairType:
 		return ast.HasTag(r.GetType())
 	}
 
@@ -176,13 +176,18 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 			return true
 		}
 	case *ast.MayBeType:
-		maybe, ok := ast.UnderType(r.GetType()).(*ast.MayBeType)
-		if ok {
-			if equalTypes(xt, maybe.Typ) {
+		var rt = ast.UnderType(r.GetType())
+		if rt == ast.NullType {
+			return true
+		} else {
+			maybe, ok := rt.(*ast.MayBeType)
+			if ok {
+				if equalTypes(xt, maybe.Typ) {
+					return true
+				}
+			} else if equalTypes(xt.Typ, r.GetType()) {
 				return true
 			}
-		} else if equalTypes(xt.Typ, r.GetType()) {
-			return true
 		}
 
 	}

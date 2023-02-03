@@ -183,7 +183,7 @@ func IsMayBeType(t Type) bool {
 
 func IsTagPairType(t Type) bool {
 	t = UnderType(t)
-	return t == TagPair
+	return t == TagPairType
 }
 
 func IsReferenceType(t Type) bool {

@@ -62,6 +62,7 @@ const (
 	Lit_Float
 	Lit_Symbol
 	Lit_String
+	Lit_Null
 )
 
 type LiteralExpr struct {

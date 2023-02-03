@@ -16,8 +16,9 @@ var (
 	String  *PredefinedType
 	Word64  *PredefinedType
 
-	Void    *PredefinedType // только для вызова функции без результата
-	TagPair *PredefinedType // только в типе параметров и в типе элемента variadic
+	VoidType    *PredefinedType // только для вызова функции без результата
+	NullType    *PredefinedType // только для константы
+	TagPairType *PredefinedType // только в типе параметров и в типе элемента variadic
 )
 
 type Scope struct {
@@ -55,11 +56,14 @@ func initScopes() {
 	Symbol = addType("Символ")
 	String = addType("Строка")
 
+	VoidType = &PredefinedType{Name: "нет результата"}
+	TagPairType = &PredefinedType{Name: "ТегСлово"}
+	NullType = &PredefinedType{Name: "ТипПусто"}
+
 	addBoolConst("истина", true)
 	addBoolConst("ложь", false)
 
-	Void = &PredefinedType{Name: "нет результата"}
-	TagPair = &PredefinedType{Name: "ТегСлово"}
+	addNullConst("пусто")
 
 	addStdFunction(StdLen)
 
@@ -95,9 +99,22 @@ func addBoolConst(name string, val bool) {
 	topScope.Names[name] = c
 }
 
+func addNullConst(name string) {
+	var c = &ConstDecl{
+		Value: &LiteralExpr{
+			ExprBase: ExprBase{Typ: NullType},
+			Kind:     Lit_Null,
+		},
+	}
+	c.Typ = NullType
+	c.Name = name
+
+	topScope.Names[name] = c
+}
+
 func addStdFunction(name string) {
 	var f = &StdFunction{}
-	f.Typ = Void
+	f.Typ = VoidType
 	f.Name = name
 
 	topScope.Names[name] = f
@@ -105,7 +122,7 @@ func addStdFunction(name string) {
 
 func addVectorMethod(name string) {
 	var f = &StdFunction{Method: true}
-	f.Typ = Void
+	f.Typ = VoidType
 	f.Name = name
 
 	vectorMethods[name] = f
