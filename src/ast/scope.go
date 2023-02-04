@@ -36,6 +36,7 @@ const (
 // Методы
 const (
 	VectorAppend = "добавить"
+	VectorFill   = "заполнить"
 )
 
 var topScope *Scope // верхняя область видимости
@@ -72,6 +73,7 @@ func initScopes() {
 
 	vectorMethods = make(map[string]*StdFunction)
 	addVectorMethod(VectorAppend)
+	addVectorMethod(VectorFill)
 
 	//	ShowScopes("top", topScope)
 }

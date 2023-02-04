@@ -119,6 +119,8 @@ func (cc *checkContext) callStdFunction(x *ast.CallExpr) {
 
 	case ast.VectorAppend:
 		cc.callVectorAppend(x)
+	case ast.VectorFill:
+		cc.callVectorFill(x)
 
 	default:
 		panic("assert: не реализована стандартная функция " + x.StdFunc.Name)
@@ -188,6 +190,7 @@ func (cc *checkContext) callStdSomething(x *ast.CallExpr) {
 
 func (cc *checkContext) callVectorAppend(x *ast.CallExpr) {
 
+	// Тип левой части уже проверен, см. selector
 	var vt = ast.UnderType(x.X.GetType()).(*ast.VectorType)
 
 	if cc.checkUnfold(x.Args, 0, vt.ElementTyp) {
@@ -199,4 +202,23 @@ func (cc *checkContext) callVectorAppend(x *ast.CallExpr) {
 		}
 	}
 	x.Typ = ast.VoidType
+}
+
+func (cc *checkContext) callVectorFill(x *ast.CallExpr) {
+	x.Typ = x.X.GetType()
+
+	if len(x.Args) != 2 {
+		env.AddError(x.Pos, "СЕМ-СТДФУНК-ОШ-ЧИСЛО-АРГ", x.StdFunc.Name, "2")
+		return
+	}
+
+	// Тип левой части уже проверен, см. selector
+	var vt = ast.UnderType(x.X.GetType()).(*ast.VectorType)
+
+	cc.expr(x.Args[0])
+	cc.checkAssignable(ast.Int64, x.Args[0])
+
+	cc.expr(x.Args[1])
+	cc.checkAssignable(vt.ElementTyp, x.Args[1])
+
 }

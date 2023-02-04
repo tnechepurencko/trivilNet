@@ -40,6 +40,8 @@ EXPORTED TInt64 tri_lenVector(void* vd);
 EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len);
 
 EXPORTED void tri_vectorAppend(void* vd, size_t element_size, TInt64 len, void* body);
+EXPORTED void* tri_vectorFill(void* vd, size_t element_size, TInt64 len, TWord64 filler);
+
 
 // Добавляет символ к []Байт
 // Используется строковой библиотекой, не используется компилятором

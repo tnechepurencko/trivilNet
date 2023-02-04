@@ -186,6 +186,8 @@ func (genc *genContext) genStdFuncCall(call *ast.CallExpr) string {
 
 	case ast.VectorAppend:
 		return genc.genVectorAppend(call)
+	case ast.VectorFill:
+		return genc.genVectorFill(call)
 
 	default:
 		panic("assert: не реализована стандартная функция " + call.StdFunc.Name)
@@ -301,7 +303,7 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 	if unfold != nil {
 		var loc = genc.localName("")
 		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
-		return fmt.Sprintf("%s(%s, sizeof(%s), %s(%s), %s->body)", rt_vector_append, genc.genExpr(call.X), et, rt_lenVector, loc, loc)
+		return fmt.Sprintf("%s(%s, sizeof(%s), %s(%s), %s->body)", rt_vectorAppend, genc.genExpr(call.X), et, rt_lenVector, loc, loc)
 
 	} else {
 		var loc = genc.localName("")
@@ -313,6 +315,26 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 
 		genc.c("%s %s[%d] = {%s};", et, loc, len(call.Args), strings.Join(cargs, ", "))
 
-		return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)", rt_vector_append, genc.genExpr(call.X), et, len(call.Args), loc)
+		return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)", rt_vectorAppend, genc.genExpr(call.X), et, len(call.Args), loc)
 	}
+}
+
+func (genc *genContext) genVectorFill(call *ast.CallExpr) string {
+
+	var vt = ast.UnderType(call.X.GetType()).(*ast.VectorType)
+	var et = genc.typeRef(vt.ElementTyp)
+
+	//	var loc = genc.localName("")
+
+	var count = genc.genExpr(call.Args[0])
+	var filler = genc.genExpr(call.Args[1])
+	//TODO: приведение типа filler к нужному Вещ64 в Слово64, и т.д.
+
+	return fmt.Sprintf("(%s)%s(%s, sizeof(%s), %s, %s)",
+		genc.typeRef(call.X.GetType()),
+		rt_vectorFill,
+		genc.genExpr(call.X),
+		et,
+		count,
+		filler)
 }

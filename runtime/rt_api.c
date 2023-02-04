@@ -304,6 +304,37 @@ EXPORTED void tri_vectorAppend(void* vd, size_t element_size, TInt64 len, void* 
     v->len = new_len;
 }
 
+EXPORTED void* tri_vectorFill(void* vd, size_t element_size, TInt64 len, TWord64 filler) {
+
+    if (len <= 0) return vd;
+
+	VectorDesc* v = vd;
+    TInt64 new_len = v->len + len;
+
+    if (new_len > v->capacity) {
+        vectorExtend(v, element_size, new_len);
+    }    
+
+    switch (element_size) {
+    case 1: 
+        memset(v->body + v->len * element_size, (int)filler, len);
+        break;
+    case 8:
+        TWord64 *a = v->body + v->len * element_size;
+        for (int i = 0; i < len; i++) a[i] = filler;
+        break;
+    default: 
+        char buf[128];
+        sprintf_s(buf, 128, "vectorFill not implemented for element size=%lld", element_size);
+		runtime_crash(buf);    
+    }    
+
+    v->len = new_len;
+
+    return vd;
+}
+
+
 EXPORTED void tri_vectorAppend_TSymbol_to_Bytes(void *vd, TSymbol x) {
 
     TByte buf[4];
