@@ -135,6 +135,10 @@ func IsStringType(t Type) bool {
 	return UnderType(t) == String
 }
 
+func IsVoidType(t Type) bool {
+	return UnderType(t) == VoidType
+}
+
 func IsIndexableType(t Type) bool {
 	t = UnderType(t)
 

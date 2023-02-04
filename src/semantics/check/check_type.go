@@ -197,6 +197,12 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 }
 
 func (cc *checkContext) checkAssignable(lt ast.Type, r ast.Expr) {
+
+	if ast.IsVoidType(r.GetType()) {
+		env.AddError(r.GetPos(), "СЕМ-ФН-НЕТ-ЗНАЧЕНИЯ")
+		return
+	}
+
 	if cc.assignable(lt, r) {
 		return
 	}

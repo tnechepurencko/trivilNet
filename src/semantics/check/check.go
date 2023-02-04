@@ -64,6 +64,11 @@ func (cc *checkContext) varDecl(v *ast.VarDecl) {
 			if v.Typ == nil {
 				panic("assert - не задан тип переменной")
 			}
+
+			if ast.IsVoidType(v.Typ) {
+				env.AddError(v.Pos, "СЕМ-ФН-НЕТ-ЗНАЧЕНИЯ")
+				return
+			}
 		}
 	}
 }
@@ -77,6 +82,10 @@ func (cc *checkContext) constDecl(v *ast.ConstDecl) {
 		v.Typ = v.Value.GetType()
 		if v.Typ == nil {
 			panic("assert - не задан тип константы")
+		}
+		if ast.IsVoidType(v.Typ) {
+			env.AddError(v.Pos, "СЕМ-ФН-НЕТ-ЗНАЧЕНИЯ")
+			return
 		}
 	}
 	cc.checkConstExpr(v.Value)
