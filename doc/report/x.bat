@@ -1,1 +1,0 @@
-xelatex --output-directory=out report.tex
