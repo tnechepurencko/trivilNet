@@ -92,6 +92,7 @@
 %==========
 \lstdefinelanguage{sts}{
   sensitive = true,
+  extendedchars=\true,
   keywords={abstract,модуль,
     class,const,constructor,continue,defer,do,
             else,enum,export,false,for,function,if,import,inner,instanceof,
@@ -103,7 +104,7 @@
     ?.,!=,<=,>=,...,\(,\[,\{,\,,\.,\),\],\},;,:
   },
   basicstyle=\ttfamily\small,
-  keywords = [2]{catch,default,extends,from,implements,in,of,out,recover,rethrows,throws},
+  keywords = [2]{пусто,catch,default,extends,from,implements,in,of,out,recover,rethrows,throws},
   keywordstyle=\color{blue},
   keywordstyle=[2]\color{blue},% for example
   numbers=left,
