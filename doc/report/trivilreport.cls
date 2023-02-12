@@ -74,11 +74,15 @@
 
 % hyperref should be last import
 \RequirePackage{hyperref}
+\hypersetup{unicode=true, bookmarks=true}
 
 % Internal refs
 \newcommand{\See}[1]{\S\ref{#1}\seechecknextarg}
 \newcommand{\seechecknextarg}{\@ifnextchar\bgroup{\seegobblenextarg}{}}
 \newcommand{\seegobblenextarg}[1]{\@ifnextchar\bgroup{, \S\ref{#1}\seegobblenextarg}{ \textit{and} \S\ref{#1}}}
+
+%External refs
+\newcommand{\myref}[1]{\textcolor{blue}{#1}}
 
 \makeatother
 
