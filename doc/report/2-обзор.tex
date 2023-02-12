@@ -1,14 +1,33 @@
 \hypertarget{review}{%
-\section{Обзор языка}\label{обзор:обзор}}
+\section{Обзор языка}\label{review:chapter}}
 
 
 Вводный текст
 
-\begin{grammar}
-правило
-    : что-то и нечто
-\end{grammar}
+\begin{Verbatim}[frame=single,numbers=left]
+модуль x
 
-\begin{source}
-abstract модуль // комментарий
-\end{source}
+импорт "стд/вывод"
+
+вход { 
+    вывод.ф("Привет!\\n")
+}
+\end{Verbatim}
+
+\begin{Trivil}
+модуль x
+
+импорт "стд/вывод"
+
+вход { 
+    вывод.ф("Привет!\n")
+}
+\end{Trivil}
+
+\begin{Grammar}
+letter
+    : unicode_letter
+    | '_'
+    | '№'
+    ;
+\end{Grammar}
