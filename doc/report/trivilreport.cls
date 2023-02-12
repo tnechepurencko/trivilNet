@@ -9,7 +9,7 @@
 \RequirePackage{polyglossia}
 \setmainlanguage{russian}
 \setotherlanguage{english}
-\setkeys{russian}{babelshorthands=true}
+\setkeys{russian}{babelshorthands=true, indentfirst=false}
 
 \setmainfont{Times New Roman}
 \setromanfont{Times New Roman} 
@@ -60,12 +60,27 @@
 {Grammar}{Verbatim}
 {frame=lines,formatcom=\color{blue},rulecolor=\color{black}}
 
+\DefineVerbatimEnvironment%
+{SampleErr}{Verbatim}
+{frame=single,numbers=left, rulecolor=\color{red}}
+
 % Highlights
 \RequirePackage{soul}
 \newcommand{\needlink}{\sethlcolor{yellow}\hl{link}}
 
-\RequirePackage{hyperref}
 \RequirePackage[numbered]{bookmark}
+
+\makeatletter
+
+% hyperref should be last import
+\RequirePackage{hyperref}
+
+% Internal refs
+\newcommand{\See}[1]{\S\ref{#1}\seechecknextarg}
+\newcommand{\seechecknextarg}{\@ifnextchar\bgroup{\seegobblenextarg}{}}
+\newcommand{\seegobblenextarg}[1]{\@ifnextchar\bgroup{, \S\ref{#1}\seegobblenextarg}{ \textit{and} \S\ref{#1}}}
+
+\makeatother
 
 %==================
 
