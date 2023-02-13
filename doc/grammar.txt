@@ -68,7 +68,7 @@ type_ref
 	;
 	
 qualident
-	: ident ('.' ident) 
+	: ident ('.' ident)?
 	;
 	
 //==== consts and vars
@@ -77,7 +77,7 @@ const_decl
 	: 'конст' (single_const | group_const)
 	;
 single_const
-	: name (':' type_ref) '=' const_expression
+	: name (':' type_ref)? '=' const_expression
 	;
 next_const
 	: name ((':' type_ref)? '=' const_expression)?

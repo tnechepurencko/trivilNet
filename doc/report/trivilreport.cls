@@ -41,6 +41,7 @@
 %\defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 
 \RequirePackage{xcolor}
+\definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
 
 % Index commands
 \RequirePackage{imakeidx}
@@ -55,6 +56,8 @@
 \DefineVerbatimEnvironment%
 {Trivil}{Verbatim}
 {frame=single,numbers=left}
+
+\newcommand{\keyword}[1]{\textcolor{darkblue}{#1}}
 
 \DefineVerbatimEnvironment%
 {Grammar}{Verbatim}
