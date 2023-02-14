@@ -56,7 +56,7 @@ base_type
 	;
 	
 class_field_list
-	: class_field (sep class_field)* sep?
+	: class_field (sep class_field)*
 	;
 	
 class_field
