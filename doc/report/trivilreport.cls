@@ -89,6 +89,14 @@
 
 \makeatother
 
+%dense itemize
+\newenvironment{d_itemize}{
+\begin{itemize}
+  \setlength{\itemsep}{2pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{itemize}}
+
 %==================
 
 \hypersetup{
