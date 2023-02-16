@@ -98,7 +98,7 @@ var_decl
 //=== function
 
 func_decl
-	: 'фн' receiver? name func_type (statement_seq | modifier)?
+	: 'фн' receiver? name func_type (statement_seq | modifier)
 	;
 
 receiver
