@@ -2,7 +2,7 @@
 \section{Лексика}\label{lex:chapter}}
 
 Исходный текст есть последовательность лексем: идентификаторов (\See{lex:idents}), ключевых слов (\See{lex:keywords}), 
-знаков операций и знаков препинания (\See{lex:operators}), литералов (\See{lex:intlit}, \See{lex:floatlit}, \See{lex:strlit}, \See{lex:symlit}) и модификаторов (\See{lex:modifiers}). 
+знаков операций и знаков препинания (\See{lex:ops}), литералов (\See{lex:intlit}, \See{lex:floatlit}, \See{lex:strlit}, \See{lex:symlit}) и модификаторов (\See{lex:modifiers}). 
 Каждая лексема состоит из последовательности Unicode символов (unicode code point) в кодировке UTF-8.
 
 Пробелы (U+0020), символы табуляции (U+0009) и символы завершения строки (U+000D, U+000A) разделяют лексемы, и, игнорируются, кроме следующих случаев:
@@ -104,8 +104,8 @@
 \end{tabular}
 
 
-\hypertarget{operators}{%
-\subsection{Знаки операций и знаки препинания}\label{lex:operators}}
+\hypertarget{ops}{%
+\subsection{Знаки операций и знаки препинания}\label{lex:ops}}
 
 Следующие последовательности символов обозначают знаки операций и знаки препинания:
 % добавить bitop
