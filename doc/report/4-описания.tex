@@ -347,9 +347,6 @@
 \subsection{Описание методов}\label{decls:methods}}
 
 \begin{Grammar}
-func_decl
-	: 'фн' receiver? name func_type (statement_seq | modifier)?
-receiver
-	: '(' ident ':' type_ref ')'
-	;
+Описание-метода: 'фн' Привязка Идент-оп Сигнатура Блок
+Привязка: '(' Идентификатор ':' Указ-типа ')'
 \end{Grammar} 
