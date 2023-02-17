@@ -266,7 +266,7 @@ element_value_list
 	;
 
 element_value
-	: expression (':' expression)
+	: expression (':' expression)?
 
 
 class_composite
