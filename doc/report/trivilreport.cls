@@ -72,6 +72,7 @@
 % Highlights
 \RequirePackage{soul}
 \newcommand{\needlink}{\sethlcolor{yellow}\hl{link}}
+\newcommand{\TBD}{\sethlcolor{orange}\hl{TBD}}
 
 \RequirePackage[numbered]{bookmark}
 
