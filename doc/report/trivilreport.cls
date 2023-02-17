@@ -40,6 +40,8 @@
 %\defaultfontfeatures{Scale=MatchLowercase}
 %\defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
 
+\RequirePackage{multirow}
+
 \RequirePackage{xcolor}
 \definecolor{darkblue}{rgb}{0.0, 0.0, 0.55}
 
