@@ -29,6 +29,12 @@ func (genc *genContext) genConversion(x *ast.ConversionExpr) string {
 		} else {
 			return genc.convertPredefined(expr, fromPred, ast.Int64)
 		}
+	case ast.Word64:
+		if fromPred == ast.Byte || fromPred == ast.Symbol {
+			return genc.castPredefined(expr, ast.Word64)
+		} else {
+			return genc.convertPredefined(expr, fromPred, ast.Word64)
+		}
 	case ast.Float64:
 		return genc.castPredefined(expr, ast.Float64)
 	case ast.Symbol:

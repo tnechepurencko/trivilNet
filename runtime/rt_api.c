@@ -428,6 +428,14 @@ EXPORTED TByte tri_TWord64_to_TByte(TWord64 x) {
 	return (TByte)x;
 }
 
+EXPORTED TInt64 tri_TWord64_to_TInt64(TWord64 x) {
+	if (x > 0x7FFFFFFFFFFFFFFF) {
+		runtime_crash("conversion to int64 out of range");
+	}
+	return (TInt64)x;
+}
+
+
 EXPORTED TByte tri_TSymbol_to_TByte(TSymbol x) {
 	if (x > 255) {
 		runtime_crash("conversion to byte out of range");
