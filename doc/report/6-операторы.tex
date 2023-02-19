@@ -134,7 +134,7 @@
 
 \begin{Grammar}
 Оператор-если: 
-    'если' Выражение Блок ('иначе' (Оператор-если | Блок)?
+    'если' Выражение Блок ('иначе' (Оператор-если | Блок))?
 \end{Grammar}
 
 \begin{Trivil}
@@ -145,8 +145,45 @@
 иначе { Ошибка!() }
 \end{Trivil}
 
-\hypertarget{return}{%
-\subsection{Оператор вернуть}\label{stmt:return}}
+\hypertarget{guard-stmt}{%
+\subsection{Оператор 'надо'}\label{stmt:if-guard}}
 
-\hypertarget{crash}{%
-\subsection{Оператор авария и аварийное завершение}\label{stmt:crash}}
+Оператор \keyword{надо} используется для завершения исполнения операторов некоторого контекста, 
+если условие, заданое логическим выражением, не выполнено.
+
+\begin{Grammar}
+Оператор-надо: 
+    'надо' Выражение 'иначе' (Завершающий-оператор | Блок)
+Завершающий-оператор
+    : Оператор-вернуть
+    | Оператор-прервать
+    | Оператор-авария
+\end{Grammar}
+
+Если в ветви \keyword{иначе} стоит \emph{Блок}, то последним оператором блока должен быть завершающий оператор.
+
+\smallskip
+\begin{tabular}[c]{r|p{6.5cm}}
+ \textbf{Завершающий оператор} & \textbf{Действие}  \\ 
+\hline
+\keyword{вернуть} (\See{stmt:return-stmt}) & выход из тела функции, метода или входа \\
+\keyword{прервать} (\See{stmt:break-stmt}) & выход из ближайшего объемлющего цикла \\
+\keyword{авария} (\See{stmt:crash-stmt}) & аварийное завершение программы \\
+\hline
+\end{tabular}
+
+\begin{Trivil}
+надо делитель # 0 иначе авария("деление на ноль")
+
+надо число > 1 иначе вернуть 1
+\end{Trivil}
+
+\hypertarget{return-stmt}{%
+\subsection{Оператор 'вернуть'}\label{stmt:return-stmt}}
+
+\hypertarget{break-stmt}{%
+\subsection{Оператор 'прервать'}\label{stmt:break-stmt}}
+
+
+\hypertarget{crash-stmt}{%
+\subsection{Оператор 'авария' и аварийное завершение}\label{stmt:crash-stmt}}
