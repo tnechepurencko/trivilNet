@@ -112,7 +112,7 @@ func UnderType(t Type) Type {
 
 func IsIntegerType(t Type) bool {
 	t = UnderType(t)
-	return t == Int64 || t == Byte
+	return t == Int64 || t == Byte || t == Word64
 }
 
 func IsInt64(t Type) bool {
