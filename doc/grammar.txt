@@ -262,12 +262,13 @@ index // index or array composite
 
 
 element_value_list
-	: element_value (',' element_value)* ','? // trailing comma allowed
+	: element_value (',' element_value)* ','? 
 	;
 
 element_value
-	: expression (':' expression)?
-
+	: '*' ':' expression
+    | expression ':' expression
+    | expression 
 
 class_composite
 	: '{' field_value_list? '}'
