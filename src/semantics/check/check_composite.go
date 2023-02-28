@@ -35,9 +35,9 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 	var elemT ast.Type = nil
 
 	if t == nil {
-		env.AddError(c.Pos, "СЕМ-КОМПОЗИТ-НЕТ-ТИПА")
+		env.AddError(c.Pos, "СЕМ-КОНСТРУКТОР-НЕТ-ТИПА")
 	} else if !ast.IsIndexableType(t) {
-		env.AddError(c.Pos, "СЕМ-МАССИВ-КОМПОЗИТ-ОШ-ТИП")
+		env.AddError(c.Pos, "СЕМ-КОН-ВЕКТОРА-ОШ-ТИП")
 	} else {
 		c.Typ = t
 		elemT = ast.ElementType(t)
@@ -58,6 +58,10 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 		if elemT != nil {
 			cc.checkAssignable(elemT, c.Default)
 		}
+	}
+
+	if c.Length != nil && c.Default == nil {
+		env.AddError(c.Pos, "СЕМ-КОН-ВЕКТОРА-НЕТ-УМОЛЧАНИЯ")
 	}
 
 	for _, inx := range c.Indexes {
@@ -107,14 +111,14 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 	var t = cc.typeExpr(c.X)
 
 	if t == nil {
-		env.AddError(c.Pos, "СЕМ-КОМПОЗИТ-НЕТ-ТИПА")
+		env.AddError(c.Pos, "СЕМ-КОНСТРУКТОР-НЕТ-ТИПА")
 		c.Typ = ast.MakeInvalidType(c.X.GetPos())
 		return
 	}
 
 	cl, ok := ast.UnderType(t).(*ast.ClassType)
 	if !ok {
-		env.AddError(c.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-ОШ-ТИП")
+		env.AddError(c.Pos, "СЕМ-КОН-КЛАССА-ОШ-ТИП")
 		c.Typ = ast.MakeInvalidType(c.X.GetPos())
 	} else {
 		c.Typ = t
@@ -133,11 +137,11 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 	for _, vp := range c.Values {
 		d, ok := cl.Members[vp.Name]
 		if !ok {
-			env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕТ-ПОЛЯ", vp.Name)
+			env.AddError(vp.Pos, "СЕМ-КОН-КЛАССА-НЕТ-ПОЛЯ", vp.Name)
 		} else {
 			f, ok := d.(*ast.Field)
 			if !ok {
-				env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕ-ПОЛE")
+				env.AddError(vp.Pos, "СЕМ-КОН-КЛАССА-НЕ-ПОЛE")
 			} else if f.Host != cc.module && !f.Exported {
 				env.AddError(vp.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", f.Name, f.Host.Name)
 			} else {
