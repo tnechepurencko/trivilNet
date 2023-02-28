@@ -308,28 +308,43 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 		X:        x,
 		Composite: &ast.ArrayCompositeExpr{
 			ExprBase: ast.ExprBase{Pos: p.pos},
-			Elements: make([]ast.ElementPair, 0),
+			Indexes:  make([]ast.Expr, 0),
+			Values:   make([]ast.Expr, 0),
 		},
 	}
 
 	p.expect(lexer.LBRACK)
 
-	var l ast.Expr
-	var r ast.Expr
+	var inx ast.Expr
+	var val ast.Expr
 
 	for p.tok != lexer.RBRACK && p.tok != lexer.EOF {
 
-		l = p.parseExpression()
-
-		if p.tok == lexer.COLON {
+		if p.tok == lexer.MUL {
 			p.next()
-			r = p.parseExpression()
+			p.expect(lexer.COLON)
+			n.Composite.Default = p.parseExpression()
 		} else {
-			r = l
-			l = nil
-		}
+			inx = p.parseExpression()
 
-		n.Composite.Elements = append(n.Composite.Elements, ast.ElementPair{Key: l, Value: r})
+			if p.tok == lexer.COLON {
+				p.next()
+				val = p.parseExpression()
+
+				if isVectorProperty(inx, ast.StdLen) {
+					n.Composite.Length = val
+					val = nil
+				} else if isVectorProperty(inx, ast.VectorAllocate) {
+					n.Composite.Capacity = val
+					val = nil
+				} else {
+					n.Composite.Indexes = append(n.Composite.Indexes, inx)
+					n.Composite.Values = append(n.Composite.Values, val)
+				}
+			} else {
+				n.Composite.Values = append(n.Composite.Values, inx)
+			}
+		}
 
 		if p.tok == lexer.RBRACK {
 			break
@@ -344,20 +359,28 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 	return n
 }
 
+func isVectorProperty(p ast.Expr, name string) bool {
+	ident, ok := p.(*ast.IdentExpr)
+	if !ok {
+		return false
+	}
+
+	return ident.Name == name
+}
+
 func (p *Parser) checkElements(n *ast.ArrayCompositeExpr) {
 
-	var pairs = 0
-	for _, v := range n.Elements {
-		if v.Key != nil {
-			pairs++
-		}
+	// если все элементы - это пары
+	if len(n.Indexes) == len(n.Values) {
+		return
 	}
 
-	if pairs == len(n.Elements) {
-		n.Keys = true
-	} else if pairs != 0 {
-		p.error(n.Pos, "ПАР-СМЕСЬ-МАССИВ")
+	// если ни одной пары
+	if len(n.Indexes) == 0 && n.Length == nil && n.Capacity == nil && n.Default == nil {
+		return
 	}
+
+	p.error(n.Pos, "ПАР-СМЕСЬ-МАССИВ")
 }
 
 //=== class composite

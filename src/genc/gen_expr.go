@@ -320,28 +320,37 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 	var name = genc.localName("")
 
 	var vt = ast.UnderType(x.Typ).(*ast.VectorType)
-	var s = fmt.Sprintf("%s %s = %s(sizeof(%s), %d);",
+
+	var length = genc.genArrayCompositeLen(x)
+	var s = fmt.Sprintf("%s %s = %s(sizeof(%s), %s);",
 		genc.typeRef(x.Typ),
 		name,
 		rt_newVector,
 		genc.typeRef(vt.ElementTyp),
-		len(x.Elements))
+		length)
 
-	var list = make([]string, len(x.Elements))
-	for i, e := range x.Elements {
+	var list = make([]string, len(x.Values))
+	for i, val := range x.Values {
 		var inx string
-		if e.Key == nil {
+		if len(x.Indexes) == 0 {
 			inx = fmt.Sprintf("%d", i)
 		} else {
-			inx = genc.genExpr(e.Key)
+			inx = genc.genExpr(x.Indexes[i])
 		}
-		list[i] = fmt.Sprintf("%s->body[%s] = %s;", name, inx, genc.genExpr(e.Value))
+		list[i] = fmt.Sprintf("%s->body[%s] = %s;", name, inx, genc.genExpr(val))
 	}
 	s += strings.Join(list, " ")
 
 	genc.c("%s", s)
 
 	return name
+}
+
+func (genc *genContext) genArrayCompositeLen(x *ast.ArrayCompositeExpr) string {
+	if x.Length != nil {
+		return genc.genExpr(x.Length)
+	}
+	return fmt.Sprintf("%d", len(x.Values))
 }
 
 func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {

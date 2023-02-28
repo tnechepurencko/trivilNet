@@ -52,11 +52,11 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 			lc.lookExpr(x.Index)
 		}
 
-		for _, e := range x.Composite.Elements {
-			if e.Key != nil {
-				lc.lookExpr(e.Key)
-			}
-			lc.lookExpr(e.Value)
+		for _, e := range x.Composite.Indexes {
+			lc.lookExpr(e)
+		}
+		for _, e := range x.Composite.Values {
+			lc.lookExpr(e)
 		}
 	case *ast.ClassCompositeExpr:
 		lc.lookExpr(x.X)

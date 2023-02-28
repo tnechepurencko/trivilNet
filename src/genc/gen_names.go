@@ -45,8 +45,9 @@ const (
 	rt_emptyString      = rt_prefix + "emptyString"
 	rt_equalStrings     = rt_prefix + "equalStrings"
 
-	rt_newVector = rt_prefix + "newVector"
-	rt_lenVector = rt_prefix + "lenVector"
+	rt_newVector     = rt_prefix + "newVector"
+	rt_newVectorFill = rt_prefix + "newVectorFill"
+	rt_lenVector     = rt_prefix + "lenVector"
 
 	rt_indexcheck = rt_prefix + "indexcheck"
 	rt_nilcheck   = rt_prefix + "nilcheck"

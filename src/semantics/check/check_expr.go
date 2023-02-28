@@ -159,11 +159,17 @@ func (cc *checkContext) notNil(x *ast.NotNilExpr) {
 
 //=== индексация
 
+func looksLikeComposite(c *ast.ArrayCompositeExpr) bool {
+	return c.Length != nil || c.Capacity != nil || c.Default != nil ||
+		len(c.Indexes) > 0 ||
+		len(c.Values) != 1
+}
+
 func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 
 	var t = cc.typeExpr(x.X)
 
-	if t != nil || len(x.Composite.Elements) != 1 || x.Composite.Keys { // composite
+	if t != nil || looksLikeComposite(x.Composite) {
 		cc.arrayComposite(x.Composite, t)
 
 		if t == nil {
@@ -183,7 +189,7 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 		env.AddError(x.X.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-МАССИВА", ast.TypeString(t))
 		x.Typ = ast.MakeInvalidType(x.Pos)
 	} else {
-		x.Index = x.Composite.Elements[0].Value
+		x.Index = x.Composite.Values[0]
 		cc.expr(x.Index)
 		if !ast.IsIntegerType(x.Index.GetType()) {
 			env.AddError(x.Index.GetPos(), "СЕМ-ОШ-ТИП-ИНДЕКСА", ast.TypeString(x.Index.GetType()))
@@ -201,111 +207,6 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 
 	if x.X.IsReadOnly() {
 		x.ReadOnly = true
-	}
-}
-
-func (cc *checkContext) typeExpr(expr ast.Expr) ast.Type {
-
-	switch x := expr.(type) {
-	case *ast.IdentExpr:
-		if tr, ok := x.Obj.(*ast.TypeRef); ok {
-			return tr
-		} else {
-			return nil
-		}
-	case *ast.SelectorExpr:
-		if tr, ok := x.Obj.(*ast.TypeRef); ok {
-			return tr
-		} else {
-			return nil
-		}
-	}
-
-	return nil
-}
-
-func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
-
-	var elemT ast.Type = nil
-
-	if t == nil {
-		env.AddError(c.Pos, "СЕМ-КОМПОЗИТ-НЕТ-ТИПА")
-	} else if !ast.IsIndexableType(t) {
-		env.AddError(c.Pos, "СЕМ-МАССИВ-КОМПОЗИТ-ОШ-ТИП")
-	} else {
-		c.Typ = t
-		elemT = ast.ElementType(t)
-	}
-
-	for _, p := range c.Elements {
-
-		if p.Key != nil {
-			cc.expr(p.Key)
-			if !ast.IsIntegerType(p.Key.GetType()) {
-				env.AddError(c.Pos, "СЕМ-МАССИВ-КОМПОЗИТ-ТИП-КЛЮЧА")
-			}
-			cc.checkConstExpr(p.Key)
-		}
-
-		cc.expr(p.Value)
-		if elemT != nil {
-			cc.checkAssignable(elemT, p.Value)
-		}
-	}
-}
-
-func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
-
-	var t = cc.typeExpr(c.X)
-
-	if t == nil {
-		env.AddError(c.Pos, "СЕМ-КОМПОЗИТ-НЕТ-ТИПА")
-		c.Typ = ast.MakeInvalidType(c.X.GetPos())
-		return
-	}
-
-	cl, ok := ast.UnderType(t).(*ast.ClassType)
-	if !ok {
-		env.AddError(c.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-ОШ-ТИП")
-		c.Typ = ast.MakeInvalidType(c.X.GetPos())
-	} else {
-		c.Typ = t
-	}
-
-	for _, vp := range c.Values {
-		cc.expr(vp.Value)
-	}
-
-	if cl == nil {
-		return
-	}
-
-	// проверяю поля и типы
-	var vals = make(map[string]bool)
-	for _, vp := range c.Values {
-		d, ok := cl.Members[vp.Name]
-		if !ok {
-			env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕТ-ПОЛЯ", vp.Name)
-		} else {
-			f, ok := d.(*ast.Field)
-			if !ok {
-				env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕ-ПОЛE")
-			} else if f.Host != cc.module && !f.Exported {
-				env.AddError(vp.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", f.Name, f.Host.Name)
-			} else {
-				vals[vp.Name] = true
-				cc.checkAssignable(f.Typ, vp.Value)
-			}
-		}
-	}
-	// проверяю позднюю инициализацию
-	for name, d := range cl.Members {
-		if f, ok := d.(*ast.Field); ok && f.Later {
-			_, ok := vals[name]
-			if !ok {
-				env.AddError(c.Pos, "СЕМ-НЕТ-ПОЗЖЕ-ПОЛЯ", name)
-			}
-		}
 	}
 }
 
@@ -406,21 +307,6 @@ func checkMayBeOparands(x *ast.BinaryExpr) {
 	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",
 		ast.TypeString(x.X.GetType()), x.Op.String(), ast.TypeString(x.Y.GetType()))
 
-}
-
-func (cc *checkContext) checkConstExpr(expr ast.Expr) {
-	switch x := expr.(type) {
-	case *ast.LiteralExpr:
-		return
-	case *ast.IdentExpr:
-		if x.Obj != nil {
-			if _, ok := x.Obj.(*ast.ConstDecl); ok {
-				return
-			}
-		}
-	}
-
-	env.AddError(expr.GetPos(), "СЕМ-ОШ-КОНСТ-ВЫРАЖЕНИЕ")
 }
 
 func isLValue(expr ast.Expr) bool {

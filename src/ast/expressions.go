@@ -134,8 +134,11 @@ type GeneralBracketExpr struct {
 
 type ArrayCompositeExpr struct {
 	ExprBase
-	Elements []ElementPair
-	Keys     bool // both L and R are used: L - are indexes, R - values
+	Length   Expr
+	Capacity Expr
+	Default  Expr // default value
+	Indexes  []Expr
+	Values   []Expr
 }
 
 type ElementPair struct {

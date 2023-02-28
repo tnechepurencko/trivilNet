@@ -35,8 +35,9 @@ const (
 
 // Методы
 const (
-	VectorAppend = "добавить"
-	VectorFill   = "заполнить"
+	VectorAppend   = "добавить"
+	VectorAllocate = "выделить"
+	VectorFill     = "заполнить"
 )
 
 var topScope *Scope // верхняя область видимости
