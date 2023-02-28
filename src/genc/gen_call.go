@@ -327,8 +327,7 @@ func (genc *genContext) genVectorFill(call *ast.CallExpr) string {
 	//	var loc = genc.localName("")
 
 	var count = genc.genExpr(call.Args[0])
-	var filler = genc.genExpr(call.Args[1])
-	//TODO: приведение типа filler к нужному: Вещ64 в Слово64, и т.д.
+	var filler = genc.genFiller(call.Args[1])
 
 	return fmt.Sprintf("(%s)%s(%s, sizeof(%s), %s, %s)",
 		genc.typeRef(call.X.GetType()),

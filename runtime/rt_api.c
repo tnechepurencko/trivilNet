@@ -242,20 +242,58 @@ typedef struct VectorDesc {
 } VectorDesc;
 
 
-EXPORTED void* tri_newVector(size_t element_size, TInt64 len) {
+EXPORTED void* tri_newVector(size_t element_size, TInt64 len, TInt64 cap) {
 	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
 	v->len = len;
-    v->capacity = len;
-    if (len == 0) {
+    
+    if (cap < len) { cap = len; }
+    v->capacity = cap;
+    
+    if (cap == 0) {
         v->body = NULL;
+        return v;
     }
-    else {
-        v->body = mm_allocate(element_size * len);
-        memset(v->body, 0x0, element_size * len); //TODO: надо?
-    }
+
+    v->body = mm_allocate(element_size * cap);
+    //memset(v->body, 0x0, element_size * cap); //TODO: не надо, см. fill
 	
 	return v;
 }
+
+void vectorFill(VectorDesc* v, size_t element_size, TWord64 filler) {
+    
+   switch (element_size) {
+    case 1: 
+        memset(v->body, (int)filler, v->len);
+        break;
+    case 8:
+        TWord64 *a = v->body;
+        for (int i = 0; i < v->len; i++) a[i] = filler;
+        break;
+    default: 
+        char buf[128];
+        sprintf_s(buf, 128, "vectorFill not implemented for element size=%lld", element_size);
+		runtime_crash(buf);    
+    }        
+}
+
+EXPORTED void* tri_newVectorFill(size_t element_size, TInt64 len, TInt64 cap, TWord64 filler) {
+	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
+	v->len = len;
+    
+    if (cap < len) { cap = len; }
+    v->capacity = cap;
+    
+    if (cap == 0) {
+        v->body = NULL;
+        return v;
+    }
+
+    v->body = mm_allocate(element_size * cap);
+    vectorFill(v, element_size, filler);
+    
+	return v;    
+}    
 
 EXPORTED void* tri_newVectorDesc() {
 	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
@@ -299,12 +337,17 @@ EXPORTED void tri_vectorAppend(void* vd, size_t element_size, TInt64 len, void* 
         vectorExtend(v, element_size, new_len);
     }    
 
+    //TODO: убрать
     memcpy(v->body + v->len * element_size, add_body, len * element_size);
     
     v->len = new_len;
 }
 
+/*
 EXPORTED void* tri_vectorFill(void* vd, size_t element_size, TInt64 len, TWord64 filler) {
+    	runtime_crash("tri_vectorFill deprecated");
+        return NULL;
+
 
     if (len <= 0) return vd;
 
@@ -332,8 +375,9 @@ EXPORTED void* tri_vectorFill(void* vd, size_t element_size, TInt64 len, TWord64
     v->len = new_len;
 
     return vd;
+    
 }
-
+*/
 
 EXPORTED void tri_vectorAppend_TSymbol_to_Bytes(void *vd, TSymbol x) {
 

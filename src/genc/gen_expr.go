@@ -316,18 +316,33 @@ func (genc *genContext) genVariadicIndex(vt *ast.VariadicType, x, inx ast.Expr) 
 	}
 }
 
+//==== конструктор вектора
+
 func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 	var name = genc.localName("")
 
 	var vt = ast.UnderType(x.Typ).(*ast.VectorType)
 
-	var length = genc.genArrayCompositeLen(x)
-	var s = fmt.Sprintf("%s %s = %s(sizeof(%s), %s);",
-		genc.typeRef(x.Typ),
-		name,
-		rt_newVector,
-		genc.typeRef(vt.ElementTyp),
-		length)
+	var s = ""
+
+	if x.Default != nil {
+		s = fmt.Sprintf("%s %s = %s(sizeof(%s), %s, %s, %s);",
+			genc.typeRef(x.Typ),
+			name,
+			rt_newVectorFill,
+			genc.typeRef(vt.ElementTyp),
+			genc.genArrayCompositeLen(x),
+			genc.genArrayCompositeCap(x),
+			genc.genFiller(x.Default))
+	} else {
+		s = fmt.Sprintf("%s %s = %s(sizeof(%s), %s, %s);",
+			genc.typeRef(x.Typ),
+			name,
+			rt_newVector,
+			genc.typeRef(vt.ElementTyp),
+			genc.genArrayCompositeLen(x),
+			genc.genArrayCompositeCap(x))
+	}
 
 	var list = make([]string, len(x.Values))
 	for i, val := range x.Values {
@@ -352,6 +367,20 @@ func (genc *genContext) genArrayCompositeLen(x *ast.ArrayCompositeExpr) string {
 	}
 	return fmt.Sprintf("%d", len(x.Values))
 }
+
+func (genc *genContext) genArrayCompositeCap(x *ast.ArrayCompositeExpr) string {
+	if x.Capacity != nil {
+		return genc.genExpr(x.Capacity)
+	}
+	return "0"
+}
+
+func (genc *genContext) genFiller(expr ast.Expr) string {
+	//TODO: приведение типа filler к нужному: Вещ64 в Слово64, и т.д.
+	return genc.genExpr(expr)
+}
+
+//==== конструктор класса
 
 func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
 	var name = genc.localName("")
