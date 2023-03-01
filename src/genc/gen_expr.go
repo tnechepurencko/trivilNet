@@ -362,15 +362,20 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 }
 
 func (genc *genContext) genArrayCompositeLen(x *ast.ArrayCompositeExpr) string {
-	if x.Length != nil {
-		return genc.genExpr(x.Length)
+	if x.Length >= 0 {
+		return fmt.Sprintf("%d", x.Length)
 	}
+
+	if x.LenExpr != nil {
+		return genc.genExpr(x.LenExpr)
+	}
+
 	return fmt.Sprintf("%d", len(x.Values))
 }
 
 func (genc *genContext) genArrayCompositeCap(x *ast.ArrayCompositeExpr) string {
-	if x.Capacity != nil {
-		return genc.genExpr(x.Capacity)
+	if x.CapExpr != nil {
+		return genc.genExpr(x.CapExpr)
 	}
 	return "0"
 }

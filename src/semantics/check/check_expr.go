@@ -160,7 +160,7 @@ func (cc *checkContext) notNil(x *ast.NotNilExpr) {
 //=== индексация
 
 func looksLikeComposite(c *ast.ArrayCompositeExpr) bool {
-	return c.Length != nil || c.Capacity != nil || c.Default != nil ||
+	return c.LenExpr != nil || c.CapExpr != nil || c.Default != nil ||
 		len(c.Indexes) > 0 ||
 		len(c.Values) != 1
 }

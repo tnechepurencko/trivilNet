@@ -43,14 +43,14 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 		elemT = ast.ElementType(t)
 	}
 
-	if c.Length != nil {
-		cc.expr(c.Length)
-		cc.checkAssignable(ast.Int64, c.Length)
+	if c.LenExpr != nil {
+		cc.expr(c.LenExpr)
+		cc.checkAssignable(ast.Int64, c.LenExpr)
 	}
 
-	if c.Capacity != nil {
-		cc.expr(c.Capacity)
-		cc.checkAssignable(ast.Int64, c.Capacity)
+	if c.CapExpr != nil {
+		cc.expr(c.CapExpr)
+		cc.checkAssignable(ast.Int64, c.CapExpr)
 	}
 
 	if c.Default != nil {
@@ -60,7 +60,7 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 		}
 	}
 
-	if c.Length != nil && c.Default == nil {
+	if c.LenExpr != nil && c.Default == nil {
 		env.AddError(c.Pos, "СЕМ-КОН-ВЕКТОРА-НЕТ-УМОЛЧАНИЯ")
 	}
 
@@ -77,12 +77,7 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 		}
 	}
 
-	// TODO: проверить отсутствие дупликатов
-	// TODO: проверить индексы в [0..длина-1]
-
 	cc.arrayCompositeIndexes(c)
-
-	// TODO: добавить тесты
 }
 
 func (cc *checkContext) arrayCompositeIndexes(c *ast.ArrayCompositeExpr) {
@@ -96,12 +91,38 @@ func (cc *checkContext) arrayCompositeIndexes(c *ast.ArrayCompositeExpr) {
 		return
 	}
 
-	/*
-		var max = 0
-		for _, inx := range c.Indexes {
-
+	if c.LenExpr != nil && cc.isConstExpr(c.LenExpr) {
+		c.Length = cc.calculateIntConstExpr(c.LenExpr)
+		if c.Length < 0 {
+			env.AddError(c.LenExpr.GetPos(), "СЕМ-КОН-ВЕКТОРА-ОШ-ДЛИНА")
 		}
-	*/
+	}
+
+	var inxMap = make(map[int64]int)
+
+	var max int64 = 0
+	for _, inx := range c.Indexes {
+		index := cc.calculateIntConstExpr(inx)
+
+		pos, ok := inxMap[index]
+		if ok {
+			env.AddError(inx.GetPos(), "СЕМ-КОН-ВЕКТОРА-ИНДЕКС-ДУБЛЬ", index, env.PosString(pos))
+		} else {
+			inxMap[index] = inx.GetPos()
+		}
+
+		if index > max {
+			max = index
+		}
+		if index < 0 || c.Length >= 0 && index >= c.Length {
+			env.AddError(inx.GetPos(), "СЕМ-КОН-ВЕКТОРА-ИНДЕКС-ДИАП", c.Length, index)
+		}
+
+	}
+
+	if c.LenExpr == nil {
+		c.Length = max + 1
+	}
 }
 
 //==== конструктор класса

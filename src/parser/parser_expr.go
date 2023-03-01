@@ -310,6 +310,7 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 			ExprBase: ast.ExprBase{Pos: p.pos},
 			Indexes:  make([]ast.Expr, 0),
 			Values:   make([]ast.Expr, 0),
+			Length:   -1,
 		},
 	}
 
@@ -332,10 +333,10 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 				val = p.parseExpression()
 
 				if isVectorProperty(inx, ast.StdLen) {
-					n.Composite.Length = val
+					n.Composite.LenExpr = val
 					val = nil
 				} else if isVectorProperty(inx, ast.VectorAllocate) {
-					n.Composite.Capacity = val
+					n.Composite.CapExpr = val
 					val = nil
 				} else {
 					n.Composite.Indexes = append(n.Composite.Indexes, inx)
@@ -376,7 +377,7 @@ func (p *Parser) checkElements(n *ast.ArrayCompositeExpr) {
 	}
 
 	// если ни одной пары
-	if len(n.Indexes) == 0 && n.Length == nil && n.Capacity == nil && n.Default == nil {
+	if len(n.Indexes) == 0 && n.LenExpr == nil && n.CapExpr == nil && n.Default == nil {
 		return
 	}
 

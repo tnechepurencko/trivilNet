@@ -52,11 +52,11 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 			lc.lookExpr(x.Index)
 		}
 
-		if x.Composite.Length != nil {
-			lc.lookExpr(x.Composite.Length)
+		if x.Composite.LenExpr != nil {
+			lc.lookExpr(x.Composite.LenExpr)
 		}
-		if x.Composite.Capacity != nil {
-			lc.lookExpr(x.Composite.Capacity)
+		if x.Composite.CapExpr != nil {
+			lc.lookExpr(x.Composite.CapExpr)
 		}
 		if x.Composite.Default != nil {
 			lc.lookExpr(x.Composite.Default)
