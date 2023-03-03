@@ -186,8 +186,6 @@ func (genc *genContext) genStdFuncCall(call *ast.CallExpr) string {
 
 	case ast.VectorAppend:
 		return genc.genVectorAppend(call)
-	case ast.VectorFill:
-		return genc.genVectorFill(call)
 
 	default:
 		panic("assert: не реализована стандартная функция " + call.StdFunc.Name)
@@ -317,23 +315,4 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 
 		return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)", rt_vectorAppend, genc.genExpr(call.X), et, len(call.Args), loc)
 	}
-}
-
-func (genc *genContext) genVectorFill(call *ast.CallExpr) string {
-
-	var vt = ast.UnderType(call.X.GetType()).(*ast.VectorType)
-	var et = genc.typeRef(vt.ElementTyp)
-
-	//	var loc = genc.localName("")
-
-	var count = genc.genExpr(call.Args[0])
-	var filler = genc.genFiller(call.Args[1])
-
-	return fmt.Sprintf("(%s)%s(%s, sizeof(%s), %s, %s)",
-		genc.typeRef(call.X.GetType()),
-		rt_vectorFill,
-		genc.genExpr(call.X),
-		et,
-		count,
-		filler)
 }

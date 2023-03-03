@@ -62,7 +62,6 @@ const (
 	rt_tag = rt_prefix + "tag"
 
 	rt_vectorAppend = rt_prefix + "vectorAppend"
-	rt_vectorFill   = rt_prefix + "vectorFill"
 )
 
 func (genc *genContext) localName(prefix string) string {
