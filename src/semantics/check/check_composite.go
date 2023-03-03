@@ -100,7 +100,7 @@ func (cc *checkContext) arrayCompositeIndexes(c *ast.ArrayCompositeExpr) {
 
 	var inxMap = make(map[int64]int)
 
-	var max int64 = 0
+	var max int64 = -1
 	for _, inx := range c.Indexes {
 		index := cc.calculateIntConstExpr(inx)
 
@@ -120,9 +120,7 @@ func (cc *checkContext) arrayCompositeIndexes(c *ast.ArrayCompositeExpr) {
 
 	}
 
-	if c.LenExpr == nil {
-		c.Length = max + 1
-	}
+	c.MaxIndex = max
 }
 
 //==== конструктор класса

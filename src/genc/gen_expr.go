@@ -319,9 +319,20 @@ func (genc *genContext) genVariadicIndex(vt *ast.VariadicType, x, inx ast.Expr) 
 //==== конструктор вектора
 
 func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
-	var name = genc.localName("")
-
 	var vt = ast.UnderType(x.Typ).(*ast.VectorType)
+
+	var name = genc.localName("")
+	var lenExpr = genc.genArrayCompositeLen(x)
+
+	// нужно ли проверять макс индекс на < длина?
+	if len(x.Indexes) > 0 && x.LenExpr != nil {
+		// c.Length = maxIndex + 1
+		var lenName = genc.localName("len")
+		genc.c("%s %s = %s;", predefinedTypeName(ast.Int64.Name), lenName, lenExpr)
+		lenExpr = lenName
+
+		genc.c("%s(%d, %s);", rt_indexcheck, x.MaxIndex, lenName)
+	}
 
 	var s = ""
 
@@ -331,7 +342,7 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 			name,
 			rt_newVectorFill,
 			genc.typeRef(vt.ElementTyp),
-			genc.genArrayCompositeLen(x),
+			lenExpr,
 			genc.genArrayCompositeCap(x),
 			genc.genFiller(x.Default))
 	} else {
@@ -340,7 +351,7 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 			name,
 			rt_newVector,
 			genc.typeRef(vt.ElementTyp),
-			genc.genArrayCompositeLen(x),
+			lenExpr,
 			genc.genArrayCompositeCap(x))
 	}
 
@@ -362,14 +373,22 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 }
 
 func (genc *genContext) genArrayCompositeLen(x *ast.ArrayCompositeExpr) string {
+	// если длина задана явно и это константое выражение
 	if x.Length >= 0 {
 		return fmt.Sprintf("%d", x.Length)
 	}
 
+	// если длина задана явно
 	if x.LenExpr != nil {
 		return genc.genExpr(x.LenExpr)
 	}
 
+	// если длина задана неявно по индексам
+	if x.MaxIndex >= 0 {
+		return fmt.Sprintf("%d", x.MaxIndex+1)
+	}
+
+	// если последовательность значений (без индекса)
 	return fmt.Sprintf("%d", len(x.Values))
 }
 

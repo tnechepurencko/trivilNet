@@ -311,6 +311,7 @@ func (p *Parser) parseIndex(x ast.Expr) ast.Expr {
 			Indexes:  make([]ast.Expr, 0),
 			Values:   make([]ast.Expr, 0),
 			Length:   -1,
+			MaxIndex: -1,
 		},
 	}
 

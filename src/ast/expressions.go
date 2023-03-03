@@ -134,12 +134,13 @@ type GeneralBracketExpr struct {
 
 type ArrayCompositeExpr struct {
 	ExprBase
-	LenExpr Expr
-	Length  int64 // если вычислено, или -1
-	CapExpr Expr
-	Default Expr // default value
-	Indexes []Expr
-	Values  []Expr
+	LenExpr  Expr  // если константое выражение, то значение сохраняется в Length
+	Length   int64 // если вычислено, или -1
+	CapExpr  Expr
+	Default  Expr // default value
+	Indexes  []Expr
+	MaxIndex int64 // из значение индекса, -1, если нет индексов
+	Values   []Expr
 }
 
 type ElementPair struct {
