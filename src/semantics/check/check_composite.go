@@ -60,7 +60,8 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 		}
 	}
 
-	if c.LenExpr != nil && c.Default == nil {
+	if c.Default == nil && (c.LenExpr != nil || len(c.Indexes) > 0) {
+		// TODO: если длина не задана явно, можно проверить, что индексы без дырок
 		env.AddError(c.Pos, "СЕМ-КОН-ВЕКТОРА-НЕТ-УМОЛЧАНИЯ")
 	}
 
