@@ -128,13 +128,7 @@ func (genc *genContext) genCautionCast(x *ast.ConversionExpr) string {
 	case ast.Float64:
 		return fmt.Sprintf("((%s)%s).f", rt_cast_union, expr)
 	case ast.Word64:
-		if from == ast.Int64 {
-			return fmt.Sprintf("((%s)(%s)%s).w", rt_cast_union, predefinedTypeName(ast.Int64.Name), expr)
-		} else if ast.IsReferenceType(from) {
-			return fmt.Sprintf("((%s)(void*)%s).w", rt_cast_union, expr)
-		} else {
-			return fmt.Sprintf("((%s)%s).w", rt_cast_union, expr)
-		}
+		return genc.genCastToWord64(expr, from)
 	default:
 		if from == ast.Word64 && ast.IsReferenceType(to) {
 			//TODO: проверить указатель и тег
@@ -142,5 +136,20 @@ func (genc *genContext) genCautionCast(x *ast.ConversionExpr) string {
 		} else {
 			panic(fmt.Sprintf("ni %T '%s'", to, ast.TypeString(to)))
 		}
+	}
+}
+
+func (genc *genContext) genCastToWord64(expr string, exprTyp ast.Type) string {
+
+	var from = ast.UnderType(exprTyp)
+
+	if from == ast.Int64 {
+		return fmt.Sprintf("((%s)(%s)%s).w", rt_cast_union, predefinedTypeName(ast.Int64.Name), expr)
+	} else if ast.IsReferenceType(from) {
+		return fmt.Sprintf("((%s)(void*)%s).w", rt_cast_union, expr)
+	} else if from == ast.Word64 {
+		return expr
+	} else {
+		return fmt.Sprintf("((%s)%s).w", rt_cast_union, expr)
 	}
 }

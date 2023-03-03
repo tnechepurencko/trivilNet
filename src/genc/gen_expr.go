@@ -399,9 +399,10 @@ func (genc *genContext) genArrayCompositeCap(x *ast.ArrayCompositeExpr) string {
 	return "0"
 }
 
-func (genc *genContext) genFiller(expr ast.Expr) string {
-	//TODO: приведение типа filler к нужному: Вещ64 в Слово64, и т.д.
-	return genc.genExpr(expr)
+func (genc *genContext) genFiller(x ast.Expr) string {
+	var expr = genc.genExpr(x)
+
+	return genc.genCastToWord64(expr, x.GetType())
 }
 
 //==== конструктор класса
