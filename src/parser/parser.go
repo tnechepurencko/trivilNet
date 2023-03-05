@@ -119,6 +119,11 @@ func (p *Parser) parseModule() {
 	p.module.Name = p.parseIdent()
 	p.sep()
 
+	if p.tok == lexer.CONCRETE {
+		p.parseConcretization()
+		return
+	}
+
 	if p.tok == lexer.CAUTION {
 		p.next()
 		p.module.Caution = true
@@ -127,6 +132,53 @@ func (p *Parser) parseModule() {
 
 	p.parseImportList()
 	p.parseDeclarations()
+}
+
+func (p *Parser) parseConcretization() {
+	p.next()
+
+	var n = &ast.Concretization{
+		Attrs: make(map[string]string),
+	}
+	p.module.Concrete = n
+
+	if p.tok == lexer.STRING {
+		n.Path = p.lit
+		p.next()
+	} else {
+		p.expect(lexer.STRING)
+	}
+
+	p.expect(lexer.LPAR)
+
+	for p.tok != lexer.RPAR && p.tok != lexer.EOF {
+		var attr = ""
+		var value = ""
+
+		if p.tok == lexer.STRING {
+			attr = p.lit
+			p.next()
+		} else {
+			p.expect(lexer.STRING)
+		}
+
+		p.expect(lexer.COLON)
+
+		if p.tok == lexer.STRING {
+			value = p.lit
+			p.next()
+		} else {
+			p.expect(lexer.STRING)
+		}
+
+		n.Attrs[attr] = value
+
+		if p.tok == lexer.RPAR {
+			break
+		}
+		p.expect(lexer.COMMA)
+	}
+	p.expect(lexer.RPAR)
 }
 
 func (p *Parser) parseImportList() {

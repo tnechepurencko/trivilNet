@@ -1,9 +1,17 @@
-compilation_unit
+source_file
 	: 'модуль' ident sep
-      ('осторожно' sep)?
+    (source_code | concretization)
+    ;
+
+source_code
+    :  ('осторожно' sep)?
 	  import_list
 	  declaration_list
 	;
+
+concretization
+    : 'конкретизация' import_path attribite_list
+    ;
 
 import_list
 	: import*
@@ -341,10 +349,14 @@ punctuation
 	;
 
 modifier
-	: '@' letter+ ('(' (attribute (',' attribute)*)? ')')?
+	: '@' letter+ attribite_list?
 	;
+
+attribite_list
+    : '(' (attribute (',' attribute)*)? ')'
+    ;
 
 attribute
     : str_lit ':' str_lit
-
+    ;
 

@@ -51,6 +51,10 @@ func (cc *compileContext) parseList(list []*env.Source) *ast.Module {
 			}
 		}
 
+		if m.Concrete != nil {
+			fmt.Printf("!!! конкретизация: %v\n", m.Name)
+		}
+
 	}
 
 	if env.ErrorCount() == 0 && len(list) > 1 {

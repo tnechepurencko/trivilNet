@@ -11,13 +11,14 @@ var _ = fmt.Printf
 
 type Module struct {
 	//source *env.Source
-	Pos     int
-	Name    string
-	Imports []*Import
-	Decls   []Decl
-	Entry   *EntryFn
-	Inner   *Scope
-	Caution bool
+	Pos      int
+	Name     string
+	Imports  []*Import
+	Decls    []Decl
+	Entry    *EntryFn
+	Inner    *Scope
+	Caution  bool
+	Concrete *Concretization
 }
 
 func (n *Module) DeclNode() {}
@@ -51,6 +52,13 @@ func NewModule() *Module {
 		Decls:   make([]Decl, 0),
 		Imports: make([]*Import, 0),
 	}
+}
+
+//=== конкретизация
+
+type Concretization struct {
+	Path  string
+	Attrs map[string]string
 }
 
 //=== импорт
