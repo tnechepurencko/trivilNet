@@ -14,10 +14,16 @@ func (genc *genContext) typeRef(t ast.Type) string {
 	case *ast.PredefinedType:
 		return predefinedTypeName(x.Name)
 	case *ast.TypeRef:
-		if pt, ok := x.Typ.(*ast.PredefinedType); ok {
-			return predefinedTypeName(pt.Name)
+		switch y := x.Typ.(type) {
+		case *ast.TypeRef:
+			return genc.typeRef(y.Typ)
+		case *ast.MayBeType:
+			return genc.typeRef(y.Typ)
+		case *ast.PredefinedType:
+			return predefinedTypeName(y.Name)
+		default:
+			return genc.declName(x.TypeDecl)
 		}
-		return genc.declName(x.TypeDecl)
 	case *ast.MayBeType:
 		return genc.typeRef(x.Typ)
 	default:
@@ -60,6 +66,10 @@ func (genc *genContext) genTypeDecl(td *ast.TypeDecl) {
 		genc.h("typedef %s* %s;", desc, tname)
 	case *ast.ClassType:
 		genc.genClassType(td, x)
+	case *ast.TypeRef:
+		/*nothing*/
+	case *ast.MayBeType:
+		/*nothing*/
 	default:
 		panic(fmt.Sprintf("getTypeDecl: ni %T", td.Typ))
 	}

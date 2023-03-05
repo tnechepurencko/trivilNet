@@ -77,10 +77,13 @@ func (p *Parser) parseTypeDef() ast.Type {
 	case lexer.CLASS:
 		return p.parseClassType()
 	default:
-		p.error(p.pos, "ПАР-ОШ-ОП-ТИПА", p.tok.String())
-		return &ast.InvalidType{
-			TypeBase: ast.TypeBase{Pos: p.pos},
-		}
+		return p.parseTypeRef()
+		/*
+			p.error(p.pos, "ПАР-ОШ-ОП-ТИПА", p.tok.String())
+			return &ast.InvalidType{
+				TypeBase: ast.TypeBase{Pos: p.pos},
+			}
+		*/
 	}
 }
 

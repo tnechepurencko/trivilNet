@@ -30,7 +30,7 @@ declaration
 //==== types
 
 type_decl
-	: 'тип' name '=' type_def
+	: 'тип' name '=' ( type_def | type_ref)
 	;
 
 name

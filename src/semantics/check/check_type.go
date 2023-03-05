@@ -9,7 +9,7 @@ import (
 
 var _ = fmt.Printf
 
-func (cc *checkContext) isCheckedType(v *ast.TypeDecl) bool {
+func (cc *checkContext) isAlreadyChecked(v *ast.TypeDecl) bool {
 
 	if v.Host != cc.module {
 		return true
@@ -27,6 +27,10 @@ func (cc *checkContext) typeDecl(td *ast.TypeDecl) {
 		// есть ли что проверять?
 	case *ast.ClassType:
 		cc.classType(td, x)
+	case *ast.MayBeType:
+		/*nothing*/
+	case *ast.TypeRef:
+		/*nothing*/
 	default:
 		panic(fmt.Sprintf("check typeDecl: ni %T", td.Typ))
 	}
@@ -34,7 +38,7 @@ func (cc *checkContext) typeDecl(td *ast.TypeDecl) {
 
 func (cc *checkContext) classType(td *ast.TypeDecl, cl *ast.ClassType) {
 
-	if cc.isCheckedType(td) {
+	if cc.isAlreadyChecked(td) {
 		return
 	}
 	cc.checkedTypes[td.Name] = struct{}{}
@@ -101,7 +105,7 @@ func (cc *checkContext) classBaseType(cl *ast.ClassType, members map[string]ast.
 		return
 	}
 
-	if !cc.isCheckedType(tr.TypeDecl) {
+	if !cc.isAlreadyChecked(tr.TypeDecl) {
 		cc.classType(tr.TypeDecl, baseClass)
 	}
 
@@ -215,14 +219,5 @@ func (cc *checkContext) checkAssignable(lt ast.Type, r ast.Expr) {
 }
 
 func equalTypes(t1, t2 ast.Type) bool {
-
-	if tr, ok := t1.(*ast.TypeRef); ok {
-		t1 = tr.Typ
-	}
-
-	if tr, ok := t2.(*ast.TypeRef); ok {
-		t2 = tr.Typ
-	}
-
-	return t1 == t2
+	return ast.UnderType(t1) == ast.UnderType(t2)
 }

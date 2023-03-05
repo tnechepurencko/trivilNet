@@ -142,6 +142,14 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 				lc.lookExpr(f.Init)
 			}
 		}
+	case *ast.TypeRef:
+		lc.lookTypeRef(x)
+	case *ast.MayBeType:
+		lc.lookTypeRef(x.Typ)
+
+		if !ast.IsReferenceType(ast.UnderType(x.Typ)) {
+			env.AddError(x.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(x.Typ))
+		}
 
 	default:
 		panic(fmt.Sprintf("lookTypeDecl: ni %T", v.Typ))

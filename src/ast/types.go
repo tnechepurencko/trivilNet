@@ -101,11 +101,15 @@ type MayBeType struct {
 
 //====
 
+// Снимает все TypeRef, может быть два в контексте тип А = Б
 func UnderType(t Type) Type {
-	if tr, ok := t.(*TypeRef); ok {
-		t = tr.Typ
+	for {
+		if tr, ok := t.(*TypeRef); ok {
+			t = tr.Typ
+		} else {
+			return t
+		}
 	}
-	return t
 }
 
 //==== predicates
