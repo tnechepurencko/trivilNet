@@ -20,9 +20,7 @@ func (cc *checkContext) expr(expr ast.Expr) {
 
 		x.Typ = x.Obj.(ast.Decl).GetType()
 
-		if v, isVar := x.Obj.(*ast.VarDecl); isVar {
-			x.ReadOnly = v.ReadOnly
-		} else {
+		if _, isVar := x.Obj.(*ast.VarDecl); !isVar {
 			x.ReadOnly = true
 		}
 		//fmt.Printf("ident %v %v %v\n", x.Name, v.ReadOnly, x.ReadOnly)
@@ -117,10 +115,6 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 			}
 			x.Typ = d.GetType()
 			x.Obj = d
-
-			if f, ok := d.(*ast.Field); ok && f.ReadOnly {
-				x.ReadOnly = true
-			}
 		}
 	case *ast.VectorType:
 		var m = ast.VectorMethod(x.Name)
@@ -317,10 +311,17 @@ func isLValue(expr ast.Expr) bool {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		return !x.ReadOnly
+		if v, isVar := x.Obj.(*ast.VarDecl); isVar {
+			return !v.AssignOnce
+		} else {
+			return !x.ReadOnly
+		}
 	case *ast.GeneralBracketExpr:
 		return x.Index != nil
 	case *ast.SelectorExpr:
+		if f, ok := x.Obj.(*ast.Field); ok {
+			return !f.AssignOnce
+		}
 		return true
 	case *ast.ConversionExpr:
 		return isLValue(x.X)

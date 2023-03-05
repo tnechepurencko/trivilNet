@@ -60,11 +60,6 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 		}
 	}
 
-	if c.Default == nil && (c.LenExpr != nil || len(c.Indexes) > 0) {
-		// TODO: если длина не задана явно, можно проверить, что индексы без дырок
-		env.AddError(c.Pos, "СЕМ-КОН-ВЕКТОРА-НЕТ-УМОЛЧАНИЯ")
-	}
-
 	for _, inx := range c.Indexes {
 		cc.expr(inx)
 		cc.checkAssignable(ast.Int64, inx)
@@ -76,6 +71,11 @@ func (cc *checkContext) arrayComposite(c *ast.ArrayCompositeExpr, t ast.Type) {
 		if elemT != nil {
 			cc.checkAssignable(elemT, val)
 		}
+	}
+
+	if c.Default == nil && (c.LenExpr != nil || len(c.Indexes) > 0) {
+		// TODO: если длина не задана явно, можно проверить, что индексы без дырок
+		env.AddError(c.Pos, "СЕМ-КОН-ВЕКТОРА-НЕТ-УМОЛЧАНИЯ")
 	}
 
 	cc.arrayCompositeIndexes(c)

@@ -57,9 +57,9 @@ type ClassType struct {
 
 type Field struct {
 	DeclBase
-	Init     Expr
-	Later    bool
-	ReadOnly bool
+	Init       Expr
+	Later      bool
+	AssignOnce bool
 }
 
 //==== function type

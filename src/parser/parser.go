@@ -362,7 +362,7 @@ func (p *Parser) parseVarDecl() *ast.VarDecl {
 	}
 
 	if p.tok == lexer.EQ {
-		n.ReadOnly = true
+		n.AssignOnce = true
 		p.next()
 	} else if p.tok == lexer.ASSIGN {
 		p.next()

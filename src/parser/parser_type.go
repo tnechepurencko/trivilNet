@@ -153,7 +153,7 @@ func (p *Parser) parseField() *ast.Field {
 	}
 
 	if p.tok == lexer.EQ {
-		n.ReadOnly = true
+		n.AssignOnce = true
 		p.next()
 	} else if p.tok == lexer.ASSIGN {
 		p.next()
