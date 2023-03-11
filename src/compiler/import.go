@@ -38,7 +38,7 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 		return
 	}
 
-	i.Mod = cc.parseList(list)
+	i.Mod = cc.parseModule(false, list)
 	cc.imported[npath] = i.Mod
 }
 

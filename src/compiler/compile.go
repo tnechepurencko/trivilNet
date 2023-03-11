@@ -12,8 +12,7 @@ import (
 var _ = fmt.Printf
 
 type compileContext struct {
-	main *ast.Module
-	//modules map[string]*ast.Module
+	main     *ast.Module
 	imported map[string]*ast.Module // map[folder]
 
 	// упорядоченный список для обработки
@@ -35,7 +34,7 @@ func Compile(spath string) {
 		imported: make(map[string]*ast.Module),
 	}
 
-	cc.main = cc.parseList(list)
+	cc.main = cc.parseModule(true, list)
 
 	if env.ErrorCount() != 0 {
 		return

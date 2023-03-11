@@ -138,6 +138,7 @@ func (p *Parser) parseConcretization() {
 	p.next()
 
 	var n = &ast.Concretization{
+		Pos:   p.pos,
 		Attrs: make(map[string]string),
 	}
 	p.module.Concrete = n

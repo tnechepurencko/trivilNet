@@ -57,6 +57,7 @@ func NewModule() *Module {
 //=== конкретизация
 
 type Concretization struct {
+	Pos   int
 	Path  string
 	Attrs map[string]string
 }

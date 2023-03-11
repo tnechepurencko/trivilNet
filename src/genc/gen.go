@@ -64,7 +64,7 @@ func (genc *genContext) startCode() {
 }
 
 func (genc *genContext) finishCode() {
-	var hname = fmt.Sprintf("_%s_H", genc.module.Name)
+	var hname = fmt.Sprintf("_%s_H", genc.outname)
 
 	// header file
 	var lines = genc.header

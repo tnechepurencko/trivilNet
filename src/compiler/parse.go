@@ -29,35 +29,44 @@ func (cc *compileContext) parseFile(src *env.Source) *ast.Module {
 	return m
 }
 
-func (cc *compileContext) parseList(list []*env.Source) *ast.Module {
+func (cc *compileContext) parseList(isMain bool, list []*env.Source) []*ast.Module {
 
+	var mods = make([]*ast.Module, 0)
 	var moduleName = ""
-	var mods = make([]*ast.Module, len(list))
-	for n, src := range list {
+
+	for _, src := range list {
 
 		var m = cc.parseFile(src)
-		mods[n] = m
+		mods = append(mods, m)
 
-		if env.ErrorCount() == 0 {
-			if n == 0 {
-				moduleName = m.Name
+		if len(mods) == 1 {
+			moduleName = m.Name
 
-				if cc.main != nil && m.Name != src.FolderName {
-					// не проверяю соответствие имени папки для головного модуля
-					env.AddError(m.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", m.Name, src.FolderName)
-				}
-			} else if moduleName != m.Name {
-				env.AddError(m.Pos, "ОКР-ОШ-МОДУЛИ-В-ПАПКЕ", moduleName, m.Name, src.FolderPath)
+			if !isMain && m.Name != src.FolderName {
+				// не проверяю соответствие имени папки для головного модуля
+				env.AddError(m.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", m.Name, src.FolderName)
 			}
+		} else if moduleName != m.Name {
+			env.AddError(m.Pos, "ОКР-ОШ-МОДУЛИ-В-ПАПКЕ", moduleName, m.Name, src.FolderPath)
 		}
 
 		if m.Concrete != nil {
-			fmt.Printf("!!! конкретизация: %v\n", m.Name)
+			mods = append(mods[:len(mods)-1], cc.concretize(m)...)
 		}
-
 	}
 
-	if env.ErrorCount() == 0 && len(list) > 1 {
+	return mods
+}
+
+func (cc *compileContext) parseModule(isMain bool, list []*env.Source) *ast.Module {
+
+	var mods = cc.parseList(isMain, list)
+
+	if env.ErrorCount() > 0 {
+		return mods[0]
+	}
+
+	if env.ErrorCount() == 0 && len(mods) > 1 {
 		mergeModules(mods)
 	}
 
