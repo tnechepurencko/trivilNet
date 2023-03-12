@@ -7,9 +7,9 @@
     #define EXPORTED
 #elif defined(_WIN32) || defined(_WIN64)
     #define EXPORTED __declspec(dllexport)
-   
+
 #else
     #define EXPORTED
-#endif    
+#endif
 
-#endif    
+#endif
