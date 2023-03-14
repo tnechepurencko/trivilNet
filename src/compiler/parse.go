@@ -50,8 +50,8 @@ func (cc *compileContext) parseList(isMain bool, list []*env.Source) []*ast.Modu
 			env.AddError(m.Pos, "ОКР-ОШ-МОДУЛИ-В-ПАПКЕ", moduleName, m.Name, src.FolderPath)
 		}
 
-		if m.Concrete != nil {
-			mods = append(mods[:len(mods)-1], cc.concretize(m)...)
+		if m.Setting != nil {
+			mods = append(mods, cc.setup(m)...)
 		}
 	}
 

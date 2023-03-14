@@ -111,6 +111,10 @@ func (p *Parser) parseModule() {
 	p.module = ast.NewModule()
 	p.module.Pos = p.pos
 
+	if p.tok == lexer.SETTING {
+		p.parseSetting()
+	}
+
 	if p.tok != lexer.MODULE {
 		p.error(p.pos, "ПАР-ОЖИДАЛСЯ", lexer.MODULE.String())
 		return
@@ -118,11 +122,6 @@ func (p *Parser) parseModule() {
 	p.next()
 	p.module.Name = p.parseIdent()
 	p.sep()
-
-	if p.tok == lexer.CONCRETE {
-		p.parseConcretization()
-		return
-	}
 
 	if p.tok == lexer.CAUTION {
 		p.next()
@@ -134,14 +133,13 @@ func (p *Parser) parseModule() {
 	p.parseDeclarations()
 }
 
-func (p *Parser) parseConcretization() {
+func (p *Parser) parseSetting() {
 	p.next()
 
-	var n = &ast.Concretization{
-		Pos:   p.pos,
-		Attrs: make(map[string]string),
+	var n = &ast.Setting{
+		Pos: p.pos,
 	}
-	p.module.Concrete = n
+	p.module.Setting = n
 
 	if p.tok == lexer.STRING {
 		n.Path = p.lit
@@ -149,37 +147,7 @@ func (p *Parser) parseConcretization() {
 	} else {
 		p.expect(lexer.STRING)
 	}
-
-	p.expect(lexer.LPAR)
-
-	for p.tok != lexer.RPAR && p.tok != lexer.EOF {
-		var attr = ""
-		var value = ""
-
-		if p.tok == lexer.STRING {
-			attr = p.lit
-			p.next()
-		} else {
-			p.expect(lexer.STRING)
-		}
-
-		p.expect(lexer.COLON)
-
-		if p.tok == lexer.STRING {
-			value = p.lit
-			p.next()
-		} else {
-			p.expect(lexer.STRING)
-		}
-
-		n.Attrs[attr] = value
-
-		if p.tok == lexer.RPAR {
-			break
-		}
-		p.expect(lexer.COMMA)
-	}
-	p.expect(lexer.RPAR)
+	p.sep()
 }
 
 func (p *Parser) parseImportList() {
