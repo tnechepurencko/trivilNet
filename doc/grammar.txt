@@ -1,16 +1,13 @@
 source_file
-	: 'модуль' ident sep
-    (source_code | concretization)
-    ;
-
-source_code
-    :  ('осторожно' sep)?
-	  import_list
-	  declaration_list
+	: setting?
+    'модуль' ident sep
+    ('осторожно' sep)?
+	import_list
+	declaration_list
 	;
 
-concretization
-    : 'конкретизация' import_path attribite_list
+setting
+    : 'настройка' import_path sep
     ;
 
 import_list
