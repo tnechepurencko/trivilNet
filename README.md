@@ -68,6 +68,6 @@ UTF-8: https://github.com/JuliaStrings/utf8proc
 
 Для изменения поведения Git нужно выполнить команду
 
-```
+```bash
 git config --global core.quotePath false
 ```
