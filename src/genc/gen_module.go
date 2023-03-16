@@ -18,12 +18,14 @@ func (genc *genContext) genModule(main bool) {
 	genc.h("")
 
 	//=== gen types
+	genc.genTypes = true
 	for _, d := range genc.module.Decls {
 		d, ok := d.(*ast.TypeDecl)
 		if ok {
 			genc.genTypeDecl(d)
 		}
 	}
+	genc.genTypes = false
 
 	//=== gen vars, consts
 	for _, d := range genc.module.Decls {

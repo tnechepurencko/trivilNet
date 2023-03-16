@@ -32,9 +32,17 @@ func Process(m *ast.Module) {
 		case *ast.ConstDecl:
 			cc.constDecl(x)
 		case *ast.Function:
-			cc.function(x)
+			// дальше
 		default:
 			panic(fmt.Sprintf("check: ni %T", d))
+		}
+	}
+
+	// обойти функции
+	for _, d := range m.Decls {
+		f, ok := d.(*ast.Function)
+		if ok {
+			cc.function(f)
 		}
 	}
 
