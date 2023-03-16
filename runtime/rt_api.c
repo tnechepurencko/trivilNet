@@ -261,20 +261,24 @@ EXPORTED void* tri_newVector(size_t element_size, TInt64 len, TInt64 cap) {
 }
 
 void vectorFill(VectorDesc* v, size_t element_size, TWord64 filler) {
-    
    switch (element_size) {
-    case 1: 
-        memset(v->body, (int)filler, v->len);
+    case 1: {
+            memset(v->body, (int)filler, v->len);
+        }
         break;
-    case 8:
-        TWord64 *a = v->body;
-        for (int i = 0; i < v->len; i++) a[i] = filler;
+    case 8: {
+            TWord64 *a = v->body;
+            for (int i = 0; i < v->len; i++) {
+                a[i] = filler;
+            }
+        }
         break;
-    default: 
-        char buf[128];
-        sprintf_s(buf, 128, "vectorFill not implemented for element size=%lld", element_size);
-		runtime_crash(buf);    
-    }        
+    default: {
+            char buf[128];
+            sprintf_s(buf, 128, "vectorFill not implemented for element size=%lld", element_size);
+            runtime_crash(buf);
+        }
+    }
 }
 
 EXPORTED void* tri_newVectorFill(size_t element_size, TInt64 len, TInt64 cap, TWord64 filler) {
@@ -662,31 +666,31 @@ void print_int(int i) {
 */
 
 EXPORTED void print_byte(TByte i) {
-  printf("%02x", i);
+    printf("%02x", i);
 }
 
 EXPORTED void print_int64(TInt64 i) {
-  printf("%lld", i);
+    printf("%ld", i);
 }
 
 EXPORTED void print_float64(TFloat64 f) {
-  printf("%g", f);
+    printf("%g", f);
 }
 
 EXPORTED void print_word64(TWord64 x) {
-  printf("0x%llx", x);
-}	
+    printf("0x%lx", x);
+}
 
 EXPORTED void print_symbol(TSymbol s) {
-  printf("0x%x", s);
-}	
+    printf("0x%x", s);
+}
 
 EXPORTED void print_string(TString s) {
-  printf("%s", s->body);
-}	
+    printf("%s", s->body);
+}
 
 EXPORTED void print_bool(TBool b) {
-	if (b) printf("истина"); else printf("ложь");
+    if (b) printf("истина"); else printf("ложь");
 }
 
 EXPORTED void println() {
