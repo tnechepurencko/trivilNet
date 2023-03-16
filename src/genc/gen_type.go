@@ -22,6 +22,9 @@ func (genc *genContext) typeRef(t ast.Type) string {
 		case *ast.PredefinedType:
 			return predefinedTypeName(y.Name)
 		default:
+			if genc.genTypes {
+				return genc.forwardTypeName(x.TypeDecl)
+			}
 			return genc.declName(x.TypeDecl)
 		}
 	case *ast.MayBeType:
@@ -29,7 +32,16 @@ func (genc *genContext) typeRef(t ast.Type) string {
 	default:
 		panic(fmt.Sprintf("assert: %T", t))
 	}
+}
 
+func (genc *genContext) forwardTypeName(td *ast.TypeDecl) string {
+
+	var name = genc.declName(td)
+
+	if td.GetHost() == genc.module && ast.IsClassType(td.Typ) {
+		return fmt.Sprintf("struct %s*", name)
+	}
+	return name
 }
 
 func predefinedTypeName(name string) string {
