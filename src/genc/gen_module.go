@@ -115,7 +115,71 @@ func (genc *genContext) params(ft *ast.FuncType) string {
 	return strings.Join(list, ", ")
 }
 
-//==== entry
+//=== глобальные константы и переменные
+
+func (genc *genContext) genGlobalConst(x *ast.ConstDecl) {
+
+	var name = genc.declName(x)
+	var def = fmt.Sprintf("%s %s", genc.typeRef(x.Typ), name)
+
+	if initializeInPlace(x.Typ) {
+		def = "const " + def
+		genc.c("%s = %s;", def, genc.genExpr(x.Value))
+	} else {
+		genc.c("%s;", def)
+		genc.initGlobals = append(genc.initGlobals, x)
+	}
+
+	if x.Exported {
+		genc.h("extern %s;", def)
+	}
+}
+
+func initializeInPlace(t ast.Type) bool {
+
+	t = ast.UnderType(t)
+	switch t {
+	case ast.Byte, ast.Int64, ast.Float64, ast.Bool, ast.Symbol:
+		return true
+	}
+	return false
+}
+
+func (genc *genContext) genGlobalVar(x *ast.VarDecl) {
+
+	if x.Exported {
+		panic("экспортированные глобалы - запретить или сделать")
+	}
+	if x.Later {
+		panic("ni - 'позже' для глобалов")
+	}
+
+	var name = genc.declName(x)
+	var def = fmt.Sprintf("static %s %s", genc.typeRef(x.Typ), name)
+
+	if initializeInPlace(x.Typ) {
+		genc.c("%s = %s;", def, genc.genExpr(x.Init))
+	} else {
+		genc.c("%s;", def)
+		genc.initGlobals = append(genc.initGlobals, x)
+	}
+}
+
+func (genc *genContext) genLocalDecl(d ast.Decl) string {
+	switch x := d.(type) {
+	case *ast.VarDecl:
+
+		return fmt.Sprintf("%s %s = %s%s;",
+			genc.typeRef(x.Typ),
+			genc.declName(x),
+			genc.assignCast(x.Typ, x.Init.GetType()),
+			genc.genExpr(x.Init))
+	default:
+		panic(fmt.Sprintf("genDecl: ni %T", d))
+	}
+}
+
+//==== вход - инициализация или головной
 
 const (
 	init_fn  = "init"
@@ -144,6 +208,8 @@ func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 
 	genc.code = append(genc.code, genc.init...)
 
+	genc.genInitGlobals()
+
 	if entry != nil {
 		genc.genStatementSeq(entry.Seq)
 	}
@@ -154,51 +220,16 @@ func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
 	genc.c("}")
 }
 
-//===
+func (genc *genContext) genInitGlobals() {
+	for _, g := range genc.initGlobals {
+		switch x := g.(type) {
+		case *ast.ConstDecl:
+			genc.c("%s = %s;", genc.declName(x), genc.genExpr(x.Value))
+		case *ast.VarDecl:
+			genc.c("%s = %s;", genc.declName(x), genc.genExpr(x.Init))
+		default:
+			panic(fmt.Sprintf("assert %T", g))
+		}
 
-func (genc *genContext) genGlobalConst(x *ast.ConstDecl) {
-
-	var name = genc.declName(x)
-	var def = fmt.Sprintf("%s %s", genc.typeRef(x.Typ), name)
-	var val = genc.genExpr(x.Value)
-
-	if initializeInPlace(x.Typ) {
-		def = "const " + def
-		genc.c("%s = %s;", def, val)
-	} else {
-		genc.c("%s;", def)
-		genc.init = append(genc.init, fmt.Sprintf("%s = %s;", name, val))
-	}
-
-	if x.Exported {
-		genc.h("extern %s;", def)
-	}
-}
-
-func initializeInPlace(t ast.Type) bool {
-
-	t = ast.UnderType(t)
-	switch t {
-	case ast.Byte, ast.Int64, ast.Float64, ast.Bool, ast.Symbol:
-		return true
-	}
-	return false
-}
-
-func (genc *genContext) genGlobalVar(x *ast.VarDecl) {
-	panic("ni")
-}
-
-func (genc *genContext) genLocalDecl(d ast.Decl) string {
-	switch x := d.(type) {
-	case *ast.VarDecl:
-
-		return fmt.Sprintf("%s %s = %s%s;",
-			genc.typeRef(x.Typ),
-			genc.declName(x),
-			genc.assignCast(x.Typ, x.Init.GetType()),
-			genc.genExpr(x.Init))
-	default:
-		panic(fmt.Sprintf("genDecl: ni %T", d))
 	}
 }

@@ -44,6 +44,23 @@ func (genc *genContext) forwardTypeName(td *ast.TypeDecl) string {
 	return name
 }
 
+// Выдает имя типа, чтобы использовать его с суффиксами, например, _ST
+func (genc *genContext) baseTypeName(t ast.Type) string {
+	switch x := t.(type) {
+	case *ast.TypeRef:
+		switch y := x.Typ.(type) {
+		case *ast.TypeRef:
+			return genc.typeRef(y.Typ)
+			//		case *ast.MayBeType:
+			//			return genc.typeRef(y.Typ)
+		default:
+			return genc.declName(x.TypeDecl)
+		}
+	default:
+		panic(fmt.Sprintf("assert: %T", t))
+	}
+}
+
 func predefinedTypeName(name string) string {
 	switch name {
 	case "Байт":
@@ -104,7 +121,7 @@ func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
 
 	genc.h("typedef struct %s {", tname_st)
 	if x.BaseTyp != nil {
-		genc.h("%s%s _B;", genc.typeRef(x.BaseTyp), nm_class_struct_suffix)
+		genc.h("%s%s _B;", genc.baseTypeName(x.BaseTyp), nm_class_struct_suffix)
 	}
 	genc.header = append(genc.header, fields...)
 	genc.h("} %s;", tname_st)
@@ -160,7 +177,7 @@ func (genc *genContext) genObjectInit(cl *ast.ClassType, tname string) {
 	genc.c("void %s%s(%s o) {", tname, nm_object_init_suffux, tname)
 
 	if cl.BaseTyp != nil {
-		var base = genc.typeRef(cl.BaseTyp)
+		var base = genc.baseTypeName(cl.BaseTyp)
 		genc.c("%s.vt.%s((void*)o);", base+nm_class_info_suffix, nm_object_init_suffux)
 	}
 
@@ -218,7 +235,7 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 	//-- Meta
 	var base = "NULL"
 	if x.BaseTyp != nil {
-		base = genc.typeRef(x.BaseTyp) + nm_class_info_ptr_suffix
+		base = genc.baseTypeName(x.BaseTyp) + nm_class_info_ptr_suffix
 	}
 	genc.c("%s.meta.object_size = sizeof(struct %s);", desc_var, tname)
 	genc.c("%s.meta.base = %s;", desc_var, base)
