@@ -710,7 +710,13 @@ EXPORTED TInt64 tri_argc() {
 }
 
 EXPORTED TString tri_arg(TInt64 n) {
-    return NULL;
+    if (n < 0 || n >= _argc) {
+        return &emptyStringDesc;
+    }
+    
+    TInt64 bytes = strlen(_argv[n]);
+    
+    return tri_newString(bytes, -1, _argv[n]);
 }    
 
 //==== init
