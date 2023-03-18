@@ -94,9 +94,15 @@ func (cc *checkContext) checkUnfold(args []ast.Expr, start int, elementTyp ast.T
 				}
 
 			default:
-				env.AddError(args[i].GetPos(), "СЕМ-ОШ-ТИП-РАЗВЕРНУТЬ", ast.TypeName(t))
+				if xt == ast.String8 {
+					if !equalTypes(elementTyp, ast.Byte) {
+						env.AddError(args[i].GetPos(), "СЕМ-ТИПЫ-ЭЛЕМЕНТОВ-НЕ-СОВПАДАЮТ",
+							ast.TypeName(elementTyp), ast.Byte.Name)
+					}
+				} else {
+					env.AddError(args[i].GetPos(), "СЕМ-ОШ-ТИП-РАЗВЕРНУТЬ", ast.TypeName(t))
+				}
 			}
-
 			return true
 		}
 	}

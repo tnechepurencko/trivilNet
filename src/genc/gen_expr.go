@@ -259,10 +259,13 @@ func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 
 		switch xt := ast.UnderType(x.X.GetType()).(type) {
 		case *ast.VectorType:
-			return genc.genVectorIndex(x.X, x.Index)
+			return genc.genVectorIndex(x.X, x.Index, "len")
 		case *ast.VariadicType:
 			return genc.genVariadicIndex(xt, x.X, x.Index)
 		default:
+			if xt == ast.String8 {
+				return genc.genVectorIndex(x.X, x.Index, "bytes")
+			}
 			panic("assert")
 		}
 	}
@@ -270,7 +273,7 @@ func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 	return genc.genArrayComposite(x.Composite)
 }
 
-func (genc *genContext) genVectorIndex(x, inx ast.Expr) string {
+func (genc *genContext) genVectorIndex(x, inx ast.Expr, lenName string) string {
 	var name string
 	if id, ok := x.(*ast.IdentExpr); ok {
 		name = genc.genIdent(id)
@@ -282,11 +285,12 @@ func (genc *genContext) genVectorIndex(x, inx ast.Expr) string {
 			name,
 			genc.genExpr(x))
 	}
-	return fmt.Sprintf("%s->body[%s(%s, %s->len)]",
+	return fmt.Sprintf("%s->body[%s(%s, %s->%s)]",
 		name,
 		rt_indexcheck,
 		genc.genExpr(inx),
-		name)
+		name,
+		lenName)
 
 }
 

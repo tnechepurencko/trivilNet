@@ -199,7 +199,7 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 	}
 	x.Composite = nil
 
-	if x.X.IsReadOnly() {
+	if x.X.IsReadOnly() || ast.UnderType(t) == ast.String8 {
 		x.ReadOnly = true
 	}
 }

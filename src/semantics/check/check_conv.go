@@ -61,7 +61,9 @@ func (cc *checkContext) conversion(x *ast.ConversionExpr) {
 	case *ast.ClassType:
 		cc.conversionToClass(x, xt)
 	default:
-		panic(fmt.Sprintf("ni %T '%s'", target, ast.TypeString(target)))
+		env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
+		x.Typ = ast.MakeInvalidType(x.Pos)
+		//panic(fmt.Sprintf("ni %T '%s'", target, ast.TypeString(target)))
 	}
 }
 

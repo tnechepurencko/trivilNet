@@ -78,7 +78,7 @@ func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTy
 	if unfold != nil {
 		var loc = genc.localName("")
 		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
-		return fmt.Sprintf("%s(%s), %s->body", rt_lenVector, loc, loc)
+		return fmt.Sprintf("%s->len, %s->body", loc, loc)
 	} else {
 		var loc = genc.localName("")
 		var et = genc.typeRef(vTyp.ElementTyp)
@@ -198,11 +198,14 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 	var t = ast.UnderType(a.GetType())
 	if t == ast.String {
 		return fmt.Sprintf("%s(%s)", rt_lenString, genc.genExpr(a))
+	} else if t == ast.String8 {
+		return fmt.Sprintf("(%s)->bytes", genc.genExpr(a))
 	}
 
 	switch t.(type) {
 	case *ast.VectorType:
-		return fmt.Sprintf("%s(%s)", rt_lenVector, genc.genExpr(a))
+		//		return fmt.Sprintf("%s(%s)", rt_lenVector, genc.genExpr(a))
+		return fmt.Sprintf("(%s)->len", genc.genExpr(a))
 	case *ast.VariadicType:
 		return fmt.Sprintf("%s%s", genc.genExpr(a), nm_variadic_len_suffic)
 	default:
@@ -301,7 +304,19 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 	if unfold != nil {
 		var loc = genc.localName("")
 		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
-		return fmt.Sprintf("%s(%s, sizeof(%s), %s(%s), %s->body)", rt_vectorAppend, genc.genExpr(call.X), et, rt_lenVector, loc, loc)
+
+		var lenName = "len"
+		if ast.UnderType(unfold.X.GetType()) == ast.String8 {
+			lenName = "bytes"
+		}
+
+		return fmt.Sprintf("%s(%s, sizeof(%s), %s->%s, %s->body)",
+			rt_vectorAppend,
+			genc.genExpr(call.X),
+			et,
+			loc,
+			lenName,
+			loc)
 
 	} else {
 		var loc = genc.localName("")
@@ -313,6 +328,11 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 
 		genc.c("%s %s[%d] = {%s};", et, loc, len(call.Args), strings.Join(cargs, ", "))
 
-		return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)", rt_vectorAppend, genc.genExpr(call.X), et, len(call.Args), loc)
+		return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)",
+			rt_vectorAppend,
+			genc.genExpr(call.X),
+			et,
+			len(call.Args),
+			loc)
 	}
 }
