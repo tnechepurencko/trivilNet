@@ -700,9 +700,32 @@ EXPORTED void tri_crash(char* msg, char* pos) {
     panic();
 }
 
+//==== аргументы
+
+static int _argc  = 0;
+static char **_argv;
+
+EXPORTED TInt64 tri_argc() {
+    return _argc;
+}
+
+EXPORTED TString tri_arg(TInt64 n) {
+    if (n < 0 || n >= _argc) {
+        return &emptyStringDesc;
+    }
+    
+    TInt64 bytes = strlen(_argv[n]);
+    
+    return tri_newString(bytes, -1, _argv[n]);
+}    
+
 //==== init
 
-EXPORTED void tri_init() {
+EXPORTED void tri_init(int argc, char *argv[]) {
+    
+    _argc = argc;
+    _argv = argv;
+    
     emptyStringDesc.bytes = 0;
     emptyStringDesc.symbols = 0;
     emptyStringDesc.body = (TByte*)"";

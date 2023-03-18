@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"fmt"
+	"strings"
 
 	"trivil/ast"
 	"trivil/env"
@@ -16,15 +17,7 @@ func (cc *compileContext) parseFile(src *env.Source) *ast.Module {
 		fmt.Printf("Синтаксис: '%s'\n", src.Path)
 	}
 
-	m := parser.Parse(src)
-
-	if env.ErrorCount() != 0 {
-		return m
-	}
-
-	for _, i := range m.Imports {
-		cc.importModule(m, i)
-	}
+	var m = parser.Parse(src)
 
 	return m
 }
@@ -50,8 +43,8 @@ func (cc *compileContext) parseList(isMain bool, list []*env.Source) []*ast.Modu
 			env.AddError(m.Pos, "ОКР-ОШ-МОДУЛИ-В-ПАПКЕ", moduleName, m.Name, src.FolderPath)
 		}
 
-		if m.Concrete != nil {
-			mods = append(mods[:len(mods)-1], cc.concretize(m)...)
+		if m.Setting != nil {
+			mods = append(mods, cc.setup(m)...)
 		}
 	}
 
@@ -74,5 +67,80 @@ func (cc *compileContext) parseModule(isMain bool, list []*env.Source) *ast.Modu
 		fmt.Println(ast.SExpr(mods[0]))
 	}
 
-	return mods[0]
+	var m = mods[0]
+
+	if env.ErrorCount() != 0 {
+		return m
+	}
+
+	for _, i := range m.Imports {
+		cc.importModule(m, i)
+	}
+
+	return m
+}
+
+func mergeModules(mods []*ast.Module) {
+
+	if *env.TraceCompile {
+		var list = make([]string, len(mods))
+		for i, m := range mods {
+			source, _, _ := env.SourcePos(m.Pos)
+			list[i] = source.Path
+		}
+		fmt.Printf("Слияние: %s\n", strings.Join(list, " + "))
+	}
+
+	var combined = mods[0]
+
+	// соединить импорт
+	var allImport = make(map[string]struct{}, len(combined.Imports))
+	for _, i := range combined.Imports {
+		allImport[i.Path] = struct{}{}
+	}
+
+	for n := 1; n < len(mods); n++ {
+		m := mods[n]
+		for _, i := range m.Imports {
+			_, ok := allImport[i.Path]
+			if !ok {
+				allImport[i.Path] = struct{}{}
+				combined.Imports = append(combined.Imports, i)
+			}
+		}
+	}
+
+	// соединить описания
+	for n := 1; n < len(mods); n++ {
+
+		var m = mods[n]
+
+		setHost(combined, m.Decls)
+		combined.Decls = append(combined.Decls, m.Decls...)
+
+		if m.Entry != nil {
+			if combined.Entry != nil {
+				env.AddError(combined.Entry.Pos, "ПАР-ДУБЛЬ-ВХОД", env.PosString(m.Entry.Pos))
+			} else {
+				combined.Entry = m.Entry
+			}
+		}
+	}
+}
+
+func setHost(combined *ast.Module, decls []ast.Decl) {
+
+	for _, d := range decls {
+		d.SetHost(combined)
+
+		if td, ok := d.(*ast.TypeDecl); ok {
+			if cl, ok := td.Typ.(*ast.ClassType); ok {
+				for _, f := range cl.Fields {
+					f.SetHost(combined)
+				}
+			}
+		}
+
+	}
+
 }

@@ -13,26 +13,29 @@ import (
 var _ = fmt.Printf
 
 type genContext struct {
-	module    *ast.Module
-	outname   string
-	declNames map[ast.Decl]string
-	autoNo    int // used for additional names
-	header    []string
-	code      []string
-	globals   []string
-	init      []string
+	module      *ast.Module
+	outname     string
+	declNames   map[ast.Decl]string
+	genTypes    bool
+	autoNo      int // used for additional names
+	header      []string
+	code        []string
+	globals     []string
+	init        []string   // используется для типов
+	initGlobals []ast.Decl // глобалы, которые надо инициализировать во входе
 }
 
 func Generate(m *ast.Module, main bool) {
 
 	var genc = &genContext{
-		module:    m,
-		outname:   env.OutName(m.Name),
-		declNames: make(map[ast.Decl]string),
-		header:    make([]string, 0),
-		code:      make([]string, 0),
-		globals:   make([]string, 0),
-		init:      make([]string, 0),
+		module:      m,
+		outname:     env.OutName(m.Name),
+		declNames:   make(map[ast.Decl]string),
+		header:      make([]string, 0),
+		code:        make([]string, 0),
+		globals:     make([]string, 0),
+		init:        make([]string, 0),
+		initGlobals: make([]ast.Decl, 0),
 	}
 
 	genc.startCode()

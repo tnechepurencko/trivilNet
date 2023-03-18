@@ -72,7 +72,6 @@ const (
 	BREAK
 	CAUTION
 	CLASS
-	CONCRETE
 	CONST
 	CRASH
 	ELSE
@@ -86,6 +85,7 @@ const (
 	MAYBE
 	MODULE
 	RETURN
+	SETTING
 	TYPE
 	VAR
 	WHEN
@@ -158,27 +158,27 @@ var tokens = [...]string{
 	SEMI:  ";",
 	COLON: ":",
 
-	CRASH:    "авария",
-	RETURN:   "вернуть",
-	ENTRY:    "вход",
-	IF:       "если",
-	IS:       "есть",
-	ELSE:     "иначе",
-	IMPORT:   "импорт",
-	CLASS:    "класс",
-	WHEN:     "когда",
-	CONCRETE: "конкретизация",
-	CONST:    "конст",
-	MAYBE:    "мб",
-	MODULE:   "модуль",
-	GUARD:    "надо",
-	CAUTION:  "осторожно",
-	WHILE:    "пока",
-	LATER:    "позже",
-	BREAK:    "прервать",
-	VAR:      "пусть",
-	TYPE:     "тип",
-	FN:       "фн",
+	CRASH:   "авария",
+	RETURN:  "вернуть",
+	ENTRY:   "вход",
+	IF:      "если",
+	IS:      "есть",
+	ELSE:    "иначе",
+	IMPORT:  "импорт",
+	CLASS:   "класс",
+	WHEN:    "когда",
+	CONST:   "конст",
+	MAYBE:   "мб",
+	MODULE:  "модуль",
+	GUARD:   "надо",
+	SETTING: "настройка",
+	CAUTION: "осторожно",
+	WHILE:   "пока",
+	LATER:   "позже",
+	BREAK:   "прервать",
+	VAR:     "пусть",
+	TYPE:    "тип",
+	FN:      "фн",
 }
 
 func (tok Token) String() string {
