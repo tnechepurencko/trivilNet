@@ -198,7 +198,7 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 	var t = ast.UnderType(a.GetType())
 	if t == ast.String {
 		return fmt.Sprintf("%s(%s)", rt_lenString, genc.genExpr(a))
-	} else if t == ast.BYTES {
+	} else if t == ast.String8 {
 		return fmt.Sprintf("(%s)->bytes", genc.genExpr(a))
 	}
 
@@ -306,7 +306,7 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
 
 		var lenName = "len"
-		if ast.UnderType(unfold.X.GetType()) == ast.BYTES {
+		if ast.UnderType(unfold.X.GetType()) == ast.String8 {
 			lenName = "bytes"
 		}
 

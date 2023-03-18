@@ -53,9 +53,9 @@ func (cc *checkContext) cautionCast(x *ast.ConversionExpr) {
 	default:
 		if from == ast.Word64 && ast.IsReferenceType(target) {
 			x.Typ = x.TargetTyp
-		} else if target == ast.BYTES && from == ast.String {
+		} else if target == ast.String8 && from == ast.String {
 			x.Typ = x.TargetTyp
-		} else if target == ast.String && from == ast.BYTES {
+		} else if target == ast.String && from == ast.String8 {
 			x.Typ = x.TargetTyp
 		} else {
 			env.AddError(x.Pos, "СЕМ-ОШ-ОСТОРОЖНОГО-ПРИВЕДЕНИЯ", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))

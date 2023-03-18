@@ -94,7 +94,7 @@ func (cc *checkContext) checkUnfold(args []ast.Expr, start int, elementTyp ast.T
 				}
 
 			default:
-				if xt == ast.BYTES {
+				if xt == ast.String8 {
 					if !equalTypes(elementTyp, ast.Byte) {
 						env.AddError(args[i].GetPos(), "СЕМ-ТИПЫ-ЭЛЕМЕНТОВ-НЕ-СОВПАДАЮТ",
 							ast.TypeName(elementTyp), ast.Byte.Name)

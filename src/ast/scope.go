@@ -10,12 +10,12 @@ var (
 	Byte *PredefinedType
 	//Int32   *PredefinedType
 	Int64   *PredefinedType
+	Word64  *PredefinedType
 	Float64 *PredefinedType
 	Bool    *PredefinedType
 	Symbol  *PredefinedType
 	String  *PredefinedType
-	Word64  *PredefinedType
-	BYTES   *PredefinedType
+	String8 *PredefinedType
 
 	VoidType    *PredefinedType // только для вызова функции без результата
 	NullType    *PredefinedType // только для константы
@@ -58,7 +58,7 @@ func initScopes() {
 	Bool = addType("Лог")
 	Symbol = addType("Символ")
 	String = addType("Строка")
-	BYTES = addType("БАЙТЫ")
+	String8 = addType("Строка8")
 
 	VoidType = &PredefinedType{Name: "нет результата"}
 	TagPairType = &PredefinedType{Name: "ТегСлово"}

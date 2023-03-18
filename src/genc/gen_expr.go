@@ -263,7 +263,7 @@ func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 		case *ast.VariadicType:
 			return genc.genVariadicIndex(xt, x.X, x.Index)
 		default:
-			if xt == ast.BYTES {
+			if xt == ast.String8 {
 				return genc.genVectorIndex(x.X, x.Index, "bytes")
 			}
 			panic("assert")
