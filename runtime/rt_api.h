@@ -123,6 +123,11 @@ EXPORTED void println();
 
 EXPORTED void tri_crash(char* msg, char* pos);
 
+//==== аргументы
+
+EXPORTED TInt64 tri_argc();
+EXPORTED TString tri_arg(TInt64 n);
+
 //==== init
 
-EXPORTED void tri_init();
+EXPORTED void tri_init(int argc, char *argv[]);

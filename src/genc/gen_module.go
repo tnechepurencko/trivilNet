@@ -115,59 +115,19 @@ func (genc *genContext) params(ft *ast.FuncType) string {
 	return strings.Join(list, ", ")
 }
 
-//==== entry
-
-const (
-	init_fn  = "init"
-	init_var = "init_done"
-)
-
-func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
-
-	if main {
-		genc.c("int main() {")
-		genc.c("%s();", rt_init)
-	} else {
-		var init_header = fmt.Sprintf("void %s__%s()", genc.outname, init_fn)
-
-		genc.h("%s;", init_header)
-
-		genc.c("static TBool %s = false;", init_var)
-		genc.c("%s {", init_header)
-		genc.c("if (%s) return;", init_var)
-		genc.c("%s = true;", init_var)
-	}
-
-	for _, i := range genc.module.Imports {
-		genc.c("%s__%s();", genc.declName(i.Mod), init_fn)
-	}
-
-	genc.code = append(genc.code, genc.init...)
-
-	if entry != nil {
-		genc.genStatementSeq(entry.Seq)
-	}
-
-	if main {
-		genc.c("  return 0;")
-	}
-	genc.c("}")
-}
-
-//===
+//=== глобальные константы и переменные
 
 func (genc *genContext) genGlobalConst(x *ast.ConstDecl) {
 
 	var name = genc.declName(x)
 	var def = fmt.Sprintf("%s %s", genc.typeRef(x.Typ), name)
-	var val = genc.genExpr(x.Value)
 
 	if initializeInPlace(x.Typ) {
 		def = "const " + def
-		genc.c("%s = %s;", def, val)
+		genc.c("%s = %s;", def, genc.genExpr(x.Value))
 	} else {
 		genc.c("%s;", def)
-		genc.init = append(genc.init, fmt.Sprintf("%s = %s;", name, val))
+		genc.initGlobals = append(genc.initGlobals, x)
 	}
 
 	if x.Exported {
@@ -186,7 +146,23 @@ func initializeInPlace(t ast.Type) bool {
 }
 
 func (genc *genContext) genGlobalVar(x *ast.VarDecl) {
-	panic("ni")
+
+	if x.Exported {
+		panic("экспортированные глобалы - запретить или сделать")
+	}
+	if x.Later {
+		panic("ni - 'позже' для глобалов")
+	}
+
+	var name = genc.declName(x)
+	var def = fmt.Sprintf("static %s %s", genc.typeRef(x.Typ), name)
+
+	if initializeInPlace(x.Typ) {
+		genc.c("%s = %s;", def, genc.genExpr(x.Init))
+	} else {
+		genc.c("%s;", def)
+		genc.initGlobals = append(genc.initGlobals, x)
+	}
 }
 
 func (genc *genContext) genLocalDecl(d ast.Decl) string {
@@ -200,5 +176,60 @@ func (genc *genContext) genLocalDecl(d ast.Decl) string {
 			genc.genExpr(x.Init))
 	default:
 		panic(fmt.Sprintf("genDecl: ni %T", d))
+	}
+}
+
+//==== вход - инициализация или головной
+
+const (
+	init_fn  = "init"
+	init_var = "init_done"
+)
+
+func (genc *genContext) genEntry(entry *ast.EntryFn, main bool) {
+
+	if main {
+		genc.c("int main(int argc, char *argv[]) {")
+		genc.c("%s(argc, argv);", rt_init)
+	} else {
+		var init_header = fmt.Sprintf("void %s__%s()", genc.outname, init_fn)
+
+		genc.h("%s;", init_header)
+
+		genc.c("static TBool %s = false;", init_var)
+		genc.c("%s {", init_header)
+		genc.c("if (%s) return;", init_var)
+		genc.c("%s = true;", init_var)
+	}
+
+	for _, i := range genc.module.Imports {
+		genc.c("%s__%s();", genc.declName(i.Mod), init_fn)
+	}
+
+	genc.code = append(genc.code, genc.init...)
+
+	genc.genInitGlobals()
+
+	if entry != nil {
+		genc.genStatementSeq(entry.Seq)
+	}
+
+	if main {
+		genc.c("  return 0;")
+	}
+	genc.c("}")
+}
+
+func (genc *genContext) genInitGlobals() {
+	for _, g := range genc.initGlobals {
+		switch x := g.(type) {
+		case *ast.ConstDecl:
+			genc.c("%s = %s;", genc.declName(x), genc.genExpr(x.Value))
+		case *ast.VarDecl:
+			genc.c("%s = %s;", genc.declName(x), genc.genExpr(x.Init))
+		default:
+			panic(fmt.Sprintf("assert %T", g))
+		}
+
 	}
 }
