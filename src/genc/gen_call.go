@@ -78,7 +78,7 @@ func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTy
 	if unfold != nil {
 		var loc = genc.localName("")
 		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
-		return fmt.Sprintf("%s(%s), %s->body", rt_lenVector, loc, loc)
+		return fmt.Sprintf("%s->len, %s->body", loc, loc)
 	} else {
 		var loc = genc.localName("")
 		var et = genc.typeRef(vTyp.ElementTyp)
@@ -304,7 +304,7 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 	if unfold != nil {
 		var loc = genc.localName("")
 		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
-		return fmt.Sprintf("%s(%s, sizeof(%s), %s(%s), %s->body)", rt_vectorAppend, genc.genExpr(call.X), et, rt_lenVector, loc, loc)
+		return fmt.Sprintf("%s(%s, sizeof(%s), %s->len, %s->body)", rt_vectorAppend, genc.genExpr(call.X), et, loc, loc)
 
 	} else {
 		var loc = genc.localName("")

@@ -36,7 +36,7 @@ EXPORTED TBool tri_equalStrings(TString s1, TString s2);
 EXPORTED void* tri_newVector(size_t element_size, TInt64 len, TInt64 cap);
 EXPORTED void* tri_newVectorFill(size_t element_size, TInt64 len, TInt64 cap, TWord64 filler);
 
-EXPORTED TInt64 tri_lenVector(void* vd);
+//unused EXPORTED TInt64 tri_lenVector(void* vd);
 
 EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len);
 

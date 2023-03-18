@@ -300,10 +300,12 @@ EXPORTED void* tri_newVectorDesc() {
 	return v;
 }
 
+/* //unused 
 EXPORTED TInt64 tri_lenVector(void* vd) {
 	VectorDesc* v = vd;
 	return v->len;	
 }
+*/
 
 EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len) {
 	if (inx < 0 || inx >= len) {

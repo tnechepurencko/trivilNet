@@ -47,7 +47,7 @@ const (
 
 	rt_newVector     = rt_prefix + "newVector"
 	rt_newVectorFill = rt_prefix + "newVectorFill"
-	rt_lenVector     = rt_prefix + "lenVector"
+	//rt_lenVector     = rt_prefix + "lenVector"
 
 	rt_indexcheck = rt_prefix + "indexcheck"
 	rt_nilcheck   = rt_prefix + "nilcheck"
