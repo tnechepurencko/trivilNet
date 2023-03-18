@@ -150,7 +150,7 @@ func IsIndexableType(t Type) bool {
 	case *VectorType, *VariadicType:
 		return true
 	default:
-		return false
+		return t == BYTES
 	}
 }
 
@@ -163,6 +163,9 @@ func ElementType(t Type) Type {
 	case *VariadicType:
 		return x.ElementTyp
 	default:
+		if t == BYTES {
+			return Byte
+		}
 		panic("assert - должен быть индексируемый тип")
 	}
 }

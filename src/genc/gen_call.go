@@ -198,11 +198,14 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 	var t = ast.UnderType(a.GetType())
 	if t == ast.String {
 		return fmt.Sprintf("%s(%s)", rt_lenString, genc.genExpr(a))
+	} else if t == ast.BYTES {
+		return fmt.Sprintf("(%s)->bytes", genc.genExpr(a))
 	}
 
 	switch t.(type) {
 	case *ast.VectorType:
-		return fmt.Sprintf("%s(%s)", rt_lenVector, genc.genExpr(a))
+		//		return fmt.Sprintf("%s(%s)", rt_lenVector, genc.genExpr(a))
+		return fmt.Sprintf("(%s)->len", genc.genExpr(a))
 	case *ast.VariadicType:
 		return fmt.Sprintf("%s%s", genc.genExpr(a), nm_variadic_len_suffic)
 	default:
