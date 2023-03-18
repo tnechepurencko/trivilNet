@@ -128,6 +128,8 @@ EXPORTED void tri_crash(char* msg, char* pos);
 EXPORTED TInt64 tri_argc();
 EXPORTED TString tri_arg(TInt64 n);
 
-//==== init
+//==== init/exit
 
 EXPORTED void tri_init(int argc, char *argv[]);
+
+EXPORTED void tri_exit(TInt64 x);

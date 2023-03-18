@@ -721,7 +721,7 @@ EXPORTED TString tri_arg(TInt64 n) {
     return tri_newString(bytes, -1, _argv[n]);
 }    
 
-//==== init
+//==== init/exit
 
 EXPORTED void tri_init(int argc, char *argv[]) {
     
@@ -732,3 +732,7 @@ EXPORTED void tri_init(int argc, char *argv[]) {
     emptyStringDesc.symbols = 0;
     emptyStringDesc.body = (TByte*)"";
 }
+
+EXPORTED void tri_exit(TInt64 x) {
+    exit(x);
+}    
