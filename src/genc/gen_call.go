@@ -304,7 +304,19 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 	if unfold != nil {
 		var loc = genc.localName("")
 		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
-		return fmt.Sprintf("%s(%s, sizeof(%s), %s->len, %s->body)", rt_vectorAppend, genc.genExpr(call.X), et, loc, loc)
+
+		var lenName = "len"
+		if ast.UnderType(unfold.X.GetType()) == ast.BYTES {
+			lenName = "bytes"
+		}
+
+		return fmt.Sprintf("%s(%s, sizeof(%s), %s->%s, %s->body)",
+			rt_vectorAppend,
+			genc.genExpr(call.X),
+			et,
+			loc,
+			lenName,
+			loc)
 
 	} else {
 		var loc = genc.localName("")
@@ -316,6 +328,11 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 
 		genc.c("%s %s[%d] = {%s};", et, loc, len(call.Args), strings.Join(cargs, ", "))
 
-		return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)", rt_vectorAppend, genc.genExpr(call.X), et, len(call.Args), loc)
+		return fmt.Sprintf("%s(%s, sizeof(%s), %d, %s)",
+			rt_vectorAppend,
+			genc.genExpr(call.X),
+			et,
+			len(call.Args),
+			loc)
 	}
 }
