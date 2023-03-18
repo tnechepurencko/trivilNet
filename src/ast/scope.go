@@ -15,6 +15,7 @@ var (
 	Symbol  *PredefinedType
 	String  *PredefinedType
 	Word64  *PredefinedType
+	BYTES   *PredefinedType
 
 	VoidType    *PredefinedType // только для вызова функции без результата
 	NullType    *PredefinedType // только для константы
@@ -57,6 +58,7 @@ func initScopes() {
 	Bool = addType("Лог")
 	Symbol = addType("Символ")
 	String = addType("Строка")
+	BYTES = addType("БАЙТЫ")
 
 	VoidType = &PredefinedType{Name: "нет результата"}
 	TagPairType = &PredefinedType{Name: "ТегСлово"}
