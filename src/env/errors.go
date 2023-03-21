@@ -23,7 +23,7 @@ func initErrors() {
 	errors = make([]*Error, 0)
 	messages = make(map[string]string)
 
-	buf, err := os.ReadFile("errors.txt")
+	buf, err := os.ReadFile(SettingsRelativePath("errors.txt"))
 	if err != nil {
 		fmt.Println("! error reading errors.txt file ", err.Error())
 		return

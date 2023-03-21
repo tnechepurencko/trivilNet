@@ -4,7 +4,7 @@ import (
 	er "errors"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -41,7 +41,7 @@ func GetSources(spath string) []*Source {
 		return GetFolderSources(spath)
 	}
 
-	folder, filename := path.Split(spath)
+	folder, filename := filepath.Split(spath)
 	if folder == "" {
 		folder = "."
 	}
@@ -49,7 +49,7 @@ func GetSources(spath string) []*Source {
 
 	var src = &Source{
 		FolderPath: folder,
-		FolderName: path.Base(folder),
+		FolderName: filepath.Base(folder),
 		FileName:   filename,
 		Path:       spath,
 
@@ -60,7 +60,7 @@ func GetSources(spath string) []*Source {
 	list[0] = src
 
 	if !strings.HasSuffix(filename, file_extension) {
-		src.Err = er.New("неверное расширение файла " + path.Ext(filename))
+		src.Err = er.New("неверное расширение файла " + filepath.Ext(filename))
 		return list
 	}
 
@@ -140,9 +140,9 @@ func readSource(folder, filename string) *Source {
 
 	var src = &Source{
 		FolderPath: folder,
-		FolderName: path.Base(folder),
+		FolderName: filepath.Base(folder),
 		FileName:   filename,
-		Path:       path.Join(folder, filename),
+		Path:       filepath.Join(folder, filename),
 
 		Lines: make([]int, 0),
 	}
