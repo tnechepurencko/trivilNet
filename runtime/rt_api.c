@@ -275,7 +275,7 @@ void vectorFill(VectorDesc* v, size_t element_size, TWord64 filler) {
         break;
     default: {
             char buf[128];
-            sprintf_s(buf, 128, "vectorFill not implemented for element size=%lld", element_size);
+            sprintf(buf, "vectorFill not implemented for element size=%ld", element_size);
             runtime_crash(buf);
         }
     }
@@ -312,7 +312,7 @@ EXPORTED TInt64 tri_lenVector(void* vd) {
 EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len) {
 	if (inx < 0 || inx >= len) {
         char buf[128];
-        sprintf_s(buf, 128, "index %lld out of bounds [0..%lld[", inx, len);
+        sprintf(buf, "index %ld out of bounds [0..%ld[", inx, len);
 		runtime_crash(buf);
 	}
 	
