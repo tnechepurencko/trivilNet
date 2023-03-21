@@ -1,3 +1,5 @@
 windows-build: clang #files# -llibwelrt -fno-omit-frame-pointer -o #target#.exe
 windows-script: build.bat
 
+linux-build: clang-15 #files# -llibwelrt -fno-omit-frame-pointer -o #target#
+linux-script: build.sh
