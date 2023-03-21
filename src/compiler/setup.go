@@ -13,7 +13,7 @@ func (cc *compileContext) setup(setuped *ast.Module) []*ast.Module {
 
 	var setting = setuped.Setting
 
-	var err = env.CheckFolder(setting.Path)
+	var err = env.EnsureFolder(setting.Path)
 	if err != nil {
 		env.AddError(setting.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", setting.Path, err.Error())
 		return nil

@@ -11,7 +11,14 @@ var _ = fmt.Printf
 
 func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 
-	var npath = env.NormalizeFolderPath(i.Path)
+	env.Lookup.Process(i.Path)
+	if env.Lookup.Err != nil {
+		env.AddError(i.Pos, "ОКР-ОШ-ПУТЬ-ИМПОРТА", i.Path, env.Lookup.Err.Error())
+		return
+	}
+
+	var npath = env.Lookup.ImportPath
+
 	m, ok := cc.imported[npath]
 	if ok {
 		// Модуль уже был импортирован
@@ -20,16 +27,16 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 		return
 	}
 
-	var err = env.CheckFolder(i.Path)
+	var err = env.EnsureFolder(npath)
 	if err != nil {
 		env.AddError(i.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", i.Path, err.Error())
 		return
 	}
 
-	var list = env.GetFolderSources(i.Path)
+	var list = env.GetFolderSources(npath)
 
 	if len(list) == 0 {
-		env.AddError(i.Pos, "ОКР-ИМПОРТ-ПУСТАЯ-ПАПКА", i.Path)
+		env.AddError(i.Pos, "ОКР-ИМПОРТ-ПУСТАЯ-ПАПКА", i.Path, npath)
 		return
 	}
 

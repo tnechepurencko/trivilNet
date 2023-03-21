@@ -37,7 +37,7 @@ func initSources() {
 // Иначе, читает файл, заданный параметром, и добавляет остальные файлы из папки с нужным расширением
 func GetSources(spath string) []*Source {
 
-	if CheckFolder(spath) == nil {
+	if EnsureFolder(spath) == nil {
 		return GetFolderSources(spath)
 	}
 
@@ -95,11 +95,6 @@ func GetSources(spath string) []*Source {
 	}
 
 	return list
-}
-
-func NormalizeFolderPath(fpath string) string {
-	// обработать репу - возможно, добавить имя реры, если оно не указано
-	return fpath
 }
 
 // Выдает список прочитанных исходников из папки
