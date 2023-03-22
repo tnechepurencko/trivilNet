@@ -132,7 +132,7 @@ func (genc *genContext) genCrash(x *ast.Crash) {
 
 func genPos(pos int) string {
 	src, line, col := env.SourcePos(pos)
-	return fmt.Sprintf("\"%s:%d:%d\"", src.Path, line, col)
+	return fmt.Sprintf("\"%s/%s:%d:%d\"", src.OriginPath, src.FileName, line, col)
 }
 
 func literal(expr ast.Expr) *ast.LiteralExpr {

@@ -14,7 +14,7 @@ var _ = fmt.Printf
 func (cc *compileContext) parseFile(src *env.Source) *ast.Module {
 
 	if *env.TraceCompile {
-		fmt.Printf("Синтаксис: '%s'\n", src.Path)
+		fmt.Printf("Синтаксис: '%s'\n", src.FilePath)
 	}
 
 	var m = parser.Parse(src)
@@ -35,7 +35,7 @@ func (cc *compileContext) parseList(isMain bool, list []*env.Source) []*ast.Modu
 		if len(mods) == 1 {
 			moduleName = m.Name
 
-			if !isMain && m.Name != src.FolderName {
+			if !isMain && m.Name != src.FolderName() {
 				// не проверяю соответствие имени папки для головного модуля
 				env.AddError(m.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", m.Name, src.FolderName)
 			}
@@ -86,7 +86,7 @@ func mergeModules(mods []*ast.Module) {
 		var list = make([]string, len(mods))
 		for i, m := range mods {
 			source, _, _ := env.SourcePos(m.Pos)
-			list[i] = source.Path
+			list[i] = source.FileName
 		}
 		fmt.Printf("Слияние: %s\n", strings.Join(list, " + "))
 	}

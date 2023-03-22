@@ -29,11 +29,11 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 
 	var err = env.EnsureFolder(npath)
 	if err != nil {
-		env.AddError(i.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", i.Path, err.Error())
+		env.AddError(i.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", npath, err.Error())
 		return
 	}
 
-	var list = env.GetFolderSources(npath)
+	var list = env.GetFolderSources(i.Path, npath)
 
 	if len(list) == 0 {
 		env.AddError(i.Pos, "ОКР-ИМПОРТ-ПУСТАЯ-ПАПКА", i.Path, npath)
@@ -41,7 +41,7 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 	}
 
 	if len(list) == 1 && list[0].Err != nil {
-		env.AddError(i.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", list[0].Path, list[0].Err.Error())
+		env.AddError(i.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", list[0].FilePath, list[0].Err.Error())
 		return
 	}
 

@@ -49,7 +49,7 @@ func (il *ImportLookup) Process(fpath string) {
 	il.Root = parts[0]
 	rootPath, ok := sourceRoots[il.Root]
 	if !ok {
-		il.Err = goerr.New(fmt.Sprintf("путь для кодовой база '%s' не задан", il.Root))
+		il.Err = goerr.New(fmt.Sprintf("путь для кодовой базы '%s' не задан", il.Root))
 		return
 	}
 	il.ImportPath = path.Join(rootPath, parts[1])
