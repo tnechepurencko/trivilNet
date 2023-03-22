@@ -80,6 +80,10 @@ func SettingsRelativePath(filename string) string {
 	return path.Join(baseFolder, filename)
 }
 
+func RuntimePath() string {
+	return path.Join(baseFolder, "runtime")
+}
+
 func initFolders() {
 	baseFolder = filepath.ToSlash(filepath.Dir(os.Args[0]))
 

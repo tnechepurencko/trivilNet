@@ -17,6 +17,7 @@ const (
 	conf_file_name = "conf_genc.txt"
 	place_files    = "#files#"
 	place_target   = "#target#"
+	place_runtime  = "#runtime#"
 )
 
 var _ = fmt.Printf
@@ -37,6 +38,7 @@ func BuildExe(modules []*ast.Module) {
 	var target = env.OutName(modules[len(modules)-1].Name)
 
 	command = strings.ReplaceAll(command, place_files, strings.Join(names, " "))
+	command = strings.ReplaceAll(command, place_runtime, env.RuntimePath())
 	command = strings.ReplaceAll(command, place_target, target)
 
 	var folder = env.PrepareOutFolder()
