@@ -1,3 +1,6 @@
-windows-build: clang #files# -I#runtime# -l#runtime#/libwelrt -fno-omit-frame-pointer -o #target#.exe
+#static:
+windows-build: clang #runtime#/rt_api.c #files# -I#runtime# -Wl,-noimplib -fno-omit-frame-pointer -o ../#target#.exe && del /f ..\#target#.exp
+#dynamic:
+#windows-build: clang #files# -I#runtime# -l#runtime#/libwelrt -fno-omit-frame-pointer -o #target#.exe
 windows-script: build.bat
 
