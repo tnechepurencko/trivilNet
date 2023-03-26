@@ -153,6 +153,8 @@ func unaryOp(op lexer.Token) string {
 		return "-"
 	case lexer.NOT:
 		return "!"
+	case lexer.BITNOT:
+		return "~"
 
 	default:
 		panic("ni unary" + op.String())
@@ -193,7 +195,12 @@ func binaryOp(op lexer.Token) string {
 		return "%"
 	case lexer.BITAND:
 		return "&"
-
+	case lexer.BITXOR:
+		return "^"
+	case lexer.SHL:
+		return "<<"
+	case lexer.SHR:
+		return ">>"
 	default:
 		panic("ni binary" + op.String())
 	}

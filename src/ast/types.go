@@ -119,6 +119,10 @@ func IsIntegerType(t Type) bool {
 	return t == Int64 || t == Byte || t == Word64
 }
 
+func IsByte(t Type) bool {
+	return UnderType(t) == Byte
+}
+
 func IsInt64(t Type) bool {
 	return UnderType(t) == Int64
 }

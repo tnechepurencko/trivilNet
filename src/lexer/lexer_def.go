@@ -35,10 +35,16 @@ const (
 	OR  // |
 	NOT // ~
 
-	BITAND // &.
-	BITOR  // |.
-	INC    // ++
-	DEC    // --
+	BITAND // :&
+	BITOR  // :|
+	BITXOR // :\
+	BITNOT // :~
+
+	SHL // <<
+	SHR // >>
+
+	INC // ++
+	DEC // --
 
 	EQ  // =
 	LSS // <
@@ -122,8 +128,13 @@ var tokens = [...]string{
 	NOT: "~",
 	//	XOR:     "^",
 
-	BITAND: "&.",
-	BITOR:  "|.",
+	BITAND: ":&",
+	BITOR:  ":|",
+	BITXOR: ":\\",
+	BITNOT: ":~",
+
+	SHL: "<<",
+	SHR: ">>",
 
 	INC: "++",
 	DEC: "--",

@@ -215,12 +215,22 @@ func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
 				ast.TypeString(x.X.GetType()), x.Op.String())
 		}
 		x.Typ = t
+	case lexer.BITNOT:
+		var t = x.X.GetType()
+		if ast.IsIntegerType(t) {
+			// ok
+		} else {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
+				ast.TypeString(x.X.GetType()), x.Op.String())
+		}
+		x.Typ = t
 	case lexer.NOT:
 		if !ast.IsBoolType(x.X.GetType()) {
 			env.AddError(x.X.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
 				ast.TypeString(x.X.GetType()), x.Op.String())
 		}
 		x.Typ = ast.Bool
+
 	default:
 		panic(fmt.Sprintf("unary expr ni: %T op=%s", x, x.Op.String()))
 	}
@@ -248,7 +258,29 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 		}
 		x.Typ = ast.Bool
 
-	//case lexer.BITAND, lexer.BITOR:
+	case lexer.BITAND, lexer.BITOR, lexer.BITXOR:
+		var t = x.X.GetType()
+		if ast.IsInt64(t) || ast.IsWord64(t) || ast.IsByte(t) {
+			checkOperandTypes(x)
+		} else {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(t), x.Op.String())
+		}
+		x.Typ = t
+
+	case lexer.SHL, lexer.SHR:
+		var t = x.X.GetType()
+		if !ast.IsIntegerType(t) {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(t), x.Op.String())
+		}
+		var t2 = x.Y.GetType()
+		if !ast.IsIntegerType(t2) {
+			env.AddError(x.Y.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(t2), x.Op.String())
+		}
+		x.Typ = t
+
 	case lexer.EQ, lexer.NEQ:
 		var t = ast.UnderType(x.X.GetType())
 		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 || t == ast.Symbol || t == ast.String {

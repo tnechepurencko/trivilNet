@@ -24,9 +24,9 @@ func precedence(tok lexer.Token) int {
 		return 2
 	case lexer.EQ, lexer.NEQ, lexer.LSS, lexer.LEQ, lexer.GTR, lexer.GEQ:
 		return 3
-	case lexer.ADD, lexer.SUB, lexer.BITOR:
+	case lexer.ADD, lexer.SUB, lexer.BITOR, lexer.BITXOR:
 		return 4
-	case lexer.MUL, lexer.QUO, lexer.REM, lexer.BITAND:
+	case lexer.MUL, lexer.QUO, lexer.REM, lexer.BITAND, lexer.SHL, lexer.SHR:
 		return 5
 	default:
 		return lowestPrecedence
@@ -74,7 +74,7 @@ func (p *Parser) parseUnaryExpression() ast.Expr {
 	}
 
 	switch p.tok {
-	case lexer.SUB, lexer.NOT:
+	case lexer.SUB, lexer.NOT, lexer.BITNOT:
 		var pos = p.pos
 		var op = p.tok
 		p.next()
