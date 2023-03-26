@@ -36,6 +36,7 @@ var tests = []one{
 	{"'a'", []pair{{SYMBOL, "a"}}},
 	{"'\t'", []pair{{SYMBOL, "\t"}}},
 	{"'\\''", []pair{{SYMBOL, "\\'"}}},
+	{"'\uFFFD'", []pair{{SYMBOL, "\uFFFD"}}},
 
 	{"\"a\"", []pair{{STRING, "a"}}},
 	{"\"\t\"", []pair{{STRING, "\t"}}},

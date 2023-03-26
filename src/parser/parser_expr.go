@@ -130,10 +130,14 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 			ExprBase: ast.ExprBase{Pos: p.pos},
 			Kind:     ast.Lit_Symbol,
 		}
-		r, _ := utf8.DecodeRuneInString(p.lit)
-		if r == utf8.RuneError {
+		if !utf8.ValidString(p.lit) {
 			p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "неверная кодировка символа")
 		} else {
+			s, err := strconv.Unquote("'" + p.lit + "'")
+			if err != nil {
+				panic("assert - unquote: " + err.Error())
+			}
+			r, _ := utf8.DecodeRuneInString(s)
 			l.WordVal = uint64(r)
 		}
 		p.next()
