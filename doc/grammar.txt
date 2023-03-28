@@ -206,6 +206,7 @@ simple_stm
 
 expression
 	: unary_expr 
+	| expression 'типа' type_ref    
 	| expression binary_op expression
 	;
 
@@ -214,11 +215,11 @@ unary_expr
 	| unary_op unary_expr
 	;
 
-unary_op: '+' | '-' | '~'; // '~' for not
+unary_op: '+' | '-' | '~' | ':~'; 
 binary_op: '|' | '&' | rel_op | add_op | mul_op;
 rel_op: '=' | '#' | '<' | '<=' | '>' | '>=';
-add_op: '+' | '-' | '|.'                                        // изменить на ||, добавить |^
-mul_op: '*' | '/' | '%' | '&.';                              // изменить на |& 
+add_op: '+' | '-' | ':|' | ':\';  
+mul_op: '*' | '/' | '%' | ':&'; 
 
 // TODO:  bitnot - use '|~' ?
 // TODO: shifts <| |>

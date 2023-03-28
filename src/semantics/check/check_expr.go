@@ -34,6 +34,10 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		cc.expr(x.Y)
 		cc.binaryExpr(x)
 
+	case *ast.OfTypeExpr:
+		cc.expr(x.X)
+		cc.ofTypeExpr(x)
+
 	case *ast.SelectorExpr:
 		cc.selector(x)
 
@@ -332,6 +336,32 @@ func checkMayBeOparands(x *ast.BinaryExpr) {
 	}
 	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",
 		ast.TypeString(x.X.GetType()), x.Op.String(), ast.TypeString(x.Y.GetType()))
+
+}
+
+func (cc *checkContext) ofTypeExpr(x *ast.OfTypeExpr) {
+
+	x.Typ = ast.Bool
+
+	t, ok := ast.UnderType(x.X.GetType()).(*ast.ClassType)
+	if !ok {
+		panic("должен быть класс")
+	}
+
+	target, ok := ast.UnderType(x.TargetTyp).(*ast.ClassType)
+	if !ok {
+		panic("должен быть класс")
+	}
+	/*
+		if t == target {
+			env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(target))
+			return
+		}
+	*/
+
+	if !isDerivedClass(t, target) {
+		env.AddError(x.Pos, "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
+	}
 
 }
 

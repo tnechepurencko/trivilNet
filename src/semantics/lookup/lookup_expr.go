@@ -24,6 +24,10 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 		lc.lookExpr(x.X)
 		lc.lookExpr(x.Y)
 
+	case *ast.OfTypeExpr:
+		lc.lookExpr(x.X)
+		lc.lookTypeRef(x.TargetTyp)
+
 	case *ast.SelectorExpr:
 		lc.lookExpr(x.X)
 		lc.lookAccessToImported(x)

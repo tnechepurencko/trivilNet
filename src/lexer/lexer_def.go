@@ -90,6 +90,7 @@ const (
 	LATER
 	MAYBE
 	MODULE
+	OFTYPE
 	RETURN
 	SETTING
 	TYPE
@@ -189,6 +190,7 @@ var tokens = [...]string{
 	BREAK:   "прервать",
 	VAR:     "пусть",
 	TYPE:    "тип",
+	OFTYPE:  "типа",
 	FN:      "фн",
 }
 

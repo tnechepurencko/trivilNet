@@ -22,7 +22,8 @@ func precedence(tok lexer.Token) int {
 		return 1
 	case lexer.AND:
 		return 2
-	case lexer.EQ, lexer.NEQ, lexer.LSS, lexer.LEQ, lexer.GTR, lexer.GEQ:
+	case lexer.EQ, lexer.NEQ, lexer.LSS, lexer.LEQ, lexer.GTR, lexer.GEQ,
+		lexer.OFTYPE:
 		return 3
 	case lexer.ADD, lexer.SUB, lexer.BITOR, lexer.BITXOR:
 		return 4
@@ -55,15 +56,19 @@ func (p *Parser) parseBinaryExpression(prec int) ast.Expr {
 		if opPrec < prec {
 			return x
 		}
-		var pos = p.pos
-		p.next()
 
-		var y = p.parseBinaryExpression(opPrec + 1)
-		x = &ast.BinaryExpr{
-			ExprBase: ast.ExprBase{Pos: pos},
-			X:        x,
-			Op:       op,
-			Y:        y,
+		if op == lexer.OFTYPE {
+			x = p.parseOfTypeExpression(x)
+		} else {
+			var pos = p.pos
+			p.next()
+			var y = p.parseBinaryExpression(opPrec + 1)
+			x = &ast.BinaryExpr{
+				ExprBase: ast.ExprBase{Pos: pos},
+				X:        x,
+				Op:       op,
+				Y:        y,
+			}
 		}
 	}
 }
@@ -92,6 +97,20 @@ func (p *Parser) parseUnaryExpression() ast.Expr {
 
 	// check ?
 	return x
+}
+
+func (p *Parser) parseOfTypeExpression(x ast.Expr) ast.Expr {
+
+	var pos = p.pos
+	p.next()
+
+	var n = &ast.OfTypeExpr{
+		ExprBase:  ast.ExprBase{Pos: pos},
+		X:         x,
+		TargetTyp: p.parseTypeRef(),
+	}
+
+	return n
 }
 
 func (p *Parser) parsePrimaryExpression() ast.Expr {
