@@ -12,6 +12,13 @@ typedef uint32_t TSymbol;
 // для преобразования с сохранением битов
 typedef union {TFloat64 f; TInt64 i; TWord64 w; void* a; } TUnion64;
 
+// Основа любого класса и объекта любого класса
+typedef struct _BaseVT { size_t self_size; void (*__init__)(void*); } _BaseVT;
+typedef struct _BaseMeta { size_t object_size; void* base_desc; } _BaseMeta;
+typedef struct _BaseClassInfo { _BaseVT vt; _BaseMeta meta; } _BaseClassInfo;
+typedef struct _BaseObject { void* vtable; } _BaseObject;
+
+// Строка
 typedef struct StringDesc {
 //TODO meta
   int64_t bytes;

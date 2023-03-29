@@ -409,19 +409,15 @@ EXPORTED void* tri_nilcheck(void* r) {
 
 //==== class
 
-typedef struct VTMini { size_t self_size; void (*__init__)(void*); } VTMini;
-typedef struct MetaMini { size_t object_size; void* base_desc; } MetaMini;
-typedef struct ObjectMini { void* vtable; } ObjectMini;
-
 EXPORTED void* tri_newObject(void* class_desc) {
 	
-	VTMini* vt = class_desc;
+	_BaseVT* vt = class_desc;
 	size_t vt_sz = vt->self_size;
 
-	MetaMini* m = class_desc + vt_sz;
+	_BaseMeta* m = class_desc + vt_sz;
 	size_t o_sz = m->object_size;
 	
-	ObjectMini* o = mm_allocate(o_sz);
+	_BaseObject* o = mm_allocate(o_sz);
 	memset(o, 0x0, o_sz);
 	o->vtable = vt;
     
@@ -432,14 +428,14 @@ EXPORTED void* tri_newObject(void* class_desc) {
 
 EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 	
-	VTMini* current_vt = ((ObjectMini*)object)->vtable;
+	_BaseVT* current_vt = ((_BaseObject*)object)->vtable;
 	
 	if (current_vt == target_desc) {
 //printf("found self\n");
 		return object;
 	}
 	
-	MetaMini* m = (void *)current_vt + current_vt->self_size;
+	_BaseMeta* m = (void *)current_vt + current_vt->self_size;
 	
 	while (m->base_desc != NULL) {
 		//printf("base_desc = %p\n", m->base_desc);
@@ -456,14 +452,14 @@ EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 }
 
 EXPORTED TBool tri_isClassType(void* object, void* target_desc) {
-    	VTMini* current_vt = ((ObjectMini*)object)->vtable;
+    	_BaseVT* current_vt = ((_BaseObject*)object)->vtable;
 	
 	if (current_vt == target_desc) {
 //printf("found self\n");
 		return true;
 	}
 	
-	MetaMini* m = (void *)current_vt + current_vt->self_size;
+	_BaseMeta* m = (void *)current_vt + current_vt->self_size;
 	
 	while (m->base_desc != NULL) {
 		//printf("base_desc = %p\n", m->base_desc);

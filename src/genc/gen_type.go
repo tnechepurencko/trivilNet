@@ -180,7 +180,10 @@ func (genc *genContext) genObjectInit(cl *ast.ClassType, tname string) {
 
 	if cl.BaseTyp != nil {
 		var base = genc.baseTypeName(cl.BaseTyp)
-		genc.c("%s.vt.%s((void*)o);", base+nm_class_info_suffix, nm_object_init_suffux)
+		genc.c("((%s*)%s)->vt.%s((void*)o);",
+			nm_base_class_info_struct,
+			base+nm_class_info_ptr_suffix,
+			nm_object_init_suffux)
 	}
 
 	for _, f := range cl.Fields {
