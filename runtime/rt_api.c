@@ -433,9 +433,6 @@ EXPORTED void* tri_newObject(void* class_desc) {
 EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 	
 	VTMini* current_vt = ((ObjectMini*)object)->vtable;
-
-//printf("object_vt = %p\n", current_vt);
-//printf("target_desc = %p\n", target_desc);
 	
 	if (current_vt == target_desc) {
 //printf("found self\n");
@@ -445,7 +442,7 @@ EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 	MetaMini* m = (void *)current_vt + current_vt->self_size;
 	
 	while (m->base_desc != NULL) {
-		printf("base_desc = %p\n", m->base_desc);
+		//printf("base_desc = %p\n", m->base_desc);
 		
 		if (m->base_desc == target_desc) return object;
 		
@@ -457,6 +454,29 @@ EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 	
 	return NULL;
 }
+
+EXPORTED TBool tri_isClassType(void* object, void* target_desc) {
+    	VTMini* current_vt = ((ObjectMini*)object)->vtable;
+	
+	if (current_vt == target_desc) {
+//printf("found self\n");
+		return true;
+	}
+	
+	MetaMini* m = (void *)current_vt + current_vt->self_size;
+	
+	while (m->base_desc != NULL) {
+		//printf("base_desc = %p\n", m->base_desc);
+		
+		if (m->base_desc == target_desc) return true;
+		
+		current_vt = m->base_desc;
+		m = (void *)current_vt + current_vt->self_size;
+	}
+	
+	return false;
+}
+
 
 //==== conversions
 

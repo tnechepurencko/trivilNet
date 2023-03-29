@@ -22,6 +22,8 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 		return fmt.Sprintf("%s(%s)", unaryOp(x.Op), genc.genExpr(x.X))
 	case *ast.BinaryExpr:
 		return genc.genBinaryExpr(x)
+	case *ast.OfTypeExpr:
+		return genc.genOfTypeExpr(x)
 	case *ast.SelectorExpr:
 		return genc.genSelector(x)
 	case *ast.CallExpr:
@@ -218,6 +220,16 @@ func (genc *genContext) genBinaryExpr(x *ast.BinaryExpr) string {
 	}
 
 	return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), binaryOp(x.Op), genc.genExpr(x.Y))
+}
+
+func (genc *genContext) genOfTypeExpr(x *ast.OfTypeExpr) string {
+	var tname = genc.typeRef(x.TargetTyp)
+
+	return fmt.Sprintf("%s(%s, %s)",
+		rt_isClassType,
+		genc.genExpr(x.X),
+		tname+nm_class_info_ptr_suffix)
+
 }
 
 //==== selector

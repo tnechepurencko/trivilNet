@@ -66,6 +66,7 @@ EXPORTED void* tri_nilcheck(void* r);
 EXPORTED void* tri_newObject(void* class_desc);
 
 EXPORTED void* tri_checkClassType(void* object, void* class_desc);
+EXPORTED TBool tri_isClassType(void* object, void* class_desc);
 
 //==== conversions
 

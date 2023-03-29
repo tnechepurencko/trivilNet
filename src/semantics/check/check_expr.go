@@ -345,12 +345,14 @@ func (cc *checkContext) ofTypeExpr(x *ast.OfTypeExpr) {
 
 	t, ok := ast.UnderType(x.X.GetType()).(*ast.ClassType)
 	if !ok {
-		panic("должен быть класс")
+		env.AddError(x.X.GetPos(), "СЕМ-ОПЕРАЦИЯ-ТИПА", ast.TypeName(x.X.GetType()))
+		return
 	}
 
 	target, ok := ast.UnderType(x.TargetTyp).(*ast.ClassType)
 	if !ok {
-		panic("должен быть класс")
+		env.AddError(x.TargetTyp.GetPos(), "СЕМ-ОПЕРАЦИЯ-ТИПА", ast.TypeName(x.TargetTyp))
+		return
 	}
 	/*
 		if t == target {

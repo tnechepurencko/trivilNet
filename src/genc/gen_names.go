@@ -54,6 +54,7 @@ const (
 
 	rt_newObject      = rt_prefix + "newObject"
 	rt_checkClassType = rt_prefix + "checkClassType"
+	rt_isClassType    = rt_prefix + "isClassType"
 
 	rt_convert = rt_prefix
 
