@@ -38,6 +38,9 @@ EXPORTED TString tri_emptyString();
 
 EXPORTED TBool tri_equalStrings(TString s1, TString s2); 
 
+// Не используется компилятором
+EXPORTED TInt64 tri_equalBytes(TString s1, TInt64 pos1, TString s2, TInt64 pos2, TInt64 len); 
+
 //==== vector
 
 EXPORTED void* tri_newVector(size_t element_size, TInt64 len, TInt64 cap);

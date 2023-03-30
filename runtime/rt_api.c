@@ -231,6 +231,13 @@ EXPORTED TBool tri_equalStrings(TString s1, TString s2) {
     return memcmp(s1->body, s2->body, s1->bytes) == 0;
 }
 
+// Не используется компилятором
+EXPORTED TInt64 tri_equalBytes(TString s1, TInt64 pos1, TString s2, TInt64 pos2, TInt64 len) {
+    // TODO: нужно ли проверять длину и позиции?
+    return strncmp((char*)s1->body + pos1, (char*)s2->body + pos2, len);
+}
+
+
 //==== vector
 
 
