@@ -174,6 +174,12 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 	}
 
 	switch xt := t.(type) {
+	case *ast.VectorType:
+		rvec, ok := ast.UnderType(r.GetType()).(*ast.VectorType)
+		// TODO: проверка для вектора векторов
+		if ok && equalTypes(xt.ElementTyp, rvec.ElementTyp) {
+			return true
+		}
 	case *ast.ClassType:
 		rcl, ok := ast.UnderType(r.GetType()).(*ast.ClassType)
 		if ok && isDerivedClass(xt, rcl) {
