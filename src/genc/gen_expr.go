@@ -22,6 +22,8 @@ func (genc *genContext) genExpr(expr ast.Expr) string {
 		return fmt.Sprintf("%s(%s)", unaryOp(x.Op), genc.genExpr(x.X))
 	case *ast.BinaryExpr:
 		return genc.genBinaryExpr(x)
+	case *ast.OfTypeExpr:
+		return genc.genOfTypeExpr(x)
 	case *ast.SelectorExpr:
 		return genc.genSelector(x)
 	case *ast.CallExpr:
@@ -153,6 +155,8 @@ func unaryOp(op lexer.Token) string {
 		return "-"
 	case lexer.NOT:
 		return "!"
+	case lexer.BITNOT:
+		return "~"
 
 	default:
 		panic("ni unary" + op.String())
@@ -193,7 +197,12 @@ func binaryOp(op lexer.Token) string {
 		return "%"
 	case lexer.BITAND:
 		return "&"
-
+	case lexer.BITXOR:
+		return "^"
+	case lexer.SHL:
+		return "<<"
+	case lexer.SHR:
+		return ">>"
 	default:
 		panic("ni binary" + op.String())
 	}
@@ -211,6 +220,16 @@ func (genc *genContext) genBinaryExpr(x *ast.BinaryExpr) string {
 	}
 
 	return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), binaryOp(x.Op), genc.genExpr(x.Y))
+}
+
+func (genc *genContext) genOfTypeExpr(x *ast.OfTypeExpr) string {
+	var tname = genc.typeRef(x.TargetTyp)
+
+	return fmt.Sprintf("%s(%s, %s)",
+		rt_isClassType,
+		genc.genExpr(x.X),
+		tname+nm_class_info_ptr_suffix)
+
 }
 
 //==== selector
@@ -259,10 +278,13 @@ func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 
 		switch xt := ast.UnderType(x.X.GetType()).(type) {
 		case *ast.VectorType:
-			return genc.genVectorIndex(x.X, x.Index)
+			return genc.genVectorIndex(x.X, x.Index, "len")
 		case *ast.VariadicType:
 			return genc.genVariadicIndex(xt, x.X, x.Index)
 		default:
+			if xt == ast.String8 {
+				return genc.genVectorIndex(x.X, x.Index, "bytes")
+			}
 			panic("assert")
 		}
 	}
@@ -270,7 +292,7 @@ func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 	return genc.genArrayComposite(x.Composite)
 }
 
-func (genc *genContext) genVectorIndex(x, inx ast.Expr) string {
+func (genc *genContext) genVectorIndex(x, inx ast.Expr, lenName string) string {
 	var name string
 	if id, ok := x.(*ast.IdentExpr); ok {
 		name = genc.genIdent(id)
@@ -282,11 +304,12 @@ func (genc *genContext) genVectorIndex(x, inx ast.Expr) string {
 			name,
 			genc.genExpr(x))
 	}
-	return fmt.Sprintf("%s->body[%s(%s, %s->len)]",
+	return fmt.Sprintf("%s->body[%s(%s, %s->%s)]",
 		name,
 		rt_indexcheck,
 		genc.genExpr(inx),
-		name)
+		name,
+		lenName)
 
 }
 

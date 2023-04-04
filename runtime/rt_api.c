@@ -231,6 +231,13 @@ EXPORTED TBool tri_equalStrings(TString s1, TString s2) {
     return memcmp(s1->body, s2->body, s1->bytes) == 0;
 }
 
+// Не используется компилятором
+EXPORTED TInt64 tri_equalBytes(TString s1, TInt64 pos1, TString s2, TInt64 pos2, TInt64 len) {
+    // TODO: нужно ли проверять длину и позиции?
+    return strncmp((char*)s1->body + pos1, (char*)s2->body + pos2, len);
+}
+
+
 //==== vector
 
 
@@ -304,10 +311,12 @@ EXPORTED void* tri_newVectorDesc() {
 	return v;
 }
 
+/* //unused 
 EXPORTED TInt64 tri_lenVector(void* vd) {
 	VectorDesc* v = vd;
 	return v->len;	
 }
+*/
 
 EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len) {
 	if (inx < 0 || inx >= len) {
@@ -411,19 +420,15 @@ EXPORTED void* tri_nilcheck(void* r) {
 
 //==== class
 
-typedef struct VTMini { size_t self_size; void (*__init__)(void*); } VTMini;
-typedef struct MetaMini { size_t object_size; void* base_desc; } MetaMini;
-typedef struct ObjectMini { void* vtable; } ObjectMini;
-
 EXPORTED void* tri_newObject(void* class_desc) {
 	
-	VTMini* vt = class_desc;
+	_BaseVT* vt = class_desc;
 	size_t vt_sz = vt->self_size;
 
-	MetaMini* m = class_desc + vt_sz;
+	_BaseMeta* m = class_desc + vt_sz;
 	size_t o_sz = m->object_size;
 	
-	ObjectMini* o = mm_allocate(o_sz);
+	_BaseObject* o = mm_allocate(o_sz);
 	memset(o, 0x0, o_sz);
 	o->vtable = vt;
     
@@ -434,20 +439,17 @@ EXPORTED void* tri_newObject(void* class_desc) {
 
 EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 	
-	VTMini* current_vt = ((ObjectMini*)object)->vtable;
-
-//printf("object_vt = %p\n", current_vt);
-//printf("target_desc = %p\n", target_desc);
+	_BaseVT* current_vt = ((_BaseObject*)object)->vtable;
 	
 	if (current_vt == target_desc) {
 //printf("found self\n");
 		return object;
 	}
 	
-	MetaMini* m = (void *)current_vt + current_vt->self_size;
+	_BaseMeta* m = (void *)current_vt + current_vt->self_size;
 	
 	while (m->base_desc != NULL) {
-		printf("base_desc = %p\n", m->base_desc);
+		//printf("base_desc = %p\n", m->base_desc);
 		
 		if (m->base_desc == target_desc) return object;
 		
@@ -459,6 +461,29 @@ EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 	
 	return NULL;
 }
+
+EXPORTED TBool tri_isClassType(void* object, void* target_desc) {
+    	_BaseVT* current_vt = ((_BaseObject*)object)->vtable;
+	
+	if (current_vt == target_desc) {
+//printf("found self\n");
+		return true;
+	}
+	
+	_BaseMeta* m = (void *)current_vt + current_vt->self_size;
+	
+	while (m->base_desc != NULL) {
+		//printf("base_desc = %p\n", m->base_desc);
+		
+		if (m->base_desc == target_desc) return true;
+		
+		current_vt = m->base_desc;
+		m = (void *)current_vt + current_vt->self_size;
+	}
+	
+	return false;
+}
+
 
 //==== conversions
 
@@ -704,10 +729,37 @@ EXPORTED void tri_crash(char* msg, char* pos) {
     panic();
 }
 
-//==== init
+//==== аргументы
 
-EXPORTED void tri_init() {
+static int _argc  = 0;
+static char **_argv;
+
+EXPORTED TInt64 tri_argc() {
+    return _argc;
+}
+
+EXPORTED TString tri_arg(TInt64 n) {
+    if (n < 0 || n >= _argc) {
+        return &emptyStringDesc;
+    }
+    
+    TInt64 bytes = strlen(_argv[n]);
+    
+    return tri_newString(bytes, -1, _argv[n]);
+}    
+
+//==== init/exit
+
+EXPORTED void tri_init(int argc, char *argv[]) {
+    
+    _argc = argc;
+    _argv = argv;
+    
     emptyStringDesc.bytes = 0;
     emptyStringDesc.symbols = 0;
     emptyStringDesc.body = (TByte*)"";
 }
+
+EXPORTED void tri_exit(TInt64 x) {
+    exit(x);
+}    

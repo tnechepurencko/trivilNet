@@ -34,6 +34,10 @@ func (cc *checkContext) expr(expr ast.Expr) {
 		cc.expr(x.Y)
 		cc.binaryExpr(x)
 
+	case *ast.OfTypeExpr:
+		cc.expr(x.X)
+		cc.ofTypeExpr(x)
+
 	case *ast.SelectorExpr:
 		cc.selector(x)
 
@@ -199,7 +203,7 @@ func (cc *checkContext) generalBracketExpr(x *ast.GeneralBracketExpr) {
 	}
 	x.Composite = nil
 
-	if x.X.IsReadOnly() {
+	if x.X.IsReadOnly() || ast.UnderType(t) == ast.String8 {
 		x.ReadOnly = true
 	}
 }
@@ -215,12 +219,22 @@ func (cc *checkContext) unaryExpr(x *ast.UnaryExpr) {
 				ast.TypeString(x.X.GetType()), x.Op.String())
 		}
 		x.Typ = t
+	case lexer.BITNOT:
+		var t = x.X.GetType()
+		if ast.IsIntegerType(t) {
+			// ok
+		} else {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
+				ast.TypeString(x.X.GetType()), x.Op.String())
+		}
+		x.Typ = t
 	case lexer.NOT:
 		if !ast.IsBoolType(x.X.GetType()) {
 			env.AddError(x.X.GetPos(), "СЕМ-ОШ-УНАРНАЯ-ТИП",
 				ast.TypeString(x.X.GetType()), x.Op.String())
 		}
 		x.Typ = ast.Bool
+
 	default:
 		panic(fmt.Sprintf("unary expr ni: %T op=%s", x, x.Op.String()))
 	}
@@ -248,7 +262,29 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 		}
 		x.Typ = ast.Bool
 
-	//case lexer.BITAND, lexer.BITOR:
+	case lexer.BITAND, lexer.BITOR, lexer.BITXOR:
+		var t = x.X.GetType()
+		if ast.IsInt64(t) || ast.IsWord64(t) || ast.IsByte(t) {
+			checkOperandTypes(x)
+		} else {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(t), x.Op.String())
+		}
+		x.Typ = t
+
+	case lexer.SHL, lexer.SHR:
+		var t = x.X.GetType()
+		if !ast.IsIntegerType(t) {
+			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(t), x.Op.String())
+		}
+		var t2 = x.Y.GetType()
+		if !ast.IsIntegerType(t2) {
+			env.AddError(x.Y.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+				ast.TypeString(t2), x.Op.String())
+		}
+		x.Typ = t
+
 	case lexer.EQ, lexer.NEQ:
 		var t = ast.UnderType(x.X.GetType())
 		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 || t == ast.Symbol || t == ast.String {
@@ -300,6 +336,34 @@ func checkMayBeOparands(x *ast.BinaryExpr) {
 	}
 	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",
 		ast.TypeString(x.X.GetType()), x.Op.String(), ast.TypeString(x.Y.GetType()))
+
+}
+
+func (cc *checkContext) ofTypeExpr(x *ast.OfTypeExpr) {
+
+	x.Typ = ast.Bool
+
+	t, ok := ast.UnderType(x.X.GetType()).(*ast.ClassType)
+	if !ok {
+		env.AddError(x.X.GetPos(), "СЕМ-ОПЕРАЦИЯ-ТИПА", ast.TypeName(x.X.GetType()))
+		return
+	}
+
+	target, ok := ast.UnderType(x.TargetTyp).(*ast.ClassType)
+	if !ok {
+		env.AddError(x.TargetTyp.GetPos(), "СЕМ-ОПЕРАЦИЯ-ТИПА", ast.TypeName(x.TargetTyp))
+		return
+	}
+	/*
+		if t == target {
+			env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(target))
+			return
+		}
+	*/
+
+	if !isDerivedClass(t, target) {
+		env.AddError(x.Pos, "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
+	}
 
 }
 

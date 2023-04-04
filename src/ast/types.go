@@ -119,6 +119,10 @@ func IsIntegerType(t Type) bool {
 	return t == Int64 || t == Byte || t == Word64
 }
 
+func IsByte(t Type) bool {
+	return UnderType(t) == Byte
+}
+
 func IsInt64(t Type) bool {
 	return UnderType(t) == Int64
 }
@@ -150,7 +154,7 @@ func IsIndexableType(t Type) bool {
 	case *VectorType, *VariadicType:
 		return true
 	default:
-		return false
+		return t == String8
 	}
 }
 
@@ -163,6 +167,9 @@ func ElementType(t Type) Type {
 	case *VariadicType:
 		return x.ElementTyp
 	default:
+		if t == String8 {
+			return Byte
+		}
 		panic("assert - должен быть индексируемый тип")
 	}
 }

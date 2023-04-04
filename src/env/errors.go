@@ -23,7 +23,7 @@ func initErrors() {
 	errors = make([]*Error, 0)
 	messages = make(map[string]string)
 
-	buf, err := os.ReadFile("errors.txt")
+	buf, err := os.ReadFile(SettingsRelativePath("errors.txt"))
 	if err != nil {
 		fmt.Println("! error reading errors.txt file ", err.Error())
 		return
@@ -41,7 +41,7 @@ func initErrors() {
 
 func PosString(pos int) string {
 	source, line, col := SourcePos(pos)
-	return fmt.Sprintf("%s:%d:%d", source.Path, line, col)
+	return fmt.Sprintf("%s:%d:%d", source.FilePath, line, col)
 }
 
 func AddError(pos int, id string, args ...interface{}) string {
@@ -64,7 +64,7 @@ func AddError(pos int, id string, args ...interface{}) string {
 		msg = fmt.Sprintf("сообщение для ошибки '%s' не задано!", id)
 	}
 
-	err.text = fmt.Sprintf("%s:%d:%d:%s: %s", source.Path, line, col, id, msg)
+	err.text = fmt.Sprintf("%s:%d:%d:%s: %s", source.FilePath, line, col, id, msg)
 
 	errors = append(errors, err)
 

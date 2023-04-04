@@ -35,10 +35,16 @@ const (
 	OR  // |
 	NOT // ~
 
-	BITAND // &.
-	BITOR  // |.
-	INC    // ++
-	DEC    // --
+	BITAND // :&
+	BITOR  // :|
+	BITXOR // :\
+	BITNOT // :~
+
+	SHL // <<
+	SHR // >>
+
+	INC // ++
+	DEC // --
 
 	EQ  // =
 	LSS // <
@@ -84,6 +90,7 @@ const (
 	LATER
 	MAYBE
 	MODULE
+	OFTYPE
 	RETURN
 	SETTING
 	TYPE
@@ -122,8 +129,13 @@ var tokens = [...]string{
 	NOT: "~",
 	//	XOR:     "^",
 
-	BITAND: "&.",
-	BITOR:  "|.",
+	BITAND: ":&",
+	BITOR:  ":|",
+	BITXOR: ":\\",
+	BITNOT: ":~",
+
+	SHL: "<<",
+	SHR: ">>",
 
 	INC: "++",
 	DEC: "--",
@@ -178,6 +190,7 @@ var tokens = [...]string{
 	BREAK:   "прервать",
 	VAR:     "пусть",
 	TYPE:    "тип",
+	OFTYPE:  "типа",
 	FN:      "фн",
 }
 
