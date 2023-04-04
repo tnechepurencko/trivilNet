@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <inttypes.h>
 
 #include "rt_defs.h"
 #include "rt_api.h"
@@ -282,7 +283,7 @@ void vectorFill(VectorDesc* v, size_t element_size, TWord64 filler) {
         break;
     default: {
             char buf[128];
-            sprintf(buf, "vectorFill not implemented for element size=%ld", element_size);
+            sprintf(buf, "vectorFill not implemented for element size=%zu", element_size);
             runtime_crash(buf);
         }
     }
@@ -321,7 +322,7 @@ EXPORTED TInt64 tri_lenVector(void* vd) {
 EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len) {
 	if (inx < 0 || inx >= len) {
         char buf[128];
-        sprintf(buf, "index %ld out of bounds [0..%ld[", inx, len);
+        sprintf(buf, "index %" PRId64 "out of bounds [0..%" PRId64 "[", inx, len);
 		runtime_crash(buf);
 	}
 	
@@ -695,7 +696,7 @@ EXPORTED void print_byte(TByte i) {
 }
 
 EXPORTED void print_int64(TInt64 i) {
-    printf("%ld", i);
+    printf("%" PRId64, i);
 }
 
 EXPORTED void print_float64(TFloat64 f) {
@@ -703,7 +704,7 @@ EXPORTED void print_float64(TFloat64 f) {
 }
 
 EXPORTED void print_word64(TWord64 x) {
-    printf("0x%lx", x);
+    printf("0x%" PRIx64, x);
 }
 
 EXPORTED void print_symbol(TSymbol s) {
