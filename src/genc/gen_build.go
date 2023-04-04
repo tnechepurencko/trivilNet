@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
+	"path/filepath"
 
 	//	"path"
 	"runtime"
@@ -18,6 +20,7 @@ const (
 	place_files    = "#files#"
 	place_target   = "#target#"
 	place_runtime  = "#runtime#"
+	place_genc     = "#genc#"
 )
 
 var _ = fmt.Printf
@@ -42,6 +45,8 @@ func BuildExe(modules []*ast.Module) {
 	command = strings.ReplaceAll(command, place_target, target)
 
 	var folder = env.PrepareOutFolder()
+	gencAbsolute, _ := filepath.Abs(folder)
+	command = strings.ReplaceAll(command, place_genc, gencAbsolute)
 
 	//=== write script file
 	var script = findTemplate(runtime.GOOS + "-script")
@@ -60,7 +65,10 @@ func BuildExe(modules []*ast.Module) {
 		mainCmd = "cmd"
 		arg = fmt.Sprintf("[/c cd %s & call %s ]", folder, script)
 		//fmt.Printf("arg %v\n", arg)
-
+	case "linux":
+		absoluteFolder, _ := filepath.Abs(folder)
+		mainCmd = "bash"
+		arg = path.Join(absoluteFolder, script)
 	default:
 		panic("build not implemented for " + runtime.GOOS)
 	}
