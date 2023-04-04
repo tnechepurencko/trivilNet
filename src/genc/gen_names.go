@@ -24,6 +24,8 @@ const (
 	nm_class_info_ptr_suffix = "_class_info_ptr"
 	nm_object_init_suffux    = "__init__"
 
+	nm_base_class_info_struct = "_BaseClassInfo"
+
 	nm_variadic_len_suffic = "_len"
 )
 
@@ -54,6 +56,7 @@ const (
 
 	rt_newObject      = rt_prefix + "newObject"
 	rt_checkClassType = rt_prefix + "checkClassType"
+	rt_isClassType    = rt_prefix + "isClassType"
 
 	rt_convert = rt_prefix
 

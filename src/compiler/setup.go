@@ -13,13 +13,21 @@ func (cc *compileContext) setup(setuped *ast.Module) []*ast.Module {
 
 	var setting = setuped.Setting
 
-	var err = env.CheckFolder(setting.Path)
-	if err != nil {
-		env.AddError(setting.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", setting.Path, err.Error())
+	env.Lookup.Process(setting.Path)
+	if env.Lookup.Err != nil {
+		env.AddError(setting.Pos, "ОКР-ОШ-ПУТЬ-ИМПОРТА", setting.Path, env.Lookup.Err.Error())
 		return nil
 	}
 
-	var list = env.GetFolderSources(setting.Path)
+	var npath = env.Lookup.ImportPath
+
+	var err = env.EnsureFolder(npath)
+	if err != nil {
+		env.AddError(setting.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", npath, err.Error())
+		return nil
+	}
+
+	var list = env.GetFolderSources(setting.Path, npath)
 
 	if len(list) == 0 {
 		// TODO: изменить ошибку
@@ -28,7 +36,7 @@ func (cc *compileContext) setup(setuped *ast.Module) []*ast.Module {
 	}
 
 	if len(list) == 1 && list[0].Err != nil {
-		env.AddError(setting.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", list[0].Path, list[0].Err.Error())
+		env.AddError(setting.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", list[0].FilePath, list[0].Err.Error())
 		return nil
 	}
 

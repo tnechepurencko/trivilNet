@@ -12,6 +12,13 @@ typedef uint32_t TSymbol;
 // для преобразования с сохранением битов
 typedef union {TFloat64 f; TInt64 i; TWord64 w; void* a; } TUnion64;
 
+// Основа любого класса и объекта любого класса
+typedef struct _BaseVT { size_t self_size; void (*__init__)(void*); } _BaseVT;
+typedef struct _BaseMeta { size_t object_size; void* base_desc; } _BaseMeta;
+typedef struct _BaseClassInfo { _BaseVT vt; _BaseMeta meta; } _BaseClassInfo;
+typedef struct _BaseObject { void* vtable; } _BaseObject;
+
+// Строка
 typedef struct StringDesc {
 //TODO meta
   int64_t bytes;
@@ -30,6 +37,9 @@ EXPORTED TInt64 tri_lenString(TString s);
 EXPORTED TString tri_emptyString();
 
 EXPORTED TBool tri_equalStrings(TString s1, TString s2); 
+
+// Не используется компилятором
+EXPORTED TInt64 tri_equalBytes(TString s1, TInt64 pos1, TString s2, TInt64 pos2, TInt64 len); 
 
 //==== vector
 
@@ -66,6 +76,7 @@ EXPORTED void* tri_nilcheck(void* r);
 EXPORTED void* tri_newObject(void* class_desc);
 
 EXPORTED void* tri_checkClassType(void* object, void* class_desc);
+EXPORTED TBool tri_isClassType(void* object, void* class_desc);
 
 //==== conversions
 

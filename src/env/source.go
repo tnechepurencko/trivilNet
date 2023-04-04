@@ -4,7 +4,7 @@ import (
 	er "errors"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -15,11 +15,11 @@ const (
 )
 
 type Source struct {
-	FolderPath string
-	FolderName string
-	FileName   string
+	OriginPath string // из командной строки или импорта
+	FilePath   string // нормализованный (файловый) путь, используемый для чтения
 
-	Path string // путь, используемый для чтения
+	FolderPath string
+	FileName   string
 
 	Bytes []byte
 	Lines []int
@@ -37,21 +37,22 @@ func initSources() {
 // Иначе, читает файл, заданный параметром, и добавляет остальные файлы из папки с нужным расширением
 func GetSources(spath string) []*Source {
 
-	if CheckFolder(spath) == nil {
-		return GetFolderSources(spath)
+	if EnsureFolder(spath) == nil {
+		return GetFolderSources(spath, spath)
 	}
 
-	folder, filename := path.Split(spath)
+	folder, filename := filepath.Split(spath)
 	if folder == "" {
 		folder = "."
 	}
 	//fmt.Printf("GetSources: '%v' '%v'\n", folder, filename)
 
 	var src = &Source{
+		OriginPath: spath,
+		FilePath:   spath,
+
 		FolderPath: folder,
-		FolderName: path.Base(folder),
 		FileName:   filename,
-		Path:       spath,
 
 		Lines: make([]int, 0),
 	}
@@ -60,11 +61,11 @@ func GetSources(spath string) []*Source {
 	list[0] = src
 
 	if !strings.HasSuffix(filename, file_extension) {
-		src.Err = er.New("неверное расширение файла " + path.Ext(filename))
+		src.Err = er.New("неверное расширение файла " + filepath.Ext(filename))
 		return list
 	}
 
-	buf, err := os.ReadFile(src.Path)
+	buf, err := os.ReadFile(src.FilePath)
 	if err != nil {
 		src.Err = err
 		return list
@@ -79,7 +80,7 @@ func GetSources(spath string) []*Source {
 	names, err := f.Readdirnames(0)
 	for _, name := range names {
 		if name != filename && strings.HasSuffix(name, file_extension) {
-			var src = readSource(folder, name)
+			var src = readSource(spath, folder, name)
 			if src.Err != nil {
 				list = make([]*Source, 1)
 				list[0] = src
@@ -88,6 +89,7 @@ func GetSources(spath string) []*Source {
 			list = append(list, src)
 		}
 	}
+	f.Close()
 
 	for _, s := range list {
 		sources = append(sources, s)
@@ -97,16 +99,11 @@ func GetSources(spath string) []*Source {
 	return list
 }
 
-func NormalizeFolderPath(fpath string) string {
-	// обработать репу - возможно, добавить имя реры, если оно не указано
-	return fpath
-}
-
 // Выдает список прочитанных исходников из папки
 // Если исходник не удается прочитать, то на этом составление списка заканчивается
 // и возвращается список из одного непрочитанного исходника.
 // В случае успеха, все исходники добавляются в список всех исходников
-func GetFolderSources(folder string) []*Source {
+func GetFolderSources(origin, folder string) []*Source {
 
 	var list = make([]*Source, 0)
 
@@ -118,7 +115,7 @@ func GetFolderSources(folder string) []*Source {
 	names, err := f.Readdirnames(0)
 	for _, name := range names {
 		if strings.HasSuffix(name, file_extension) {
-			var src = readSource(folder, name)
+			var src = readSource(origin, folder, name)
 			if src.Err != nil {
 				list = make([]*Source, 1)
 				list[0] = src
@@ -127,6 +124,7 @@ func GetFolderSources(folder string) []*Source {
 			list = append(list, src)
 		}
 	}
+	f.Close()
 
 	for _, s := range list {
 		sources = append(sources, s)
@@ -136,18 +134,19 @@ func GetFolderSources(folder string) []*Source {
 	return list
 }
 
-func readSource(folder, filename string) *Source {
+func readSource(origin, folder, filename string) *Source {
 
 	var src = &Source{
+		OriginPath: origin,
+		FilePath:   filepath.Join(folder, filename),
+
 		FolderPath: folder,
-		FolderName: path.Base(folder),
 		FileName:   filename,
-		Path:       path.Join(folder, filename),
 
 		Lines: make([]int, 0),
 	}
 
-	buf, err := os.ReadFile(src.Path)
+	buf, err := os.ReadFile(src.FilePath)
 	if err != nil {
 		src.Err = err
 		return src
@@ -161,10 +160,10 @@ func readSource(folder, filename string) *Source {
 func AddImmSource(text string) *Source {
 
 	var src = &Source{
-		Path:  "imm",
-		Lines: make([]int, 0),
-		No:    len(sources) + 1,
-		Bytes: []byte(text),
+		FilePath: "imm",
+		Lines:    make([]int, 0),
+		No:       len(sources) + 1,
+		Bytes:    []byte(text),
 	}
 
 	sources = append(sources, src)
@@ -172,7 +171,13 @@ func AddImmSource(text string) *Source {
 	return src
 }
 
-//====
+//==== файловые пути и имена
+
+func (s *Source) FolderName() string {
+	return filepath.Base(s.FolderPath)
+}
+
+//==== позиция
 
 func (s *Source) AddLine(ofs int) {
 	s.Lines = append(s.Lines, ofs)

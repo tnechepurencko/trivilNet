@@ -26,6 +26,14 @@ var tests = []one{
 	{">=", []pair{{GEQ, ""}}},
 	{":=", []pair{{ASSIGN, ""}}},
 
+	{":&", []pair{{BITAND, ""}}},
+	{":|", []pair{{BITOR, ""}}},
+	{":\\", []pair{{BITXOR, ""}}},
+	{":~", []pair{{BITNOT, ""}}},
+
+	{"<<", []pair{{SHL, ""}}},
+	{">>", []pair{{SHR, ""}}},
+
 	{"1", []pair{{INT, "1"}}},
 	{"0x1", []pair{{INT, "0x1"}}},
 	{"0xA", []pair{{INT, "0xA"}}},
@@ -36,6 +44,7 @@ var tests = []one{
 	{"'a'", []pair{{SYMBOL, "a"}}},
 	{"'\t'", []pair{{SYMBOL, "\t"}}},
 	{"'\\''", []pair{{SYMBOL, "\\'"}}},
+	{"'\uFFFD'", []pair{{SYMBOL, "\uFFFD"}}},
 
 	{"\"a\"", []pair{{STRING, "a"}}},
 	{"\"\t\"", []pair{{STRING, "\t"}}},
@@ -55,6 +64,8 @@ var tests = []one{
 	{"если-нет", []pair{{IDENT, "если-нет"}}},
 	{"ц--", []pair{{IDENT, "ц"}, {DEC, ""}}},
 	{"надо ложь иначе авария", []pair{{GUARD, "надо"}, {IDENT, "ложь"}, {ELSE, "иначе"}, {CRASH, "авария"}}},
+
+	{"типа", []pair{{OFTYPE, "типа"}}},
 }
 
 //===

@@ -54,6 +54,12 @@ type UnaryExpr struct {
 	X  Expr
 }
 
+type OfTypeExpr struct {
+	ExprBase
+	X         Expr
+	TargetTyp Type
+}
+
 type LiteralKind int
 
 const (

@@ -449,7 +449,26 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 			tok = MODIFIER
 			lit = s.scanModifier()
 		case ':':
-			tok = s.checkEqu(COLON, ASSIGN)
+			switch s.ch {
+			case '=':
+				tok = ASSIGN
+				s.next()
+			case '&':
+				tok = BITAND
+				s.next()
+			case '|':
+				tok = BITOR
+				s.next()
+			case '\\':
+				tok = BITXOR
+				s.next()
+			case '~':
+				tok = BITNOT
+				s.next()
+			default:
+				tok = COLON
+			}
+
 		case '.':
 			tok = DOT
 			if s.ch == '.' && s.peek() == '.' {
@@ -498,9 +517,27 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 		case '^':
 			tok = NOTNIL
 		case '<':
-			tok = s.checkEqu(LSS, LEQ)
+			switch s.ch {
+			case '=':
+				tok = LEQ
+				s.next()
+			case '<':
+				tok = SHL
+				s.next()
+			default:
+				tok = LSS
+			}
 		case '>':
-			tok = s.checkEqu(GTR, GEQ)
+			switch s.ch {
+			case '=':
+				tok = GEQ
+				s.next()
+			case '>':
+				tok = SHR
+				s.next()
+			default:
+				tok = GTR
+			}
 		case '=':
 			tok = EQ
 		case '#':

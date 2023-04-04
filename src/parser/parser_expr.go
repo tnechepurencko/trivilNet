@@ -22,11 +22,12 @@ func precedence(tok lexer.Token) int {
 		return 1
 	case lexer.AND:
 		return 2
-	case lexer.EQ, lexer.NEQ, lexer.LSS, lexer.LEQ, lexer.GTR, lexer.GEQ:
+	case lexer.EQ, lexer.NEQ, lexer.LSS, lexer.LEQ, lexer.GTR, lexer.GEQ,
+		lexer.OFTYPE:
 		return 3
-	case lexer.ADD, lexer.SUB, lexer.BITOR:
+	case lexer.ADD, lexer.SUB, lexer.BITOR, lexer.BITXOR:
 		return 4
-	case lexer.MUL, lexer.QUO, lexer.REM, lexer.BITAND:
+	case lexer.MUL, lexer.QUO, lexer.REM, lexer.BITAND, lexer.SHL, lexer.SHR:
 		return 5
 	default:
 		return lowestPrecedence
@@ -55,15 +56,19 @@ func (p *Parser) parseBinaryExpression(prec int) ast.Expr {
 		if opPrec < prec {
 			return x
 		}
-		var pos = p.pos
-		p.next()
 
-		var y = p.parseBinaryExpression(opPrec + 1)
-		x = &ast.BinaryExpr{
-			ExprBase: ast.ExprBase{Pos: pos},
-			X:        x,
-			Op:       op,
-			Y:        y,
+		if op == lexer.OFTYPE {
+			x = p.parseOfTypeExpression(x)
+		} else {
+			var pos = p.pos
+			p.next()
+			var y = p.parseBinaryExpression(opPrec + 1)
+			x = &ast.BinaryExpr{
+				ExprBase: ast.ExprBase{Pos: pos},
+				X:        x,
+				Op:       op,
+				Y:        y,
+			}
 		}
 	}
 }
@@ -74,7 +79,7 @@ func (p *Parser) parseUnaryExpression() ast.Expr {
 	}
 
 	switch p.tok {
-	case lexer.SUB, lexer.NOT:
+	case lexer.SUB, lexer.NOT, lexer.BITNOT:
 		var pos = p.pos
 		var op = p.tok
 		p.next()
@@ -92,6 +97,20 @@ func (p *Parser) parseUnaryExpression() ast.Expr {
 
 	// check ?
 	return x
+}
+
+func (p *Parser) parseOfTypeExpression(x ast.Expr) ast.Expr {
+
+	var pos = p.pos
+	p.next()
+
+	var n = &ast.OfTypeExpr{
+		ExprBase:  ast.ExprBase{Pos: pos},
+		X:         x,
+		TargetTyp: p.parseTypeRef(),
+	}
+
+	return n
 }
 
 func (p *Parser) parsePrimaryExpression() ast.Expr {
@@ -130,10 +149,14 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 			ExprBase: ast.ExprBase{Pos: p.pos},
 			Kind:     ast.Lit_Symbol,
 		}
-		r, _ := utf8.DecodeRuneInString(p.lit)
-		if r == utf8.RuneError {
+		if !utf8.ValidString(p.lit) {
 			p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "неверная кодировка символа")
 		} else {
+			s, err := strconv.Unquote("'" + p.lit + "'")
+			if err != nil {
+				panic("assert - unquote: " + err.Error())
+			}
+			r, _ := utf8.DecodeRuneInString(s)
 			l.WordVal = uint64(r)
 		}
 		p.next()
