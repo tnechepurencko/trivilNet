@@ -4,5 +4,5 @@ windows-build: clang #runtime#/rt_api.c #files# -I#runtime# -Wl,-noimplib -fno-o
 #windows-build: clang #files# -I#runtime# -l#runtime#/libwelrt -fno-omit-frame-pointer -o #target#.exe
 windows-script: build.bat
 
-linux-build: clang-15 #files# ../#runtime#/rt_api.c -lm -fno-omit-frame-pointer -I../#runtime# -o ../#target#
+linux-build: pushd . && cd #genc# && clang-15 #files# ../#runtime#/rt_api.c -lm -fno-omit-frame-pointer -I../#runtime# -o ../#target# && popd
 linux-script: build.sh
