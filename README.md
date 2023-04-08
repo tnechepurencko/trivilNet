@@ -2,7 +2,7 @@
 
 ### Установка и использование компилятора Тривиль на Windows
 
-1) Должны быть установлены:
+1) Перед установкой Тривиля должны быть установлены:
 * Go: https://go.dev/doc/install
 * Clang
 
@@ -12,7 +12,7 @@
 cd scripts
 install <path to install directory>
 ```
-3) Добавить <install directory> в PATH
+3) Добавить install directory в PATH
 
 4) Написать модуль на Тривиле. Для создания/ редактирования исходных текстов рекомендуем использовать Notepad++ к которому есть подсветка синтаксиса: doc/tri-notepad.xml
 
