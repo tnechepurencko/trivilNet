@@ -60,6 +60,7 @@
 {frame=single,numbers=left}
 
 \newcommand{\keyword}[1]{\textcolor{darkblue}{#1}}
+\newcommand{\cautiously}[1]{\textcolor{red}{#1}}
 
 \DefineVerbatimEnvironment%
 {Grammar}{Verbatim}
