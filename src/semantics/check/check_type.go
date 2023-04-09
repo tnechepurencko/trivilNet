@@ -162,10 +162,31 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		var li = literal(r)
 		if li != nil {
 			if li.Kind == ast.Lit_Int && li.IntVal >= 0 || li.IntVal <= 255 {
+				li.WordVal = uint64(li.IntVal)
 				li.Typ = ast.Byte
 				return true
 			} else if li.Kind == ast.Lit_Word && li.WordVal <= 255 {
 				li.Typ = ast.Byte
+				return true
+			}
+		}
+	case ast.Word64:
+		var li = literal(r)
+		if li != nil {
+			if li.Kind == ast.Lit_Int && li.IntVal >= 0 {
+				li.WordVal = uint64(li.IntVal)
+				li.Typ = ast.Word64
+				return true
+			} else if li.Kind == ast.Lit_Word {
+				li.Typ = ast.Word64
+				return true
+			}
+		}
+	case ast.Int64:
+		var li = literal(r)
+		if li != nil {
+			if li.Kind == ast.Lit_Word && li.WordVal <= 1<<63-1 {
+				li.Typ = ast.Int64
 				return true
 			}
 		}

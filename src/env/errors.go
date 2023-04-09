@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const errorsPath = "config/errors.txt"
+
 type Error struct {
 	id     string
 	source *Source
@@ -23,9 +25,9 @@ func initErrors() {
 	errors = make([]*Error, 0)
 	messages = make(map[string]string)
 
-	buf, err := os.ReadFile(SettingsRelativePath("errors.txt"))
+	buf, err := os.ReadFile(SettingsRelativePath(errorsPath))
 	if err != nil {
-		fmt.Println("! error reading errors.txt file ", err.Error())
+		fmt.Printf("! error reading %v file: %v\n", errorsPath, err.Error())
 		return
 	}
 

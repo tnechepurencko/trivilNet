@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	conf_file_name = "conf_genc.txt"
+	conf_file_name = "config/genc.txt"
 	place_files    = "#files#"
 	place_target   = "#target#"
 	place_runtime  = "#runtime#"
