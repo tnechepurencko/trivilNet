@@ -12,7 +12,7 @@ xcopy /q /y /e /k /i стд %1\стд
 xcopy /q /y /e /k /i runtime %1\runtime
 xcopy /q /y /k /i doc\report\*.pdf %1\doc
 xcopy /q /y /k /i doc\*.xml %1\doc
-xcopy /q /y /k /i *.txt %1
+xcopy /q /y /k /i config\*.* %1\config
 
 cd src
 
