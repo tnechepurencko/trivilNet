@@ -133,7 +133,9 @@ func (cc *checkContext) statement(s ast.Statement) {
 		cc.statements(x) // из else
 	case *ast.ExprStatement:
 		cc.expr(x.X)
-		if _, isCall := x.X.(*ast.CallExpr); !isCall {
+		if b, isBinary := x.X.(*ast.BinaryExpr); isBinary && b.Op == lexer.EQ {
+			env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПРИСВАИВАНИЕ")
+		} else if _, isCall := x.X.(*ast.CallExpr); !isCall {
 			env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-ИСПОЛЬЗУЕТСЯ")
 		}
 	case *ast.DeclStatement:
