@@ -12,10 +12,7 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 
 	switch x := expr.(type) {
 	case *ast.IdentExpr:
-		var d = lookInScopes(lc.scope, x.Name, x.Pos)
-		x.Obj = lc.considerTypeRef(d, x.Pos)
-
-		//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
+		lc.lookIdentExpr(x)
 
 	case *ast.UnaryExpr:
 		lc.lookExpr(x.X)
@@ -88,21 +85,31 @@ func (lc *lookContext) lookExpr(expr ast.Expr) {
 	}
 }
 
-// Возврашает TypeRef для TypeDecl, или сам объект
-func (lc *lookContext) considerTypeRef(d ast.Decl, pos int) ast.Node {
+func (lc *lookContext) lookIdentExpr(x *ast.IdentExpr) {
+
+	var d = lookInScopes(lc.scope, x.Name, x.Pos)
 
 	if td, ok := d.(*ast.TypeDecl); ok {
-		return &ast.TypeRef{
-			TypeBase: ast.TypeBase{Pos: pos},
-			TypeName: td.Name,
-			//ModuleName: ?
-			TypeDecl: td,
-			Typ:      td.Typ,
+		x.Obj = makeTypeRef(td, x.Pos)
+	} else {
+		x.Obj = d
+		if d.GetHost() == lc.module {
+			lc.lookDecl(d)
 		}
 	}
 
-	return d
+	//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
+}
 
+// Возврашает TypeRef для TypeDecl, или сам объект
+func makeTypeRef(td *ast.TypeDecl, pos int) *ast.TypeRef {
+	return &ast.TypeRef{
+		TypeBase: ast.TypeBase{Pos: pos},
+		TypeName: td.Name,
+		//ModuleName: ?
+		TypeDecl: td,
+		Typ:      td.Typ,
+	}
 }
 
 func (lc *lookContext) lookAccessToImported(x *ast.SelectorExpr) {
@@ -121,7 +128,13 @@ func (lc *lookContext) lookAccessToImported(x *ast.SelectorExpr) {
 		if !d.IsExported() {
 			env.AddError(x.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", x.Name, m.Name)
 		}
-		x.Obj = lc.considerTypeRef(d, x.Pos)
+
+		if td, ok := d.(*ast.TypeDecl); ok {
+			x.Obj = makeTypeRef(td, x.Pos)
+		} else {
+			x.Obj = d
+		}
+
 	} else {
 		var inv = &ast.InvalidDecl{
 			DeclBase: ast.DeclBase{Pos: x.Pos, Name: x.Name},
