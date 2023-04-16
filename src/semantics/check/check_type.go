@@ -213,7 +213,7 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		} else {
 			maybe, ok := rt.(*ast.MayBeType)
 			if ok {
-				if equalTypes(xt, maybe.Typ) {
+				if equalTypes(xt.Typ, maybe.Typ) {
 					return true
 				}
 			} else if equalTypes(xt.Typ, r.GetType()) {
