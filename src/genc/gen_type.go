@@ -106,6 +106,8 @@ func (genc *genContext) genTypeDecl(td *ast.TypeDecl) {
 	}
 }
 
+// ===== класс
+
 // genClassType - forward VT
 // genClassDesc - before entry
 func (genc *genContext) genClassType(td *ast.TypeDecl, x *ast.ClassType) {
