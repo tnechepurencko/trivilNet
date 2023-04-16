@@ -14,8 +14,11 @@ func (cc *checkContext) isConstExpr(expr ast.Expr) bool {
 		return true
 	case *ast.IdentExpr:
 		if x.Obj != nil {
-			if _, ok := x.Obj.(*ast.ConstDecl); ok {
+			switch x.Obj.(type) {
+			case *ast.ConstDecl, *ast.Function:
 				return true
+			default:
+				return false
 			}
 		}
 	}

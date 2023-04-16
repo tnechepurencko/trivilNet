@@ -751,6 +751,8 @@ EXPORTED TString tri_arg(TInt64 n) {
 
 //==== init/exit
 
+EXPORTED void register_default_crash_handler();
+
 EXPORTED void tri_init(int argc, char *argv[]) {
     
     _argc = argc;
@@ -759,6 +761,8 @@ EXPORTED void tri_init(int argc, char *argv[]) {
     emptyStringDesc.bytes = 0;
     emptyStringDesc.symbols = 0;
     emptyStringDesc.body = (TByte*)"";
+    
+    register_default_crash_handler();
 }
 
 EXPORTED void tri_exit(TInt64 x) {

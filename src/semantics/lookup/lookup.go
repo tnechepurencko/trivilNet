@@ -2,6 +2,8 @@ package lookup
 
 import (
 	"fmt"
+	//"strings"
+
 	"trivil/ast"
 	"trivil/env"
 )
@@ -9,15 +11,19 @@ import (
 var _ = fmt.Printf
 
 type lookContext struct {
-	module *ast.Module
-	scope  *ast.Scope
+	module    *ast.Module
+	scope     *ast.Scope
+	processed map[ast.Decl]bool
+	decls     []ast.Decl // в правильном порядке
 }
 
 func Process(m *ast.Module) {
 
 	var lc = &lookContext{
-		module: m,
-		scope:  m.Inner,
+		module:    m,
+		scope:     m.Inner,
+		processed: make(map[ast.Decl]bool),
+		decls:     make([]ast.Decl, 0),
 	}
 
 	// добавление импорта
@@ -47,40 +53,86 @@ func Process(m *ast.Module) {
 		panic("assert - should be module scope")
 	}
 
-	// TODO обойти типы
-	for _, d := range m.Decls {
-		td, ok := d.(*ast.TypeDecl)
-		if ok {
-			lc.lookTypeDecl(td)
+	/*
+		// TODO обойти типы
+		for _, d := range m.Decls {
+			td, ok := d.(*ast.TypeDecl)
+			if ok {
+				lc.lookTypeDecl(td)
+			}
 		}
+	*/
+
+	// обойти описания, кроме функций
+	for _, d := range m.Decls {
+		lc.lookDecl(d)
 	}
 
-	// обойти описания
-	for _, d := range m.Decls {
-		switch x := d.(type) {
-		case *ast.TypeDecl:
-			// уже сделано
-		case *ast.ConstDecl:
-			lc.lookConstDecl(x)
-		case *ast.VarDecl:
-			lc.lookVarDecl(x)
-		case *ast.Function:
-			// позже
-		default:
-			panic(fmt.Sprintf("lookup 3: ni %T", d))
-		}
-	}
 	// обойти функции
 	for _, d := range m.Decls {
 		f, ok := d.(*ast.Function)
 		if ok {
 			lc.lookFunction(f)
+			lc.decls = append(lc.decls, d)
 		}
 	}
 
 	if m.Entry != nil {
 		lc.lookEntry(m.Entry)
 	}
+	//show(m.Decls)
+	//show(lc.decls)
+
+	// Меняем порядок описаний - определение до использования
+	m.Decls = lc.decls
+}
+
+/* Отладочное, временно оставляю
+func show(decls []ast.Decl) {
+	var s = make([]string, len(decls))
+	for i, d := range decls {
+		s[i] = d.GetName()
+	}
+	fmt.Printf("%v\n", strings.Join(s, ","))
+}
+*/
+
+// Обрабатывает описания, кроме функций
+// Проверяет рекурсивные описания, задает порядок описаний
+func (lc *lookContext) lookDecl(d ast.Decl) {
+
+	_, ok := d.(*ast.Function)
+	if ok {
+		return
+	}
+
+	completed, exist := lc.processed[d]
+	//fmt.Printf("! %v %v %v\n", d.GetName(), completed, exist)
+
+	if exist {
+		if !completed {
+			env.AddError(d.GetPos(), "СЕМ-РЕКУРСИВНОЕ-ОПРЕДЕЛЕНИЕ", d.GetName())
+		}
+		return
+	}
+
+	lc.processed[d] = false
+
+	switch x := d.(type) {
+	case *ast.TypeDecl:
+		lc.lookTypeDecl(x)
+	case *ast.ConstDecl:
+		lc.lookConstDecl(x)
+	case *ast.VarDecl:
+		lc.lookVarDecl(x)
+	case *ast.Function:
+		return
+	default:
+		panic(fmt.Sprintf("lookup 3: ni %T", d))
+	}
+
+	lc.processed[d] = true
+	lc.decls = append(lc.decls, d)
 }
 
 //==== константы и переменные
@@ -225,8 +277,8 @@ func (lc *lookContext) lookLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
 	}
 	switch x := decl.(type) {
 	case *ast.VarDecl:
-		addToScope(x.Name, x, lc.scope)
 		lc.lookVarDecl(x)
+		addToScope(x.Name, x, lc.scope)
 	default:
 		panic(fmt.Sprintf("local decl: ni %T", decl))
 	}

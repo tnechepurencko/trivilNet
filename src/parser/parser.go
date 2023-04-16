@@ -312,6 +312,9 @@ func (p *Parser) parseConstGroup() []*ast.ConstDecl {
 		p.sep()
 
 		c = p.parseNextConst()
+		if exported {
+			c.Exported = true
+		}
 		cs = append(cs, c)
 	}
 

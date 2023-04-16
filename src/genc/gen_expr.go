@@ -240,7 +240,7 @@ func (genc *genContext) genSelector(x *ast.SelectorExpr) string {
 	}
 
 	var cl = ast.UnderType(x.X.GetType()).(*ast.ClassType)
-	return fmt.Sprintf("%s->%s.%s%s",
+	return fmt.Sprintf("(%s)->%s.%s%s",
 		genc.genExpr(x.X),
 		nm_class_fields,
 		pathToField(cl, x.Name),

@@ -9,9 +9,11 @@ import (
 var _ = fmt.Printf
 
 func addToScope(name string, d ast.Decl, scope *ast.Scope) {
-	_, ok := scope.Names[name]
+	x, ok := scope.Names[name]
 	if ok {
-		env.AddError(d.GetPos(), "СЕМ-УЖЕ-ОПИСАНО", name)
+		if _, inv := x.(*ast.InvalidDecl); !inv {
+			env.AddError(d.GetPos(), "СЕМ-УЖЕ-ОПИСАНО", name)
+		}
 		return
 	}
 	scope.Names[name] = d

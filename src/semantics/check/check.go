@@ -70,7 +70,7 @@ func (cc *checkContext) varDecl(v *ast.VarDecl) {
 		} else {
 			v.Typ = v.Init.GetType()
 			if v.Typ == nil {
-				panic("assert - не задан тип переменной")
+				panic("assert - не задан тип переменной " + env.PosString(v.Pos))
 			}
 
 			if ast.IsVoidType(v.Typ) {
@@ -109,8 +109,48 @@ func (cc *checkContext) function(f *ast.Function) {
 		cc.loopCount = 0
 		cc.statements(f.Seq)
 
+		if cc.returnTyp != nil {
+			if !cc.seqHasReturn(f.Seq) {
+				env.AddError(f.Pos, "СЕМ-НЕТ-ВЕРНУТЬ")
+			}
+		}
+
 		cc.returnTyp = nil
 	}
+}
+
+func (cc *checkContext) seqHasReturn(s *ast.StatementSeq) bool {
+	if len(s.Statements) == 0 {
+		return false
+	}
+	var last = s.Statements[len(s.Statements)-1]
+	switch x := last.(type) {
+	case *ast.Return:
+		return true
+	case *ast.Guard:
+		return true
+	case *ast.Crash:
+		return true
+	case *ast.If:
+		return cc.ifHasReturn(x)
+	// TODO: *ast.When
+	default:
+		return false
+	}
+
+}
+
+func (cc *checkContext) ifHasReturn(x *ast.If) bool {
+	if !cc.seqHasReturn(x.Then) {
+		return false
+	}
+	if x.Else == nil {
+		return false
+	}
+	if elsif, ok := x.Else.(*ast.If); ok {
+		return cc.ifHasReturn(elsif)
+	}
+	return cc.seqHasReturn(x.Else.(*ast.StatementSeq))
 }
 
 func (cc *checkContext) entry(e *ast.EntryFn) {
@@ -133,7 +173,9 @@ func (cc *checkContext) statement(s ast.Statement) {
 		cc.statements(x) // из else
 	case *ast.ExprStatement:
 		cc.expr(x.X)
-		if _, isCall := x.X.(*ast.CallExpr); !isCall {
+		if b, isBinary := x.X.(*ast.BinaryExpr); isBinary && b.Op == lexer.EQ {
+			env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПРИСВАИВАНИЕ")
+		} else if _, isCall := x.X.(*ast.CallExpr); !isCall {
 			env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-ИСПОЛЬЗУЕТСЯ")
 		}
 	case *ast.DeclStatement:

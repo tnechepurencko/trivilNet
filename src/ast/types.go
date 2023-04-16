@@ -184,6 +184,11 @@ func IsVariadicType(t Type) bool {
 	return ok
 }
 
+func IsFuncType(t Type) bool {
+	_, ok := UnderType(t).(*FuncType)
+	return ok
+}
+
 func IsClassType(t Type) bool {
 	_, ok := UnderType(t).(*ClassType)
 

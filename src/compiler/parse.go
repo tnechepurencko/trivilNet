@@ -37,7 +37,7 @@ func (cc *compileContext) parseList(isMain bool, list []*env.Source) []*ast.Modu
 
 			if !isMain && m.Name != src.FolderName() {
 				// не проверяю соответствие имени папки для головного модуля
-				env.AddError(m.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", m.Name, src.FolderName)
+				env.AddError(m.Pos, "ОКР-ОШ-ИМЯ-МОДУЛЯ", m.Name, src.FolderName())
 			}
 		} else if moduleName != m.Name {
 			env.AddError(m.Pos, "ОКР-ОШ-МОДУЛИ-В-ПАПКЕ", moduleName, m.Name, src.FolderPath)

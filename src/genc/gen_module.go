@@ -120,7 +120,15 @@ func (genc *genContext) params(ft *ast.FuncType) string {
 func (genc *genContext) genGlobalConst(x *ast.ConstDecl) {
 
 	var name = genc.declName(x)
-	var def = fmt.Sprintf("%s %s", genc.typeRef(x.Typ), name)
+
+	var typ string
+	if ast.IsFuncType(x.Typ) {
+		typ = genc.typeOfFunction(x.Value)
+	} else {
+		typ = genc.typeRef(x.Typ)
+	}
+
+	var def = fmt.Sprintf("%s %s", typ, name)
 
 	if initializeInPlace(x.Typ) {
 		def = "const " + def
@@ -133,6 +141,42 @@ func (genc *genContext) genGlobalConst(x *ast.ConstDecl) {
 	if x.Exported {
 		genc.h("extern %s;", def)
 	}
+}
+
+// Обработка кода: конст к = функ
+func (genc *genContext) typeOfFunction(x ast.Expr) string {
+
+	// Проверка применимости
+	id, ok := x.(*ast.IdentExpr)
+	if !ok {
+		panic("assert - должна быть ссылка на функцию")
+	}
+	f, ok := id.Obj.(*ast.Function)
+	if !ok {
+		panic("assert - должна быть функция")
+	}
+
+	var ft = ast.UnderType(f.Typ).(*ast.FuncType)
+
+	var name = genc.localName("FT")
+
+	var ps = make([]string, len(ft.Params))
+
+	for i, p := range ft.Params {
+		if ast.IsVariadicType(p.Typ) {
+			ps[i] = "TInt64"
+			ps = append(ps, "void*")
+		} else {
+			ps[i] = genc.typeRef(p.Typ)
+		}
+	}
+
+	genc.g("typedef %s (*%s)(%s);",
+		genc.returnType(ft),
+		name,
+		strings.Join(ps, ", "))
+
+	return name
 }
 
 func initializeInPlace(t ast.Type) bool {
@@ -155,7 +199,14 @@ func (genc *genContext) genGlobalVar(x *ast.VarDecl) {
 	}
 
 	var name = genc.declName(x)
-	var def = fmt.Sprintf("static %s %s", genc.typeRef(x.Typ), name)
+
+	var typ string
+	if ast.IsFuncType(x.Typ) {
+		panic("closure not implemented")
+	} else {
+		typ = genc.typeRef(x.Typ)
+	}
+	var def = fmt.Sprintf("static %s %s", typ, name)
 
 	if initializeInPlace(x.Typ) {
 		genc.c("%s = %s;", def, genc.genExpr(x.Init))
