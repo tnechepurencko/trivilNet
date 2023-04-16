@@ -109,8 +109,48 @@ func (cc *checkContext) function(f *ast.Function) {
 		cc.loopCount = 0
 		cc.statements(f.Seq)
 
+		if cc.returnTyp != nil {
+			if !cc.seqHasReturn(f.Seq) {
+				env.AddError(f.Pos, "СЕМ-НЕТ-ВЕРНУТЬ")
+			}
+		}
+
 		cc.returnTyp = nil
 	}
+}
+
+func (cc *checkContext) seqHasReturn(s *ast.StatementSeq) bool {
+	if len(s.Statements) == 0 {
+		return false
+	}
+	var last = s.Statements[len(s.Statements)-1]
+	switch x := last.(type) {
+	case *ast.Return:
+		return true
+	case *ast.Guard:
+		return true
+	case *ast.Crash:
+		return true
+	case *ast.If:
+		return cc.ifHasReturn(x)
+	// TODO: *ast.When
+	default:
+		return false
+	}
+
+}
+
+func (cc *checkContext) ifHasReturn(x *ast.If) bool {
+	if !cc.seqHasReturn(x.Then) {
+		return false
+	}
+	if x.Else == nil {
+		return false
+	}
+	if elsif, ok := x.Else.(*ast.If); ok {
+		return cc.ifHasReturn(elsif)
+	}
+	return cc.seqHasReturn(x.Else.(*ast.StatementSeq))
 }
 
 func (cc *checkContext) entry(e *ast.EntryFn) {
