@@ -42,12 +42,6 @@ func Compile(spath string) {
 
 	cc.orderedList()
 
-	/*
-		for i, m := range cc.list {
-			fmt.Printf("%d: %v %p\n", i, m.Name, m)
-		}
-	*/
-
 	for _, m := range cc.list {
 
 		if env.ErrorCount() != 0 {
@@ -56,6 +50,7 @@ func Compile(spath string) {
 
 		if *env.TraceCompile {
 			fmt.Printf("Анализ и генерация: '%s'\n", m.Name)
+			//fmt.Printf("Анализ и генерация: '%s' %p\n", m.Name, m)
 		}
 
 		cc.process(m)
