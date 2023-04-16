@@ -70,7 +70,7 @@ func (cc *checkContext) varDecl(v *ast.VarDecl) {
 		} else {
 			v.Typ = v.Init.GetType()
 			if v.Typ == nil {
-				panic("assert - не задан тип переменной")
+				panic("assert - не задан тип переменной " + env.PosString(v.Pos))
 			}
 
 			if ast.IsVoidType(v.Typ) {

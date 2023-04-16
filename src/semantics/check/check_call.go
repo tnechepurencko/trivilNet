@@ -23,7 +23,10 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	ft, ok := x.X.GetType().(*ast.FuncType)
 	if !ok {
 
-		env.AddError(x.X.GetPos(), "СЕМ-ВЫЗОВ-НЕ_ФУНКТИП", ast.TypeName(x.X.GetType()))
+		if !ast.IsInvalidType(x.X.GetType()) {
+			env.AddError(x.X.GetPos(), "СЕМ-ВЫЗОВ-НЕ_ФУНКТИП", ast.TypeName(x.X.GetType()))
+		}
+		x.Typ = ast.MakeInvalidType(x.X.GetPos())
 		return
 	}
 
