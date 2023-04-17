@@ -726,7 +726,7 @@ EXPORTED void println() {
 //==== crash
 
 EXPORTED void tri_crash(char* msg, char* pos) {
-	printf("авария '%s' в позиции %s\n", msg, pos);
+	printf("авария '%s' (%s)\n", msg, pos);
     panic();
 }
 
