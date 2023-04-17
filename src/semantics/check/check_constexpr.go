@@ -13,16 +13,20 @@ func (cc *checkContext) isConstExpr(expr ast.Expr) bool {
 	case *ast.LiteralExpr:
 		return true
 	case *ast.IdentExpr:
-		if x.Obj != nil {
-			switch x.Obj.(type) {
-			case *ast.ConstDecl, *ast.Function:
-				return true
-			default:
-				return false
-			}
-		}
+		return cc.isConstObj(x.Obj)
+	case *ast.SelectorExpr:
+		return x.X == nil && cc.isConstObj(x.Obj)
 	}
 	return false
+}
+
+func (cc *checkContext) isConstObj(obj ast.Node) bool {
+	switch obj.(type) {
+	case *ast.ConstDecl, *ast.Function:
+		return true
+	default:
+		return false
+	}
 }
 
 func (cc *checkContext) checkConstExpr(expr ast.Expr) {
