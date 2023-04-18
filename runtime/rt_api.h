@@ -133,7 +133,7 @@ EXPORTED void println();
 
 //==== crash
 
-EXPORTED void tri_crash(char* msg, char* pos);
+EXPORTED _Noreturn void tri_crash(char* msg, char* pos);
 
 //==== аргументы
 
