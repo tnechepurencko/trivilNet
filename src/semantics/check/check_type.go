@@ -195,12 +195,13 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 	}
 
 	switch xt := t.(type) {
-	case *ast.VectorType:
-		rvec, ok := ast.UnderType(r.GetType()).(*ast.VectorType)
-		// TODO: проверка для вектора векторов
-		if ok && equalTypes(xt.ElementTyp, rvec.ElementTyp) {
-			return true
-		}
+	/*
+		case *ast.VectorType:
+			rvec, ok := ast.UnderType(r.GetType()).(*ast.VectorType)
+			if ok && equalTypes(xt.ElementTyp, rvec.ElementTyp) {
+				return true
+			}
+	*/
 	case *ast.ClassType:
 		rcl, ok := ast.UnderType(r.GetType()).(*ast.ClassType)
 		if ok && isDerivedClass(xt, rcl) {
@@ -210,20 +211,13 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		var rt = ast.UnderType(r.GetType())
 		if rt == ast.NullType {
 			return true
-		} else {
-			maybe, ok := rt.(*ast.MayBeType)
-			if ok {
-				if equalTypes(xt.Typ, maybe.Typ) {
-					return true
-				}
-			} else if equalTypes(xt.Typ, r.GetType()) {
-				return true
-			}
+		} else if equalTypes(xt.Typ, r.GetType()) {
+			return true
 		}
 
 	}
 
-	// TODO: function types, целые литералы?, ...
+	// TODO: function types, ...
 	return false
 }
 
@@ -246,5 +240,19 @@ func (cc *checkContext) checkAssignable(lt ast.Type, r ast.Expr) {
 }
 
 func equalTypes(t1, t2 ast.Type) bool {
-	return ast.UnderType(t1) == ast.UnderType(t2)
+	if ast.UnderType(t1) == ast.UnderType(t2) {
+		return true
+	}
+	switch x1 := t1.(type) {
+	case *ast.VectorType:
+		x2, ok := t2.(*ast.VectorType)
+		return ok && equalTypes(x1.ElementTyp, x2.ElementTyp)
+	case *ast.VariadicType:
+		x2, ok := t2.(*ast.VariadicType)
+		return ok && equalTypes(x1.ElementTyp, x2.ElementTyp)
+	case *ast.MayBeType:
+		x2, ok := t2.(*ast.MayBeType)
+		return ok && equalTypes(x1.Typ, x2.Typ)
+	}
+	return false
 }
