@@ -256,3 +256,11 @@ func equalTypes(t1, t2 ast.Type) bool {
 	}
 	return false
 }
+
+//=== ошибки с проверкой
+
+func addErrorForType(t ast.Type, pos int, id string, args ...interface{}) {
+	if !ast.IsInvalidType(t) {
+		env.AddError(pos, id, args...)
+	}
+}
