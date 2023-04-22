@@ -16,42 +16,42 @@ const (
 	stdName   = "стд"
 )
 
-// Обработка входного пути для импорта:
+// Обработка входного пути для модуля:
 // Поиск по кодовой базе или нормализация
-type ImportLookup struct {
-	Root       string // "", если не задана кодовая база
-	Err        error  // ошибка при обработке кодовой базы или нормализации
-	ImportPath string // Найденный или нормализованный путь
+type NormalizePath struct {
+	Root  string // "", если не задана кодовая база
+	Err   error  // ошибка при обработке кодовой базы или нормализации
+	NPath string // Найденный или нормализованный путь
 }
 
 // Объект для поиска
-var Lookup ImportLookup
+var Normalizer NormalizePath
 
 // Словарь кодовых баз
 var sourceRoots = make(map[string]string)
 
 //====
 
-func (il *ImportLookup) Process(fpath string) {
+func (np *NormalizePath) Process(fpath string) {
 
-	il.Root = ""
-	il.Err = nil
+	np.Root = ""
+	np.Err = nil
 
 	var parts = strings.SplitN(fpath, separator, 2)
 	if len(parts) != 2 || len(parts) >= 1 && parts[0] == "" {
 
-		il.ImportPath, il.Err = filepath.Abs(fpath)
+		np.NPath, np.Err = filepath.Abs(fpath)
 
 		return
 	}
 
-	il.Root = parts[0]
-	rootPath, ok := sourceRoots[il.Root]
+	np.Root = parts[0]
+	rootPath, ok := sourceRoots[np.Root]
 	if !ok {
-		il.Err = goerr.New(fmt.Sprintf("путь для кодовой базы '%s' не задан", il.Root))
+		np.Err = goerr.New(fmt.Sprintf("путь для кодовой базы '%s' не задан", np.Root))
 		return
 	}
-	il.ImportPath = path.Join(rootPath, parts[1])
+	np.NPath = path.Join(rootPath, parts[1])
 }
 
 //====
