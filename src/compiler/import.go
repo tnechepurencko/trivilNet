@@ -21,6 +21,11 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 
 	m, ok := cc.imported[npath]
 	if ok {
+		if m == nil {
+			env.AddError(i.Pos, "СЕМ-ЦИКЛ-ИМПОРТА", i.Path)
+			return
+		}
+
 		// Модуль уже был импортирован
 		i.Mod = m
 		//fmt.Printf("already imported %s\n", i.Path)
@@ -55,6 +60,7 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 		list = append(list, tlist...)
 	}
 
+	cc.imported[npath] = nil // начали обработку
 	i.Mod = cc.parseModule(false, list)
 	cc.imported[npath] = i.Mod
 }

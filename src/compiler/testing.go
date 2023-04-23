@@ -20,7 +20,6 @@ const (
 )
 
 func TestOne(tpath string) {
-	fmt.Printf("тест %v\n", tpath)
 
 	env.Normalizer.Process(tpath)
 	if env.Normalizer.Err != nil {
