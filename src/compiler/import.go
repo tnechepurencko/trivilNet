@@ -45,6 +45,16 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 		return
 	}
 
+	if cc.testModulePath == i.Path {
+		var tlist = collectTestSources(i.Path, npath)
+
+		if env.ErrorCount() != 0 {
+			return
+		}
+
+		list = append(list, tlist...)
+	}
+
 	i.Mod = cc.parseModule(false, list)
 	cc.imported[npath] = i.Mod
 }
