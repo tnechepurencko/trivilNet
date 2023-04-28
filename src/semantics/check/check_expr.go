@@ -248,16 +248,16 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 		if ast.IsInt64(t) || ast.IsWord64(t) || ast.IsFloatType(t) {
 			checkOperandTypes(x)
 		} else {
-			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+			addErrorForType(t, x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(t), x.Op.String())
 		}
 		x.Typ = t
 	case lexer.AND, lexer.OR:
 		if !ast.IsBoolType(x.X.GetType()) {
-			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+			addErrorForType(x.X.GetType(), x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(x.X.GetType()), x.Op.String())
 		} else if !ast.IsBoolType(x.Y.GetType()) {
-			env.AddError(x.Y.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+			addErrorForType(x.Y.GetType(), x.Y.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(x.Y.GetType()), x.Op.String())
 		}
 		x.Typ = ast.Bool
@@ -267,7 +267,7 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 		if ast.IsInt64(t) || ast.IsWord64(t) || ast.IsByte(t) {
 			checkOperandTypes(x)
 		} else {
-			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+			addErrorForType(t, x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(t), x.Op.String())
 		}
 		x.Typ = t
@@ -275,12 +275,12 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 	case lexer.SHL, lexer.SHR:
 		var t = x.X.GetType()
 		if !ast.IsIntegerType(t) {
-			env.AddError(x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+			addErrorForType(t, x.X.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(t), x.Op.String())
 		}
 		var t2 = x.Y.GetType()
 		if !ast.IsIntegerType(t2) {
-			env.AddError(x.Y.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+			addErrorForType(t2, x.Y.GetPos(), "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(t2), x.Op.String())
 		}
 		x.Typ = t
@@ -294,7 +294,7 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 		} else if ast.IsMayBeType(t) {
 			checkMayBeOparands(x)
 		} else {
-			env.AddError(x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+			addErrorForType(t, x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(x.X.GetType()), x.Op.String())
 		}
 
@@ -304,7 +304,7 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 || t == ast.Symbol {
 			checkOperandTypes(x)
 		} else {
-			env.AddError(x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
+			addErrorForType(t, x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(x.X.GetType()), x.Op.String())
 		}
 		x.Typ = ast.Bool

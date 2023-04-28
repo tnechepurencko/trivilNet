@@ -9,11 +9,11 @@
 
 //==== crash
 
-void panic() {
+ _Noreturn void panic() {
     exit(1);
 }
 
-void runtime_crash(char* s) {
+ _Noreturn void runtime_crash(char* s) {
 	printf("!runtime_crash: %s\n", s);
     panic();
 }
@@ -725,8 +725,8 @@ EXPORTED void println() {
 
 //==== crash
 
-EXPORTED void tri_crash(char* msg, char* pos) {
-	printf("авария '%s' в позиции %s\n", msg, pos);
+EXPORTED  _Noreturn void tri_crash(char* msg, char* pos) {
+	printf("авария '%s' (%s)\n", msg, pos);
     panic();
 }
 

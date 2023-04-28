@@ -11,16 +11,21 @@ var _ = fmt.Printf
 
 func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 
-	env.Lookup.Process(i.Path)
-	if env.Lookup.Err != nil {
-		env.AddError(i.Pos, "ОКР-ОШ-ПУТЬ-ИМПОРТА", i.Path, env.Lookup.Err.Error())
+	env.Normalizer.Process(i.Path)
+	if env.Normalizer.Err != nil {
+		env.AddError(i.Pos, "ОКР-ОШ-ПУТЬ-ИМПОРТА", i.Path, env.Normalizer.Err.Error())
 		return
 	}
 
-	var npath = env.Lookup.ImportPath
+	var npath = env.Normalizer.NPath
 
 	m, ok := cc.imported[npath]
 	if ok {
+		if m == nil {
+			env.AddError(i.Pos, "СЕМ-ЦИКЛ-ИМПОРТА", i.Path)
+			return
+		}
+
 		// Модуль уже был импортирован
 		i.Mod = m
 		//fmt.Printf("already imported %s\n", i.Path)
@@ -45,6 +50,17 @@ func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
 		return
 	}
 
+	if cc.testModulePath == i.Path {
+		var tlist = collectTestSources(i.Path, npath)
+
+		if env.ErrorCount() != 0 {
+			return
+		}
+
+		list = append(list, tlist...)
+	}
+
+	cc.imported[npath] = nil // начали обработку
 	i.Mod = cc.parseModule(false, list)
 	cc.imported[npath] = i.Mod
 }

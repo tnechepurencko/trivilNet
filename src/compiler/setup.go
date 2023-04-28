@@ -13,13 +13,13 @@ func (cc *compileContext) setup(setuped *ast.Module) []*ast.Module {
 
 	var setting = setuped.Setting
 
-	env.Lookup.Process(setting.Path)
-	if env.Lookup.Err != nil {
-		env.AddError(setting.Pos, "ОКР-ОШ-ПУТЬ-ИМПОРТА", setting.Path, env.Lookup.Err.Error())
+	env.Normalizer.Process(setting.Path)
+	if env.Normalizer.Err != nil {
+		env.AddError(setting.Pos, "ОКР-ОШ-ПУТЬ-ИМПОРТА", setting.Path, env.Normalizer.Err.Error())
 		return nil
 	}
 
-	var npath = env.Lookup.ImportPath
+	var npath = env.Normalizer.NPath
 
 	var err = env.EnsureFolder(npath)
 	if err != nil {

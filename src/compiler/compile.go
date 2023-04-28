@@ -15,6 +15,8 @@ type compileContext struct {
 	main     *ast.Module
 	imported map[string]*ast.Module // map[folder]
 
+	testModulePath string // импорт путь для тестируемого модуля
+
 	// упорядоченный список для обработки
 	// головной модуль - в конце
 	list   []*ast.Module
@@ -40,6 +42,10 @@ func Compile(spath string) {
 		return
 	}
 
+	cc.build()
+}
+
+func (cc *compileContext) build() {
 	cc.orderedList()
 
 	for _, m := range cc.list {

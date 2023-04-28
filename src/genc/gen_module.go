@@ -146,17 +146,9 @@ func (genc *genContext) genGlobalConst(x *ast.ConstDecl) {
 // Обработка кода: конст к = функ
 func (genc *genContext) typeOfFunction(x ast.Expr) string {
 
-	// Проверка применимости
-	id, ok := x.(*ast.IdentExpr)
-	if !ok {
-		panic("assert - должна быть ссылка на функцию")
-	}
-	f, ok := id.Obj.(*ast.Function)
-	if !ok {
-		panic("assert - должна быть функция")
-	}
+	checkFunctionRef(x)
 
-	var ft = ast.UnderType(f.Typ).(*ast.FuncType)
+	var ft = ast.UnderType(x.GetType()).(*ast.FuncType)
 
 	var name = genc.localName("FT")
 
@@ -177,6 +169,22 @@ func (genc *genContext) typeOfFunction(x ast.Expr) string {
 		strings.Join(ps, ", "))
 
 	return name
+}
+
+func checkFunctionRef(expr ast.Expr) {
+
+	switch x := expr.(type) {
+	case *ast.IdentExpr:
+		if _, ok := x.Obj.(*ast.Function); ok {
+			return
+		}
+	case *ast.SelectorExpr:
+		if _, ok := x.Obj.(*ast.Function); ok {
+			return
+		}
+	}
+
+	panic("assert - должна быть ссылка на функцию")
 }
 
 func initializeInPlace(t ast.Type) bool {
