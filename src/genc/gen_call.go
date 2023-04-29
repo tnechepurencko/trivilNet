@@ -76,9 +76,15 @@ func (genc *genContext) genVariadicArgs(call *ast.CallExpr, vPar *ast.Param, vTy
 
 	var unfold = getUnfold(call)
 	if unfold != nil {
-		var loc = genc.localName("")
-		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
-		return fmt.Sprintf("%s->len, %s->body", loc, loc)
+
+		if ast.IsVariadicType(unfold.X.GetType()) {
+			var vr = genc.genExpr(unfold.X)
+			return fmt.Sprintf("%s%s, %s", vr, nm_variadic_len_suffic, vr)
+		} else {
+			var loc = genc.localName("")
+			genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
+			return fmt.Sprintf("%s->len, %s->body", loc, loc)
+		}
 	} else {
 		var loc = genc.localName("")
 		var et = genc.typeRef(vTyp.ElementTyp)
@@ -302,22 +308,34 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 
 	var unfold = getUnfold(call)
 	if unfold != nil {
-		var loc = genc.localName("")
-		genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
 
-		var lenName = "len"
-		if ast.UnderType(unfold.X.GetType()) == ast.String8 {
-			lenName = "bytes"
+		if ast.IsVariadicType(unfold.X.GetType()) {
+			var vr = genc.genExpr(unfold.X)
+
+			return fmt.Sprintf("%s(%s, sizeof(%s), %s%s, %s)",
+				rt_vectorAppend,
+				genc.genExpr(call.X),
+				et,
+				vr, nm_variadic_len_suffic,
+				vr)
+
+		} else {
+			var loc = genc.localName("")
+			genc.c("%s %s = %s;", genc.typeRef(unfold.X.GetType()), loc, genc.genExpr(unfold.X))
+
+			var lenName = "len"
+			if ast.UnderType(unfold.X.GetType()) == ast.String8 {
+				lenName = "bytes"
+			}
+
+			return fmt.Sprintf("%s(%s, sizeof(%s), %s->%s, %s->body)",
+				rt_vectorAppend,
+				genc.genExpr(call.X),
+				et,
+				loc,
+				lenName,
+				loc)
 		}
-
-		return fmt.Sprintf("%s(%s, sizeof(%s), %s->%s, %s->body)",
-			rt_vectorAppend,
-			genc.genExpr(call.X),
-			et,
-			loc,
-			lenName,
-			loc)
-
 	} else {
 		var loc = genc.localName("")
 
