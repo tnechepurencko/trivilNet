@@ -36,6 +36,17 @@ void* mm_reallocate(void* ptr, size_t size) {
 	return a;
 }	
 
+void* nogc_alloc(size_t size) {
+	void* a = malloc(size);
+	if (a == NULL) {
+		runtime_crash("memory not allocated");
+	}
+	return a;
+}	
+
+void nogc_free(void *ptr) {
+    free(ptr);
+}
 
 //==== utf-8
 

@@ -18,5 +18,8 @@ EXPORTED void* sysapi_fread(void* request, TString filename);
 // В случае ошибки выставляет код ошибки в запросе
 EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes);
 
+// Выдает список имен в папке - список строк []Строка
+// В случае ошибки выставляет код ошибки в запросе
+EXPORTED void* sysapi_dirnames(void* request, TString filename) ;
 
 #endif
