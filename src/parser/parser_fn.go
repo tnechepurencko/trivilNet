@@ -48,13 +48,14 @@ func (p *Parser) parseFn() *ast.Function {
 	if p.tok == lexer.MODIFIER {
 		var mod = p.parseModifier()
 
-		switch mod.name {
+		switch mod.Name {
 		case "@внеш":
 			n.External = true
-		default:
-			p.error(p.pos, "ПАР-ОШ-МОДИФИКАТОР", mod.name)
-		}
 
+		default:
+			p.error(p.pos, "ПАР-ОШ-МОДИФИКАТОР", mod.Name)
+		}
+		/* перенесено в словарь
 		for i, a := range mod.attrs {
 			if a == "имя" {
 				n.ExternalName = mod.values[i]
@@ -62,7 +63,8 @@ func (p *Parser) parseFn() *ast.Function {
 				p.error(p.pos, "ПАР-ОШ-МОД-АТРИБУТ", a)
 			}
 		}
-
+		*/
+		n.Mod = mod
 	} else {
 		n.Seq = p.parseStatementSeq()
 	}

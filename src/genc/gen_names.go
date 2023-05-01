@@ -88,8 +88,8 @@ func (genc *genContext) declName(d ast.Decl) string {
 	f, is_fn := d.(*ast.Function)
 
 	if is_fn && f.External {
-		var name = f.ExternalName
-		if name == "" {
+		name, ok := f.Mod.Attrs["имя"]
+		if !ok {
 			name = env.OutName(f.Name)
 		}
 		genc.declNames[d] = name
