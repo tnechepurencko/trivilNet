@@ -35,6 +35,7 @@ typedef StringDesc* TString;
 //==== strings
 
 EXPORTED TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* body);
+EXPORTED TString tri_newString(TInt64 bytes, TInt64 symbols, char* body);
 
 EXPORTED TInt64 tri_lenString(TString s);
 

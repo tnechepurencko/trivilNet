@@ -3,13 +3,15 @@
 
 #include "rt_api.h"
 
-struct SysFiles {
+// Используется 
+struct Request {
     _BaseObject _base;
     //FILE* handler;
-    TString errcode;
+    TString err_id;
 };
 
 // Возвращает дескриптор байтового массива или NULL, в случае ошибки
-EXPORTED void* sysapi_fread(struct SysFiles* sf, TString filename);
+// Выставляет код ошибки
+EXPORTED void* sysapi_fread(void* request, TString filename);
 
 #endif
