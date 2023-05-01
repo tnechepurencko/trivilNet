@@ -10,8 +10,13 @@ struct Request {
     TString err_id;
 };
 
-// Возвращает дескриптор байтового массива или NULL, в случае ошибки
-// Выставляет код ошибки
+// Читает файл, возвращает дескриптор байтового вектора.
+// В случае ошибки, возвращает NULL и выставляет код ошибки в запросе 
 EXPORTED void* sysapi_fread(void* request, TString filename);
+
+// Записывает в файл байтовый вектор.
+// В случае ошибки выставляет код ошибки в запросе
+EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes);
+
 
 #endif

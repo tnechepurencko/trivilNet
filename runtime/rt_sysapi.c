@@ -5,7 +5,6 @@
 
 struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
 
-
 TString error_id(int errcode) {
     char buf[80];
     
@@ -17,8 +16,6 @@ TString error_id(int errcode) {
     return tri_newString(strlen(buf), -1, buf);
 }
 
-// Возвращает дескриптор байтового массива или NULL, в случае ошибки
-// Выставляет код ошибки
 EXPORTED void* sysapi_fread(void* request, TString filename) {
     
     struct Request* req = request;
@@ -35,12 +32,9 @@ EXPORTED void* sysapi_fread(void* request, TString filename) {
     size_t sz = ftell(fp);
     rewind(fp);
     
-    printf("size %zu\n", sz);    
-    
     struct BytesDesc* bytes = tri_newVector(sizeof(TByte), sz, 0); 
     
     size_t ret = fread(bytes->body, sizeof(TByte), sz, fp);
-    printf("read %zu\n", ret);    
     
     if (ret != sz) {
             req->err_id = error_id(ferror(fp));
@@ -52,4 +46,31 @@ EXPORTED void* sysapi_fread(void* request, TString filename) {
     fclose(fp);
     req->err_id = NULL;
     return bytes;
+}
+
+EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes) {
+    
+    struct Request* req = request;
+    
+    FILE* fp;
+
+    int errcode = fopen_s(&fp, (char *)filename->body, "wb");
+    if (errcode != 0) {
+        req->err_id = error_id(errcode);
+        return;
+    }
+    
+    struct BytesDesc* v = bytes;
+    
+    size_t ret = fwrite(v->body, sizeof(TByte), v->len, fp);
+    
+    if (ret != v->len) {
+            req->err_id = error_id(ferror(fp));
+            // TODO: удалить bytes?
+            fclose(fp);
+            return;
+    }
+
+    fclose(fp);
+    req->err_id = NULL;
 }
