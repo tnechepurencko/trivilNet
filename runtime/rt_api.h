@@ -1,3 +1,6 @@
+#ifndef _rt_api_H
+#define _rt_api_H
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -145,3 +148,5 @@ EXPORTED TString tri_arg(TInt64 n);
 EXPORTED void tri_init(int argc, char *argv[]);
 
 EXPORTED void tri_exit(TInt64 x);
+
+#endif
