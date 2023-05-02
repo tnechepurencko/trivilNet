@@ -251,6 +251,15 @@ EXPORTED TInt64 tri_equalBytes(TString s1, TInt64 pos1, TString s2, TInt64 pos2,
     return strncmp((char*)s1->body + pos1, (char*)s2->body + pos2, len);
 }
 
+EXPORTED TString tri_substring(TString source, TInt64 pos, TInt64 len) {
+    if (pos < 0) pos = 0;
+    if (len < 0) len = 0;
+    if (pos + len > source->bytes) len = source->bytes - pos;
+    
+    if (len == 0) return &emptyStringDesc;
+    
+    return tri_newString(len, -1, (char*)source->body + pos);
+}
 
 //==== vector
 
