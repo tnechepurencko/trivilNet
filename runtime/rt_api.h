@@ -144,8 +144,12 @@ EXPORTED _Noreturn void tri_crash(char* msg, char* pos);
 EXPORTED TInt64 tri_argc();
 EXPORTED TString tri_arg(TInt64 n);
 
-//==== ручное выделение/освобождение памяти
+//==== управление памятью
 
+// выделение памяти, в GC области 
+//Пока не используется: void* gc_alloc(size_t size) {
+
+// ручное выделение/освобождение памяти
 void* nogc_alloc(size_t size);
 void nogc_free(void *ptr);
 

@@ -20,15 +20,17 @@
 
 //==== memory
 
-void* mm_allocate(size_t size) {
-	void* a = malloc(size);
+// TODO: заменить malloc
+void* gc_alloc(size_t size) {
+	void* a = malloc(size); 
 	if (a == NULL) {
 		runtime_crash("memory not allocated");
 	}
 	return a;
 }	
 
-void* mm_reallocate(void* ptr, size_t size) {
+// TODO: заменить realloc
+void* gc_realloc(void* ptr, size_t size) {
 	void* a = realloc(ptr, size);
 	if (a == NULL) {
 		runtime_crash("memory not reallocated");
@@ -158,7 +160,7 @@ EXPORTED TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbol
     }
 
 	size_t sz = sizeof(StringDesc) + bytes + 1; // +1 для 0x0
-	void* mem = mm_allocate(sz);
+	void* mem = gc_alloc(sz);
 //	printf("mem=%p\n", mem);
 
 	TString s = mem;
@@ -176,7 +178,7 @@ EXPORTED TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbol
 EXPORTED TString tri_newString(TInt64 bytes, TInt64 symbols, char* body) {
 
 	size_t sz = sizeof(StringDesc) + bytes + 1; // +1 для 0x0
-	void* mem = mm_allocate(sz);
+	void* mem = gc_alloc(sz);
 
 	TString s = mem;
 	s->bytes = bytes;
@@ -199,7 +201,7 @@ EXPORTED TString tri_emptyString() {
 EXPORTED TString tri_newStringDesc(TInt64 bytes, TInt64 symbols) {
 
 	size_t sz = sizeof(StringDesc) + bytes + 1; // +1 для 0x0
-	void* mem = mm_allocate(sz);
+	void* mem = gc_alloc(sz);
 
 	TString s = mem;
 	s->bytes = bytes;
@@ -262,7 +264,7 @@ typedef struct VectorDesc {
 
 
 EXPORTED void* tri_newVector(size_t element_size, TInt64 len, TInt64 cap) {
-	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
+	VectorDesc* v = gc_alloc(sizeof(VectorDesc));
 	v->len = len;
     
     if (cap < len) { cap = len; }
@@ -273,7 +275,7 @@ EXPORTED void* tri_newVector(size_t element_size, TInt64 len, TInt64 cap) {
         return v;
     }
 
-    v->body = mm_allocate(element_size * cap);
+    v->body = gc_alloc(element_size * cap);
     //memset(v->body, 0x0, element_size * cap); //TODO: не надо, см. fill
 	
 	return v;
@@ -301,7 +303,7 @@ void vectorFill(VectorDesc* v, size_t element_size, TWord64 filler) {
 }
 
 EXPORTED void* tri_newVectorFill(size_t element_size, TInt64 len, TInt64 cap, TWord64 filler) {
-	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
+	VectorDesc* v = gc_alloc(sizeof(VectorDesc));
 	v->len = len;
     
     if (cap < len) { cap = len; }
@@ -312,14 +314,14 @@ EXPORTED void* tri_newVectorFill(size_t element_size, TInt64 len, TInt64 cap, TW
         return v;
     }
 
-    v->body = mm_allocate(element_size * cap);
+    v->body = gc_alloc(element_size * cap);
     vectorFill(v, element_size, filler);
     
 	return v;    
 }    
 
 EXPORTED void* tri_newVectorDesc() {
-	VectorDesc* v = mm_allocate(sizeof(VectorDesc));
+	VectorDesc* v = gc_alloc(sizeof(VectorDesc));
 	return v;
 }
 
@@ -346,7 +348,7 @@ void vectorExtend(VectorDesc* v, size_t element_size, TInt64 new_cap) {
     if (new_cap < v->capacity * 2) new_cap = v->capacity * 2;
 
     //TODO: нужно копировать по длине (не по capacity)
-    v->body = mm_reallocate(v->body, new_cap * element_size);
+    v->body = gc_realloc(v->body, new_cap * element_size);
     v->capacity = new_cap;
 }    
 
@@ -440,7 +442,7 @@ EXPORTED void* tri_newObject(void* class_desc) {
 	_BaseMeta* m = class_desc + vt_sz;
 	size_t o_sz = m->object_size;
 	
-	_BaseObject* o = mm_allocate(o_sz);
+	_BaseObject* o = gc_alloc(o_sz);
 	memset(o, 0x0, o_sz);
 	o->vtable = vt;
     
@@ -590,7 +592,7 @@ EXPORTED void* tri_TString_to_Bytes(TString s) {
 	
 	v->len = s->bytes;
     v->capacity = s->bytes;
-	v->body = mm_allocate(sizeof(TByte) * v->len);
+	v->body = gc_alloc(sizeof(TByte) * v->len);
 	memcpy(v->body, s->body, s->bytes);
 	
 	return v;
@@ -605,7 +607,7 @@ EXPORTED void* tri_TSymbol_to_Bytes(TSymbol x) {
 
  	v->len = len;
     v->capacity = len;
-	v->body = mm_allocate(sizeof(TByte) * len);
+	v->body = gc_alloc(sizeof(TByte) * len);
 	memcpy(v->body, buf, len);
 	
 	return v;   
@@ -632,7 +634,7 @@ EXPORTED void* tri_TString_to_Symbols(TString s) {
 	VectorDesc* v = tri_newVectorDesc();
 	v->len = count;
     v->capacity = count;
-	v->body = mm_allocate(sizeof(TSymbol) * count);	
+	v->body = gc_alloc(sizeof(TSymbol) * count);	
 	
 	TSymbol* symbuf = v->body;
 	i = 0;

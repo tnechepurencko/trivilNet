@@ -10,6 +10,9 @@ struct Request {
     TString err_id;
 };
 
+// Выдает строку - папку программы с правильными разделителями
+EXPORTED TString sysapi_exec_path();
+
 // Читает файл, возвращает дескриптор байтового вектора.
 // В случае ошибки, возвращает NULL и выставляет код ошибки в запросе 
 EXPORTED void* sysapi_fread(void* request, TString filename);

@@ -5,6 +5,8 @@
 
 struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
 
+//==== коды ошибок общие ===
+
 TString error_id(int errcode) {
     char buf[80];
     
@@ -15,6 +17,29 @@ TString error_id(int errcode) {
     }
     return tri_newString(strlen(buf), -1, buf);
 }
+
+//==== папки ====
+
+EXPORTED TString sysapi_exec_path() {
+    TString folder = tri_arg(0);
+    
+#if defined(_WIN32) || defined(_WIN64)
+    size_t len = folder->bytes;
+    char* s = nogc_alloc(len + 1);
+    strncpy_s(s, len+1, (char*)folder->body, len);    
+    s[len] = 0; 
+
+    for (int i = 0; i < folder->bytes; i++) {
+        if (s[i] == '\\') s[i] = '/';
+    }   
+    folder =  tri_newString(len, -1, s); 
+    nogc_free(s);
+#endif
+
+    return folder;
+}
+
+//==== чтение/запись ====
 
 EXPORTED void* sysapi_fread(void* request, TString filename) {
     
