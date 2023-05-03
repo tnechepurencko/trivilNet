@@ -43,11 +43,11 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		genc.genWhile(x)
 	case *ast.Guard:
 		genc.genGuard(x)
-	case *ast.When:
-		if canWhenAsSwitch(x) {
-			genc.genWhenAsSwitch(x)
+	case *ast.Select:
+		if canSelectAsSwitch(x) {
+			genc.genSelectAsSwitch(x)
 		} else {
-			genc.genWhenAsIfs(x)
+			genc.genSelectAsIfs(x)
 		}
 	case *ast.Return:
 		r := ""
@@ -150,7 +150,7 @@ func literal(expr ast.Expr) *ast.LiteralExpr {
 
 //==== когда
 
-func canWhenAsSwitch(x *ast.When) bool {
+func canSelectAsSwitch(x *ast.Select) bool {
 	var t = ast.UnderType(x.X.GetType())
 	switch t {
 	case ast.Byte, ast.Int64, ast.Word64, ast.Symbol:
@@ -168,7 +168,7 @@ func canWhenAsSwitch(x *ast.When) bool {
 	return true
 }
 
-func (genc *genContext) genWhenAsSwitch(x *ast.When) {
+func (genc *genContext) genSelectAsSwitch(x *ast.Select) {
 	genc.c("switch (%s) {", genc.genExpr(x.X))
 
 	for _, c := range x.Cases {
@@ -187,7 +187,7 @@ func (genc *genContext) genWhenAsSwitch(x *ast.When) {
 	genc.c("}")
 }
 
-func (genc *genContext) genWhenAsIfs(x *ast.When) {
+func (genc *genContext) genSelectAsIfs(x *ast.Select) {
 
 	var strCompare = ast.IsStringType(x.X.GetType())
 

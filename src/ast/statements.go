@@ -72,7 +72,7 @@ type Guard struct {
 	Else Statement
 }
 
-type When struct {
+type Select struct {
 	StatementBase
 	X     Expr
 	Cases []*Case

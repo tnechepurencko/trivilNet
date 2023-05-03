@@ -133,7 +133,7 @@ func (cc *checkContext) seqHasReturn(s *ast.StatementSeq) bool {
 		return true
 	case *ast.If:
 		return cc.ifHasReturn(x)
-	// TODO: *ast.When
+	// TODO: *ast.Select
 	default:
 		return false
 	}
@@ -231,8 +231,8 @@ func (cc *checkContext) statement(s ast.Statement) {
 				env.AddError(x.Else.GetPos(), "СЕМ-НЕ-ЗАВЕРШАЮЩИЙ")
 			}
 		}
-	case *ast.When:
-		cc.checkWhen(x)
+	case *ast.Select:
+		cc.checkSelect(x)
 
 	case *ast.Return:
 		if x.X != nil {
@@ -271,9 +271,9 @@ func (cc *checkContext) localDecl(decl ast.Decl) {
 	}
 }
 
-func (cc *checkContext) checkWhen(x *ast.When) {
+func (cc *checkContext) checkSelect(x *ast.Select) {
 	cc.expr(x.X)
-	checkWhenExpr(x.X)
+	checkSelectExpr(x.X)
 
 	for _, c := range x.Cases {
 		for _, e := range c.Exprs {
@@ -290,7 +290,7 @@ func (cc *checkContext) checkWhen(x *ast.When) {
 
 }
 
-func checkWhenExpr(x ast.Expr) {
+func checkSelectExpr(x ast.Expr) {
 	var t = ast.UnderType(x.GetType())
 	switch t {
 	case ast.Byte, ast.Int64, ast.Word64, ast.Symbol, ast.String:
