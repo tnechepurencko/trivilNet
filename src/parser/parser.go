@@ -456,10 +456,11 @@ type modifier struct {
 	values []string
 }
 
-func (p *Parser) parseModifier() modifier {
+func (p *Parser) parseModifier() *ast.Modifier {
 
-	var mod = modifier{
-		name: p.lit,
+	var mod = &ast.Modifier{
+		Name:  p.lit,
+		Attrs: make(map[string]string),
 	}
 	p.next()
 
@@ -489,8 +490,7 @@ func (p *Parser) parseModifier() modifier {
 			p.expect(lexer.STRING)
 		}
 
-		mod.attrs = append(mod.attrs, attr)
-		mod.values = append(mod.values, value)
+		mod.Attrs[attr] = value
 
 		if p.tok == lexer.RPAR {
 			break

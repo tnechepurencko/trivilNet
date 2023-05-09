@@ -133,7 +133,7 @@ func (cc *checkContext) seqHasReturn(s *ast.StatementSeq) bool {
 		return true
 	case *ast.If:
 		return cc.ifHasReturn(x)
-	// TODO: *ast.When
+	// TODO: *ast.Select
 	default:
 		return false
 	}
@@ -172,11 +172,13 @@ func (cc *checkContext) statement(s ast.Statement) {
 	case *ast.StatementSeq:
 		cc.statements(x) // из else
 	case *ast.ExprStatement:
-		cc.expr(x.X)
 		if b, isBinary := x.X.(*ast.BinaryExpr); isBinary && b.Op == lexer.EQ {
 			env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПРИСВАИВАНИЕ")
-		} else if _, isCall := x.X.(*ast.CallExpr); !isCall {
-			env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-ИСПОЛЬЗУЕТСЯ")
+		} else {
+			cc.expr(x.X)
+			if _, isCall := x.X.(*ast.CallExpr); !isCall {
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-ИСПОЛЬЗУЕТСЯ")
+			}
 		}
 	case *ast.DeclStatement:
 		cc.localDecl(x.D)
@@ -229,8 +231,8 @@ func (cc *checkContext) statement(s ast.Statement) {
 				env.AddError(x.Else.GetPos(), "СЕМ-НЕ-ЗАВЕРШАЮЩИЙ")
 			}
 		}
-	case *ast.When:
-		cc.checkWhen(x)
+	case *ast.Select:
+		cc.checkSelect(x)
 
 	case *ast.Return:
 		if x.X != nil {
@@ -269,9 +271,15 @@ func (cc *checkContext) localDecl(decl ast.Decl) {
 	}
 }
 
-func (cc *checkContext) checkWhen(x *ast.When) {
+func (cc *checkContext) checkSelect(x *ast.Select) {
+
+	if x.X == nil {
+		cc.checkPredicateSelect(x)
+		return
+	}
+
 	cc.expr(x.X)
-	checkWhenExpr(x.X)
+	checkSelectExpr(x.X)
 
 	for _, c := range x.Cases {
 		for _, e := range c.Exprs {
@@ -285,10 +293,25 @@ func (cc *checkContext) checkWhen(x *ast.When) {
 	if x.Else != nil {
 		cc.statements(x.Else)
 	}
-
 }
 
-func checkWhenExpr(x ast.Expr) {
+func (cc *checkContext) checkPredicateSelect(x *ast.Select) {
+
+	for _, c := range x.Cases {
+		for _, e := range c.Exprs {
+			cc.expr(e)
+			if !equalTypes(e.GetType(), ast.Bool) {
+				env.AddError(e.GetPos(), "СЕМ-КОГДА-ОШ-ПРЕДИКАТ", ast.TypeName(ast.Bool), ast.TypeName(e.GetType()))
+			}
+		}
+		cc.statements(c.Seq)
+	}
+	if x.Else != nil {
+		cc.statements(x.Else)
+	}
+}
+
+func checkSelectExpr(x ast.Expr) {
 	var t = ast.UnderType(x.GetType())
 	switch t {
 	case ast.Byte, ast.Int64, ast.Word64, ast.Symbol, ast.String:

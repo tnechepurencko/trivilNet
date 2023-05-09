@@ -44,7 +44,7 @@ var endWhenCase = tokens{
 	lexer.EOF:    true,
 	lexer.RBRACE: true,
 
-	lexer.IS:   true,
+	lexer.WHEN: true,
 	lexer.ELSE: true,
 }
 
@@ -108,8 +108,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseIf()
 	case lexer.WHILE:
 		return p.parseWhile()
-	case lexer.WHEN:
-		return p.parseWhen()
+	case lexer.SELECT:
+		return p.parseSelect()
 	case lexer.RETURN:
 		return p.parseReturn()
 	case lexer.BREAK:
@@ -308,21 +308,25 @@ func (p *Parser) parseGuard() ast.Statement {
 	return n
 }
 
-func (p *Parser) parseWhen() ast.Statement {
+func (p *Parser) parseSelect() ast.Statement {
 	if p.trace {
-		defer un(trace(p, "Оператор когда"))
+		defer un(trace(p, "Оператор выбора"))
 	}
 
-	var n = &ast.When{
+	var n = &ast.Select{
 		StatementBase: ast.StatementBase{Pos: p.pos},
 	}
 
 	p.next()
-	n.X = p.parseExpression()
-	p.expect(lexer.LBRACE)
+	if p.tok == lexer.LBRACE {
+		p.next()
+	} else {
+		n.X = p.parseExpression()
+		p.expect(lexer.LBRACE)
+	}
 
-	for p.tok == lexer.IS {
-		var c = p.parseWhenCase()
+	for p.tok == lexer.WHEN {
+		var c = p.parseSelectCase()
 		n.Cases = append(n.Cases, c)
 	}
 
@@ -335,9 +339,9 @@ func (p *Parser) parseWhen() ast.Statement {
 	return n
 }
 
-func (p *Parser) parseWhenCase() *ast.Case {
+func (p *Parser) parseSelectCase() *ast.Case {
 	if p.trace {
-		defer un(trace(p, "Оператор когда есть"))
+		defer un(trace(p, "выбор когда"))
 	}
 
 	var c = &ast.Case{

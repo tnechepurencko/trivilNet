@@ -62,6 +62,16 @@ func (genc *genContext) genModule(main bool) {
 func (genc *genContext) genFunction(f *ast.Function) {
 
 	if f.External {
+
+		apiName, ok := f.Mod.Attrs["sysapi"]
+		if ok {
+			exported, exist := genc.sysAPI[apiName]
+			if !exist {
+				genc.sysAPI[apiName] = f.Exported
+			} else if f.Exported && !exported {
+				genc.sysAPI[apiName] = true
+			}
+		}
 		return
 	}
 

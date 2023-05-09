@@ -1,3 +1,6 @@
+#ifndef _rt_api_H
+#define _rt_api_H
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -32,6 +35,7 @@ typedef StringDesc* TString;
 //==== strings
 
 EXPORTED TString tri_newLiteralString(TString* sptr, TInt64 bytes, TInt64 symbols, char* body);
+EXPORTED TString tri_newString(TInt64 bytes, TInt64 symbols, char* body);
 
 EXPORTED TInt64 tri_lenString(TString s);
 
@@ -41,6 +45,7 @@ EXPORTED TBool tri_equalStrings(TString s1, TString s2);
 
 // Не используется компилятором
 EXPORTED TInt64 tri_equalBytes(TString s1, TInt64 pos1, TString s2, TInt64 pos2, TInt64 len); 
+EXPORTED TString tri_substring(TString s, TInt64 pos, TInt64 len); 
 
 //==== vector
 
@@ -140,8 +145,19 @@ EXPORTED _Noreturn void tri_crash(char* msg, char* pos);
 EXPORTED TInt64 tri_argc();
 EXPORTED TString tri_arg(TInt64 n);
 
+//==== управление памятью
+
+// выделение памяти, в GC области 
+//Пока не используется: void* gc_alloc(size_t size) {
+
+// ручное выделение/освобождение памяти
+void* nogc_alloc(size_t size);
+void nogc_free(void *ptr);
+
 //==== init/exit
 
 EXPORTED void tri_init(int argc, char *argv[]);
 
 EXPORTED void tri_exit(TInt64 x);
+
+#endif
