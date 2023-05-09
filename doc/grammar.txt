@@ -170,7 +170,7 @@ guard_stm
 	;
 
 switch_stm                          // пока единственный вариант
-    : 'выбор' expression '{' 
+    : 'выбор' expression? '{' 
       ('когда' expression (',' expression)* ':' statement_list? )* 
       ('иначе' statement_list?)?
       '}'

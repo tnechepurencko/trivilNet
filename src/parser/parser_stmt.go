@@ -310,7 +310,7 @@ func (p *Parser) parseGuard() ast.Statement {
 
 func (p *Parser) parseSelect() ast.Statement {
 	if p.trace {
-		defer un(trace(p, "Оператор когда"))
+		defer un(trace(p, "Оператор выбора"))
 	}
 
 	var n = &ast.Select{
@@ -318,8 +318,12 @@ func (p *Parser) parseSelect() ast.Statement {
 	}
 
 	p.next()
-	n.X = p.parseExpression()
-	p.expect(lexer.LBRACE)
+	if p.tok == lexer.LBRACE {
+		p.next()
+	} else {
+		n.X = p.parseExpression()
+		p.expect(lexer.LBRACE)
+	}
 
 	for p.tok == lexer.WHEN {
 		var c = p.parseSelectCase()

@@ -286,7 +286,9 @@ func (lc *lookContext) lookLocalDecl(seq *ast.StatementSeq, decl ast.Decl) {
 }
 
 func (lc *lookContext) lookSelect(x *ast.Select) {
-	lc.lookExpr(x.X)
+	if x.X != nil {
+		lc.lookExpr(x.X)
+	}
 
 	for _, c := range x.Cases {
 		for _, e := range c.Exprs {

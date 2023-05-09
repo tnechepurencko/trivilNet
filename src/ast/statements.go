@@ -74,7 +74,7 @@ type Guard struct {
 
 type Select struct {
 	StatementBase
-	X     Expr
+	X     Expr // = nil, если предикатный оператор
 	Cases []*Case
 	Else  *StatementSeq
 }

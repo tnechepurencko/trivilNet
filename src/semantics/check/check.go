@@ -272,6 +272,12 @@ func (cc *checkContext) localDecl(decl ast.Decl) {
 }
 
 func (cc *checkContext) checkSelect(x *ast.Select) {
+
+	if x.X == nil {
+		cc.checkPredicateSelect(x)
+		return
+	}
+
 	cc.expr(x.X)
 	checkSelectExpr(x.X)
 
@@ -287,7 +293,22 @@ func (cc *checkContext) checkSelect(x *ast.Select) {
 	if x.Else != nil {
 		cc.statements(x.Else)
 	}
+}
 
+func (cc *checkContext) checkPredicateSelect(x *ast.Select) {
+
+	for _, c := range x.Cases {
+		for _, e := range c.Exprs {
+			cc.expr(e)
+			if !equalTypes(e.GetType(), ast.Bool) {
+				env.AddError(e.GetPos(), "СЕМ-КОГДА-ОШ-ПРЕДИКАТ", ast.TypeName(ast.Bool), ast.TypeName(e.GetType()))
+			}
+		}
+		cc.statements(c.Seq)
+	}
+	if x.Else != nil {
+		cc.statements(x.Else)
+	}
 }
 
 func checkSelectExpr(x ast.Expr) {

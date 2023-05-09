@@ -46,6 +46,8 @@ func (genc *genContext) genStatement(s ast.Statement) {
 	case *ast.Select:
 		if canSelectAsSwitch(x) {
 			genc.genSelectAsSwitch(x)
+		} else if x.X == nil {
+			genc.genPredicateSelect(x)
 		} else {
 			genc.genSelectAsIfs(x)
 		}
@@ -148,9 +150,14 @@ func literal(expr ast.Expr) *ast.LiteralExpr {
 	return nil
 }
 
-//==== когда
+//==== оператор выбор
 
 func canSelectAsSwitch(x *ast.Select) bool {
+
+	if x.X == nil {
+		return false
+	}
+
 	var t = ast.UnderType(x.X.GetType())
 	switch t {
 	case ast.Byte, ast.Int64, ast.Word64, ast.Symbol:
@@ -204,6 +211,28 @@ func (genc *genContext) genSelectAsIfs(x *ast.Select) {
 			} else {
 				conds = append(conds, fmt.Sprintf("%s == %s", loc, genc.genExpr(e)))
 			}
+		}
+		genc.c("%sif (%s) {", els, strings.Join(conds, " || "))
+		els = "else "
+		genc.genStatementSeq(c.Seq)
+		genc.c("}")
+	}
+
+	if x.Else != nil {
+		genc.c("else {")
+		genc.genStatementSeq(x.Else)
+		genc.c("}")
+	}
+}
+
+func (genc *genContext) genPredicateSelect(x *ast.Select) {
+
+	var els = ""
+	for _, c := range x.Cases {
+
+		var conds = make([]string, 0)
+		for _, e := range c.Exprs {
+			conds = append(conds, genc.genExpr(e))
 		}
 		genc.c("%sif (%s) {", els, strings.Join(conds, " || "))
 		els = "else "
