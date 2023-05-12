@@ -12,6 +12,8 @@ func (cc *checkContext) isConstExpr(expr ast.Expr) bool {
 	switch x := expr.(type) {
 	case *ast.LiteralExpr:
 		return true
+	case *ast.ConversionExpr:
+		return x.Done
 	case *ast.IdentExpr:
 		return cc.isConstObj(x.Obj)
 	case *ast.SelectorExpr:
