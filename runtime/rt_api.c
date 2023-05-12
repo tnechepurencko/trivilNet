@@ -512,9 +512,16 @@ EXPORTED TBool tri_isClassType(void* object, void* target_desc) {
 
 EXPORTED TByte tri_TInt64_to_TByte(TInt64 x) {
 	if (x < 0 || x > 255) {
-		runtime_crash("conversion to byte out of range");
+		runtime_crash("conversion int64 to byte out of range");
 	}
 	return (TByte)x;
+}
+
+EXPORTED TWord64 tri_TInt64_to_TWord64(TInt64 x) {
+	if (x < 0) {
+		runtime_crash("conversion int64 to word64 out of range");
+	}
+	return (TWord64)x;
 }
 
 EXPORTED TByte tri_TWord64_to_TByte(TWord64 x) {

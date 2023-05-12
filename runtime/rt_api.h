@@ -87,8 +87,9 @@ EXPORTED TBool tri_isClassType(void* object, void* class_desc);
 //==== conversions
 
 EXPORTED TByte tri_TInt64_to_TByte(TInt64 x);
-EXPORTED TByte tri_TWord64_to_TByte(TWord64 x);
+EXPORTED TWord64 tri_TInt64_to_TWord64(TInt64 x);
 
+EXPORTED TByte tri_TWord64_to_TByte(TWord64 x);
 EXPORTED TInt64 tri_TWord64_to_TInt64(TWord64 x);
 
 EXPORTED TByte tri_TSymbol_to_TByte(TSymbol x);
