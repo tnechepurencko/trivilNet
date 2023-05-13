@@ -90,6 +90,7 @@ const (
 	MAYBE
 	MODULE
 	OFTYPE
+	OTHER
 	RETURN
 	SELECT
 	SETTING
@@ -97,7 +98,6 @@ const (
 	VAR
 	WHEN
 	WHILE
-
 	keyword_end
 )
 
@@ -174,6 +174,7 @@ var tokens = [...]string{
 	RETURN:  "вернуть",
 	ENTRY:   "вход",
 	SELECT:  "выбор",
+	OTHER:   "другое",
 	IF:      "если",
 	ELSE:    "иначе",
 	IMPORT:  "импорт",
