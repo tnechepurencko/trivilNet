@@ -70,7 +70,10 @@ func (cc *compileContext) build() {
 //=== process
 
 func (cc *compileContext) process(m *ast.Module) {
+
+	ast.CurHost = m
 	semantics.Analyse(m)
+	ast.CurHost = nil
 
 	if env.ErrorCount() != 0 {
 		return

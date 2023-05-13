@@ -239,6 +239,9 @@ func MakeInvalidType(pos int) *InvalidType {
 
 //==== for error messages
 
+// Используется для улучшения сообщений об ошибках, см. TypeName
+var CurHost *Module
+
 func TypeString(t Type) string {
 
 	t = UnderType(t)
@@ -266,6 +269,8 @@ func TypeName(t Type) string {
 	if tr, ok := t.(*TypeRef); ok {
 		if tr.ModuleName != "" {
 			return tr.ModuleName + "." + tr.TypeName
+		} else if tr.TypeDecl != nil && tr.TypeDecl.Host != nil && tr.TypeDecl.Host != CurHost {
+			return tr.TypeDecl.Host.Name + "." + tr.TypeName
 		} else {
 			return tr.TypeName
 		}

@@ -146,7 +146,7 @@ func (cc *checkContext) compareFuncTypes(t1, t2 ast.Type) string {
 	return ""
 }
 
-// Возвращает "", если равны или причину ошибки
+// Возвращает true, если можно присвоить
 func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 
 	cc.errorHint = ""
@@ -240,7 +240,9 @@ func (cc *checkContext) checkAssignable(lt ast.Type, r ast.Expr) {
 }
 
 func equalTypes(t1, t2 ast.Type) bool {
-	if ast.UnderType(t1) == ast.UnderType(t2) {
+	t1 = ast.UnderType(t1)
+	t2 = ast.UnderType(t2)
+	if t1 == t2 {
 		return true
 	}
 	switch x1 := t1.(type) {
