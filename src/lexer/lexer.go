@@ -305,7 +305,7 @@ func (s *Lexer) scanEscape(quote rune) bool {
 
 	var n int
 	switch s.ch {
-	case 'n', 'r', 't', '\'', '"':
+	case 'n', 'r', 't', '\'', '"', '\\':
 		s.next()
 		return true
 	case 'u': // \uABCD
