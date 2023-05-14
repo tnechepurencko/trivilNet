@@ -53,8 +53,8 @@ go test ./...
 * 2023.01.22   8061 in 50 files, runtime:   685 lines (C)
 * 2023.02.03   9001 in 51 files, runtime:   767 lines (C)
 * 2023.03.11   9417 in 54 files, runtime:   852 lines (C)
-* 2023.04.08   9836 in 54 files, runtime:   930 lines (C), libraries:   5, lines    561 (Тривиль)
-* 2023.05.14 10369 in 56 files, runtime: 1312 lines (C), libraries: 10, lines 1230 (Тривиль), трик  987 (Тривиль)
+* 2023.04.08   9836 in 54 files, runtime:   930 lines (C), libraries:   5,   561 lines (Тривиль)
+* 2023.05.14 10369 in 56 files, runtime: 1312 lines (C), libraries: 10, 1230 lines (Тривиль), трик 987 lines (Тривиль)
 
 #### Как посчитать в Windows (PowerShell)
 
