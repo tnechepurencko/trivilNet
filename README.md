@@ -45,15 +45,16 @@ go test ./...
 
 Строчек кода на Go:
 
-* 2022.12.16 3135 in 31 files
-* 2022.12.22 4450 in 37 files
-* 2022.12.31 5611 in 41 files
-* 2023.01.08 6583 in 44 files, runtime: 509 lines (C)
-* 2023.01.13 7199 in 45 files, runtime: 568 lines (C)
-* 2023.01.22 8061 in 50 files, runtime: 685 lines (C)
-* 2023.02.03 9001 in 51 files, runtime: 767 lines (C)
-* 2023.03.11 9417 in 54 files, runtime: 852 lines (C)
-* 2023.04.08 9836 in 54 files, runtime: 930 lines (C), libraries: 5, lines 561 (Тривиль)
+* 2022.12.16   3135 in 31 files
+* 2022.12.22   4450 in 37 files
+* 2022.12.31   5611 in 41 files
+* 2023.01.08   6583 in 44 files, runtime:   509 lines (C)
+* 2023.01.13   7199 in 45 files, runtime:   568 lines (C)
+* 2023.01.22   8061 in 50 files, runtime:   685 lines (C)
+* 2023.02.03   9001 in 51 files, runtime:   767 lines (C)
+* 2023.03.11   9417 in 54 files, runtime:   852 lines (C)
+* 2023.04.08   9836 in 54 files, runtime:   930 lines (C), libraries:   5, lines    561 (Тривиль)
+* 2023.05.14 10369 in 56 files, runtime: 1312 lines (C), libraries: 10, lines 1230 (Тривиль), трик  987 (Тривиль)
 
 #### Как посчитать в Windows (PowerShell)
 
