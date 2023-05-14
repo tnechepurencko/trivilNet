@@ -2,12 +2,17 @@
 
 импорт "стд::вывод"
 импорт "стд::юникод/utf8"
+импорт "стд::юникод"
+
 //импорт "стд::строки"
 
 импорт "трик/основа"
 
 тип Лексер = класс {
+    // результат работы Лексер.лексема:
     лек* := НЕОП
+    поз* := 0
+    изо* := "" // изображение лексемы для идентов, строк, чисел
 
     исходник: основа.Исходник = позже
     байты: основа.Байты = позже
@@ -88,25 +93,316 @@
     ле.№-байта := ле.№-байта + байтов
 }
 
-// Read the next Unicode char into s.ch.
-// s.ch < 0 means end-of-file.
-/*
+//==== предикаты =====
 
-		case r >= utf8.RuneSelf:
-			// not ASCII
-			r, w = utf8.DecodeRune(s.src[s.rdOffset:])
-			if r == utf8.RuneError && w == 1 {
-				s.error(s.offset, "ЛЕК-UTF8")
+фн это буква?(сим: Символ): Лог {
+    вернуть сим >= 0x80(:Символ) & юникод.буква?(сим)
+        | сим = '_' | сим = '№' 
+        | сим >= 'a' & сим <= 'z'
+        | сим >= 'A' & сим <= 'Z'
+}
+
+фн это цифра?(сим: Символ): Лог {
+    вернуть сим >= '0' & сим <= '9'
+}
+
+//==== разбор лексем =====
+
+фн (ле: Лексер) пропустить пробелы() {
+    пока ле.сим = ' ' | ле.сим = '\t' {
+        ле.символ()
+    }
+}
+
+фн (ле: Лексер) лексема*() {
+    ле.пропустить пробелы()
+
+    ле.поз := ле.исходник.позиция(ле.№-сим)
+    пусть сим = ле.сим
+    
+    если это буква?(сим) {
+        вернуть
+    }
+    если это цифра?(сим) {
+        вернуть
+    }
+   
+    ле.символ() // всегда сдвигаюсь
+    выбор сим {
+    когда КФ: ле.лек := КОН-Ф
+/*
+		case '\n':
+			// пропускаем все
+			for s.ch == '\n' {
+				s.next()
 			}
-			s.uOffset++
+			tok = NL
+		case '"':
+			tok = STRING
+			lit = s.scanString('"')
+		case '\'':
+			tok = SYMBOL
+			lit = s.scanSymbol('\'')
+		case '@':
+			tok = MODIFIER
+			lit = s.scanModifier()
+		case ':':
+			switch s.ch {
+			case '=':
+				tok = ASSIGN
+				s.next()
+			case '&':
+				tok = BITAND
+				s.next()
+			case '|':
+				tok = BITOR
+				s.next()
+			case '\\':
+				tok = BITXOR
+				s.next()
+			case '~':
+				tok = BITNOT
+				s.next()
+			default:
+				tok = COLON
+			}
+
+		case '.':
+			tok = DOT
+			if s.ch == '.' && s.peek() == '.' {
+				s.next()
+				s.next() // consume last '.'
+				tok = ELLIPSIS
+			}
+*/
+    когда ',': 
+        ле.лек := ЗАПЯТАЯ
+    когда ';': 
+        ле.лек := ТОЧКА-ЗАП
+        ле.изо := ";"
+    
+/*
+		case '(':
+			tok = s.checkNext(LPAR, ':', LCONV)
+		case ')':
+			tok = RPAR
+		case '[':
+			tok = LBRACK
+		case ']':
+			tok = RBRACK
+		case '{':
+			tok = LBRACE
+		case '}':
+			tok = RBRACE
+		case '+':
+			tok = s.checkNext(ADD, '+', INC)
+		case '-':
+			tok = s.checkNext(SUB, '-', DEC)
+		case '*':
+			tok = MUL
+		case '/':
+			if s.ch == '/' {
+				tok = LINE_COMMENT
+				ofs := s.scanLineComment()
+				lit = string(s.src[ofs:s.offset])
+			} else if s.ch == '*' {
+				tok = BLOCK_COMMENT
+				ofs := s.scanBlockComment()
+				lit = string(s.src[ofs:s.offset])
+			} else {
+				tok = QUO
+			}
+
+		case '%':
+			tok = REM
+		case '^':
+			tok = NOTNIL
+		case '<':
+			switch s.ch {
+			case '=':
+				tok = LEQ
+				s.next()
+			case '<':
+				tok = SHL
+				s.next()
+			default:
+				tok = LSS
+			}
+		case '>':
+			switch s.ch {
+			case '=':
+				tok = GEQ
+				s.next()
+			case '>':
+				tok = SHR
+				s.next()
+			default:
+				tok = GTR
+			}
+		case '=':
+			tok = EQ
+		case '#':
+			tok = NEQ
+		case '~':
+			tok = NOT
+		case '&':
+			tok = s.checkNext(AND, '.', BITAND)
+		case '|':
+			tok = s.checkNext(OR, '.', BITOR)
 		default:
-			s.uOffset++ // ascii
+			s.error(s.offset, "ЛЕК-ОШ-СИМ", ch)
+			tok = Invalid
+			lit = string(ch)
 		}
-		s.rdOffset += w
-		s.ch = r
+	}
+*/
+ 
+    }
+    
 
 }
+
+/*
+func (s *Lexer) Scan() (pos int, tok Token, lit string) {
+
+	s.skipWhitespace()
+
+	// начало лексемы
+	pos = s.source.MakePos(s.uOffset)
+	ch := s.ch
+
+	switch {
+	case isLetter(ch):
+		tok, lit = s.scanIdentifier()
+	case isDecimal(ch):
+		tok, lit = s.scanNumber()
+	default:
+		s.next() // всегда двигаемся
+		switch ch {
+		case -1:
+			tok = EOF
+		case '\n':
+			// пропускаем все
+			for s.ch == '\n' {
+				s.next()
+			}
+			tok = NL
+		case '"':
+			tok = STRING
+			lit = s.scanString('"')
+		case '\'':
+			tok = SYMBOL
+			lit = s.scanSymbol('\'')
+		case '@':
+			tok = MODIFIER
+			lit = s.scanModifier()
+		case ':':
+			switch s.ch {
+			case '=':
+				tok = ASSIGN
+				s.next()
+			case '&':
+				tok = BITAND
+				s.next()
+			case '|':
+				tok = BITOR
+				s.next()
+			case '\\':
+				tok = BITXOR
+				s.next()
+			case '~':
+				tok = BITNOT
+				s.next()
+			default:
+				tok = COLON
+			}
+
+		case '.':
+			tok = DOT
+			if s.ch == '.' && s.peek() == '.' {
+				s.next()
+				s.next() // consume last '.'
+				tok = ELLIPSIS
+			}
+		case ',':
+			tok = COMMA
+		case ';':
+			tok = SEMI
+			lit = ";"
+		case '(':
+			tok = s.checkNext(LPAR, ':', LCONV)
+		case ')':
+			tok = RPAR
+		case '[':
+			tok = LBRACK
+		case ']':
+			tok = RBRACK
+		case '{':
+			tok = LBRACE
+		case '}':
+			tok = RBRACE
+		case '+':
+			tok = s.checkNext(ADD, '+', INC)
+		case '-':
+			tok = s.checkNext(SUB, '-', DEC)
+		case '*':
+			tok = MUL
+		case '/':
+			if s.ch == '/' {
+				tok = LINE_COMMENT
+				ofs := s.scanLineComment()
+				lit = string(s.src[ofs:s.offset])
+			} else if s.ch == '*' {
+				tok = BLOCK_COMMENT
+				ofs := s.scanBlockComment()
+				lit = string(s.src[ofs:s.offset])
+			} else {
+				tok = QUO
+			}
+
+		case '%':
+			tok = REM
+		case '^':
+			tok = NOTNIL
+		case '<':
+			switch s.ch {
+			case '=':
+				tok = LEQ
+				s.next()
+			case '<':
+				tok = SHL
+				s.next()
+			default:
+				tok = LSS
+			}
+		case '>':
+			switch s.ch {
+			case '=':
+				tok = GEQ
+				s.next()
+			case '>':
+				tok = SHR
+				s.next()
+			default:
+				tok = GTR
+			}
+		case '=':
+			tok = EQ
+		case '#':
+			tok = NEQ
+		case '~':
+			tok = NOT
+		case '&':
+			tok = s.checkNext(AND, '.', BITAND)
+		case '|':
+			tok = s.checkNext(OR, '.', BITOR)
+		default:
+			s.error(s.offset, "ЛЕК-ОШ-СИМ", ch)
+			tok = Invalid
+			lit = string(ch)
+		}
+	}
+
+	return
+}
 */
-
-
-
