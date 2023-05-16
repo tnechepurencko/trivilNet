@@ -7,6 +7,13 @@
 #include "rt_defs.h"
 #include "rt_api.h"
 
+typedef struct VectorDesc { 
+    //TODO: Tag
+    TInt64 len;
+    TInt64 capacity;
+    void* body; 
+} VectorDesc;
+
 //==== crash
 
  _Noreturn void panic() {
@@ -252,25 +259,25 @@ EXPORTED TInt64 tri_equalBytes(TString s1, TInt64 pos1, TString s2, TInt64 pos2,
 }
 
 EXPORTED TString tri_substring(TString source, TInt64 pos, TInt64 len) {
+    if (len <= 0) return &emptyStringDesc;
     if (pos < 0) pos = 0;
-    if (len < 0) len = 0;
+
     if (pos + len > source->bytes) len = source->bytes - pos;
-    
-    if (len == 0) return &emptyStringDesc;
     
     return tri_newString(len, -1, (char*)source->body + pos);
 }
 
+EXPORTED TString tri_substring_from_bytes(void* vd, TInt64 pos, TInt64 len) {
+    if (len <= 0) return &emptyStringDesc;
+    if (pos < 0) pos = 0;
+
+	VectorDesc* v = vd;    
+    if (pos + len > v->len) len = v->len - pos;
+    
+    return tri_newString(len, -1, (char*)v->body + pos);
+}
+
 //==== vector
-
-
-typedef struct VectorDesc { 
-    //TODO: Tag
-    TInt64 len;
-    TInt64 capacity;
-    void* body; 
-} VectorDesc;
-
 
 EXPORTED void* tri_newVector(size_t element_size, TInt64 len, TInt64 cap) {
 	VectorDesc* v = gc_alloc(sizeof(VectorDesc));
