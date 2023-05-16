@@ -93,6 +93,11 @@
     ле.№-байта := ле.№-байта + байтов
 }
 
+фн (ле: Лексер) посмотреть байт(): Байт {
+    надо ле.№-байта < длина(ле.байты) иначе вернуть 0
+    вернуть ле.байты[ле.№-байта]
+}
+
 //==== предикаты =====
 
 фн это буква?(сим: Символ): Лог {
@@ -114,295 +119,163 @@
     }
 }
 
+/*
+фн (ле: Лексер) равно что-то(лек0, лек1 Лексема) Лексема {
+	если ле.сим = '=' {
+		ле.символ()
+		вернуть лек1
+	}
+	вернуть лек0
+}
+*/
+
+фн (ле: Лексер) проверить след(лек0: Лексема, след: Символ, лек1: Лексема): Лексема {
+	если ле.сим = след {
+		ле.символ()
+		вернуть лек1
+	}
+	вернуть лек0
+}
+
 фн (ле: Лексер) лексема*() {
     ле.пропустить пробелы()
 
     ле.поз := ле.исходник.позиция(ле.№-сим)
+    ле.изо := ""
     пусть сим = ле.сим
     
     если это буква?(сим) {
+    //!
         вернуть
     }
     если это цифра?(сим) {
+    //!
         вернуть
     }
    
     ле.символ() // всегда сдвигаюсь
     выбор сим {
-    когда КФ: ле.лек := КОН-Ф
-/*
-		case '\n':
-			// пропускаем все
-			for s.ch == '\n' {
-				s.next()
-			}
-			tok = NL
-		case '"':
-			tok = STRING
+    когда КФ: ле.лек := КОН-ФАЙЛ
+    когда '\n':
+		// пропускаем все концы строк
+		пока ле.сим = '\n' {
+				ле.символ()
+		}
+		ле.лек := КОН-СТР
+/*            
+		когда '"':
+			ле.лек := STRING
 			lit = s.scanString('"')
-		case '\'':
-			tok = SYMBOL
+		когда '\'':
+			ле.лек := SYMBOL
 			lit = s.scanSymbol('\'')
-		case '@':
-			tok = MODIFIER
+		когда '@':
+			ле.лек := MODIFIER
 			lit = s.scanModifier()
-		case ':':
-			switch s.ch {
-			case '=':
-				tok = ASSIGN
-				s.next()
-			case '&':
-				tok = BITAND
-				s.next()
-			case '|':
-				tok = BITOR
-				s.next()
-			case '\\':
-				tok = BITXOR
-				s.next()
-			case '~':
-				tok = BITNOT
-				s.next()
-			default:
-				tok = COLON
-			}
-
-		case '.':
-			tok = DOT
-			if s.ch == '.' && s.peek() == '.' {
-				s.next()
-				s.next() // consume last '.'
-				tok = ELLIPSIS
-			}
-*/
+*/            
+	когда ':':
+        выбор ле.сим  {
+		когда '=':
+			ле.лек := ПРИСВОИТЬ
+			ле.символ()
+		когда '&':
+			ле.лек := БИТ-И
+			ле.символ()
+		когда '|':
+			ле.лек := БИТ-ИЛИ
+			ле.символ()
+		когда '\\':
+			ле.лек := БИТ-ИСК-ИЛИ
+			ле.символ()
+		когда '~':
+			ле.лек := БИТ-НЕ
+			ле.символ()
+		другое
+			ле.лек := ДВОЕТОЧИЕ
+		}
+	когда '.':
+		ле.лек := ТОЧКА
+		если ле.сим = '.' & ле.посмотреть байт() = '.'(:Байт) {
+				ле.символ()
+				ле.символ() // взять третью  '.'
+				ле.лек := ТРОЕТОЧИЕ
+		}
     когда ',': 
         ле.лек := ЗАПЯТАЯ
     когда ';': 
         ле.лек := ТОЧКА-ЗАП
         ле.изо := ";"
-    
-/*
-		case '(':
-			tok = s.checkNext(LPAR, ':', LCONV)
-		case ')':
-			tok = RPAR
-		case '[':
-			tok = LBRACK
-		case ']':
-			tok = RBRACK
-		case '{':
-			tok = LBRACE
-		case '}':
-			tok = RBRACE
-		case '+':
-			tok = s.checkNext(ADD, '+', INC)
-		case '-':
-			tok = s.checkNext(SUB, '-', DEC)
-		case '*':
-			tok = MUL
-		case '/':
-			if s.ch == '/' {
-				tok = LINE_COMMENT
-				ofs := s.scanLineComment()
-				lit = string(s.src[ofs:s.offset])
-			} else if s.ch == '*' {
-				tok = BLOCK_COMMENT
-				ofs := s.scanBlockComment()
-				lit = string(s.src[ofs:s.offset])
-			} else {
-				tok = QUO
-			}
-
-		case '%':
-			tok = REM
-		case '^':
-			tok = NOTNIL
-		case '<':
-			switch s.ch {
-			case '=':
-				tok = LEQ
-				s.next()
-			case '<':
-				tok = SHL
-				s.next()
-			default:
-				tok = LSS
-			}
-		case '>':
-			switch s.ch {
-			case '=':
-				tok = GEQ
-				s.next()
-			case '>':
-				tok = SHR
-				s.next()
-			default:
-				tok = GTR
-			}
-		case '=':
-			tok = EQ
-		case '#':
-			tok = NEQ
-		case '~':
-			tok = NOT
-		case '&':
-			tok = s.checkNext(AND, '.', BITAND)
-		case '|':
-			tok = s.checkNext(OR, '.', BITOR)
-		default:
-			s.error(s.offset, "ЛЕК-ОШ-СИМ", ch)
-			tok = Invalid
-			lit = string(ch)
+	когда '(':
+		ле.лек := ле.проверить след(КРУГ-Л, ':', КОНВЕРСИЯ)
+	когда ')':
+		ле.лек := КРУГ-П
+	когда '[':
+		ле.лек := КВАД-Л
+	когда ']':
+		ле.лек := КВАД-П
+	когда '{':
+		ле.лек := ФИГ-Л
+	когда '}':
+		ле.лек := ФИГ-П
+	когда '+':
+		ле.лек := ле.проверить след(СЛОЖИТЬ, '+', УВЕЛИЧИТЬ)
+	когда '-':
+		ле.лек := ле.проверить след(ВЫЧЕСТЬ, '-', УМЕНЬШИТЬ)
+	когда '*':
+		ле.лек := УМНОЖИТЬ
+	когда '/':
+		если ле.сим = '/' {
+			ле.лек := КОММЕНТ-СТРОКА
+//!				ofs := s.scanLineComment()
+//				lit = string(s.src[ofs:s.offset])
+		} иначе если ле.сим = '*' {
+			ле.лек := КОММЕНТ-БЛОК
+//!				ofs := s.scanBlockComment()
+//				lit = string(s.src[ofs:s.offset])
+		} иначе {
+			ле.лек := ДЕЛИТЬ
 		}
+	когда '%':
+		ле.лек := ОСТАТОК
+	когда '^':
+		ле.лек := НЕ-ПУСТО
+	когда '<':
+		выбор ле.сим {
+		когда '=':
+			ле.лек := МЕНЬШЕ-РАВНО
+			ле.символ()
+		когда '<':
+			ле.лек := СДВИГ-Л
+			ле.символ()
+		другое
+			ле.лек := МЕНЬШЕ
+		}
+	когда '>':
+		выбор ле.сим {
+		когда '=':
+			ле.лек := БОЛЬШЕ-РАВНО
+			ле.символ()
+		когда '>':
+			ле.лек := СДВИГ-П
+			ле.символ()
+		другое
+			ле.лек := БОЛЬШЕ
+		}
+	когда '=':
+		ле.лек := РАВНО
+	когда '#':
+		ле.лек := НЕ-РАВНО
+	когда '~':
+		ле.лек := НЕ
+	когда '&':
+		ле.лек := И
+	когда '|':
+		ле.лек := ИЛИ 
+	другое
+        ле.ошибка(ле.№-сим, "ЛЕК-ОШ-СИМ", сим(:Строка))
+		ле.лек := НЕОП
+        ле.изо := сим(:Строка)
 	}
-*/
- 
-    }
-    
 
 }
 
-/*
-func (s *Lexer) Scan() (pos int, tok Token, lit string) {
-
-	s.skipWhitespace()
-
-	// начало лексемы
-	pos = s.source.MakePos(s.uOffset)
-	ch := s.ch
-
-	switch {
-	case isLetter(ch):
-		tok, lit = s.scanIdentifier()
-	case isDecimal(ch):
-		tok, lit = s.scanNumber()
-	default:
-		s.next() // всегда двигаемся
-		switch ch {
-		case -1:
-			tok = EOF
-		case '\n':
-			// пропускаем все
-			for s.ch == '\n' {
-				s.next()
-			}
-			tok = NL
-		case '"':
-			tok = STRING
-			lit = s.scanString('"')
-		case '\'':
-			tok = SYMBOL
-			lit = s.scanSymbol('\'')
-		case '@':
-			tok = MODIFIER
-			lit = s.scanModifier()
-		case ':':
-			switch s.ch {
-			case '=':
-				tok = ASSIGN
-				s.next()
-			case '&':
-				tok = BITAND
-				s.next()
-			case '|':
-				tok = BITOR
-				s.next()
-			case '\\':
-				tok = BITXOR
-				s.next()
-			case '~':
-				tok = BITNOT
-				s.next()
-			default:
-				tok = COLON
-			}
-
-		case '.':
-			tok = DOT
-			if s.ch == '.' && s.peek() == '.' {
-				s.next()
-				s.next() // consume last '.'
-				tok = ELLIPSIS
-			}
-		case ',':
-			tok = COMMA
-		case ';':
-			tok = SEMI
-			lit = ";"
-		case '(':
-			tok = s.checkNext(LPAR, ':', LCONV)
-		case ')':
-			tok = RPAR
-		case '[':
-			tok = LBRACK
-		case ']':
-			tok = RBRACK
-		case '{':
-			tok = LBRACE
-		case '}':
-			tok = RBRACE
-		case '+':
-			tok = s.checkNext(ADD, '+', INC)
-		case '-':
-			tok = s.checkNext(SUB, '-', DEC)
-		case '*':
-			tok = MUL
-		case '/':
-			if s.ch == '/' {
-				tok = LINE_COMMENT
-				ofs := s.scanLineComment()
-				lit = string(s.src[ofs:s.offset])
-			} else if s.ch == '*' {
-				tok = BLOCK_COMMENT
-				ofs := s.scanBlockComment()
-				lit = string(s.src[ofs:s.offset])
-			} else {
-				tok = QUO
-			}
-
-		case '%':
-			tok = REM
-		case '^':
-			tok = NOTNIL
-		case '<':
-			switch s.ch {
-			case '=':
-				tok = LEQ
-				s.next()
-			case '<':
-				tok = SHL
-				s.next()
-			default:
-				tok = LSS
-			}
-		case '>':
-			switch s.ch {
-			case '=':
-				tok = GEQ
-				s.next()
-			case '>':
-				tok = SHR
-				s.next()
-			default:
-				tok = GTR
-			}
-		case '=':
-			tok = EQ
-		case '#':
-			tok = NEQ
-		case '~':
-			tok = NOT
-		case '&':
-			tok = s.checkNext(AND, '.', BITAND)
-		case '|':
-			tok = s.checkNext(OR, '.', BITOR)
-		default:
-			s.error(s.offset, "ЛЕК-ОШ-СИМ", ch)
-			tok = Invalid
-			lit = string(ch)
-		}
-	}
-
-	return
-}
-*/
