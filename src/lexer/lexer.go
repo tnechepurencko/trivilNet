@@ -545,9 +545,9 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 		case '~':
 			tok = NOT
 		case '&':
-			tok = s.checkNext(AND, '.', BITAND)
+			tok = AND
 		case '|':
-			tok = s.checkNext(OR, '.', BITOR)
+			tok = OR
 		default:
 			s.error(s.offset, "ЛЕК-ОШ-СИМ", ch)
 			tok = Invalid
