@@ -24,7 +24,7 @@ func TestOne(tpath string) {
 
 	env.Normalizer.Process(tpath)
 	if env.Normalizer.Err != nil {
-		env.AddProgramError("ОКР-ОШ-ПУТЬ-ТЕСТ", tpath, env.Normalizer.Err.Error())
+		env.AddProgramError("ОКР-ОШ-ПУТЬ", tpath, env.Normalizer.Err.Error())
 		return
 	}
 

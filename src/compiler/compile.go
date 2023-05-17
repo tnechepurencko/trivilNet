@@ -21,6 +21,9 @@ type compileContext struct {
 	// головной модуль - в конце
 	list   []*ast.Module
 	status map[*ast.Module]int
+
+	// Путь к папке для модуля, только для создания интерфейса модуля
+	folders map[*ast.Module]string
 }
 
 func Compile(spath string) {
@@ -34,6 +37,7 @@ func Compile(spath string) {
 
 	var cc = &compileContext{
 		imported: make(map[string]*ast.Module),
+		folders:  make(map[*ast.Module]string),
 	}
 
 	cc.main = cc.parseModule(true, list)
@@ -81,6 +85,10 @@ func (cc *compileContext) process(m *ast.Module) {
 
 	if *env.ShowAST >= 2 {
 		fmt.Println(ast.SExpr(m))
+	}
+
+	if *env.MakeDef && m != cc.main {
+		makeDef(m, cc.folders[m])
 	}
 
 	if *env.DoGen {
