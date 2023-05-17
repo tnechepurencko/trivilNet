@@ -6,3 +6,5 @@
 _genc/*
 модули/*
 x.*
+*.tri!
+_totri.cfg
