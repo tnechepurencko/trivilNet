@@ -45,6 +45,8 @@ func makeDef(m *ast.Module, folder string) {
 		}
 	}
 
+	dc.f("")
+
 	//fmt.Println(dc.lines)
 	writeFile(folder, m.Name, ".def", dc.lines)
 
