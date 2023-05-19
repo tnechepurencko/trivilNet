@@ -93,7 +93,6 @@ const (
 	OTHER
 	RETURN
 	SELECT
-	SETTING
 	TYPE
 	VAR
 	WHEN
@@ -184,7 +183,6 @@ var tokens = [...]string{
 	MAYBE:   "мб",
 	MODULE:  "модуль",
 	GUARD:   "надо",
-	SETTING: "настройка",
 	CAUTION: "осторожно",
 	WHILE:   "пока",
 	LATER:   "позже",
