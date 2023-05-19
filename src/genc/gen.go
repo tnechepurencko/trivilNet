@@ -21,8 +21,9 @@ type genContext struct {
 	header      []string
 	code        []string
 	globals     []string
-	init        []string   // используется для типов
-	initGlobals []ast.Decl // глобалы, которые надо инициализировать во входе
+	init        []string        // используется для типов
+	initGlobals []ast.Decl      // глобалы, которые надо инициализировать во входе
+	sysAPI      map[string]bool // true - exported
 }
 
 func Generate(m *ast.Module, main bool) {
@@ -36,9 +37,9 @@ func Generate(m *ast.Module, main bool) {
 		globals:     make([]string, 0),
 		init:        make([]string, 0),
 		initGlobals: make([]ast.Decl, 0),
+		sysAPI:      make(map[string]bool),
 	}
 
-	genc.startCode()
 	genc.genModule(main)
 	genc.finishCode()
 
@@ -63,9 +64,6 @@ func l(lines []string, format string, args ...interface{}) {
 	lines = append(lines, fmt.Sprintf(format, args...))
 }
 
-func (genc *genContext) startCode() {
-}
-
 func (genc *genContext) finishCode() {
 	var hname = fmt.Sprintf("_%s_H", genc.outname)
 
@@ -75,6 +73,8 @@ func (genc *genContext) finishCode() {
 	genc.header = make([]string, 0)
 	genc.h("#ifndef %s", hname)
 	genc.h("#define %s", hname)
+
+	genc.includeSysAPI(true)
 	genc.h("")
 
 	genc.header = append(genc.header, lines...)
@@ -87,6 +87,7 @@ func (genc *genContext) finishCode() {
 
 	genc.c("#include \"rt_api.h\"")
 	genc.c("#include \"%s\"", genc.outname+".h")
+	genc.includeSysAPI(false)
 	genc.c("")
 
 	if len(genc.globals) != 0 {
@@ -97,6 +98,16 @@ func (genc *genContext) finishCode() {
 	}
 
 	genc.code = append(genc.code, lines...)
+}
+
+func (genc *genContext) includeSysAPI(header bool) {
+	for name, exported := range genc.sysAPI {
+		if exported {
+			genc.h("#include \"%s.h\"", name)
+		} else {
+			genc.c("#include \"%s.h\"", name)
+		}
+	}
 }
 
 //====

@@ -4,29 +4,56 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"trivil/compiler"
 	"trivil/env"
 	"trivil/lexer"
 )
 
+// команды
+const (
+	prefix  = "+"
+	testOne = prefix + "тест"
+)
+
 func main() {
 	// флаги определены в env.flags
 	flag.Parse()
-	spath := flag.Arg(0)
-	if spath == "" {
-		fmt.Println("Использование: tric (folder | file.tri)")
+	var arg = flag.Arg(0)
+	var justHelp = arg == ""
+
+	var command = ""
+	if !justHelp && strings.HasPrefix(arg, prefix) {
+		switch arg {
+		case testOne:
+			command = arg
+			arg = flag.Arg(1)
+			if arg == "" {
+				justHelp = true
+			}
+		default:
+			justHelp = true
+		}
+	}
+
+	if justHelp {
+		fmt.Println("Использование:")
+		fmt.Println("  построить: tric (folder | file.tri)")
+		fmt.Println("  тестировать: tric +тест folder")
 		os.Exit(1)
 	}
 
-	fmt.Println("Тривиль-0 компилятор v0.5")
+	fmt.Println("Тривиль-0 компилятор v0.6")
 	env.Init()
 
 	//fmt.Printf("%v\n", src.Bytes)
 	if *env.JustLexer {
-		testLexer(spath)
+		testLexer(arg)
+	} else if command == testOne {
+		compiler.TestOne(arg)
 	} else {
-		compiler.Compile(spath)
+		compiler.Compile(arg)
 	}
 
 	env.ShowErrors()

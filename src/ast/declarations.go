@@ -53,11 +53,11 @@ type InvalidDecl struct {
 
 type Function struct {
 	DeclBase
-	Recv         *Param
-	Inner        *Scope
-	Seq          *StatementSeq
-	External     bool
-	ExternalName string
+	Recv     *Param
+	Inner    *Scope
+	Seq      *StatementSeq
+	External bool
+	Mod      *Modifier
 }
 
 type VarDecl struct {

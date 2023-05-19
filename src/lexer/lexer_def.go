@@ -86,12 +86,12 @@ const (
 	GUARD
 	IF
 	IMPORT
-	IS
 	LATER
 	MAYBE
 	MODULE
 	OFTYPE
 	RETURN
+	SELECT
 	SETTING
 	TYPE
 	VAR
@@ -173,8 +173,8 @@ var tokens = [...]string{
 	CRASH:   "авария",
 	RETURN:  "вернуть",
 	ENTRY:   "вход",
+	SELECT:  "выбор",
 	IF:      "если",
-	IS:      "есть",
 	ELSE:    "иначе",
 	IMPORT:  "импорт",
 	CLASS:   "класс",
