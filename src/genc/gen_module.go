@@ -48,7 +48,8 @@ func (genc *genContext) genModule(main bool) {
 	//=== gen class desc
 	for _, d := range genc.module.Decls {
 		if td, ok := d.(*ast.TypeDecl); ok {
-			if cl, ok := ast.UnderType(td.GetType()).(*ast.ClassType); ok {
+			//			if cl, ok := ast.UnderType(td.GetType()).(*ast.ClassType); ok {
+			if cl, ok := td.GetType().(*ast.ClassType); ok {
 				genc.genClassDesc(td, cl)
 			}
 		}
