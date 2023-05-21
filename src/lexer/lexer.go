@@ -305,7 +305,7 @@ func (s *Lexer) scanEscape(quote rune) bool {
 
 	var n int
 	switch s.ch {
-	case 'n', 'r', 't', '\'', '"':
+	case 'n', 'r', 't', '\'', '"', '\\':
 		s.next()
 		return true
 	case 'u': // \uABCD
@@ -545,9 +545,9 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 		case '~':
 			tok = NOT
 		case '&':
-			tok = s.checkNext(AND, '.', BITAND)
+			tok = AND
 		case '|':
-			tok = s.checkNext(OR, '.', BITOR)
+			tok = OR
 		default:
 			s.error(s.offset, "ЛЕК-ОШ-СИМ", ch)
 			tok = Invalid

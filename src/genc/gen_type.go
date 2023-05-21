@@ -14,8 +14,20 @@ func (genc *genContext) typeRef(t ast.Type) string {
 	case *ast.PredefinedType:
 		return predefinedTypeName(x.Name)
 	case *ast.TypeRef:
-		switch y := x.Typ.(type) {
+		//fmt.Printf("!TR1 %v %T\n", x.TypeName, x.Typ)
+		// Пропускаю type ref до последнего
+		var tr = x
+		for {
+			tr1, ok := tr.Typ.(*ast.TypeRef)
+			if !ok {
+				break
+			}
+			tr = tr1
+			//fmt.Printf("!next TR %v %T\n", tr.TypeName, tr.Typ)
+		}
+		switch y := tr.Typ.(type) {
 		case *ast.TypeRef:
+			fmt.Printf(" !TR2 %v %T\n", y.TypeName, y.Typ)
 			return genc.typeRef(y.Typ)
 		case *ast.MayBeType:
 			return genc.typeRef(y.Typ)
@@ -23,9 +35,9 @@ func (genc *genContext) typeRef(t ast.Type) string {
 			return predefinedTypeName(y.Name)
 		default:
 			if genc.genTypes {
-				return genc.forwardTypeName(x.TypeDecl)
+				return genc.forwardTypeName(tr.TypeDecl)
 			}
-			return genc.declName(x.TypeDecl)
+			return genc.declName(tr.TypeDecl)
 		}
 	case *ast.MayBeType:
 		return genc.typeRef(x.Typ)

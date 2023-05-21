@@ -44,8 +44,8 @@ var endWhenCase = tokens{
 	lexer.EOF:    true,
 	lexer.RBRACE: true,
 
-	lexer.WHEN: true,
-	lexer.ELSE: true,
+	lexer.WHEN:  true,
+	lexer.OTHER: true,
 }
 
 //=== statements
@@ -330,7 +330,7 @@ func (p *Parser) parseSelect() ast.Statement {
 		n.Cases = append(n.Cases, c)
 	}
 
-	if p.tok == lexer.ELSE {
+	if p.tok == lexer.OTHER {
 		p.next()
 		n.Else = p.parseStatementList(endStatementSeq)
 	}

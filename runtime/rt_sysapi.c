@@ -104,6 +104,16 @@ EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes) {
 
 #ifndef _WIN32
 
+EXPORTED TBool sysapi_is_dir(void* request, TString filename)  {
+    struct Request* req = request;    
+    
+    char buf[80];
+    sprintf(buf, "sysapi_is_dir не реализована"); 
+    req->err_id = tri_newString(strlen(buf), -1, buf);
+    
+    return false;
+}
+
 EXPORTED void* sysapi_dirnames(void* request, TString filename)  {
     
     struct Request* req = request;    
@@ -114,7 +124,6 @@ EXPORTED void* sysapi_dirnames(void* request, TString filename)  {
     req->err_id = tri_newString(strlen(buf), -1, buf);
     return NULL;
 }
-
 
 // ============== windows ==============
 #else
@@ -130,6 +139,23 @@ TString win_error_id(int errcode) {
         sprintf(buf, "ОШИБКА[%d]", errcode); 
     }
     return tri_newString(strlen(buf), -1, buf);
+}
+
+EXPORTED TBool sysapi_is_dir(void* request, TString filename)  {
+    struct Request* req = request;    
+    
+    WIN32_FIND_DATA FindFileData;
+    
+    HANDLE hFind = FindFirstFileA((char*)filename->body, &FindFileData);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        req->err_id = win_error_id(GetLastError());
+        return false;
+    } 
+    
+    if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        return true;
+    }
+    return false;
 }
 
 EXPORTED void* sysapi_dirnames(void* request, TString filename)  {

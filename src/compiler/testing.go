@@ -3,6 +3,7 @@ package compiler
 import (
 	"fmt"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"trivil/ast"
@@ -23,7 +24,7 @@ func TestOne(tpath string) {
 
 	env.Normalizer.Process(tpath)
 	if env.Normalizer.Err != nil {
-		env.AddProgramError("ОКР-ОШ-ПУТЬ-ТЕСТ", tpath, env.Normalizer.Err.Error())
+		env.AddProgramError("ОКР-ОШ-ПУТЬ", tpath, env.Normalizer.Err.Error())
 		return
 	}
 
@@ -99,9 +100,9 @@ func prepareTestEntry(tpath, npath string) []*env.Source {
 	var text = string(list[0].Bytes)
 
 	text = strings.ReplaceAll(text, patternImportPath, tpath)
-	text = strings.ReplaceAll(text, patternModuleName, path.Base(npath))
+	text = strings.ReplaceAll(text, patternModuleName, filepath.Base(npath))
 
-	//fmt.Printf("! %v\n", text)
+	//fmt.Printf("!! %v %v\n", npath, filepath.Base(npath))
 
 	list[0].Bytes = []byte(text)
 

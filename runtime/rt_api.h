@@ -43,9 +43,11 @@ EXPORTED TString tri_emptyString();
 
 EXPORTED TBool tri_equalStrings(TString s1, TString s2); 
 
-// Не используется компилятором
+// Для библиотек: не используется компилятором
 EXPORTED TInt64 tri_equalBytes(TString s1, TInt64 pos1, TString s2, TInt64 pos2, TInt64 len); 
 EXPORTED TString tri_substring(TString s, TInt64 pos, TInt64 len); 
+// vd - []Байт
+EXPORTED TString tri_substring_from_bytes(void* vd, TInt64 pos, TInt64 len); 
 
 //==== vector
 
@@ -87,8 +89,9 @@ EXPORTED TBool tri_isClassType(void* object, void* class_desc);
 //==== conversions
 
 EXPORTED TByte tri_TInt64_to_TByte(TInt64 x);
-EXPORTED TByte tri_TWord64_to_TByte(TWord64 x);
+EXPORTED TWord64 tri_TInt64_to_TWord64(TInt64 x);
 
+EXPORTED TByte tri_TWord64_to_TByte(TWord64 x);
 EXPORTED TInt64 tri_TWord64_to_TInt64(TWord64 x);
 
 EXPORTED TByte tri_TSymbol_to_TByte(TSymbol x);

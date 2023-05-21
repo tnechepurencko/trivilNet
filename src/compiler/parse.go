@@ -77,6 +77,8 @@ func (cc *compileContext) parseModule(isMain bool, list []*env.Source) *ast.Modu
 		cc.importModule(m, i)
 	}
 
+	cc.folders[m] = list[0].FolderPath
+
 	return m
 }
 

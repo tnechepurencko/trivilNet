@@ -134,7 +134,7 @@ func encodeLiteralString(runes []rune) string {
 		case '\v':
 			b.WriteString("\\v")
 		case '\\':
-			b.WriteString("\\")
+			b.WriteString("\\\\")
 		case '"':
 			b.WriteString("\\\"")
 		default:

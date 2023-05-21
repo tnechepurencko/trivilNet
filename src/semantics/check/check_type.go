@@ -146,7 +146,7 @@ func (cc *checkContext) compareFuncTypes(t1, t2 ast.Type) string {
 	return ""
 }
 
-// Возвращает "", если равны или причину ошибки
+// Возвращает true, если можно присвоить
 func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 
 	cc.errorHint = ""
@@ -161,7 +161,7 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 	case ast.Byte:
 		var li = literal(r)
 		if li != nil {
-			if li.Kind == ast.Lit_Int && li.IntVal >= 0 || li.IntVal <= 255 {
+			if li.Kind == ast.Lit_Int && (li.IntVal >= 0 || li.IntVal <= 255) {
 				li.WordVal = uint64(li.IntVal)
 				li.Typ = ast.Byte
 				return true
@@ -240,7 +240,9 @@ func (cc *checkContext) checkAssignable(lt ast.Type, r ast.Expr) {
 }
 
 func equalTypes(t1, t2 ast.Type) bool {
-	if ast.UnderType(t1) == ast.UnderType(t2) {
+	t1 = ast.UnderType(t1)
+	t2 = ast.UnderType(t2)
+	if t1 == t2 {
 		return true
 	}
 	switch x1 := t1.(type) {

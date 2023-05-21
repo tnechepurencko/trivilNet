@@ -23,7 +23,7 @@ func (cc *compileContext) setup(setuped *ast.Module) []*ast.Module {
 
 	var err = env.EnsureFolder(npath)
 	if err != nil {
-		env.AddError(setting.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", npath, err.Error())
+		env.AddError(setting.Pos, "ОКР-НЕ-ПАПКА", npath, err.Error())
 		return nil
 	}
 

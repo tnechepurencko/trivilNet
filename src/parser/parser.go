@@ -111,7 +111,7 @@ func (p *Parser) parseModule() {
 	p.module = ast.NewModule()
 	p.module.Pos = p.pos
 
-	if p.tok == lexer.SETTING {
+	if p.tok == lexer.IDENT && p.lit == "настройка" {
 		p.parseSetting()
 	}
 

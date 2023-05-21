@@ -199,8 +199,6 @@ func SourcePos(pos int) (src *Source, line int, col int) {
 
 	line, col = calcTextPos(src, ofs)
 
-	//	line = 0 // TBD: find line number
-	//	col = ofs
 	return
 }
 

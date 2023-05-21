@@ -13,7 +13,7 @@ type checkContext struct {
 	module       *ast.Module
 	checkedTypes map[string]struct{}
 	returnTyp    ast.Type
-	errorHint    string
+	errorHint    string // не используется
 	loopCount    int
 }
 
