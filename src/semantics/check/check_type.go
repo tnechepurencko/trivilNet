@@ -78,7 +78,7 @@ func (cc *checkContext) classType(td *ast.TypeDecl, cl *ast.ClassType) {
 		prev, ok := cl.Members[m.Name]
 		if ok {
 			prevM, ok := prev.(*ast.Function)
-			if ok && prevM.Recv.Typ != m.Recv.Typ {
+			if ok && ast.UnderType(prevM.Recv.Typ) != ast.UnderType(m.Recv.Typ) {
 				// сигнатуры при переопределении должны совпадать
 				var res = cc.compareFuncTypes(m.Typ, prevM.Typ)
 				if res != "" {
