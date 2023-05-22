@@ -11,48 +11,41 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-static char const * icky_global_program_name;
+void die(const char *fmt, ...) {
+  va_list ap;
 
-/* Resolve symbol name and source location given the path to the executable
-   and an address */
-int addr2line(char const * const program_name, void const * const addr)
-{
-  char addr2line_cmd[512] = {0};
-
-  /* have addr2line map the address to the relent line in the code */
-  #ifdef __APPLE__
-    /* apple does things differently... */
-    sprintf(addr2line_cmd,"atos -o %.256s %p", program_name, addr);
-  #else
-    sprintf(addr2line_cmd,"addr2line -f -p -e %.256s %p", program_name, addr);
-  #endif
-
-  return system(addr2line_cmd);
+  va_start(ap, fmt);
+  vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  exit(1);
 }
 
-#define MAX_STACK_FRAMES 64
+#define BT_BUF_SIZE 100
 
-static void *stack_traces[MAX_STACK_FRAMES];
 void posix_print_stack_trace() {
-    int i, trace_size = 0;
-    char **messages = (char **)NULL;
+  int nptrs;
+  void *buffer[BT_BUF_SIZE];
+  char **strings;
 
-    trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
-    messages = backtrace_symbols(stack_traces, trace_size);
+  nptrs = backtrace(buffer, BT_BUF_SIZE);
 
-    /* skip the first couple stack frames (as they are this function and
-     our handler) and also skip the last frame as it's (always?) junk. */
-    // for (i = 3; i < (trace_size - 1); ++i)
-    for (i = 0; i < trace_size; ++i) {
-  	    // we'll use this for now so you can see what's going on
-        if (addr2line(icky_global_program_name, stack_traces[i]) != 0) {
-            printf("  error determining line # for: %s\n", messages[i]);
-        }
-    }
+  strings = backtrace_symbols(buffer, nptrs);
+  if (strings == NULL) {
+    die("backtrace_symbols");
+    exit(EXIT_FAILURE);
+  }
 
-	if (messages) {
-	    free(messages);
-	}
+  // Пропускаем вызовы posix_print_stack_trace() и системные вызовы.
+  size_t start = 0;
+  if (nptrs > 3) {
+    start = 3;
+  }
+
+  for (size_t j = 3; j < nptrs; j++) {
+    printf("%s\n", strings[j]);
+  }
+
+  free(strings);
 }
 
 void posix_signal_handler(int sig, siginfo_t *siginfo, void *context) {
