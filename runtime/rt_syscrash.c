@@ -10,6 +10,7 @@
 #include <execinfo.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdarg.h>
 
 void die(const char *fmt, ...) {
   va_list ap;
