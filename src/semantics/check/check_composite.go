@@ -138,7 +138,7 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 
 	cl, ok := ast.UnderType(t).(*ast.ClassType)
 	if !ok {
-		env.AddError(c.Pos, "СЕМ-КОН-КЛАССА-ОШ-ТИП")
+		env.AddError(c.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-ОШ-ТИП")
 		c.Typ = ast.MakeInvalidType(c.X.GetPos())
 	} else {
 		c.Typ = t
@@ -157,11 +157,11 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 	for _, vp := range c.Values {
 		d, ok := cl.Members[vp.Name]
 		if !ok {
-			env.AddError(vp.Pos, "СЕМ-КОН-КЛАССА-НЕТ-ПОЛЯ", vp.Name)
+			env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕТ-ПОЛЯ", vp.Name)
 		} else {
 			f, ok := d.(*ast.Field)
 			if !ok {
-				env.AddError(vp.Pos, "СЕМ-КОН-КЛАССА-НЕ-ПОЛE")
+				env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕ-ПОЛE")
 			} else if f.Host != cc.module && !f.Exported {
 				env.AddError(vp.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", f.Name, f.Host.Name)
 			} else {
