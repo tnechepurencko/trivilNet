@@ -1,0 +1,136 @@
+модуль асд
+
+тип ОшВыражение* = класс (Выражение) {}
+
+//==== литералы
+
+конст * (
+    Лит-НЕОП = 0
+    Лит-Цел
+    Лит-Слово
+    Лит-Вещ
+    Лит-Символ
+    Лит-Строка
+    Лит-Пусто
+)
+
+тип Символы = []Символ
+
+тип Литерал* = класс (Выражение) {
+    вид* := Лит-НЕОП
+    цел*: Цел64 := 0
+    слово*: Слово64 := 0
+    вещ*: Строка = ""  // чтобы не терять точность
+    стр*: мб Символы := пусто // чтобы не выделять всегда
+}
+
+тип ЛогЛитерал* = класс (Выражение) {
+	значение* := ложь
+}
+
+//==
+/*
+тип BinaryExpr = класс {
+	ExprBase
+	X  Expr
+	Op lexer.Token
+	Y  Expr
+}
+
+тип UnaryExpr = класс {
+	ExprBase
+	Op lexer.Token
+	X  Expr
+}
+
+тип OfTypeExpr = класс {
+	ExprBase
+	X         Expr
+	TargetTyp Type
+}
+
+
+
+тип IdentExpr = класс {
+	ExprBase
+	Name Строка
+	Obj  Node // Decl: Var, Const or Function or TypeRef
+}
+
+тип SelectorExpr = класс {
+	ExprBase
+	X         Expr // = nil, если импортированный объект
+	Name      Строка
+	Obj       Node // импортированный объект или поле или метод
+	StdMethod *StdFunction
+}
+
+тип CallExpr = класс {
+	ExprBase
+	X       Expr
+	Args    []Expr
+	StdFunc *StdFunction
+}
+
+тип UnfoldExpr = класс {
+	ExprBase
+	X Expr
+}
+
+тип ConversionExpr = класс {
+	ExprBase
+	X         Expr
+	TargetTyp Type
+	Caution   Лог
+	Done      Лог // X уже преобразован к целевому типу
+}
+
+// Если тип передается, как параметр, например, в функции 'тег'
+тип TypeExpr = класс {
+	ExprBase
+}
+
+тип NotNilExpr = класс {
+	ExprBase
+	X Expr
+}
+
+//== index
+
+тип GeneralBracketExpr = класс {
+	ExprBase
+	X         Expr
+	Index     Expr // indexation если # nil, otherwise composite
+	Composite *ArrayCompositeExpr
+}
+
+тип ArrayCompositeExpr = класс {
+	ExprBase
+	LenExpr  Expr  // если константое выражение, то значение сохраняется в Length
+	Length   Цел64 // если вычислено, или -1
+	CapExpr  Expr
+	Default  Expr // default value
+	Indexes  []Expr
+	MaxIndex Цел64 // из значение индекса, -1, если нет индексов
+	Values   []Expr
+}
+
+тип ElementPair = класс {
+	Key   Expr
+	Value Expr
+}
+
+//== class composite
+
+тип ClassCompositeExpr = класс {
+	ExprBase
+	X      Expr
+	Values []ValuePair
+}
+
+тип ValuePair = класс {
+	Pos   int
+	Name  Строка
+	Value Expr
+}
+*/
