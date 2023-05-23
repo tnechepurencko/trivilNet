@@ -133,11 +133,11 @@ func (cc *checkContext) seqHasReturn(s *ast.StatementSeq) bool {
 		return true
 	case *ast.If:
 		return cc.ifHasReturn(x)
-	// TODO: *ast.Select
+	case *ast.Select:
+		return cc.selectHasReturn(x)
 	default:
 		return false
 	}
-
 }
 
 func (cc *checkContext) ifHasReturn(x *ast.If) bool {
@@ -153,12 +153,26 @@ func (cc *checkContext) ifHasReturn(x *ast.If) bool {
 	return cc.seqHasReturn(x.Else.(*ast.StatementSeq))
 }
 
+func (cc *checkContext) selectHasReturn(x *ast.Select) bool {
+	if x.Else == nil || !cc.seqHasReturn(x.Else) {
+		return false
+	}
+
+	for _, c := range x.Cases {
+		if !cc.seqHasReturn(c.Seq) {
+			return false
+		}
+	}
+
+	return true
+}
+
+//==== statements
+
 func (cc *checkContext) entry(e *ast.EntryFn) {
 	cc.loopCount = 0
 	cc.statements(e.Seq)
 }
-
-//==== statements
 
 func (cc *checkContext) statements(seq *ast.StatementSeq) {
 
