@@ -211,7 +211,7 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		var rt = ast.UnderType(r.GetType())
 		if rt == ast.NullType {
 			return true
-		} else if equalTypes(xt.Typ, r.GetType()) {
+		} else if cc.assignable(xt.Typ, r) {
 			return true
 		}
 
