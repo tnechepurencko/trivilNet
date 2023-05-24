@@ -97,6 +97,7 @@ func removeExtraPars(s string) string {
 		return s
 	}
 	if s[0] == '(' && s[len(s)-1] == ')' {
+		fmt.Printf("!removeExtraPars %v\n", s[1:len(s)-1])
 		return s[1 : len(s)-1]
 	}
 	return s
@@ -232,7 +233,7 @@ func (genc *genContext) genPredicateSelect(x *ast.Select) {
 
 		var conds = make([]string, 0)
 		for _, e := range c.Exprs {
-			conds = append(conds, genc.genExpr(e))
+			conds = append(conds, removeExtraPars(genc.genExpr(e)))
 		}
 		genc.c("%sif (%s) {", els, strings.Join(conds, " || "))
 		els = "else "
