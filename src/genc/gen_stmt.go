@@ -97,7 +97,6 @@ func removeExtraPars(s string) string {
 		return s
 	}
 	if s[0] == '(' && s[len(s)-1] == ')' {
-		fmt.Printf("!removeExtraPars %v\n", s[1:len(s)-1])
 		return s[1 : len(s)-1]
 	}
 	return s
@@ -183,7 +182,9 @@ func (genc *genContext) genSelectAsSwitch(x *ast.Select) {
 		for _, e := range c.Exprs {
 			genc.c("case %s: ", genc.genExpr(e))
 		}
+		genc.c("{") // for clang 15.0.7 on linux
 		genc.genStatementSeq(c.Seq)
+		genc.c("}")
 		genc.c("break;")
 	}
 
