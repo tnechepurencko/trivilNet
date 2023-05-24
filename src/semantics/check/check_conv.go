@@ -52,19 +52,23 @@ func (cc *checkContext) conversion(x *ast.ConversionExpr) {
 	case ast.String:
 		cc.conversionToString(x)
 		return
-
-	}
-
-	switch xt := target.(type) {
-	case *ast.VectorType:
-		cc.conversionToVector(x, xt)
-	case *ast.ClassType:
-		cc.conversionToClass(x, xt)
+	case ast.String8:
+		cc.conversionToString8(x)
+		return
 	default:
-		env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
-		x.Typ = ast.MakeInvalidType(x.Pos)
-		//panic(fmt.Sprintf("ni %T '%s'", target, ast.TypeString(target)))
+		switch xt := target.(type) {
+		case *ast.VectorType:
+			cc.conversionToVector(x, xt)
+			return
+		case *ast.ClassType:
+			cc.conversionToClass(x, xt)
+			return
+		}
 	}
+
+	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
+	x.Typ = ast.MakeInvalidType(x.Pos)
+	//panic(fmt.Sprintf("ni %T '%s'", target, ast.TypeString(target)))
 }
 
 func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
@@ -354,6 +358,9 @@ func (cc *checkContext) conversionToString(x *ast.ConversionExpr) {
 		env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(x.X.GetType()))
 		x.Typ = ast.String
 		return
+	case ast.String8:
+		x.Typ = ast.String
+		return
 	case ast.Symbol:
 		var li = literal(x.X)
 		if li != nil {
@@ -377,6 +384,24 @@ func (cc *checkContext) conversionToString(x *ast.ConversionExpr) {
 	}
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.String.Name)
+	x.Typ = ast.MakeInvalidType(x.Pos)
+}
+
+func (cc *checkContext) conversionToString8(x *ast.ConversionExpr) {
+
+	var t = ast.UnderType(x.X.GetType())
+
+	switch t {
+	case ast.String:
+		x.Typ = ast.String8
+		return
+	case ast.String8:
+		env.AddError(x.Pos, "СЕМ-ПРИВЕДЕНИЕ-ТИПА-К-СЕБЕ", ast.TypeString(x.X.GetType()))
+		x.Typ = ast.String8
+		return
+	}
+
+	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeString(x.X.GetType()), ast.String8.Name)
 	x.Typ = ast.MakeInvalidType(x.Pos)
 }
 

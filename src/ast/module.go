@@ -17,7 +17,6 @@ type Module struct {
 	Decls   []Decl
 	Entry   *EntryFn
 	Inner   *Scope
-	Caution bool
 	Setting *Setting
 }
 

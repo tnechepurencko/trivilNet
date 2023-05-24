@@ -45,6 +45,8 @@ func (genc *genContext) genConversion(x *ast.ConversionExpr) string {
 		}
 	case ast.String:
 		return genc.convertToString(expr, ast.UnderType(x.X.GetType()))
+	case ast.String8:
+		return expr
 	}
 
 	switch xt := to.(type) {
@@ -69,6 +71,8 @@ func (genc *genContext) convertToString(expr string, from ast.Type) string {
 
 	if from == ast.Symbol {
 		return genc.convertPredefined(expr, ast.Symbol, ast.String)
+	} else if from == ast.String8 {
+		return expr
 	}
 
 	vt, ok := from.(*ast.VectorType)
@@ -133,10 +137,6 @@ func (genc *genContext) genCautionCast(x *ast.ConversionExpr) string {
 		if from == ast.Word64 && ast.IsReferenceType(to) {
 			//TODO: проверить указатель и тег
 			return fmt.Sprintf("(%s)((%s)%s).a", genc.typeRef(x.TargetTyp), rt_cast_union, expr)
-		} else if to == ast.String8 && from == ast.String {
-			return expr
-		} else if to == ast.String && from == ast.String8 {
-			return expr
 		} else {
 			panic(fmt.Sprintf("ni %T '%s'", to, ast.TypeString(to)))
 		}

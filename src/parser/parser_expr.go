@@ -309,7 +309,8 @@ func (p *Parser) parseConversion(x ast.Expr) ast.Expr {
 	if p.tok == lexer.CAUTION {
 		p.next()
 		n.Caution = true
-		if !p.module.Caution {
+		p.cautionUse++
+		if !p.caution {
 			p.error(p.pos, "ПАР-ОШ-ИСП-ОСТОРОЖНО")
 		}
 	}

@@ -17,6 +17,9 @@ type Parser struct {
 	lex    *lexer.Lexer
 	module *ast.Module
 
+	caution    bool
+	cautionUse int
+
 	pos     int
 	tok     lexer.Token
 	lit     string
@@ -36,6 +39,10 @@ func Parse(source *env.Source) *ast.Module {
 
 	p.next()
 	p.parseModule()
+
+	if p.caution && p.cautionUse == 0 {
+		p.error(p.module.Pos, "ПАР-ОШ-ОСТОРОЖНО-НЕ-ИСП")
+	}
 
 	return p.module
 }
@@ -125,7 +132,7 @@ func (p *Parser) parseModule() {
 
 	if p.tok == lexer.CAUTION {
 		p.next()
-		p.module.Caution = true
+		p.caution = true
 		p.sep()
 	}
 
