@@ -51,6 +51,8 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		} else {
 			genc.genSelectAsIfs(x)
 		}
+	case *ast.SelectType:
+		genc.genSelectType(x)
 	case *ast.Return:
 		r := ""
 		if x.X != nil {
@@ -247,4 +249,37 @@ func (genc *genContext) genPredicateSelect(x *ast.Select) {
 		genc.genStatementSeq(x.Else)
 		genc.c("}")
 	}
+}
+
+//==== оператор выбора по типу
+
+// if
+func (genc *genContext) genSelectType(x *ast.SelectType) {
+
+	var loc = genc.localName("")
+	genc.c("%s %s = %s;", genc.typeRef(x.X.GetType()), loc, genc.genExpr(x.X))
+
+	var tag = genc.localName("tag")
+	genc.c("void* %s = %s->%s;", tag, loc, nm_VT_field)
+
+	var els = ""
+	for _, c := range x.Cases {
+
+		var conds = make([]string, 0)
+		for _, t := range c.Types {
+			var tname = genc.typeRef(t)
+			conds = append(conds, fmt.Sprintf("%s == %s", tag, tname+nm_class_info_ptr_suffix))
+		}
+		genc.c("%sif (%s) {", els, strings.Join(conds, " || "))
+		els = "else "
+		genc.genStatementSeq(c.Seq)
+		genc.c("}")
+	}
+
+	if x.Else != nil {
+		genc.c("else {")
+		genc.genStatementSeq(x.Else)
+		genc.c("}")
+	}
+
 }

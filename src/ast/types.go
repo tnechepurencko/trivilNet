@@ -218,7 +218,7 @@ func IsReferenceType(t Type) bool {
 	}
 }
 
-//==== tags
+//==== теги
 
 // Объекты каких типов имеют тег
 func HasTag(t Type) bool {

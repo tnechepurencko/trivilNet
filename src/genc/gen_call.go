@@ -226,30 +226,33 @@ func (genc *genContext) genStdTag(call *ast.CallExpr) string {
 	if tExpr, ok := a.(*ast.TypeExpr); ok {
 		return genc.genTypeTag(tExpr.Typ)
 	} else {
-		var t = a.GetType()
-		if ast.IsTagPairType(t) {
-			return genc.genExprTag(a)
-		} else {
-			return genc.genTypeTag(t)
-		}
+		return genc.genTagPairTag(a)
 	}
 }
 
+// Выдает тег по статическому типу
 func (genc *genContext) genTypeTag(t ast.Type) string {
 	t = ast.UnderType(t)
 	switch x := t.(type) {
 	case *ast.PredefinedType:
 		return fmt.Sprintf("%s%s()", rt_tag, predefinedTypeName(x.Name))
+	case *ast.ClassType:
+		panic("ni")
+	case *ast.VectorType:
+		panic("ni")
+	case *ast.MayBeType:
+		return genc.genTypeTag(x.Typ)
 	default:
-		panic(("ni"))
+		panic(fmt.Sprintf("ni type tag %T", t))
 	}
 }
 
-func (genc *genContext) genExprTag(e ast.Expr) string {
+// Тег для TagPair выражения
+func (genc *genContext) genTagPairTag(e ast.Expr) string {
 	switch x := e.(type) {
 	case *ast.GeneralBracketExpr:
 		if x.Index == nil {
-			panic("assert")
+			panic("assert - не может быть композита")
 		}
 
 		var left = genc.genExpr(x.X)
@@ -263,7 +266,7 @@ func (genc *genContext) genExprTag(e ast.Expr) string {
 			nm_variadic_len_suffic)
 
 	case *ast.IdentExpr:
-		panic("ni")
+		panic("ni - не вариадик параметр '*'")
 	}
 	panic("assert")
 }

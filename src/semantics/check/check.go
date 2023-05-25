@@ -77,6 +77,10 @@ func (cc *checkContext) varDecl(v *ast.VarDecl) {
 				env.AddError(v.Pos, "СЕМ-ФН-НЕТ-ЗНАЧЕНИЯ")
 				return
 			}
+			if ast.IsTagPairType(v.Typ) {
+				env.AddError(v.Pos, "СЕМ-СОХРАНЕНИЕ-ПОЛИМОРФНОГО")
+				return
+			}
 		}
 	}
 }
@@ -247,6 +251,8 @@ func (cc *checkContext) statement(s ast.Statement) {
 		}
 	case *ast.Select:
 		cc.checkSelect(x)
+	case *ast.SelectType:
+		cc.checkSelectType(x)
 
 	case *ast.Return:
 		if x.X != nil {
@@ -285,6 +291,8 @@ func (cc *checkContext) localDecl(decl ast.Decl) {
 	}
 }
 
+//==== оператор выбора по выражению
+
 func (cc *checkContext) checkSelect(x *ast.Select) {
 
 	if x.X == nil {
@@ -299,7 +307,7 @@ func (cc *checkContext) checkSelect(x *ast.Select) {
 		for _, e := range c.Exprs {
 			cc.expr(e)
 			if !equalTypes(x.X.GetType(), e.GetType()) {
-				env.AddError(e.GetPos(), "СЕМ-КОГДА-ОШ-ТИПЫ", ast.TypeName(e.GetType()), ast.TypeName(x.X.GetType()))
+				env.AddError(e.GetPos(), "СЕМ-ВЫБОР-ОШ-ТИП-ВАРИАНТА", ast.TypeName(e.GetType()), ast.TypeName(x.X.GetType()))
 			}
 		}
 		cc.statements(c.Seq)
@@ -315,7 +323,7 @@ func (cc *checkContext) checkPredicateSelect(x *ast.Select) {
 		for _, e := range c.Exprs {
 			cc.expr(e)
 			if !equalTypes(e.GetType(), ast.Bool) {
-				env.AddError(e.GetPos(), "СЕМ-КОГДА-ОШ-ПРЕДИКАТ", ast.TypeName(ast.Bool), ast.TypeName(e.GetType()))
+				env.AddError(e.GetPos(), "СЕМ-ВЫБОР-ОШ-ТИП-ПРЕДИКАТА", ast.TypeName(ast.Bool), ast.TypeName(e.GetType()))
 			}
 		}
 		cc.statements(c.Seq)
@@ -335,7 +343,37 @@ func checkSelectExpr(x ast.Expr) {
 			return
 		}
 	}
-	env.AddError(x.GetPos(), "СЕМ-КОГДА-ОШ-ТИП", ast.TypeName(x.GetType()))
+	env.AddError(x.GetPos(), "СЕМ-ВЫБОР-ОШ-ТИП", ast.TypeName(x.GetType()))
+}
+
+//==== оператор выбора по типу
+
+func (cc *checkContext) checkSelectType(x *ast.SelectType) {
+
+	cc.expr(x.X)
+
+	tClass, isClass := ast.UnderType(x.X.GetType()).(*ast.ClassType)
+
+	if !isClass {
+		env.AddError(x.GetPos(), "СЕМ-ВЫБОР-ТИП-КЛАССА", ast.TypeName(x.X.GetType()))
+	}
+
+	for _, c := range x.Cases {
+		for _, t := range c.Types {
+			caseClass, ok := ast.UnderType(t).(*ast.ClassType)
+			if !ok {
+				env.AddError(t.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeName(t))
+			} else if isClass {
+				if caseClass != tClass && !isDerivedClass(tClass, caseClass) {
+					env.AddError(t.GetPos(), "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(t), ast.TypeName(x.X.GetType()))
+				}
+			}
+		}
+		cc.statements(c.Seq)
+	}
+	if x.Else != nil {
+		cc.statements(x.Else)
+	}
 }
 
 //====

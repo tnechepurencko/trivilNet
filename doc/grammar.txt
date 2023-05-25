@@ -169,9 +169,21 @@ guard_stm
 	: 'надо' expression 'иначе' (terminating_stm | statement_seq )
 	;
 
-switch_stm                          // пока единственный вариант
+switch_stm
+    : expr_switch
+    | type_switch
+    ;
+
+expr_switch                          
     : 'выбор' expression? '{' 
       ('когда' expression (',' expression)* ':' statement_list? )* 
+      ('другое' statement_list?)?
+      '}'
+    ;
+
+type_switch                          
+    : 'выбор' ('пусть' ident ':')? 'тип' expression '{' 
+      ('когда'  type_ref (','  type_ref)* ':' statement_list? )* 
       ('другое' statement_list?)?
       '}'
     ;

@@ -308,16 +308,26 @@ func (p *Parser) parseGuard() ast.Statement {
 	return n
 }
 
-func (p *Parser) parseSelect() ast.Statement {
-	if p.trace {
-		defer un(trace(p, "Оператор выбора"))
-	}
+//==== оператор выбора
 
+func (p *Parser) parseSelect() ast.Statement {
+	p.next()
+	if p.tok == lexer.VAR || p.tok == lexer.TYPE {
+		return p.parseSelectType()
+	}
+	return p.parseSelectExpr()
+}
+
+//==== оператор выбора по выражению
+
+func (p *Parser) parseSelectExpr() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор выбора по выражению"))
+	}
 	var n = &ast.Select{
 		StatementBase: ast.StatementBase{Pos: p.pos},
 	}
 
-	p.next()
 	if p.tok == lexer.LBRACE {
 		p.next()
 	} else {
@@ -326,7 +336,7 @@ func (p *Parser) parseSelect() ast.Statement {
 	}
 
 	for p.tok == lexer.WHEN {
-		var c = p.parseSelectCase()
+		var c = p.parseCaseExpr()
 		n.Cases = append(n.Cases, c)
 	}
 
@@ -339,7 +349,7 @@ func (p *Parser) parseSelect() ast.Statement {
 	return n
 }
 
-func (p *Parser) parseSelectCase() *ast.Case {
+func (p *Parser) parseCaseExpr() *ast.Case {
 	if p.trace {
 		defer un(trace(p, "выбор когда"))
 	}
@@ -353,6 +363,67 @@ func (p *Parser) parseSelectCase() *ast.Case {
 	for {
 		var x = p.parseExpression()
 		c.Exprs = append(c.Exprs, x)
+		if p.tok != lexer.COMMA {
+			break
+		}
+		p.next()
+	}
+	p.expect(lexer.COLON)
+
+	c.Seq = p.parseStatementList(endWhenCase)
+
+	return c
+}
+
+//==== оператор выбора по типу
+
+func (p *Parser) parseSelectType() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор выбора по типу"))
+	}
+
+	var n = &ast.SelectType{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+	}
+
+	if p.tok == lexer.VAR {
+		p.next()
+		n.Ident = p.parseIdent()
+		p.expect(lexer.COLON)
+	}
+	p.expect(lexer.TYPE)
+
+	n.X = p.parseExpression()
+	p.expect(lexer.LBRACE)
+
+	for p.tok == lexer.WHEN {
+		var c = p.parseCaseType()
+		n.Cases = append(n.Cases, c)
+	}
+
+	if p.tok == lexer.OTHER {
+		p.next()
+		n.Else = p.parseStatementList(endStatementSeq)
+	}
+	p.expect(lexer.RBRACE)
+
+	return n
+}
+
+func (p *Parser) parseCaseType() *ast.CaseType {
+	if p.trace {
+		defer un(trace(p, "выбор когда по типу"))
+	}
+
+	var c = &ast.CaseType{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+		Types:         make([]ast.Type, 0),
+	}
+	p.next()
+
+	for {
+		var x = p.parseTypeRef()
+		c.Types = append(c.Types, x)
 		if p.tok != lexer.COMMA {
 			break
 		}

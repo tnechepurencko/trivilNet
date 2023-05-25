@@ -85,6 +85,20 @@ type Case struct {
 	Seq   *StatementSeq
 }
 
+type SelectType struct {
+	StatementBase
+	Ident string
+	X     Expr
+	Cases []*CaseType
+	Else  *StatementSeq
+}
+
+type CaseType struct {
+	StatementBase
+	Types []Type
+	Seq   *StatementSeq
+}
+
 type Crash struct {
 	StatementBase
 	X Expr //

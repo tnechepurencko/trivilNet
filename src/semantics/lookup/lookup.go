@@ -255,6 +255,8 @@ func (lc *lookContext) lookStatement(seq *ast.StatementSeq, s ast.Statement) {
 		lc.lookStatement(nil, x.Else)
 	case *ast.Select:
 		lc.lookSelect(x)
+	case *ast.SelectType:
+		lc.lookSelectType(x)
 	case *ast.Return:
 		if x.X != nil {
 			lc.lookExpr(x.X)
@@ -293,6 +295,20 @@ func (lc *lookContext) lookSelect(x *ast.Select) {
 	for _, c := range x.Cases {
 		for _, e := range c.Exprs {
 			lc.lookExpr(e)
+		}
+		lc.lookStatements(c.Seq)
+	}
+	if x.Else != nil {
+		lc.lookStatements(x.Else)
+	}
+}
+
+func (lc *lookContext) lookSelectType(x *ast.SelectType) {
+	lc.lookExpr(x.X)
+
+	for _, c := range x.Cases {
+		for _, t := range c.Types {
+			lc.lookTypeRef(t)
 		}
 		lc.lookStatements(c.Seq)
 	}

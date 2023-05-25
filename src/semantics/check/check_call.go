@@ -170,7 +170,7 @@ func (cc *checkContext) callStdTag(x *ast.CallExpr) {
 	} else {
 		cc.expr(x.Args[0])
 
-		if !ast.HasTag(x.Args[0].GetType()) {
+		if !ast.IsTagPairType(x.Args[0].GetType()) {
 			env.AddError(x.Pos, "СЕМ-СТД-ТЕГ-ОШ-АРГ")
 			return
 		}
