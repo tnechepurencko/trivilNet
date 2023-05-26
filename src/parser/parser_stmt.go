@@ -386,9 +386,12 @@ func (p *Parser) parseSelectType() ast.Statement {
 		StatementBase: ast.StatementBase{Pos: p.pos},
 	}
 
+	var varPos = 0
+
 	if p.tok == lexer.VAR {
 		p.next()
-		n.Ident = p.parseIdent()
+		varPos = p.pos
+		n.VarIdent = p.parseIdent()
 		p.expect(lexer.COLON)
 	}
 	p.expect(lexer.TYPE)
@@ -398,6 +401,16 @@ func (p *Parser) parseSelectType() ast.Statement {
 
 	for p.tok == lexer.WHEN {
 		var c = p.parseCaseType()
+		if n.VarIdent != "" {
+			c.Var = &ast.VarDecl{
+				DeclBase: ast.DeclBase{
+					Pos:  varPos,
+					Name: n.VarIdent,
+				},
+				AssignOnce: true,
+			}
+		}
+
 		n.Cases = append(n.Cases, c)
 	}
 

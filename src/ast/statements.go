@@ -87,15 +87,16 @@ type Case struct {
 
 type SelectType struct {
 	StatementBase
-	Ident string
-	X     Expr
-	Cases []*CaseType
-	Else  *StatementSeq
+	VarIdent string
+	X        Expr
+	Cases    []*CaseType
+	Else     *StatementSeq
 }
 
 type CaseType struct {
 	StatementBase
 	Types []Type
+	Var   *VarDecl // nil, если переменная не задана
 	Seq   *StatementSeq
 }
 

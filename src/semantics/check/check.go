@@ -139,6 +139,8 @@ func (cc *checkContext) seqHasReturn(s *ast.StatementSeq) bool {
 		return cc.ifHasReturn(x)
 	case *ast.Select:
 		return cc.selectHasReturn(x)
+	case *ast.SelectType:
+		return cc.selectTypeHasReturn(x)
 	default:
 		return false
 	}
@@ -158,6 +160,20 @@ func (cc *checkContext) ifHasReturn(x *ast.If) bool {
 }
 
 func (cc *checkContext) selectHasReturn(x *ast.Select) bool {
+	if x.Else == nil || !cc.seqHasReturn(x.Else) {
+		return false
+	}
+
+	for _, c := range x.Cases {
+		if !cc.seqHasReturn(c.Seq) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (cc *checkContext) selectTypeHasReturn(x *ast.SelectType) bool {
 	if x.Else == nil || !cc.seqHasReturn(x.Else) {
 		return false
 	}
@@ -368,6 +384,14 @@ func (cc *checkContext) checkSelectType(x *ast.SelectType) {
 					env.AddError(t.GetPos(), "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(t), ast.TypeName(x.X.GetType()))
 				}
 			}
+		}
+		if c.Var != nil {
+			if len(c.Types) > 1 {
+				env.AddError(c.Pos, "СЕМ-ВЫБОР-ОДИН-ТИП")
+			}
+
+			c.Var.Typ = c.Types[0]
+
 		}
 		cc.statements(c.Seq)
 	}

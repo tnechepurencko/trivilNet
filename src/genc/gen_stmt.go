@@ -272,6 +272,16 @@ func (genc *genContext) genSelectType(x *ast.SelectType) {
 		}
 		genc.c("%sif (%s) {", els, strings.Join(conds, " || "))
 		els = "else "
+
+		if c.Var != nil {
+			var v = c.Var
+
+			genc.c("%s %s = %s%s;",
+				genc.typeRef(v.Typ),
+				genc.declName(v),
+				genc.assignCast(v.Typ, x.X.GetType()),
+				loc)
+		}
 		genc.genStatementSeq(c.Seq)
 		genc.c("}")
 	}
