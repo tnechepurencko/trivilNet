@@ -149,11 +149,6 @@ type ArrayCompositeExpr struct {
 	Values   []Expr
 }
 
-type ElementPair struct {
-	Key   Expr
-	Value Expr
-}
-
 //=== class composite
 
 type ClassCompositeExpr struct {
