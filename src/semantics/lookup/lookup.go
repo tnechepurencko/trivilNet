@@ -310,6 +310,11 @@ func (lc *lookContext) lookSelectType(x *ast.SelectType) {
 		for _, t := range c.Types {
 			lc.lookTypeRef(t)
 		}
+		if c.Var != nil {
+			c.Var.Later = true
+			lc.lookLocalDecl(c.Seq, c.Var)
+		}
+
 		lc.lookStatements(c.Seq)
 	}
 	if x.Else != nil {
