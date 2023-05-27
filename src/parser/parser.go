@@ -312,7 +312,9 @@ func (p *Parser) parseConstGroup() []*ast.ConstDecl {
 	var cs = make([]*ast.ConstDecl, 0)
 	var c = p.parseSingleConst()
 
-	c.Exported = exported
+	if exported {
+		c.Exported = true
+	}
 	cs = append(cs, c)
 
 	for p.tok != lexer.RPAR && p.tok != lexer.EOF {
