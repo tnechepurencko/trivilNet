@@ -95,12 +95,14 @@ func (p *Parser) parseFuncType() *ast.FuncType {
 	return ft
 }
 
+/* не используется
 var skipToParam = tokens{
 	lexer.EOF: true,
 
 	lexer.RPAR:  true,
 	lexer.COMMA: true,
 }
+*/
 
 func (p *Parser) parseParameters(ft *ast.FuncType) {
 

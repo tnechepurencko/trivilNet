@@ -132,6 +132,7 @@ func (cc *checkContext) selector(x *ast.SelectorExpr) {
 			return
 		}
 	default:
+		// TODO: выдать отдельную ошибку, если пропущен "^"
 		env.AddError(x.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeName(t))
 		x.Typ = ast.MakeInvalidType(x.X.GetPos())
 		return
