@@ -291,9 +291,9 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 || t == ast.Symbol || t == ast.String {
 			checkOperandTypes(x)
 		} else if ast.IsClassType(t) {
-			checkOperandTypes(x)
+			checkClassOperands(x)
 		} else if ast.IsMayBeType(t) {
-			checkMayBeOparands(x)
+			checkMayBeOperands(x)
 		} else {
 			addErrorForType(t, x.Pos, "СЕМ-ОШ-ТИП-ОПЕРАНДА",
 				ast.TypeString(x.X.GetType()), x.Op.String())
@@ -320,12 +320,27 @@ func checkOperandTypes(x *ast.BinaryExpr) {
 		return
 	}
 	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",
-		ast.TypeString(x.X.GetType()), x.Op.String(), ast.TypeString(x.Y.GetType()))
+		ast.TypeName(x.X.GetType()), x.Op.String(), ast.TypeName(x.Y.GetType()))
 
 }
 
 // Считаю, что "пусто" может быть только вторым операндом
-func checkMayBeOparands(x *ast.BinaryExpr) {
+func checkClassOperands(x *ast.BinaryExpr) {
+
+	var l = ast.UnderType(x.X.GetType()).(*ast.ClassType)
+	r, ok := ast.UnderType(x.Y.GetType()).(*ast.ClassType)
+
+	if ok {
+		if l == r || isDerivedClass(l, r) || isDerivedClass(r, l) {
+			return
+		}
+	}
+	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",
+		ast.TypeName(x.X.GetType()), x.Op.String(), ast.TypeName(x.Y.GetType()))
+}
+
+// Считаю, что "пусто" может быть только вторым операндом
+func checkMayBeOperands(x *ast.BinaryExpr) {
 
 	var l = ast.UnderType(x.X.GetType()).(*ast.MayBeType)
 	var r = ast.UnderType(x.Y.GetType())
@@ -336,7 +351,7 @@ func checkMayBeOparands(x *ast.BinaryExpr) {
 		return
 	}
 	env.AddError(x.Pos, "СЕМ-ОПЕРАНДЫ-НЕ-СОВМЕСТИМЫ",
-		ast.TypeString(x.X.GetType()), x.Op.String(), ast.TypeString(x.Y.GetType()))
+		ast.TypeName(x.X.GetType()), x.Op.String(), ast.TypeName(x.Y.GetType()))
 
 }
 
