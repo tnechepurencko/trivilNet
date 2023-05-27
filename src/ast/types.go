@@ -275,6 +275,8 @@ func TypeString(t Type) string {
 		return "..." + TypeName(x.ElementTyp)
 	case *MayBeType:
 		return "мб " + TypeName(x.Typ)
+	case *FuncType:
+		return "тип функции"
 	default:
 		return fmt.Sprintf("TypeString ni: %T", t)
 	}
