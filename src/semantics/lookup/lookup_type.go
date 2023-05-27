@@ -43,6 +43,9 @@ func (lc *lookContext) lookTypeRef(t ast.Type) {
 		td = lc.lookTypeDeclInModule(tr.ModuleName, tr.TypeName, tr.Pos)
 	} else {
 		td = lc.lookTypeDeclInScopes(tr.TypeName, tr.Pos)
+		if td.GetHost() == lc.module {
+			lc.lookDecl(td)
+		}
 	}
 
 	tr.TypeDecl = td
