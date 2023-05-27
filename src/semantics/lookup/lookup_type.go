@@ -43,9 +43,6 @@ func (lc *lookContext) lookTypeRef(t ast.Type) {
 		td = lc.lookTypeDeclInModule(tr.ModuleName, tr.TypeName, tr.Pos)
 	} else {
 		td = lc.lookTypeDeclInScopes(tr.TypeName, tr.Pos)
-		if td.GetHost() == lc.module {
-			lc.lookDecl(td)
-		}
 	}
 
 	tr.TypeDecl = td
@@ -133,9 +130,12 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 	switch x := v.Typ.(type) {
 	case *ast.VectorType:
 		lc.lookTypeRef(x.ElementTyp)
+		lc.checkRecursion(x.ElementTyp)
+
 	case *ast.ClassType:
 		if x.BaseTyp != nil {
 			lc.lookTypeRef(x.BaseTyp)
+			lc.checkRecursion(x.BaseTyp)
 		}
 		for _, f := range x.Fields {
 			if f.Typ != nil {
@@ -153,8 +153,19 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 		if !ast.IsReferenceType(ast.UnderType(x.Typ)) {
 			env.AddError(x.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(x.Typ))
 		}
-
+	case *ast.InvalidType:
 	default:
 		panic(fmt.Sprintf("lookTypeDecl: ni %T", v.Typ))
+	}
+}
+
+func (lc *lookContext) checkRecursion(t ast.Type) {
+	tr, ok := t.(*ast.TypeRef)
+	if ok {
+		tr = ast.DirectTypeRef(tr)
+		var td = tr.TypeDecl
+		if td.GetHost() == lc.module {
+			lc.lookDecl(td)
+		}
 	}
 }
