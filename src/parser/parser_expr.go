@@ -52,6 +52,7 @@ func (p *Parser) parseBinaryExpression(prec int) ast.Expr {
 	var x = p.parseUnaryExpression()
 	for {
 		op := p.tok
+		var pos = p.pos
 		opPrec := precedence(op)
 		if opPrec < prec {
 			return x
@@ -60,7 +61,6 @@ func (p *Parser) parseBinaryExpression(prec int) ast.Expr {
 		if op == lexer.OFTYPE {
 			x = p.parseOfTypeExpression(x)
 		} else {
-			var pos = p.pos
 			p.next()
 			var y = p.parseBinaryExpression(opPrec + 1)
 			x = &ast.BinaryExpr{

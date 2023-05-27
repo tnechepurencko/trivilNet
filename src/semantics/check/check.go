@@ -207,7 +207,7 @@ func (cc *checkContext) statement(s ast.Statement) {
 		cc.statements(x) // из else
 	case *ast.ExprStatement:
 		if b, isBinary := x.X.(*ast.BinaryExpr); isBinary && b.Op == lexer.EQ {
-			env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПРИСВАИВАНИЕ")
+			env.AddError(x.X.GetPos(), "СЕМ-ОЖИДАЛОСЬ-ПРИСВАИВАНИЕ")
 		} else {
 			cc.expr(x.X)
 			if _, isCall := x.X.(*ast.CallExpr); !isCall {
