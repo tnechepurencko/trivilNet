@@ -99,7 +99,7 @@ type MayBeType struct {
 	Typ Type
 }
 
-//====
+//==== type refs
 
 // Снимает все TypeRef, может быть два в контексте тип А = Б
 func UnderType(t Type) Type {
@@ -108,6 +108,22 @@ func UnderType(t Type) Type {
 			t = tr.Typ
 		} else {
 			return t
+		}
+	}
+}
+
+// Выдает TypeRef, непосредственно указывающий на сам тип
+func DirectTypeRef(t Type) *TypeRef {
+	tr, ok := t.(*TypeRef)
+	if !ok {
+		panic("assert: должен быть TypeRef")
+	}
+	for {
+		next, ok := tr.Typ.(*TypeRef)
+		if ok {
+			tr = next
+		} else {
+			return tr
 		}
 	}
 }

@@ -80,8 +80,8 @@ func Process(m *ast.Module) {
 	if m.Entry != nil {
 		lc.lookEntry(m.Entry)
 	}
-	//show(m.Decls)
-	//show(lc.decls)
+	//	show(m.Decls)
+	//	show(lc.decls)
 
 	// Меняем порядок описаний - определение до использования
 	m.Decls = lc.decls
@@ -127,6 +127,8 @@ func (lc *lookContext) lookDecl(d ast.Decl) {
 		lc.lookVarDecl(x)
 	case *ast.Function:
 		return
+	case *ast.InvalidDecl:
+		// игнорирую
 	default:
 		panic(fmt.Sprintf("lookup 3: ni %T", d))
 	}

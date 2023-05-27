@@ -93,9 +93,9 @@ func (lc *lookContext) lookIdentExpr(x *ast.IdentExpr) {
 		x.Obj = makeTypeRef(td, x.Pos)
 	} else {
 		x.Obj = d
-		if d.GetHost() == lc.module {
-			lc.lookDecl(d)
-		}
+	}
+	if d.GetHost() == lc.module {
+		lc.lookDecl(d)
 	}
 
 	//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
