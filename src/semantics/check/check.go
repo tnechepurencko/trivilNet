@@ -247,8 +247,8 @@ func (cc *checkContext) statement(s ast.Statement) {
 		}
 	case *ast.While:
 		cc.checkWhile(x)
-	case *ast.For:
-		cc.checkFor(x)
+	case *ast.Cycle:
+		cc.checkCycle(x)
 	case *ast.Guard:
 		cc.expr(x.Cond)
 		if !ast.IsBoolType(x.Cond.GetType()) {
@@ -314,7 +314,7 @@ func (cc *checkContext) checkWhile(x *ast.While) {
 	cc.loopCount--
 }
 
-func (cc *checkContext) checkFor(x *ast.For) {
+func (cc *checkContext) checkCycle(x *ast.Cycle) {
 	cc.expr(x.Expr)
 	var t = x.Expr.GetType()
 

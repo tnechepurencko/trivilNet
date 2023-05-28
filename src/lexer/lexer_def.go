@@ -81,10 +81,10 @@ const (
 	CLASS
 	CONST
 	CRASH
+	CYCLE
 	ELSE
 	ENTRY
 	FN
-	FOR
 	GUARD
 	IF
 	IMPORT
@@ -175,7 +175,6 @@ var tokens = [...]string{
 	RETURN:  "вернуть",
 	ENTRY:   "вход",
 	SELECT:  "выбор",
-	FOR:     "для",
 	OTHER:   "другое",
 	IF:      "если",
 	ELSE:    "иначе",
@@ -195,6 +194,7 @@ var tokens = [...]string{
 	TYPE:    "тип",
 	OFTYPE:  "типа",
 	FN:      "фн",
+	CYCLE:   "цикл",
 }
 
 func (tok Token) String() string {

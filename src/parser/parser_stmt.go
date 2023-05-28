@@ -112,8 +112,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseSelect()
 	case lexer.WHILE:
 		return p.parseWhile()
-	case lexer.FOR:
-		return p.parseFor()
+	case lexer.CYCLE:
+		return p.parseCycle()
 	case lexer.RETURN:
 		return p.parseReturn()
 	case lexer.BREAK:
@@ -231,12 +231,12 @@ func (p *Parser) parseWhile() ast.Statement {
 }
 
 // Не делаю пока возможности задавать тип переменных
-func (p *Parser) parseFor() ast.Statement {
+func (p *Parser) parseCycle() ast.Statement {
 	if p.trace {
-		defer un(trace(p, "Оператор для"))
+		defer un(trace(p, "Оператор цикла"))
 	}
 
-	var n = &ast.For{
+	var n = &ast.Cycle{
 		StatementBase: ast.StatementBase{Pos: p.pos},
 	}
 

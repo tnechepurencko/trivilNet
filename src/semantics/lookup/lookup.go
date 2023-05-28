@@ -256,7 +256,7 @@ func (lc *lookContext) lookStatement(seq *ast.StatementSeq, s ast.Statement) {
 	case *ast.While:
 		lc.lookExpr(x.Cond)
 		lc.lookStatements(x.Seq)
-	case *ast.For:
+	case *ast.Cycle:
 		lc.lookExpr(x.Expr)
 		if x.IndexVar != nil {
 			x.IndexVar.Later = true

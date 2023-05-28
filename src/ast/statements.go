@@ -102,7 +102,7 @@ type While struct {
 	Seq  *StatementSeq
 }
 
-type For struct {
+type Cycle struct {
 	StatementBase
 	IndexVar   *VarDecl
 	ElementVar *VarDecl

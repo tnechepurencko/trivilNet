@@ -151,7 +151,7 @@ statement
     | guard_stm
 	| switch_stm
 	| while_stm
-	| for_stm
+	| cycle_stm
 	| return_stm
     | crash_stm
 	| break_stm 
@@ -189,8 +189,8 @@ while_stm
 	: 'пока' expression statement_block 
 	;
 
-for_stm
-	: 'для' iters 'из' expression statement_block 
+cycle_stm
+	: 'цикл' iters 'среди' expression statement_block 
 	;
 
 iters

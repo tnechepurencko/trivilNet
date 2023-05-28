@@ -41,8 +41,8 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		genc.genIf(x, "")
 	case *ast.While:
 		genc.genWhile(x)
-	case *ast.For:
-		genc.genFor(x)
+	case *ast.Cycle:
+		genc.genCycle(x)
 	case *ast.Guard:
 		genc.genGuard(x)
 	case *ast.Select:
@@ -112,7 +112,7 @@ func (genc *genContext) genWhile(x *ast.While) {
 	genc.c("}")
 }
 
-func (genc *genContext) genFor(x *ast.For) {
+func (genc *genContext) genCycle(x *ast.Cycle) {
 
 	var index = ""
 	if x.IndexVar != nil {
