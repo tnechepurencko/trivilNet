@@ -210,10 +210,29 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 
 	switch t.(type) {
 	case *ast.VectorType:
-		//		return fmt.Sprintf("%s(%s)", rt_lenVector, genc.genExpr(a))
 		return fmt.Sprintf("(%s)->len", genc.genExpr(a))
 	case *ast.VariadicType:
 		return fmt.Sprintf("%s%s", genc.genExpr(a), nm_variadic_len_suffic)
+	default:
+		panic("ni")
+	}
+}
+
+// Запрос длины по выражению expr тип typ
+func (genc *genContext) genLen(expr string, typ ast.Type) string {
+
+	var t = ast.UnderType(typ)
+	if t == ast.String {
+		return fmt.Sprintf("%s(%s)", rt_lenString, expr)
+	} else if t == ast.String8 {
+		return fmt.Sprintf("(%s)->bytes", expr)
+	}
+
+	switch t.(type) {
+	case *ast.VectorType:
+		return fmt.Sprintf("(%s)->len", expr)
+	case *ast.VariadicType:
+		return fmt.Sprintf("%s%s", expr, nm_variadic_len_suffic)
 	default:
 		panic("ni")
 	}

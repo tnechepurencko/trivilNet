@@ -41,6 +41,8 @@ func (genc *genContext) genStatement(s ast.Statement) {
 		genc.genIf(x, "")
 	case *ast.While:
 		genc.genWhile(x)
+	case *ast.For:
+		genc.genFor(x)
 	case *ast.Guard:
 		genc.genGuard(x)
 	case *ast.Select:
@@ -108,6 +110,51 @@ func (genc *genContext) genWhile(x *ast.While) {
 	genc.c("while (%s) {", removeExtraPars(genc.genExpr(x.Cond)))
 	genc.genStatementSeq(x.Seq)
 	genc.c("}")
+}
+
+func (genc *genContext) genFor(x *ast.For) {
+
+	var index = ""
+	if x.IndexVar != nil {
+		index = genc.declName(x.IndexVar)
+	} else {
+		index = genc.localName("i")
+	}
+
+	//TODO: нельзя для вариадик
+	var loc = genc.localName("")
+	genc.c("%s %s = %s;", genc.typeRef(x.Expr.GetType()), loc, genc.genExpr(x.Expr))
+
+	genc.c("for (%s %s = 0;%s < %s;%s++) {",
+		predefinedTypeName(ast.Int64.Name),
+		index,
+		index,
+		genc.genLen(loc, x.Expr.GetType()),
+		index)
+
+	if x.ElementVar != nil {
+		genc.c("%s %s = %s;",
+			genc.typeRef(x.ElementVar.Typ),
+			genc.declName(x.ElementVar),
+			genc.genForElementSet(x.Expr.GetType(), loc, index))
+	}
+	genc.genStatementSeq(x.Seq)
+	genc.c("}")
+}
+
+func (genc *genContext) genForElementSet(arrayType ast.Type, array string, index string) string {
+	switch xt := ast.UnderType(arrayType).(type) {
+	case *ast.VectorType:
+		return fmt.Sprintf("%s->body[%s]", array, index)
+	case *ast.VariadicType:
+		panic("ni")
+	default:
+		if xt == ast.String8 {
+			return fmt.Sprintf("%s->body[%s]", array, index)
+		}
+		panic("assert")
+	}
+
 }
 
 func (genc *genContext) genGuard(x *ast.Guard) {

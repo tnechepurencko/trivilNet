@@ -256,6 +256,17 @@ func (lc *lookContext) lookStatement(seq *ast.StatementSeq, s ast.Statement) {
 	case *ast.While:
 		lc.lookExpr(x.Cond)
 		lc.lookStatements(x.Seq)
+	case *ast.For:
+		lc.lookExpr(x.Expr)
+		if x.IndexVar != nil {
+			x.IndexVar.Later = true
+			lc.lookLocalDecl(x.Seq, x.IndexVar)
+		}
+		if x.ElementVar != nil {
+			x.ElementVar.Later = true
+			lc.lookLocalDecl(x.Seq, x.ElementVar)
+		}
+		lc.lookStatements(x.Seq)
 	case *ast.Guard:
 		lc.lookExpr(x.Cond)
 		lc.lookStatement(nil, x.Else)

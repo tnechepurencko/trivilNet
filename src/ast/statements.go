@@ -51,19 +51,13 @@ type DecStatement struct {
 	L Expr
 }
 
-//====
+//==== управление
 
 type If struct {
 	StatementBase
 	Cond Expr
 	Then *StatementSeq
 	Else Statement
-}
-
-type While struct {
-	StatementBase
-	Cond Expr
-	Seq  *StatementSeq
 }
 
 type Guard struct {
@@ -99,6 +93,24 @@ type CaseType struct {
 	Var   *VarDecl // nil, если переменная не задана
 	Seq   *StatementSeq
 }
+
+//==== циклы
+
+type While struct {
+	StatementBase
+	Cond Expr
+	Seq  *StatementSeq
+}
+
+type For struct {
+	StatementBase
+	IndexVar   *VarDecl
+	ElementVar *VarDecl
+	Expr       Expr
+	Seq        *StatementSeq
+}
+
+//==== завершающие
 
 type Crash struct {
 	StatementBase

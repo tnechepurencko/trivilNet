@@ -75,6 +75,7 @@ const (
 
 	// keywords
 	keyword_beg
+	AMONG
 	BREAK
 	CAUTION
 	CLASS
@@ -83,6 +84,7 @@ const (
 	ELSE
 	ENTRY
 	FN
+	FOR
 	GUARD
 	IF
 	IMPORT
@@ -173,6 +175,7 @@ var tokens = [...]string{
 	RETURN:  "вернуть",
 	ENTRY:   "вход",
 	SELECT:  "выбор",
+	FOR:     "для",
 	OTHER:   "другое",
 	IF:      "если",
 	ELSE:    "иначе",
@@ -188,6 +191,7 @@ var tokens = [...]string{
 	LATER:   "позже",
 	BREAK:   "прервать",
 	VAR:     "пусть",
+	AMONG:   "среди",
 	TYPE:    "тип",
 	OFTYPE:  "типа",
 	FN:      "фн",

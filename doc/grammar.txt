@@ -103,7 +103,7 @@ var_decl
 //=== function
 
 func_decl
-	: 'фн' receiver? name func_type (statement_seq | modifier)
+	: 'фн' receiver? name func_type (statement_block | modifier)
 	;
 
 receiver
@@ -127,12 +127,12 @@ result_type
 //=== entry 
 
 entry
-	: 'вход' statement_seq
+	: 'вход' statement_block
 	;
 
 //=== statements
 
-statement_seq
+statement_block
 	: '{' statement_list? '}'
 	;
     
@@ -148,9 +148,10 @@ statement_or_decl
 
 statement
 	: if_stm
-	| while_stm
     | guard_stm
 	| switch_stm
+	| while_stm
+	| for_stm
 	| return_stm
     | crash_stm
 	| break_stm 
@@ -158,15 +159,11 @@ statement
 	;
 
 if_stm
-	: 'если' expression statement_seq ('иначе' (if_stm | statement_seq))?
+	: 'если' expression statement_block ('иначе' (if_stm | statement_block))?
 	;
 	
-while_stm
-	: 'пока' expression statement_seq 
-	;
-
 guard_stm
-	: 'надо' expression 'иначе' (terminating_stm | statement_seq )
+	: 'надо' expression 'иначе' (terminating_stm | statement_block )
 	;
 
 switch_stm
@@ -186,6 +183,25 @@ type_switch
       ('когда'  type_ref (','  type_ref)* ':' statement_list? )* 
       ('другое' statement_list?)?
       '}'
+    ;
+
+while_stm
+	: 'пока' expression statement_block 
+	;
+
+for_stm
+	: 'для' iters 'из' expression statement_block 
+	;
+
+iters
+    : iter_element
+    | iter_index iter_element?
+    ;
+iter_element
+    :  ident (':' type_ref)?
+    ;
+iter_index
+    ; '[' iter_element ']'
     ;
 
 terminating_stm

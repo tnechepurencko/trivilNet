@@ -106,18 +106,20 @@ func (p *Parser) parseStatement() ast.Statement {
 		}
 	case lexer.IF:
 		return p.parseIf()
-	case lexer.WHILE:
-		return p.parseWhile()
+	case lexer.GUARD:
+		return p.parseGuard()
 	case lexer.SELECT:
 		return p.parseSelect()
+	case lexer.WHILE:
+		return p.parseWhile()
+	case lexer.FOR:
+		return p.parseFor()
 	case lexer.RETURN:
 		return p.parseReturn()
 	case lexer.BREAK:
 		return p.parseBreak()
 	case lexer.CRASH:
 		return p.parseCrash()
-	case lexer.GUARD:
-		return p.parseGuard()
 
 	default:
 		if validSimpleStmToken[p.tok] {
@@ -223,6 +225,51 @@ func (p *Parser) parseWhile() ast.Statement {
 
 	p.next()
 	n.Cond = p.parseExpression()
+	n.Seq = p.parseStatementSeq()
+
+	return n
+}
+
+// Не делаю пока возможности задавать тип переменных
+func (p *Parser) parseFor() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор для"))
+	}
+
+	var n = &ast.For{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+	}
+
+	p.next()
+
+	if p.tok == lexer.LBRACK {
+		p.next()
+		n.IndexVar = &ast.VarDecl{
+			DeclBase: ast.DeclBase{
+				Pos:  p.pos,
+				Name: p.parseIdent(),
+			},
+			AssignOnce: true,
+		}
+		p.expect(lexer.RBRACK)
+	}
+
+	if p.tok == lexer.IDENT {
+		n.ElementVar = &ast.VarDecl{
+			DeclBase: ast.DeclBase{
+				Pos:  p.pos,
+				Name: p.parseIdent(),
+			},
+			AssignOnce: true,
+		}
+	} else if n.IndexVar == nil {
+		p.expect(lexer.IDENT)
+	}
+
+	p.expect(lexer.AMONG)
+
+	n.Expr = p.parseExpression()
+
 	n.Seq = p.parseStatementSeq()
 
 	return n

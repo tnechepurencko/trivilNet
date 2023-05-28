@@ -246,14 +246,9 @@ func (cc *checkContext) statement(s ast.Statement) {
 			cc.statement(x.Else)
 		}
 	case *ast.While:
-		cc.expr(x.Cond)
-		if !ast.IsBoolType(x.Cond.GetType()) {
-			env.AddError(x.Cond.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.Bool.Name)
-		}
-		cc.loopCount++
-		cc.statements(x.Seq)
-		cc.loopCount--
-
+		cc.checkWhile(x)
+	case *ast.For:
+		cc.checkFor(x)
 	case *ast.Guard:
 		cc.expr(x.Cond)
 		if !ast.IsBoolType(x.Cond.GetType()) {
@@ -305,6 +300,45 @@ func (cc *checkContext) localDecl(decl ast.Decl) {
 	default:
 		panic(fmt.Sprintf("local decl: ni %T", decl))
 	}
+}
+
+//==== циклы
+
+func (cc *checkContext) checkWhile(x *ast.While) {
+	cc.expr(x.Cond)
+	if !ast.IsBoolType(x.Cond.GetType()) {
+		env.AddError(x.Cond.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.Bool.Name)
+	}
+	cc.loopCount++
+	cc.statements(x.Seq)
+	cc.loopCount--
+}
+
+func (cc *checkContext) checkFor(x *ast.For) {
+	cc.expr(x.Expr)
+	var t = x.Expr.GetType()
+
+	if !ast.IsIndexableType(t) {
+		env.AddError(x.Expr.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-МАССИВА", ast.TypeString(t))
+		t = ast.MakeInvalidType(x.Expr.GetPos())
+	}
+
+	if x.IndexVar != nil {
+		if x.IndexVar.Typ != nil {
+			panic("ni - явные типы для итерируемых переменных")
+		}
+		x.IndexVar.Typ = ast.Int64
+	}
+	if x.ElementVar != nil {
+		if x.ElementVar.Typ != nil {
+			panic("ni - явные типы для итерируемых переменных")
+		}
+		x.ElementVar.Typ = ast.ElementType(t)
+	}
+
+	cc.loopCount++
+	cc.statements(x.Seq)
+	cc.loopCount--
 }
 
 //==== оператор выбора по выражению
