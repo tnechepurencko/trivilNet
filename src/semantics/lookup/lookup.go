@@ -29,6 +29,10 @@ func Process(m *ast.Module) {
 	// добавление импорта
 	for _, i := range m.Imports {
 		addToScope(i.Mod.Name, i.Mod, m.Inner)
+		// добавляю для проверки наличия импорта в исходном файле
+		for _, no := range i.Sources {
+			addToScope(nameForCheckImported(i.Mod, no), i.Mod, m.Inner)
+		}
 	}
 
 	// добавление имен

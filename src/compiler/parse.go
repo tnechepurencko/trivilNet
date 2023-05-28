@@ -59,7 +59,7 @@ func (cc *compileContext) parseModule(isMain bool, list []*env.Source) *ast.Modu
 		return mods[0]
 	}
 
-	if env.ErrorCount() == 0 && len(mods) > 1 {
+	if env.ErrorCount() == 0 {
 		mergeModules(mods)
 	}
 
@@ -82,35 +82,48 @@ func (cc *compileContext) parseModule(isMain bool, list []*env.Source) *ast.Modu
 	return m
 }
 
+// Вызывается даже если модуль один - нужно подготовить импорт
 func mergeModules(mods []*ast.Module) {
 
-	if *env.TraceCompile {
+	if *env.TraceCompile && len(mods) > 1 {
 		var list = make([]string, len(mods))
 		for i, m := range mods {
 			source, _, _ := env.SourcePos(m.Pos)
 			list[i] = source.FileName
 		}
-		fmt.Printf("Слияние: %s\n", strings.Join(list, " + "))
+		fmt.Printf("Слияние '%v': %s\n", mods[0].Name, strings.Join(list, " + "))
 	}
 
 	var combined = mods[0]
 
 	// соединить импорт
-	var allImport = make(map[string]struct{}, len(combined.Imports))
+	var sourceNo = env.SourceNo(combined.Pos)
+	var allImport = make(map[string]*ast.Import, len(combined.Imports))
 	for _, i := range combined.Imports {
-		allImport[i.Path] = struct{}{}
+		i.Sources = []int{sourceNo}
+		allImport[i.Path] = i
 	}
 
 	for n := 1; n < len(mods); n++ {
 		m := mods[n]
+		sourceNo = env.SourceNo(m.Pos)
 		for _, i := range m.Imports {
-			_, ok := allImport[i.Path]
-			if !ok {
-				allImport[i.Path] = struct{}{}
+			iCombined, ok := allImport[i.Path]
+			if ok {
+				iCombined.Sources = append(iCombined.Sources, sourceNo)
+			} else {
+				i.Sources = []int{sourceNo}
+				allImport[i.Path] = i
 				combined.Imports = append(combined.Imports, i)
 			}
 		}
 	}
+
+	/* отладка
+	for _, imp := range combined.Imports {
+		fmt.Printf("! %v %v\n", imp.Path, imp.Sources)
+	}
+	*/
 
 	// соединить описания
 	for n := 1; n < len(mods); n++ {

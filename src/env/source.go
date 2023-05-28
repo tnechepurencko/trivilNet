@@ -187,6 +187,10 @@ func (s *Source) MakePos(ofs int) int {
 	return ofs<<16 + s.No
 }
 
+func SourceNo(pos int) int {
+	return pos & 0xFFFF
+}
+
 func SourcePos(pos int) (src *Source, line int, col int) {
 	no := pos & 0xFFFF
 	ofs := pos >> 16

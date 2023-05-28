@@ -89,6 +89,8 @@ func (lc *lookContext) lookTypeDeclInModule(moduleName, name string, pos int) *a
 		return lc.makeTypeDecl(name, pos)
 	}
 
+	lc.checkImported(m, pos)
+
 	d, ok = m.Inner.Names[name]
 	if !ok {
 		env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО-В-МОДУЛЕ", m.Name, name)
