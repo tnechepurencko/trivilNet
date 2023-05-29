@@ -276,13 +276,14 @@ func (genc *genContext) genTagPairTag(e ast.Expr) string {
 
 		var left = genc.genExpr(x.X)
 
-		return fmt.Sprintf("((%s*)(%s))[%s(%s, %s%s) << 1]",
+		return fmt.Sprintf("((%s*)(%s))[%s(%s, %s%s, %s) << 1]",
 			predefinedTypeName(ast.Word64.Name),
 			left,
 			rt_indexcheck,
 			genc.genExpr(x.Index),
 			left,
-			nm_variadic_len_suffic)
+			nm_variadic_len_suffic,
+			genPos(x.Pos))
 
 	case *ast.IdentExpr:
 		panic("ni - не вариадик параметр '*'")
@@ -307,13 +308,14 @@ func (genc *genContext) genStdSomething(call *ast.CallExpr) string {
 
 		var left = genc.genExpr(x.X)
 
-		return fmt.Sprintf("((%s*)(%s))[(%s(%s, %s%s) << 1)+1]",
+		return fmt.Sprintf("((%s*)(%s))[(%s(%s, %s%s, %s) << 1)+1]",
 			predefinedTypeName(ast.Word64.Name),
 			left,
 			rt_indexcheck,
 			genc.genExpr(x.Index),
 			left,
-			nm_variadic_len_suffic)
+			nm_variadic_len_suffic,
+			genPos(x.Pos))
 
 	case *ast.IdentExpr:
 		panic("ni")

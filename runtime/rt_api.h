@@ -56,7 +56,7 @@ EXPORTED void* tri_newVectorFill(size_t element_size, TInt64 len, TInt64 cap, TW
 
 //unused EXPORTED TInt64 tri_lenVector(void* vd);
 
-EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len);
+EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len, char* position);
 
 EXPORTED void tri_vectorAppend(void* vd, size_t element_size, TInt64 len, void* body);
 //EXPORTED void* tri_vectorFill(void* vd, size_t element_size, TInt64 len, TWord64 filler);
@@ -68,7 +68,7 @@ EXPORTED void tri_vectorAppend_TSymbol_to_Bytes(void *vd, TSymbol x);
 
 //==== nil check
 
-EXPORTED void* tri_nilcheck(void* r);
+EXPORTED void* tri_nilcheck(void* r, char* position);
 
 //==== class
 

@@ -267,7 +267,11 @@ func pathToField(cl *ast.ClassType, name string) string {
 //==== проверка на nil
 
 func (genc *genContext) genNotNil(x *ast.NotNilExpr) string {
-	return fmt.Sprintf("(%s)%s(%s)", genc.typeRef(x.Typ), rt_nilcheck, genc.genExpr(x.X))
+	return fmt.Sprintf("(%s)%s(%s,%s)",
+		genc.typeRef(x.Typ),
+		rt_nilcheck,
+		genc.genExpr(x.X),
+		genPos(x.Pos))
 }
 
 //==== индексация и композит массива
@@ -304,12 +308,13 @@ func (genc *genContext) genVectorIndex(x, inx ast.Expr, lenName string) string {
 			name,
 			genc.genExpr(x))
 	}
-	return fmt.Sprintf("%s->body[%s(%s, %s->%s)]",
+	return fmt.Sprintf("%s->body[%s(%s, %s->%s,%s)]",
 		name,
 		rt_indexcheck,
 		genc.genExpr(inx),
 		name,
-		lenName)
+		lenName,
+		genPos(inx.GetPos()))
 
 }
 
@@ -329,13 +334,14 @@ func (genc *genContext) genVariadicIndex(vt *ast.VariadicType, x, inx ast.Expr) 
 		panic("assert")
 	} else {
 
-		return fmt.Sprintf("((%s*)%s)[%s(%s, %s%s)]",
+		return fmt.Sprintf("((%s*)%s)[%s(%s, %s%s, %s)]",
 			genc.typeRef(vt.ElementTyp),
 			vPar,
 			rt_indexcheck,
 			genc.genExpr(inx),
 			vPar,
-			nm_variadic_len_suffic)
+			nm_variadic_len_suffic,
+			genPos(inx.GetPos()))
 	}
 }
 
@@ -354,7 +360,7 @@ func (genc *genContext) genArrayComposite(x *ast.ArrayCompositeExpr) string {
 		genc.c("%s %s = %s;", predefinedTypeName(ast.Int64.Name), lenName, lenExpr)
 		lenExpr = lenName
 
-		genc.c("%s(%d, %s);", rt_indexcheck, x.MaxIndex, lenName)
+		genc.c("%s(%d, %s, %s);", rt_indexcheck, x.MaxIndex, lenName, genPos(x.Pos))
 	}
 
 	var s = ""
