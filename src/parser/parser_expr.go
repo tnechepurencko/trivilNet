@@ -154,7 +154,8 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 		} else {
 			s, err := strconv.Unquote("'" + p.lit + "'")
 			if err != nil {
-				panic("assert - unquote: " + err.Error())
+				p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "unqoute "+err.Error())
+				//panic("assert - unquote: " + err.Error())
 			}
 			r, _ := utf8.DecodeRuneInString(s)
 			l.WordVal = uint64(r)
@@ -185,7 +186,8 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 		} else {
 			s, err := strconv.Unquote("\"" + p.lit + "\"")
 			if err != nil {
-				panic("assert - unquote: " + err.Error())
+				p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "unqoute "+err.Error())
+				//panic("assert - unquote: " + err.Error())
 			}
 			l.StrVal = make([]rune, utf8.RuneCountInString(s))
 
