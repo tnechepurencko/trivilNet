@@ -165,7 +165,7 @@
 		} иначе {
 			s, err := strconv.Unquote("'" + п.ле.изо + "'")
 			если err # nil {
-				panic("assert - unquote: " + err.Error())
+                p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "unqoute "+err.Error())
 			}
 			r, _ := utf8.DecodeRuneInString(s)
 			l.WordVal = Слово64(r)
@@ -202,7 +202,7 @@
 		} иначе {
 			s, err := strconv.Unquote("\"" + п.ле.изо + "\"")
 			если err # nil {
-				panic("assert - unquote: " + err.Error())
+                p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "unqoute "+err.Error())
 			}
 			l.StrVal = make([]rune, utf8.RuneCountInString(s))
 
