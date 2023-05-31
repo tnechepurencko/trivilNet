@@ -611,6 +611,7 @@ EXPORTED TString tri_Symbols_to_TString(void *vd) {
 		len = encode_symbol(symbuf[i], bytebuf);
 		bytebuf += len;
 	}	
+    s->body[bytes] = 0x0;
 
 	return s;	
 }	
