@@ -17,7 +17,6 @@ type Module struct {
 	Decls   []Decl
 	Entry   *EntryFn
 	Inner   *Scope
-	Caution bool
 	Setting *Setting
 }
 
@@ -68,6 +67,8 @@ type Import struct {
 	Pos  int
 	Path string
 	Mod  *Module
+	// Собирается на слиянии модулей:
+	Sources []int // список номеров исходных файлов, в которых есть импорт
 }
 
 func (n *Import) GetPos() int {

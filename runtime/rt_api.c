@@ -21,7 +21,12 @@ typedef struct VectorDesc {
 }
 
  _Noreturn void runtime_crash(char* s) {
-	printf("!runtime_crash: %s\n", s);
+	printf("!crash: %s\n", s);
+    panic();
+}
+
+ _Noreturn void runtime_crash_pos(char* position, char* s) {
+	printf("!crash at %s: %s\n", position, s);
     panic();
 }
 
@@ -348,11 +353,11 @@ EXPORTED TInt64 tri_lenVector(void* vd) {
 }
 */
 
-EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len) {
+EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len, char* position) {
 	if (inx < 0 || inx >= len) {
         char buf[128];
         sprintf(buf, "index %" PRId64 " out of bounds [0..%" PRId64 "[", inx, len);
-		runtime_crash(buf);
+		runtime_crash_pos(position, buf);
 	}
 	
 	return inx;
@@ -441,9 +446,9 @@ EXPORTED void tri_vectorAppend_TSymbol_to_Bytes(void *vd, TSymbol x) {
 
 //==== nil check
 
-EXPORTED void* tri_nilcheck(void* r) {
+EXPORTED void* tri_nilcheck(void* r, char* position) {
     if (r == NULL) {
-        runtime_crash("nil check");    
+        runtime_crash_pos(position, "nil pointer error");    
     }
     return r;
 }
@@ -606,6 +611,7 @@ EXPORTED TString tri_Symbols_to_TString(void *vd) {
 		len = encode_symbol(symbuf[i], bytebuf);
 		bytebuf += len;
 	}	
+    s->body[bytes] = 0x0;
 
 	return s;	
 }	

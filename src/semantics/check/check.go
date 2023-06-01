@@ -77,6 +77,10 @@ func (cc *checkContext) varDecl(v *ast.VarDecl) {
 				env.AddError(v.Pos, "СЕМ-ФН-НЕТ-ЗНАЧЕНИЯ")
 				return
 			}
+			if ast.IsTagPairType(v.Typ) {
+				env.AddError(v.Pos, "СЕМ-СОХРАНЕНИЕ-ПОЛИМОРФНОГО")
+				return
+			}
 		}
 	}
 }
@@ -133,11 +137,13 @@ func (cc *checkContext) seqHasReturn(s *ast.StatementSeq) bool {
 		return true
 	case *ast.If:
 		return cc.ifHasReturn(x)
-	// TODO: *ast.Select
+	case *ast.Select:
+		return cc.selectHasReturn(x)
+	case *ast.SelectType:
+		return cc.selectTypeHasReturn(x)
 	default:
 		return false
 	}
-
 }
 
 func (cc *checkContext) ifHasReturn(x *ast.If) bool {
@@ -153,12 +159,40 @@ func (cc *checkContext) ifHasReturn(x *ast.If) bool {
 	return cc.seqHasReturn(x.Else.(*ast.StatementSeq))
 }
 
+func (cc *checkContext) selectHasReturn(x *ast.Select) bool {
+	if x.Else == nil || !cc.seqHasReturn(x.Else) {
+		return false
+	}
+
+	for _, c := range x.Cases {
+		if !cc.seqHasReturn(c.Seq) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (cc *checkContext) selectTypeHasReturn(x *ast.SelectType) bool {
+	if x.Else == nil || !cc.seqHasReturn(x.Else) {
+		return false
+	}
+
+	for _, c := range x.Cases {
+		if !cc.seqHasReturn(c.Seq) {
+			return false
+		}
+	}
+
+	return true
+}
+
+//==== statements
+
 func (cc *checkContext) entry(e *ast.EntryFn) {
 	cc.loopCount = 0
 	cc.statements(e.Seq)
 }
-
-//==== statements
 
 func (cc *checkContext) statements(seq *ast.StatementSeq) {
 
@@ -173,7 +207,7 @@ func (cc *checkContext) statement(s ast.Statement) {
 		cc.statements(x) // из else
 	case *ast.ExprStatement:
 		if b, isBinary := x.X.(*ast.BinaryExpr); isBinary && b.Op == lexer.EQ {
-			env.AddError(x.Pos, "СЕМ-ОЖИДАЛОСЬ-ПРИСВАИВАНИЕ")
+			env.AddError(x.X.GetPos(), "СЕМ-ОЖИДАЛОСЬ-ПРИСВАИВАНИЕ")
 		} else {
 			cc.expr(x.X)
 			if _, isCall := x.X.(*ast.CallExpr); !isCall {
@@ -212,14 +246,9 @@ func (cc *checkContext) statement(s ast.Statement) {
 			cc.statement(x.Else)
 		}
 	case *ast.While:
-		cc.expr(x.Cond)
-		if !ast.IsBoolType(x.Cond.GetType()) {
-			env.AddError(x.Cond.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.Bool.Name)
-		}
-		cc.loopCount++
-		cc.statements(x.Seq)
-		cc.loopCount--
-
+		cc.checkWhile(x)
+	case *ast.Cycle:
+		cc.checkCycle(x)
 	case *ast.Guard:
 		cc.expr(x.Cond)
 		if !ast.IsBoolType(x.Cond.GetType()) {
@@ -233,6 +262,8 @@ func (cc *checkContext) statement(s ast.Statement) {
 		}
 	case *ast.Select:
 		cc.checkSelect(x)
+	case *ast.SelectType:
+		cc.checkSelectType(x)
 
 	case *ast.Return:
 		if x.X != nil {
@@ -271,6 +302,47 @@ func (cc *checkContext) localDecl(decl ast.Decl) {
 	}
 }
 
+//==== циклы
+
+func (cc *checkContext) checkWhile(x *ast.While) {
+	cc.expr(x.Cond)
+	if !ast.IsBoolType(x.Cond.GetType()) {
+		env.AddError(x.Cond.GetPos(), "СЕМ-ТИП-ВЫРАЖЕНИЯ", ast.Bool.Name)
+	}
+	cc.loopCount++
+	cc.statements(x.Seq)
+	cc.loopCount--
+}
+
+func (cc *checkContext) checkCycle(x *ast.Cycle) {
+	cc.expr(x.Expr)
+	var t = x.Expr.GetType()
+
+	if !ast.IsIndexableType(t) {
+		env.AddError(x.Expr.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-МАССИВА", ast.TypeString(t))
+		t = ast.MakeInvalidType(x.Expr.GetPos())
+	}
+
+	if x.IndexVar != nil {
+		if x.IndexVar.Typ != nil {
+			panic("ni - явные типы для итерируемых переменных")
+		}
+		x.IndexVar.Typ = ast.Int64
+	}
+	if x.ElementVar != nil {
+		if x.ElementVar.Typ != nil {
+			panic("ni - явные типы для итерируемых переменных")
+		}
+		x.ElementVar.Typ = ast.ElementType(t)
+	}
+
+	cc.loopCount++
+	cc.statements(x.Seq)
+	cc.loopCount--
+}
+
+//==== оператор выбора по выражению
+
 func (cc *checkContext) checkSelect(x *ast.Select) {
 
 	if x.X == nil {
@@ -285,7 +357,7 @@ func (cc *checkContext) checkSelect(x *ast.Select) {
 		for _, e := range c.Exprs {
 			cc.expr(e)
 			if !equalTypes(x.X.GetType(), e.GetType()) {
-				env.AddError(e.GetPos(), "СЕМ-КОГДА-ОШ-ТИПЫ", ast.TypeName(e.GetType()), ast.TypeName(x.X.GetType()))
+				env.AddError(e.GetPos(), "СЕМ-ВЫБОР-ОШ-ТИП-ВАРИАНТА", ast.TypeName(e.GetType()), ast.TypeName(x.X.GetType()))
 			}
 		}
 		cc.statements(c.Seq)
@@ -301,7 +373,7 @@ func (cc *checkContext) checkPredicateSelect(x *ast.Select) {
 		for _, e := range c.Exprs {
 			cc.expr(e)
 			if !equalTypes(e.GetType(), ast.Bool) {
-				env.AddError(e.GetPos(), "СЕМ-КОГДА-ОШ-ПРЕДИКАТ", ast.TypeName(ast.Bool), ast.TypeName(e.GetType()))
+				env.AddError(e.GetPos(), "СЕМ-ВЫБОР-ОШ-ТИП-ПРЕДИКАТА", ast.TypeName(ast.Bool), ast.TypeName(e.GetType()))
 			}
 		}
 		cc.statements(c.Seq)
@@ -321,7 +393,45 @@ func checkSelectExpr(x ast.Expr) {
 			return
 		}
 	}
-	env.AddError(x.GetPos(), "СЕМ-КОГДА-ОШ-ТИП", ast.TypeName(x.GetType()))
+	env.AddError(x.GetPos(), "СЕМ-ВЫБОР-ОШ-ТИП", ast.TypeName(x.GetType()))
+}
+
+//==== оператор выбора по типу
+
+func (cc *checkContext) checkSelectType(x *ast.SelectType) {
+
+	cc.expr(x.X)
+
+	tClass, isClass := ast.UnderType(x.X.GetType()).(*ast.ClassType)
+
+	if !isClass {
+		env.AddError(x.GetPos(), "СЕМ-ВЫБОР-ТИП-КЛАССА", ast.TypeName(x.X.GetType()))
+	}
+
+	for _, c := range x.Cases {
+		for _, t := range c.Types {
+			caseClass, ok := ast.UnderType(t).(*ast.ClassType)
+			if !ok {
+				env.AddError(t.GetPos(), "СЕМ-ОЖИДАЛСЯ-ТИП-КЛАССА", ast.TypeName(t))
+			} else if isClass {
+				if caseClass != tClass && !isDerivedClass(tClass, caseClass) {
+					env.AddError(t.GetPos(), "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(t), ast.TypeName(x.X.GetType()))
+				}
+			}
+		}
+		if c.Var != nil {
+			if len(c.Types) > 1 {
+				env.AddError(c.Pos, "СЕМ-ВЫБОР-ОДИН-ТИП")
+			}
+
+			c.Var.Typ = c.Types[0]
+
+		}
+		cc.statements(c.Seq)
+	}
+	if x.Else != nil {
+		cc.statements(x.Else)
+	}
 }
 
 //====

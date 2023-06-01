@@ -52,7 +52,7 @@ func (s *Lexer) next() {
 		w := 1
 		switch {
 		case r == 0:
-			s.error(s.offset, "ЛЕК-ОШ-СИМ", rune(0))
+			s.error(s.offset, "ЛЕК-ОШ-СИМ", fmt.Sprintf("%#U", rune(0)))
 			s.uOffset++
 		case r == '\n':
 			s.uOffset++
@@ -243,7 +243,7 @@ func (s *Lexer) scanString(opening rune) string {
 			break
 		}
 		if ch < ' ' {
-			s.error(ofs, "ЛЕК-ОШ-СИМ", ch)
+			s.error(ofs, "ЛЕК-ОШ-СИМ", fmt.Sprintf("%#U", ch))
 		} else if ch == '\\' {
 			s.scanEscape(opening)
 		}
@@ -278,7 +278,7 @@ func (s *Lexer) scanSymbol(opening rune) string {
 		}
 		n++
 		if ch < ' ' {
-			s.error(ofs, "ЛЕК-ОШ-СИМ", ch)
+			s.error(ofs, "ЛЕК-ОШ-СИМ", fmt.Sprintf("%#U", ch))
 			valid = false
 		} else if ch == '\\' {
 			if !s.scanEscape(opening) {
@@ -326,7 +326,7 @@ func (s *Lexer) scanEscape(quote rune) bool {
 			if s.ch < 0 {
 				s.error(s.offset, "ЛЕК-ESCAPE-ЗАВЕРШЕНИЕ")
 			} else {
-				s.error(s.offset, "ЛЕК-ОШ-СИМ", s.ch)
+				s.error(s.offset, "ЛЕК-ОШ-СИМ", fmt.Sprintf("%#U", s.ch))
 				return false
 			}
 		}
@@ -549,7 +549,7 @@ func (s *Lexer) Scan() (pos int, tok Token, lit string) {
 		case '|':
 			tok = OR
 		default:
-			s.error(s.offset, "ЛЕК-ОШ-СИМ", ch)
+			s.error(s.offset, "ЛЕК-ОШ-СИМ", fmt.Sprintf("%#U", ch))
 			tok = Invalid
 			lit = string(ch)
 		}

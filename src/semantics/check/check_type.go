@@ -78,7 +78,7 @@ func (cc *checkContext) classType(td *ast.TypeDecl, cl *ast.ClassType) {
 		prev, ok := cl.Members[m.Name]
 		if ok {
 			prevM, ok := prev.(*ast.Function)
-			if ok && prevM.Recv.Typ != m.Recv.Typ {
+			if ok && ast.UnderType(prevM.Recv.Typ) != ast.UnderType(m.Recv.Typ) {
 				// сигнатуры при переопределении должны совпадать
 				var res = cc.compareFuncTypes(m.Typ, prevM.Typ)
 				if res != "" {
@@ -211,7 +211,7 @@ func (cc *checkContext) assignable(lt ast.Type, r ast.Expr) bool {
 		var rt = ast.UnderType(r.GetType())
 		if rt == ast.NullType {
 			return true
-		} else if equalTypes(xt.Typ, r.GetType()) {
+		} else if cc.assignable(xt.Typ, r) {
 			return true
 		}
 

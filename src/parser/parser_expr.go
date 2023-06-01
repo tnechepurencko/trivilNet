@@ -52,6 +52,7 @@ func (p *Parser) parseBinaryExpression(prec int) ast.Expr {
 	var x = p.parseUnaryExpression()
 	for {
 		op := p.tok
+		var pos = p.pos
 		opPrec := precedence(op)
 		if opPrec < prec {
 			return x
@@ -60,7 +61,6 @@ func (p *Parser) parseBinaryExpression(prec int) ast.Expr {
 		if op == lexer.OFTYPE {
 			x = p.parseOfTypeExpression(x)
 		} else {
-			var pos = p.pos
 			p.next()
 			var y = p.parseBinaryExpression(opPrec + 1)
 			x = &ast.BinaryExpr{
@@ -154,7 +154,8 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 		} else {
 			s, err := strconv.Unquote("'" + p.lit + "'")
 			if err != nil {
-				panic("assert - unquote: " + err.Error())
+				p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "unqoute "+err.Error())
+				//panic("assert - unquote: " + err.Error())
 			}
 			r, _ := utf8.DecodeRuneInString(s)
 			l.WordVal = uint64(r)
@@ -185,7 +186,8 @@ func (p *Parser) parsePrimaryExpression() ast.Expr {
 		} else {
 			s, err := strconv.Unquote("\"" + p.lit + "\"")
 			if err != nil {
-				panic("assert - unquote: " + err.Error())
+				p.error(p.pos, "ПАР-ОШ-ЛИТЕРАЛ", "unqoute "+err.Error())
+				//panic("assert - unquote: " + err.Error())
 			}
 			l.StrVal = make([]rune, utf8.RuneCountInString(s))
 
@@ -309,7 +311,8 @@ func (p *Parser) parseConversion(x ast.Expr) ast.Expr {
 	if p.tok == lexer.CAUTION {
 		p.next()
 		n.Caution = true
-		if !p.module.Caution {
+		p.cautionUse++
+		if !p.caution {
 			p.error(p.pos, "ПАР-ОШ-ИСП-ОСТОРОЖНО")
 		}
 	}

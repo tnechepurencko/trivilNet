@@ -89,6 +89,8 @@ func (lc *lookContext) lookTypeDeclInModule(moduleName, name string, pos int) *a
 		return lc.makeTypeDecl(name, pos)
 	}
 
+	lc.checkImported(m, pos)
+
 	d, ok = m.Inner.Names[name]
 	if !ok {
 		env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО-В-МОДУЛЕ", m.Name, name)
@@ -130,9 +132,12 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 	switch x := v.Typ.(type) {
 	case *ast.VectorType:
 		lc.lookTypeRef(x.ElementTyp)
+		lc.checkRecursion(x.ElementTyp)
+
 	case *ast.ClassType:
 		if x.BaseTyp != nil {
 			lc.lookTypeRef(x.BaseTyp)
+			lc.checkRecursion(x.BaseTyp)
 		}
 		for _, f := range x.Fields {
 			if f.Typ != nil {
@@ -150,8 +155,19 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 		if !ast.IsReferenceType(ast.UnderType(x.Typ)) {
 			env.AddError(x.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(x.Typ))
 		}
-
+	case *ast.InvalidType:
 	default:
 		panic(fmt.Sprintf("lookTypeDecl: ni %T", v.Typ))
+	}
+}
+
+func (lc *lookContext) checkRecursion(t ast.Type) {
+	tr, ok := t.(*ast.TypeRef)
+	if ok {
+		tr = ast.DirectTypeRef(tr)
+		var td = tr.TypeDecl
+		if td.GetHost() == lc.module {
+			lc.lookDecl(td)
+		}
 	}
 }

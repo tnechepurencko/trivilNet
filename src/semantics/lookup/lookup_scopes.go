@@ -2,6 +2,8 @@ package lookup
 
 import (
 	"fmt"
+	"strconv"
+
 	"trivil/ast"
 	"trivil/env"
 )
@@ -53,4 +55,22 @@ func lookInScopes(scope *ast.Scope, name string, pos int) ast.Decl {
 	}
 	addToScope(name, inv, scope)
 	return inv
+}
+
+//==== проверить импорт
+
+func nameForCheckImported(mod *ast.Module, no int) string {
+	return strconv.Itoa(no) + mod.Name
+}
+
+// Проверяет, что использованный модуль импортирован в исходном файле
+func (lc *lookContext) checkImported(mod *ast.Module, pos int) {
+	var no = env.SourceNo(pos)
+	_, ok := lc.module.Inner.Names[nameForCheckImported(mod, no)]
+	if !ok {
+		source, _, _ := env.SourcePos(pos)
+		env.AddError(pos, "СЕМ-МОДУЛЬ-НЕ-ИМПОРТИРОВАН", mod.Name, source.FileName)
+		// не повторять ошибку
+		lc.module.Inner.Names[nameForCheckImported(mod, no)] = mod
+	}
 }

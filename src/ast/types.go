@@ -99,7 +99,7 @@ type MayBeType struct {
 	Typ Type
 }
 
-//====
+//==== type refs
 
 // Снимает все TypeRef, может быть два в контексте тип А = Б
 func UnderType(t Type) Type {
@@ -108,6 +108,22 @@ func UnderType(t Type) Type {
 			t = tr.Typ
 		} else {
 			return t
+		}
+	}
+}
+
+// Выдает TypeRef, непосредственно указывающий на сам тип
+func DirectTypeRef(t Type) *TypeRef {
+	tr, ok := t.(*TypeRef)
+	if !ok {
+		panic("assert: должен быть TypeRef")
+	}
+	for {
+		next, ok := tr.Typ.(*TypeRef)
+		if ok {
+			tr = next
+		} else {
+			return tr
 		}
 	}
 }
@@ -218,7 +234,7 @@ func IsReferenceType(t Type) bool {
 	}
 }
 
-//==== tags
+//==== теги
 
 // Объекты каких типов имеют тег
 func HasTag(t Type) bool {
@@ -259,6 +275,8 @@ func TypeString(t Type) string {
 		return "..." + TypeName(x.ElementTyp)
 	case *MayBeType:
 		return "мб " + TypeName(x.Typ)
+	case *FuncType:
+		return "тип функции"
 	default:
 		return fmt.Sprintf("TypeString ni: %T", t)
 	}

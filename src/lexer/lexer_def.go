@@ -75,11 +75,13 @@ const (
 
 	// keywords
 	keyword_beg
+	AMONG
 	BREAK
 	CAUTION
 	CLASS
 	CONST
 	CRASH
+	CYCLE
 	ELSE
 	ENTRY
 	FN
@@ -188,9 +190,11 @@ var tokens = [...]string{
 	LATER:   "позже",
 	BREAK:   "прервать",
 	VAR:     "пусть",
+	AMONG:   "среди",
 	TYPE:    "тип",
 	OFTYPE:  "типа",
 	FN:      "фн",
+	CYCLE:   "цикл",
 }
 
 func (tok Token) String() string {

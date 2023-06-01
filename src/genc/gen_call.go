@@ -210,10 +210,29 @@ func (genc *genContext) genStdLen(call *ast.CallExpr) string {
 
 	switch t.(type) {
 	case *ast.VectorType:
-		//		return fmt.Sprintf("%s(%s)", rt_lenVector, genc.genExpr(a))
 		return fmt.Sprintf("(%s)->len", genc.genExpr(a))
 	case *ast.VariadicType:
 		return fmt.Sprintf("%s%s", genc.genExpr(a), nm_variadic_len_suffic)
+	default:
+		panic("ni")
+	}
+}
+
+// Запрос длины по выражению expr тип typ
+func (genc *genContext) genLen(expr string, typ ast.Type) string {
+
+	var t = ast.UnderType(typ)
+	if t == ast.String {
+		return fmt.Sprintf("%s(%s)", rt_lenString, expr)
+	} else if t == ast.String8 {
+		return fmt.Sprintf("(%s)->bytes", expr)
+	}
+
+	switch t.(type) {
+	case *ast.VectorType:
+		return fmt.Sprintf("(%s)->len", expr)
+	case *ast.VariadicType:
+		return fmt.Sprintf("%s%s", expr, nm_variadic_len_suffic)
 	default:
 		panic("ni")
 	}
@@ -226,44 +245,48 @@ func (genc *genContext) genStdTag(call *ast.CallExpr) string {
 	if tExpr, ok := a.(*ast.TypeExpr); ok {
 		return genc.genTypeTag(tExpr.Typ)
 	} else {
-		var t = a.GetType()
-		if ast.IsTagPairType(t) {
-			return genc.genExprTag(a)
-		} else {
-			return genc.genTypeTag(t)
-		}
+		return genc.genTagPairTag(a)
 	}
 }
 
+// Выдает тег по статическому типу
 func (genc *genContext) genTypeTag(t ast.Type) string {
 	t = ast.UnderType(t)
 	switch x := t.(type) {
 	case *ast.PredefinedType:
 		return fmt.Sprintf("%s%s()", rt_tag, predefinedTypeName(x.Name))
+	case *ast.ClassType:
+		panic("ni")
+	case *ast.VectorType:
+		panic("ni")
+	case *ast.MayBeType:
+		return genc.genTypeTag(x.Typ)
 	default:
-		panic(("ni"))
+		panic(fmt.Sprintf("ni type tag %T", t))
 	}
 }
 
-func (genc *genContext) genExprTag(e ast.Expr) string {
+// Тег для TagPair выражения
+func (genc *genContext) genTagPairTag(e ast.Expr) string {
 	switch x := e.(type) {
 	case *ast.GeneralBracketExpr:
 		if x.Index == nil {
-			panic("assert")
+			panic("assert - не может быть композита")
 		}
 
 		var left = genc.genExpr(x.X)
 
-		return fmt.Sprintf("((%s*)(%s))[%s(%s, %s%s) << 1]",
+		return fmt.Sprintf("((%s*)(%s))[%s(%s, %s%s, %s) << 1]",
 			predefinedTypeName(ast.Word64.Name),
 			left,
 			rt_indexcheck,
 			genc.genExpr(x.Index),
 			left,
-			nm_variadic_len_suffic)
+			nm_variadic_len_suffic,
+			genPos(x.Pos))
 
 	case *ast.IdentExpr:
-		panic("ni")
+		panic("ni - не вариадик параметр '*'")
 	}
 	panic("assert")
 }
@@ -285,13 +308,14 @@ func (genc *genContext) genStdSomething(call *ast.CallExpr) string {
 
 		var left = genc.genExpr(x.X)
 
-		return fmt.Sprintf("((%s*)(%s))[(%s(%s, %s%s) << 1)+1]",
+		return fmt.Sprintf("((%s*)(%s))[(%s(%s, %s%s, %s) << 1)+1]",
 			predefinedTypeName(ast.Word64.Name),
 			left,
 			rt_indexcheck,
 			genc.genExpr(x.Index),
 			left,
-			nm_variadic_len_suffic)
+			nm_variadic_len_suffic,
+			genPos(x.Pos))
 
 	case *ast.IdentExpr:
 		panic("ni")

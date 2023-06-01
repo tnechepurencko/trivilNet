@@ -106,18 +106,20 @@ func (p *Parser) parseStatement() ast.Statement {
 		}
 	case lexer.IF:
 		return p.parseIf()
-	case lexer.WHILE:
-		return p.parseWhile()
+	case lexer.GUARD:
+		return p.parseGuard()
 	case lexer.SELECT:
 		return p.parseSelect()
+	case lexer.WHILE:
+		return p.parseWhile()
+	case lexer.CYCLE:
+		return p.parseCycle()
 	case lexer.RETURN:
 		return p.parseReturn()
 	case lexer.BREAK:
 		return p.parseBreak()
 	case lexer.CRASH:
 		return p.parseCrash()
-	case lexer.GUARD:
-		return p.parseGuard()
 
 	default:
 		if validSimpleStmToken[p.tok] {
@@ -228,6 +230,51 @@ func (p *Parser) parseWhile() ast.Statement {
 	return n
 }
 
+// Не делаю пока возможности задавать тип переменных
+func (p *Parser) parseCycle() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор цикла"))
+	}
+
+	var n = &ast.Cycle{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+	}
+
+	p.next()
+
+	if p.tok == lexer.LBRACK {
+		p.next()
+		n.IndexVar = &ast.VarDecl{
+			DeclBase: ast.DeclBase{
+				Pos:  p.pos,
+				Name: p.parseIdent(),
+			},
+			AssignOnce: true,
+		}
+		p.expect(lexer.RBRACK)
+	}
+
+	if p.tok == lexer.IDENT {
+		n.ElementVar = &ast.VarDecl{
+			DeclBase: ast.DeclBase{
+				Pos:  p.pos,
+				Name: p.parseIdent(),
+			},
+			AssignOnce: true,
+		}
+	} else if n.IndexVar == nil {
+		p.expect(lexer.IDENT)
+	}
+
+	p.expect(lexer.AMONG)
+
+	n.Expr = p.parseExpression()
+
+	n.Seq = p.parseStatementSeq()
+
+	return n
+}
+
 func (p *Parser) parseReturn() ast.Statement {
 	if p.trace {
 		defer un(trace(p, "Оператор вернуть"))
@@ -308,16 +355,26 @@ func (p *Parser) parseGuard() ast.Statement {
 	return n
 }
 
-func (p *Parser) parseSelect() ast.Statement {
-	if p.trace {
-		defer un(trace(p, "Оператор выбора"))
-	}
+//==== оператор выбора
 
+func (p *Parser) parseSelect() ast.Statement {
+	p.next()
+	if p.tok == lexer.VAR || p.tok == lexer.TYPE {
+		return p.parseSelectType()
+	}
+	return p.parseSelectExpr()
+}
+
+//==== оператор выбора по выражению
+
+func (p *Parser) parseSelectExpr() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор выбора по выражению"))
+	}
 	var n = &ast.Select{
 		StatementBase: ast.StatementBase{Pos: p.pos},
 	}
 
-	p.next()
 	if p.tok == lexer.LBRACE {
 		p.next()
 	} else {
@@ -326,7 +383,7 @@ func (p *Parser) parseSelect() ast.Statement {
 	}
 
 	for p.tok == lexer.WHEN {
-		var c = p.parseSelectCase()
+		var c = p.parseCaseExpr()
 		n.Cases = append(n.Cases, c)
 	}
 
@@ -339,7 +396,7 @@ func (p *Parser) parseSelect() ast.Statement {
 	return n
 }
 
-func (p *Parser) parseSelectCase() *ast.Case {
+func (p *Parser) parseCaseExpr() *ast.Case {
 	if p.trace {
 		defer un(trace(p, "выбор когда"))
 	}
@@ -353,6 +410,80 @@ func (p *Parser) parseSelectCase() *ast.Case {
 	for {
 		var x = p.parseExpression()
 		c.Exprs = append(c.Exprs, x)
+		if p.tok != lexer.COMMA {
+			break
+		}
+		p.next()
+	}
+	p.expect(lexer.COLON)
+
+	c.Seq = p.parseStatementList(endWhenCase)
+
+	return c
+}
+
+//==== оператор выбора по типу
+
+func (p *Parser) parseSelectType() ast.Statement {
+	if p.trace {
+		defer un(trace(p, "Оператор выбора по типу"))
+	}
+
+	var n = &ast.SelectType{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+	}
+
+	var varPos = 0
+
+	if p.tok == lexer.VAR {
+		p.next()
+		varPos = p.pos
+		n.VarIdent = p.parseIdent()
+		p.expect(lexer.COLON)
+	}
+	p.expect(lexer.TYPE)
+
+	n.X = p.parseExpression()
+	p.expect(lexer.LBRACE)
+
+	for p.tok == lexer.WHEN {
+		var c = p.parseCaseType()
+		if n.VarIdent != "" {
+			c.Var = &ast.VarDecl{
+				DeclBase: ast.DeclBase{
+					Pos:  varPos,
+					Name: n.VarIdent,
+				},
+				AssignOnce: true,
+			}
+		}
+
+		n.Cases = append(n.Cases, c)
+	}
+
+	if p.tok == lexer.OTHER {
+		p.next()
+		n.Else = p.parseStatementList(endStatementSeq)
+	}
+	p.expect(lexer.RBRACE)
+
+	return n
+}
+
+func (p *Parser) parseCaseType() *ast.CaseType {
+	if p.trace {
+		defer un(trace(p, "выбор когда по типу"))
+	}
+
+	var c = &ast.CaseType{
+		StatementBase: ast.StatementBase{Pos: p.pos},
+		Types:         make([]ast.Type, 0),
+	}
+	p.next()
+
+	for {
+		var x = p.parseTypeRef()
+		c.Types = append(c.Types, x)
 		if p.tok != lexer.COMMA {
 			break
 		}

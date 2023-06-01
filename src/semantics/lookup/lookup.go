@@ -29,6 +29,10 @@ func Process(m *ast.Module) {
 	// добавление импорта
 	for _, i := range m.Imports {
 		addToScope(i.Mod.Name, i.Mod, m.Inner)
+		// добавляю для проверки наличия импорта в исходном файле
+		for _, no := range i.Sources {
+			addToScope(nameForCheckImported(i.Mod, no), i.Mod, m.Inner)
+		}
 	}
 
 	// добавление имен
@@ -80,8 +84,8 @@ func Process(m *ast.Module) {
 	if m.Entry != nil {
 		lc.lookEntry(m.Entry)
 	}
-	//show(m.Decls)
-	//show(lc.decls)
+	//	show(m.Decls)
+	//	show(lc.decls)
 
 	// Меняем порядок описаний - определение до использования
 	m.Decls = lc.decls
@@ -127,6 +131,8 @@ func (lc *lookContext) lookDecl(d ast.Decl) {
 		lc.lookVarDecl(x)
 	case *ast.Function:
 		return
+	case *ast.InvalidDecl:
+		// игнорирую
 	default:
 		panic(fmt.Sprintf("lookup 3: ni %T", d))
 	}
@@ -250,11 +256,24 @@ func (lc *lookContext) lookStatement(seq *ast.StatementSeq, s ast.Statement) {
 	case *ast.While:
 		lc.lookExpr(x.Cond)
 		lc.lookStatements(x.Seq)
+	case *ast.Cycle:
+		lc.lookExpr(x.Expr)
+		if x.IndexVar != nil {
+			x.IndexVar.Later = true
+			lc.lookLocalDecl(x.Seq, x.IndexVar)
+		}
+		if x.ElementVar != nil {
+			x.ElementVar.Later = true
+			lc.lookLocalDecl(x.Seq, x.ElementVar)
+		}
+		lc.lookStatements(x.Seq)
 	case *ast.Guard:
 		lc.lookExpr(x.Cond)
 		lc.lookStatement(nil, x.Else)
 	case *ast.Select:
 		lc.lookSelect(x)
+	case *ast.SelectType:
+		lc.lookSelectType(x)
 	case *ast.Return:
 		if x.X != nil {
 			lc.lookExpr(x.X)
@@ -294,6 +313,25 @@ func (lc *lookContext) lookSelect(x *ast.Select) {
 		for _, e := range c.Exprs {
 			lc.lookExpr(e)
 		}
+		lc.lookStatements(c.Seq)
+	}
+	if x.Else != nil {
+		lc.lookStatements(x.Else)
+	}
+}
+
+func (lc *lookContext) lookSelectType(x *ast.SelectType) {
+	lc.lookExpr(x.X)
+
+	for _, c := range x.Cases {
+		for _, t := range c.Types {
+			lc.lookTypeRef(t)
+		}
+		if c.Var != nil {
+			c.Var.Later = true
+			lc.lookLocalDecl(c.Seq, c.Var)
+		}
+
 		lc.lookStatements(c.Seq)
 	}
 	if x.Else != nil {

@@ -36,7 +36,7 @@ func initErrors() {
 	for _, s := range lines {
 		pair := strings.SplitN(s, ": ", 2)
 		if len(pair) == 2 {
-			messages[pair[0]] = pair[1]
+			messages[pair[0]] = strings.ReplaceAll(pair[1], "$;", "%v")
 		}
 	}
 }
