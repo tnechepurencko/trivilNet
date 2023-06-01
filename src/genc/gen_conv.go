@@ -147,13 +147,14 @@ func (genc *genContext) genCastToWord64(expr string, exprTyp ast.Type) string {
 
 	var from = ast.UnderType(exprTyp)
 
-	if from == ast.Int64 {
-		return fmt.Sprintf("((%s)(%s)%s).w", rt_cast_union, predefinedTypeName(ast.Int64.Name), expr)
-	} else if ast.IsReferenceType(from) {
-		return fmt.Sprintf("((%s)(void*)%s).w", rt_cast_union, expr)
-	} else if from == ast.Word64 {
+	switch {
+	case from == ast.Word64, from == ast.Byte, from == ast.Symbol, from == ast.Bool:
 		return expr
-	} else {
+	case from == ast.Int64:
+		return fmt.Sprintf("((%s)(%s)%s).w", rt_cast_union, predefinedTypeName(ast.Int64.Name), expr)
+	case ast.IsReferenceType(from):
+		return fmt.Sprintf("((%s)(void*)%s).w", rt_cast_union, expr)
+	default:
 		return fmt.Sprintf("((%s)%s).w", rt_cast_union, expr)
 	}
 }
