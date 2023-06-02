@@ -109,7 +109,7 @@ size_t encode_bytes(TSymbol cp) {
 
 // Извлекает code point из UTF-8 буфера.
 // Если успешно: code point записан в cp_ref, возвращает число прочитанных байтов
-// Если ошибк, возвращает -1
+// Если ошибка, возвращает -1
 size_t decode_symbol(TByte* buf, size_t buflen, TSymbol* cp_ref) {
   int32_t cp;
   const TByte *end;
