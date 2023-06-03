@@ -130,7 +130,6 @@ func mergeModules(mods []*ast.Module) {
 
 		var m = mods[n]
 
-		setHost(combined, m.Decls)
 		combined.Decls = append(combined.Decls, m.Decls...)
 
 		if m.Entry != nil {
@@ -141,6 +140,7 @@ func mergeModules(mods []*ast.Module) {
 			}
 		}
 	}
+	setHost(combined, combined.Decls)
 }
 
 func setHost(combined *ast.Module, decls []ast.Decl) {
