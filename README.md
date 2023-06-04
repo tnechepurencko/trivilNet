@@ -69,6 +69,7 @@ test_vxod
 * 2023.03.11   9417 in 54 files, runtime:   852 lines (C)
 * 2023.04.08   9836 in 54 files, runtime:   930 lines (C), libraries:   5,   561 lines (Тривиль)
 * 2023.05.14 10369 in 56 files, runtime: 1312 lines (C), libraries: 10, 1230 lines (Тривиль), трик 987 lines (Тривиль)
+* 2023.06.04 11128 in 57 files, runtime: 1530 lines (C), libraries: 10, 1818 lines (Тривиль), трик 4352 lines (Тривиль)
 
 #### Как посчитать в Windows (PowerShell)
 
