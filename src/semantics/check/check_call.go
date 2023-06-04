@@ -24,7 +24,7 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	if !ok {
 
 		if !ast.IsInvalidType(x.X.GetType()) {
-			env.AddError(x.X.GetPos(), "СЕМ-ВЫЗОВ-НЕ_ФУНКТИП", ast.TypeName(x.X.GetType()))
+			env.AddError(x.X.GetPos(), "СЕМ-ВЫЗОВ-НЕ-ФУНКТИП", ast.TypeName(x.X.GetType()))
 		}
 		x.Typ = ast.MakeInvalidType(x.X.GetPos())
 		return
@@ -55,9 +55,13 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	for i := 0; i < normLen; i++ {
 		var p = ft.Params[i]
 		cc.expr(x.Args[i])
-		cc.checkAssignable(p.Typ, x.Args[i])
 		if p.Out {
+			if !equalTypes(p.Typ, x.Args[i].GetType()) {
+				env.AddError(x.Args[i].GetPos(), "СЕМ-ВЫХОДНОй-ТИПЫ-НЕ-РАВНЫ")
+			}
 			cc.checkLValue(x.Args[i])
+		} else {
+			cc.checkAssignable(p.Typ, x.Args[i])
 		}
 	}
 
