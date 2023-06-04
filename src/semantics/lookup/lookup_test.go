@@ -108,5 +108,6 @@ func compile(text string) {
 	if env.ErrorCount() > 0 {
 		return
 	}
+	m.SetDeclsHost()
 	Process(m)
 }
