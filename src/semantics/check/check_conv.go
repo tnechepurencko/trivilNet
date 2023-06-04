@@ -84,7 +84,7 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 		var li = literal(x.X)
 		if li != nil {
 			if li.IntVal < 0 || li.IntVal > 255 {
-				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В-ДИАПАЗОНЕ", ast.Byte.Name)
 			} else {
 				li.Kind = ast.Lit_Word
 				li.WordVal = uint64(li.IntVal)
@@ -98,7 +98,7 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 		var li = literal(x.X)
 		if li != nil {
 			if li.WordVal > 255 {
-				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В-ДИАПАЗОНЕ", ast.Byte.Name)
 			} else {
 				li.Typ = ast.Byte
 				x.Done = true
@@ -110,7 +110,7 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 		var li = literal(x.X)
 		if li != nil {
 			if li.WordVal > 255 {
-				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В-ДИАПАЗОНЕ", ast.Byte.Name)
 			} else {
 				li.Kind = ast.Lit_Word
 				li.Typ = ast.Byte
@@ -126,7 +126,7 @@ func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
 				env.AddError(x.Pos, "СЕМ-ДЛИНА-СТРОКИ-НЕ-1")
 			} else {
 				if li.StrVal[0] > 255 {
-					env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Byte.Name)
+					env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В-ДИАПАЗОНЕ", ast.Byte.Name)
 				} else {
 					li.Kind = ast.Lit_Word
 					li.Typ = ast.Byte
@@ -175,7 +175,7 @@ func (cc *checkContext) conversionToInt64(x *ast.ConversionExpr) {
 		var li = literal(x.X)
 		if li != nil {
 			if li.WordVal > 1<<63-1 {
-				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Int64.Name)
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В-ДИАПАЗОНЕ", ast.Int64.Name)
 			} else {
 				li.Kind = ast.Lit_Int
 				li.IntVal = int64(li.WordVal)
@@ -237,7 +237,7 @@ func (cc *checkContext) conversionToWord64(x *ast.ConversionExpr) {
 		var li = literal(x.X)
 		if li != nil {
 			if li.IntVal < 0 {
-				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Word64.Name)
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В-ДИАПАЗОНЕ", ast.Word64.Name)
 			} else {
 				li.Kind = ast.Lit_Word
 				li.WordVal = uint64(li.IntVal)
@@ -307,7 +307,7 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 		var li = literal(x.X)
 		if li != nil {
 			if li.IntVal < 0 || li.IntVal > unicode.MaxRune {
-				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Symbol.Name)
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В-ДИАПАЗОНЕ", ast.Symbol.Name)
 			} else {
 				li.Kind = ast.Lit_Word
 				li.WordVal = uint64(li.IntVal)
@@ -321,7 +321,7 @@ func (cc *checkContext) conversionToSymbol(x *ast.ConversionExpr) {
 		var li = literal(x.X)
 		if li != nil {
 			if li.WordVal > unicode.MaxRune {
-				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В_ДИАПАЗОНЕ", ast.Symbol.Name)
+				env.AddError(x.Pos, "СЕМ-ЗНАЧЕНИЕ-НЕ-В-ДИАПАЗОНЕ", ast.Symbol.Name)
 			} else {
 				li.Typ = ast.Symbol
 				x.Done = true
