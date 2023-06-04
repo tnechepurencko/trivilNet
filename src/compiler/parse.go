@@ -140,22 +140,5 @@ func mergeModules(mods []*ast.Module) {
 			}
 		}
 	}
-	setHost(combined, combined.Decls)
-}
-
-func setHost(combined *ast.Module, decls []ast.Decl) {
-
-	for _, d := range decls {
-		d.SetHost(combined)
-
-		if td, ok := d.(*ast.TypeDecl); ok {
-			if cl, ok := td.Typ.(*ast.ClassType); ok {
-				for _, f := range cl.Fields {
-					f.SetHost(combined)
-				}
-			}
-		}
-
-	}
-
+	combined.SetDeclsHost()
 }

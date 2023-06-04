@@ -45,6 +45,20 @@ func (n *Module) IsExported() bool {
 	return false
 }
 
+func (mod *Module) SetDeclsHost() {
+	for _, d := range mod.Decls {
+		d.SetHost(mod)
+
+		if td, ok := d.(*TypeDecl); ok {
+			if cl, ok := td.Typ.(*ClassType); ok {
+				for _, f := range cl.Fields {
+					f.SetHost(mod)
+				}
+			}
+		}
+	}
+}
+
 func NewModule() *Module {
 	return &Module{
 		Inner:   NewScope(topScope),
