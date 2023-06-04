@@ -41,10 +41,8 @@ func (genc *genContext) genArgs(call *ast.CallExpr) string {
 	}
 
 	// не вариативные параметры
-
 	for i := 0; i < normLen; i++ {
 		if ft.Params[i].Out {
-			// TODO: нужны ли скобки здесь?
 			cargs[i] = fmt.Sprintf("&(%s)", genc.genExpr(call.Args[i]))
 		} else {
 			cargs[i] = genc.genExpr(call.Args[i])

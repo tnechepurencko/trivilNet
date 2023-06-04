@@ -121,7 +121,11 @@ func (genc *genContext) genCycle(x *ast.Cycle) {
 		index = genc.localName("i")
 	}
 
-	//TODO: нельзя для вариадик
+	if ast.IsVariadicType(x.Expr.GetType()) {
+		// нельзя использовать временную переменную
+		panic("не реализовано для вариативных")
+	}
+
 	var loc = genc.localName("")
 	genc.c("%s %s = %s;", genc.typeRef(x.Expr.GetType()), loc, genc.genExpr(x.Expr))
 
