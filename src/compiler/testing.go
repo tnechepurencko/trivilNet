@@ -32,6 +32,7 @@ func TestOne(tpath string) {
 
 	var cc = &compileContext{
 		imported:       make(map[string]*ast.Module),
+		folders:        make(map[*ast.Module]string),
 		testModulePath: tpath,
 	}
 
