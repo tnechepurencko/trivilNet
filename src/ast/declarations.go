@@ -65,6 +65,7 @@ type VarDecl struct {
 	Init       Expr
 	Later      bool
 	AssignOnce bool
+	OutParam   bool // если это выходной параметр
 }
 
 type ConstDecl struct {

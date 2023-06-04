@@ -56,7 +56,19 @@ func (genc *genContext) genIdent(id *ast.IdentExpr) string {
 		return s
 	}
 
+	if isVarOutParam(d) {
+		return "*" + genc.declName(d)
+	}
+
 	return genc.declName(d)
+}
+
+func isVarOutParam(d ast.Decl) bool {
+	v, ok := d.(*ast.VarDecl)
+	if !ok {
+		return false
+	}
+	return v.OutParam
 }
 
 func genConstAsLiteral(d ast.Decl) string {

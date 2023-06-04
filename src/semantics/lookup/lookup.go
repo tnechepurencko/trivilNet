@@ -212,6 +212,7 @@ func (lc *lookContext) addVarForParameter(p *ast.Param) {
 	var v = &ast.VarDecl{}
 	v.Typ = p.Typ
 	v.Name = p.Name
+	v.OutParam = p.Out
 	addToScope(v.Name, v, lc.scope)
 }
 

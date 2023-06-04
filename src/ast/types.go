@@ -72,6 +72,7 @@ type FuncType struct {
 
 type Param struct {
 	DeclBase
+	Out bool // выходной параметр
 }
 
 func VariadicParam(ft *FuncType) *Param {

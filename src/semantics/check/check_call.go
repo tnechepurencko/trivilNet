@@ -37,34 +37,36 @@ func (cc *checkContext) call(x *ast.CallExpr) {
 	}
 
 	var vPar = ast.VariadicParam(ft)
+	var normLen = len(ft.Params)
 
 	if vPar == nil {
 		if len(x.Args) != len(ft.Params) {
 			env.AddError(x.X.GetPos(), "СЕМ-ЧИСЛО-АРГУМЕНТОВ", len(x.Args), len(ft.Params))
 			return
 		}
-
-		for i, p := range ft.Params {
-			cc.expr(x.Args[i])
-			cc.checkAssignable(p.Typ, x.Args[i])
-		}
 	} else {
-		var normCount = len(ft.Params) - 1
-		if len(x.Args) < normCount {
-			env.AddError(x.X.GetPos(), "СЕМ-ВАРИАДИК-ЧИСЛО-АРГУМЕНТОВ", normCount, len(x.Args))
+		normLen = len(ft.Params) - 1
+		if len(x.Args) < normLen {
+			env.AddError(x.X.GetPos(), "СЕМ-ВАРИАДИК-ЧИСЛО-АРГУМЕНТОВ", normLen, len(x.Args))
 			return
 		}
+	}
 
-		for i := 0; i < normCount; i++ {
-			cc.expr(x.Args[i])
-			cc.checkAssignable(ft.Params[i].Typ, x.Args[i])
+	for i := 0; i < normLen; i++ {
+		var p = ft.Params[i]
+		cc.expr(x.Args[i])
+		cc.checkAssignable(p.Typ, x.Args[i])
+		if p.Out {
+			cc.checkLValue(x.Args[i])
 		}
+	}
 
+	if vPar != nil {
 		var vTyp = vPar.Typ.(*ast.VariadicType)
-		if cc.checkUnfold(x.Args, normCount, vTyp.ElementTyp) {
+		if cc.checkUnfold(x.Args, normLen, vTyp.ElementTyp) {
 			// проверено
 		} else {
-			for i := normCount; i < len(x.Args); i++ {
+			for i := normLen; i < len(x.Args); i++ {
 				cc.expr(x.Args[i])
 				cc.checkAssignable(vTyp.ElementTyp, x.Args[i])
 			}

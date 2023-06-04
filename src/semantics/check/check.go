@@ -107,8 +107,15 @@ func (cc *checkContext) constDecl(v *ast.ConstDecl) {
 
 func (cc *checkContext) function(f *ast.Function) {
 
+	var ft = f.Typ.(*ast.FuncType)
+
+	var vPar = ast.VariadicParam(ft)
+	if vPar != nil && vPar.Out {
+		env.AddError(vPar.Pos, "СЕМ-ВАРИАТИВНЫЙ-ВЫХОДНОЙ")
+	}
+
 	if f.Seq != nil {
-		cc.returnTyp = f.Typ.(*ast.FuncType).ReturnTyp
+		cc.returnTyp = ft.ReturnTyp
 
 		cc.loopCount = 0
 		cc.statements(f.Seq)
@@ -122,6 +129,8 @@ func (cc *checkContext) function(f *ast.Function) {
 		cc.returnTyp = nil
 	}
 }
+
+//==== проверка наличия "вернуть"
 
 func (cc *checkContext) seqHasReturn(s *ast.StatementSeq) bool {
 	if len(s.Statements) == 0 {
