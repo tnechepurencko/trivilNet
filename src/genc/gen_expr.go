@@ -57,7 +57,7 @@ func (genc *genContext) genIdent(id *ast.IdentExpr) string {
 	}
 
 	if isVarOutParam(d) {
-		return "*" + genc.declName(d)
+		return fmt.Sprintf("(*%s)", genc.declName(d))
 	}
 
 	return genc.declName(d)
