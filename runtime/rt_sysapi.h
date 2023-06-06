@@ -10,8 +10,15 @@ struct Request {
     TString err_id;
 };
 
+//==== имена файлов
+
 // Выдает строку - папку программы с правильными разделителями
 EXPORTED TString sysapi_exec_path();
+
+// По имени файла выдает аболютное имя файла (от корня файловой системы) 
+EXPORTED TString sysapi_abs_path(void* request, TString filename);
+
+//=== чтение/запись
 
 // Читает файл, возвращает дескриптор байтового вектора.
 // В случае ошибки, возвращает NULL и выставляет код ошибки в запросе 
@@ -21,9 +28,7 @@ EXPORTED void* sysapi_fread(void* request, TString filename);
 // В случае ошибки выставляет код ошибки в запросе
 EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes);
 
-// Выдает список имен в папке - список строк []Строка
-// В случае ошибки выставляет код ошибки в запросе
-EXPORTED void* sysapi_dirnames(void* request, TString filename) ;
+//=== работа с папками
 
 // Выдает true, если файл является папкой 
 // В случае ошибки выставляет код ошибки в запросе

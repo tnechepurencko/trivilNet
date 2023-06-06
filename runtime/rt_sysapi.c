@@ -125,6 +125,16 @@ EXPORTED void* sysapi_dirnames(void* request, TString filename)  {
     return NULL;
 }
 
+EXPORTED TString sysapi_abs_path(void* request, TString filename) {
+    struct Request* req = request;    
+    
+    char buf[80];
+    sprintf(buf, "sysapi_abs_path не реализована"); 
+
+    req->err_id = tri_newString(strlen(buf), -1, buf);
+    return NULL;
+}
+
 // ============== windows ==============
 #else
     
@@ -226,12 +236,41 @@ EXPORTED void* sysapi_dirnames(void* request, TString filename)  {
     return list;
 }
 
+EXPORTED TString sysapi_abs_path(void* request, TString filename) {
+    struct Request* req = request;    
+    
+    DWORD retval = GetFullPathNameA(
+        (char*)filename->body,
+        0,
+        NULL,
+        NULL);
+    
+    if (retval == 0) {
+        req->err_id = win_error_id(GetLastError());
+        return NULL;
+    }
 
-/* Сохранил для проверки на папку
-    if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-        _tprintf(TEXT("  %s   <DIR>\n"), FindFileData.cFileName);
-    else
-        _tprintf(TEXT("  %s \n"), FindFileData.cFileName);
-*/
+    char* buf = nogc_alloc(retval);
+
+    retval = GetFullPathNameA(
+        (char*)filename->body,
+        retval,
+        buf,
+        NULL);
+
+    if (retval == 0) {
+        tri_crash("sysapi_abs_path: assert 2nd call of GetFullPathNameA returns error", "");
+        return NULL;
+    }
+    
+    for (int i = 0; i < retval; i++) {
+        if (buf[i] == '\\') buf[i] = '/';
+    }       
+    
+    TString full =  tri_newString(retval, -1, buf); 
+    nogc_free(buf);
+    
+    return full;
+}
 
 #endif
