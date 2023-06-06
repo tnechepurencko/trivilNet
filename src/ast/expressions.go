@@ -160,5 +160,6 @@ type ClassCompositeExpr struct {
 type ValuePair struct {
 	Pos   int
 	Name  string
+	Field *Field
 	Value Expr
 }

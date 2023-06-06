@@ -42,10 +42,14 @@ func (genc *genContext) genArgs(call *ast.CallExpr) string {
 
 	// не вариативные параметры
 	for i := 0; i < normLen; i++ {
-		if ft.Params[i].Out {
-			cargs[i] = fmt.Sprintf("&(%s)", genc.genExpr(call.Args[i]))
+		var p = ft.Params[i]
+		var arg = call.Args[i]
+		var expr = genc.genExpr(arg)
+		if p.Out {
+			cargs[i] = fmt.Sprintf("&(%s)", expr)
 		} else {
-			cargs[i] = genc.genExpr(call.Args[i])
+			var cast = genc.assignCast(p.Typ, arg.GetType())
+			cargs[i] = fmt.Sprintf("%s%s", cast, expr)
 		}
 	}
 
@@ -366,7 +370,8 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 
 		var cargs = make([]string, len(call.Args))
 		for i, a := range call.Args {
-			cargs[i] = genc.genExpr(a)
+			var cast = genc.assignCast(vt.ElementTyp, a.GetType())
+			cargs[i] = fmt.Sprintf("%s%s", cast, genc.genExpr(a))
 		}
 
 		genc.c("%s %s[%d] = {%s};", et, loc, len(call.Args), strings.Join(cargs, ", "))

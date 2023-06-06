@@ -231,7 +231,11 @@ func (genc *genContext) genBinaryExpr(x *ast.BinaryExpr) string {
 		return fmt.Sprintf("%s%s(%s, %s)", not, rt_equalStrings, genc.genExpr(x.X), genc.genExpr(x.Y))
 	}
 
-	return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), binaryOp(x.Op), genc.genExpr(x.Y))
+	if ast.IsClassType(x.X.GetType()) {
+		return fmt.Sprintf("((void*)%s %s (void*)%s)", genc.genExpr(x.X), binaryOp(x.Op), genc.genExpr(x.Y))
+	} else {
+		return fmt.Sprintf("(%s %s %s)", genc.genExpr(x.X), binaryOp(x.Op), genc.genExpr(x.Y))
+	}
 }
 
 func (genc *genContext) genOfTypeExpr(x *ast.OfTypeExpr) string {
@@ -462,8 +466,10 @@ func (genc *genContext) genClassComposite(x *ast.ClassCompositeExpr) string {
 
 	var list = make([]string, len(x.Values))
 	for i, v := range x.Values {
-		list[i] = fmt.Sprintf("%s->%s.%s%s = %s;",
-			name, nm_class_fields, pathToField(cl, v.Name), genc.outName(v.Name), genc.genExpr(v.Value))
+		var cast = genc.assignCast(v.Field.Typ, v.Value.GetType())
+		list[i] = fmt.Sprintf("%s->%s.%s%s = %s%s;",
+			name, nm_class_fields, pathToField(cl, v.Name), genc.outName(v.Name),
+			cast, genc.genExpr(v.Value))
 	}
 	s += strings.Join(list, " ")
 

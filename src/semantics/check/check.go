@@ -282,6 +282,7 @@ func (cc *checkContext) statement(s ast.Statement) {
 				env.AddError(x.Pos, "СЕМ-ОШ-ВЕРНУТЬ-ЛИШНЕЕ")
 			} else {
 				cc.checkAssignable(cc.returnTyp, x.X)
+				x.ReturnTyp = cc.returnTyp
 			}
 		} else if cc.returnTyp != nil {
 			env.AddError(x.Pos, "СЕМ-ОШ-ВЕРНУТЬ-НУЖНО")
