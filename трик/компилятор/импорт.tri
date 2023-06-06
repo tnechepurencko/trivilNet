@@ -1,0 +1,70 @@
+модуль компилятор
+
+импорт "стд::вывод"
+//импорт "стд::строки"
+
+импорт "трик/асд"
+импорт "трик/основа"
+
+//импорт "трик/парсер"
+//импорт "трик/асд/асд-показ"
+//импорт "трик/компилятор/словарь-импорты"
+
+фн (сб: Сборка) импортировать(имп: асд.Импорт) {
+
+/*
+	env.Normalizer.Process(i.Path)
+	если env.Normalizer.Err # nil {
+		env.AddError(i.Pos, "ОКР-ОШ-ПУТЬ-ИМПОРТА", i.Path, env.Normalizer.Err.Error())
+		вернуть
+	}
+
+	пусть npath = env.Normalizer.NPath
+
+	m, ok := cc.импортed[npath]
+	если ok {
+		если m = nil {
+			env.AddError(i.Pos, "СЕМ-ЦИКЛ-ИМПОРТА", i.Path)
+			вернуть
+		}
+
+		// Модуль уже был импортирован
+		i.Mod = m
+		//вывод.ф("already импортed %s\n", i.Path)
+		вернуть
+	}
+
+	пусть err = env.EnsureFolder(npath)
+	если err # nil {
+		env.AddError(i.Pos, "ОКР-ИМПОРТ-НЕ-ПАПКА", npath, err.Error())
+		вернуть
+	}
+
+	пусть list = env.GetFolderSources(i.Path, npath)
+
+	если len(list) = 0 {
+		env.AddError(i.Pos, "ОКР-ИМПОРТ-ПУСТАЯ-ПАПКА", i.Path, npath)
+		вернуть
+	}
+
+	если len(list) = 1 & list[0].Err # nil {
+		env.AddError(i.Pos, "ОКР-ОШ-ЧТЕНИЕ-ИСХОДНОГО", list[0].FilePath, list[0].Err.Error())
+		вернуть
+	}
+
+	если cc.testModulePath = i.Path {
+		пусть tlist = collectTestSources(i.Path, npath)
+
+		если основа.число ошибок() # 0 {
+			вернуть
+		}
+
+		list = append(list, tlist...)
+	}
+
+	cc.импортed[npath] = nil // начали обработку
+	i.Mod = cc.parseModule(ложь, list)
+	cc.импортed[npath] = i.Mod
+    
+*/    
+}
