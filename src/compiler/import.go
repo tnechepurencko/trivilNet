@@ -9,7 +9,7 @@ import (
 
 var _ = fmt.Printf
 
-func (cc *compileContext) importModule(m *ast.Module, i *ast.Import) {
+func (cc *compileContext) importModule(i *ast.Import) {
 
 	env.Normalizer.Process(i.Path)
 	if env.Normalizer.Err != nil {
