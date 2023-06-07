@@ -54,7 +54,6 @@ type InvalidDecl struct {
 type Function struct {
 	DeclBase
 	Recv     *Param
-	Inner    *Scope
 	Seq      *StatementSeq
 	External bool
 	Mod      *Modifier
