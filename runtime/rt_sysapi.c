@@ -1,9 +1,28 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <errno.h>
 #include "rt_sysapi.h"
 
 struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
+
+
+//=== вещественные (временно)
+
+TBool sysapi_string_to_float64(TString s, TFloat64* res)  {
+    
+    char *eptr;
+    *res = strtod((char *)s->body, &eptr);
+    if (eptr != NULL) return false;
+
+    /* If the result is 0, test for an error */
+    if (*res == 0)
+    {
+        /* If the value provided was out of range, display a warning message */
+        if (errno == ERANGE || errno == EINVAL) return false;
+    }
+    return true;
+}
 
 //==== коды ошибок общие ===
 

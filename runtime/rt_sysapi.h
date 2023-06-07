@@ -3,7 +3,12 @@
 
 #include "rt_api.h"
 
-// Используется 
+//=== вещественные (временно)
+
+// Возвращает истину, если корректное представление вещественного целиком занимает строку
+EXPORTED TBool sysapi_string_to_float64(TString s, TFloat64* res) ;
+
+//==== Используется для работы с файлами
 struct Request {
     _BaseObject _base;
     //FILE* handler;
