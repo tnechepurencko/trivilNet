@@ -11,9 +11,13 @@ struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
 
 TBool sysapi_string_to_float64(TString s, TFloat64* res)  {
     
-    char *eptr;
-    *res = strtod((char *)s->body, &eptr);
-    if (eptr != NULL) return false;
+    char *endptr;
+    *res = strtod((char *)s->body, &endptr);
+    
+    //printf("%s: %f %p %p\n", (char *)s->body, *res, endptr, s->body);
+    if (endptr != NULL) {
+        if (endptr < (char *)s->body + s->bytes)  return false;
+    }
 
     /* If the result is 0, test for an error */
     if (*res == 0)
@@ -22,6 +26,13 @@ TBool sysapi_string_to_float64(TString s, TFloat64* res)  {
         if (errno == ERANGE || errno == EINVAL) return false;
     }
     return true;
+}
+
+EXPORTED TString sysapi_float64_to_string(TString format, TFloat64 f)  {
+    char buf[100];
+    int len = snprintf(buf, 100, (char*)format->body, f);
+   
+    return tri_newString(len, -1, buf); 
 }
 
 //==== коды ошибок общие ===
