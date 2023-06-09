@@ -1,0 +1,72 @@
+модуль имена
+
+импорт "стд::вывод"
+импорт "трик/асд"
+//импорт "трик/основа"
+
+/*
+фн добавить в область(name Строка, d ast.Decl, scope асд.Scope) {
+	x, ok := scope.Names[name]
+	если ok {
+		если _, inv := x.(асд.InvalidDecl); ~inv {
+			env.AddError(d.GetPos(), "СЕМ-УЖЕ-ОПИСАНО", name)
+		}
+		вернуть
+	}
+	scope.Names[name] = d
+
+	//fmt.Printf("scope: %v\n", scope.Names)
+}
+
+фн findInScopes(scope асд.Scope, name Строка, pos int) ast.Decl {
+
+	пусть cur = scope
+
+	пока {
+		если cur = nil {
+			//ast.ShowScopes("not found "+name, scope)
+			вернуть nil
+		}
+
+		d, ok := cur.Names[name]
+		если ok {
+			вернуть d
+		}
+
+		cur = cur.Outer
+	}
+}
+
+// Всегда возвращает объект, возможно InvalidDesc
+фн lookInScopes(scope асд.Scope, name Строка, pos int) ast.Decl {
+
+	пусть d = findInScopes(scope, name, pos)
+	если d # nil {
+		вернуть d
+	}
+	env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО", name)
+	пусть inv = &ast.InvalidDecl{
+		DeclBase: ast.DeclBase{Pos: pos, Name: name},
+	}
+	добавить в область(name, inv, scope)
+	вернуть inv
+}
+
+//== проверить импорт
+
+фн nameForCheckImported(mod асд.Модуль, no int) Строка {
+	вернуть strconv.Itoa(no) + mod.Name
+}
+
+// Проверяет, что использованный модуль импортирован в исходном файле
+фн (им: Имена) checkImported(mod асд.Модуль, pos int) {
+	пусть no = env.SourceNo(pos)
+	_, ok := lc.module.Inner.Names[nameForCheckImported(mod, no)]
+	если ~ok {
+		source, _, _ := env.SourcePos(pos)
+		env.AddError(pos, "СЕМ-МОДУЛЬ-НЕ-ИМПОРТИРОВАН", mod.Name, source.FileName)
+		// не повторять ошибку
+		lc.module.Inner.Names[nameForCheckImported(mod, no)] = mod
+	}
+}
+*/

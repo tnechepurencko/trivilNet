@@ -1,0 +1,168 @@
+модуль имена
+
+импорт "трик/асд"
+//импорт "трик/основа"
+
+фн (им: Имена) выражение(выр: асд.Выражение) {
+/*
+	выбор x := expr.(тип) {
+	когда асд.ОперандИдент:
+		lc.lookIdentExpr(x)
+
+	когда асд.УнарнаяОперация:
+		им.выражение(x.X)
+
+	когда асд.БинарнаяОперация:
+		им.выражение(x.X)
+		им.выражение(x.Y)
+
+	когда асд.ПроверкаТипа:
+		им.выражение(x.X)
+		им.указание-типа(x.TargetTyp)
+
+	когда асд.ОператорВыборorExpr:
+		им.выражение(x.X)
+		lc.lookAccessToImported(x)
+		// проверка поля/метода делается на контроле типов
+
+	когда асд.Вызов:
+		им.выражение(x.X)
+		пока _, a := range x.Args {
+			им.выражение(a)
+		}
+		lc.lookStdFunction(x)
+
+	когда асд.Развернуть:
+		им.выражение(x.X)
+
+	когда асд.Преобразовать:
+		им.выражение(x.X)
+		им.указание-типа(x.TargetTyp)
+
+	когда асд.ПодтверждениеТипа:
+		им.выражение(x.X)
+
+	когда асд.ИндексацияИлиКомпозит:
+		им.выражение(x.X)
+		если x.Index # nil {
+			им.выражение(x.Index)
+		}
+
+		если x.Composite.LenExpr # nil {
+			им.выражение(x.Composite.LenExpr)
+		}
+		если x.Composite.CapExpr # nil {
+			им.выражение(x.Composite.CapExpr)
+		}
+		если x.Composite.Default # nil {
+			им.выражение(x.Composite.Default)
+		}
+
+		пока _, e := range x.Composite.Indexes {
+			им.выражение(e)
+		}
+		пока _, e := range x.Composite.Values {
+			им.выражение(e)
+		}
+	когда асд.КомпозитКласса:
+		им.выражение(x.X)
+
+		пока _, vp := range x.Values {
+			им.выражение(vp.Value)
+
+		}
+	когда асд.Литерал:
+		//nothing
+
+	другое
+		panic(fmt.Sprintf("expression: ni %T", expr))
+
+	}
+*/    
+}
+
+/*
+фн (им: Имена) lookIdentExpr(x асд.ОперандИдент) {
+
+	пусть d = lookInScopes(lc.scope, x.Name, x.Pos)
+
+	если td, ok := d.(асд.ТипDecl); ok {
+		x.Obj = makeTypeRef(td, x.Pos)
+	} иначе {
+		x.Obj = d
+	}
+	если d.GetHost() = lc.module {
+		им.описание(d)
+	}
+
+	//fmt.Printf("found %v => %v\n", x.Name, x.Obj)
+}
+
+// Возврашает TypeRef для TypeDecl, или сам объект
+фн makeTypeRef(td асд.ТипDecl, pos int) асд.ТипRef {
+	вернуть &ast.TypeRef{
+		TypeBase: ast.TypeBase{Pos: pos},
+		TypeName: td.Name,
+		//ModuleName: ?
+		TypeDecl: td,
+		Typ:      td.Typ,
+	}
+}
+
+фн (им: Имена) lookAccessToImported(x асд.ОператорВыборorExpr) {
+
+	ident, ok := x.X.(асд.ОперандИдент)
+	если ~ok {
+		вернуть
+	}
+
+	m, ok := ident.Obj.(асд.Модуль)
+	если ~ok {
+		вернуть
+	}
+
+	lc.checkImported(m, x.Pos)
+
+	если d, ok := m.Inner.Names[x.Name]; ok {
+		если ~d.IsExported() {
+			env.AddError(x.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", x.Name, m.Name)
+		}
+
+		если td, ok := d.(асд.ТипDecl); ok {
+			x.Obj = makeTypeRef(td, x.Pos)
+		} иначе {
+			x.Obj = d
+		}
+
+	} иначе {
+		пусть inv = &ast.InvalidDecl{
+			DeclBase: ast.DeclBase{Pos: x.Pos, Name: x.Name},
+		}
+		x.Obj = inv
+		m.Inner.Names[x.Name] = inv
+		env.AddError(x.Pos, "СЕМ-НЕ-НАЙДЕНО-В-МОДУЛЕ", m.Name, x.Name)
+		//TODO: add test пока this error
+	}
+	x.X = nil
+}
+
+фн (им: Имена) lookStdFunction(x асд.Вызов) {
+
+	ident, ok := x.X.(асд.ОперандИдент)
+	если ~ok {
+		вернуть
+	}
+
+	если ident.Obj = nil {
+		вернуть
+	}
+
+	stdf, ok := ident.Obj.(асд.StdFunction)
+	если ~ok {
+		вернуть
+	}
+
+	x.StdFunc = stdf
+	x.X = nil
+}
+*/

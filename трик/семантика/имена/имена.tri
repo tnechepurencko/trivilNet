@@ -1,0 +1,344 @@
+модуль имена
+
+импорт "стд::вывод"
+импорт "трик/асд"
+импорт "трик/основа"
+импорт "трик/семантика/имена/словарь-состояние"
+
+тип Имена = класс {
+	мод: асд.Модуль = позже
+    область: асд.Область = позже
+    обработано = словарь-состояние.Словарь{}
+    
+	описания = асд.Описания[] // строится в правильном порядке
+}
+
+фн обработать*(мод: асд.Модуль) {
+/*
+	пусть lc = &lookContext{
+		module:    m,
+		scope:     m.Inner,
+		processed: make(map[ast.Decl]Лог),
+		decls:     make([]ast.Decl, 0),
+	}
+
+	// добавление импорта
+	пока _, i := range m.Imports {
+		добавить в область(i.Mod.Name, i.Mod, m.Inner)
+		// добавляю для проверки наличия импорта в исходном файле
+		пока _, no := range i.Sources {
+			добавить в область(nameForCheckImported(i.Mod, no), i.Mod, m.Inner)
+		}
+	}
+
+	// добавление имен
+	пока _, d := range m.Decls {
+		выбор x := d.(тип) {
+		когда асд.ТипDecl:
+			добавить в область(x.Name, x, m.Inner)
+		когда асд.ОписаниеПеременной:
+			добавить в область(x.Name, x, m.Inner)
+		когда асд.ОписаниеКонстанты:
+			добавить в область(x.Name, x, m.Inner)
+		когда асд.Функции:
+			если x.Recv = nil {
+				добавить в область(x.Name, x, m.Inner)
+			}
+		другое
+			panic(fmt.Sprintf("lookup 1: ni %T", d))
+		}
+	}
+
+	если lc.scope # m.Inner {
+		panic("assert - should be module scope")
+	}
+
+	/*
+		// TODO обойти типы
+		пока _, d := range m.Decls {
+			td, ok := d.(асд.ТипDecl)
+			если ok {
+				lc.lookTypeDecl(td)
+			}
+		}
+	*/
+
+	// обойти описания, кроме функций
+	пока _, d := range m.Decls {
+		им.описание(d)
+	}
+
+	// обойти функции
+	пока _, d := range m.Decls {
+		f, ok := d.(асд.Функции)
+		если ok {
+			lc.lookFunction(f)
+			lc.decls = append(lc.decls, d)
+		}
+	}
+
+	если m.Entry # nil {
+		lc.lookEntry(m.Entry)
+	}
+	//	show(m.Decls)
+	//	show(lc.decls)
+
+	// Меняем порядок описаний - определение до использования
+	m.Decls = lc.decls
+*/    
+}
+
+/* Отладочное, временно оставляю
+фн show(decls []ast.Decl) {
+	пусть s = make([]Строка, len(decls))
+	пока i, d := range decls {
+		s[i] = d.GetName()
+	}
+	fmt.Printf("%v\n", Строкаs.Join(s, ","))
+}
+*/
+
+/*
+// Обрабатывает описания, кроме функций
+// Проверяет рекурсивные описания, задает порядок описаний
+фн (им: Имена) lookDecl(d ast.Decl) {
+
+	_, ok := d.(асд.Функции)
+	если ok {
+		вернуть
+	}
+
+	completed, exist := lc.processed[d]
+	//fmt.Printf("~ %v %v %v\n", d.GetName(), completed, exist)
+
+	если exist {
+		если ~completed {
+			env.AddError(d.GetPos(), "СЕМ-РЕКУРСИВНОЕ-ОПРЕДЕЛЕНИЕ", d.GetName())
+		}
+		вернуть
+	}
+
+	lc.processed[d] = ложь
+
+	выбор x := d.(тип) {
+	когда асд.ТипDecl:
+		lc.lookTypeDecl(x)
+	когда асд.ОписаниеКонстанты:
+		lc.lookConstDecl(x)
+	когда асд.ОписаниеПеременной:
+		lc.lookVarDecl(x)
+	когда асд.Функции:
+		вернуть
+	когда асд.InvalidDecl:
+		// игнорирую
+	другое
+		panic(fmt.Sprintf("lookup 3: ni %T", d))
+	}
+
+	lc.processed[d] = истина
+	lc.decls = append(lc.decls, d)
+}
+
+//== константы и переменные
+
+фн (им: Имена) lookVarDecl(v асд.ОписаниеПеременной) {
+	если v.Typ # nil {
+		им.указание-типа(v.Typ)
+	}
+	если ~v.Later {
+		им.выражение(v.Init)
+	}
+}
+
+фн (им: Имена) lookConstDecl(v асд.ОписаниеКонстанты) {
+	если v.Typ # nil {
+		им.указание-типа(v.Typ)
+	}
+	им.выражение(v.Value)
+}
+
+//== фнtions
+
+фн (им: Имена) lookFunction(f асд.Функции) {
+
+	пусть hasBody = ~f.External
+
+	если hasBody {
+		f.Seq.Inner = ast.NewScope(lc.scope)
+		lc.scope = f.Seq.Inner
+	}
+
+	если f.Recv # nil {
+		им.указание-типа(f.Recv.Typ)
+
+		lc.addMethodToType(f)
+
+		если hasBody {
+			lc.addVarForParameter(f.Recv)
+		}
+	}
+
+	пусть ft = f.Typ.(асд.FuncType)
+
+	пока _, p := range ft.Params {
+		им.указание-типа(p.Typ)
+		если hasBody {
+			lc.addVarForParameter(p)
+		}
+	}
+
+	если ft.ReturnTyp # nil {
+		им.указание-типа(ft.ReturnTyp)
+	}
+
+	если hasBody {
+		им.операторы(f.Seq)
+	}
+}
+
+фн (им: Имена) addMethodToType(f асд.Функции) {
+
+	пусть rt = f.Recv.Typ.(асд.ТипRef)
+
+	cl, ok := rt.Typ.(асд.ClassType)
+	если ~ok {
+		env.AddError(f.Recv.Pos, "СЕМ-ПОЛУЧАТЕЛЬ-НЕ-КЛАСС")
+		вернуть
+	}
+
+	cl.Methods = append(cl.Methods, f)
+
+}
+
+фн (им: Имена) addVarForParameter(p асд.Param) {
+	пусть v = &ast.VarDecl{}
+	v.Typ = p.Typ
+	v.Name = p.Name
+	v.OutParam = p.Out
+	добавить в область(v.Name, v, lc.scope)
+}
+
+фн (им: Имена) lookEntry(e асд.EntryFn) {
+	им.операторы(e.Seq)
+}
+
+//== statements
+
+фн (им: Имена) lookStatements(seq асд.ОператорSeq) {
+
+	пока _, s := range seq.Statements {
+		им.оператор(seq, s)
+	}
+
+	если lc.scope = seq.Inner {
+		lc.scope = seq.Inner.Outer
+	}
+}
+
+фн (им: Имена) lookStatement(seq асд.ОператорSeq, s ast.Statement) {
+	выбор x := s.(тип) {
+	когда асд.ОператорSeq:
+		им.операторы(x)
+	когда асд.ВыражениеStatement:
+		им.выражение(x.X)
+	когда асд.ОписаниеStatement:
+		им.локальное описание(seq, x.D)
+	когда асд.ОператорПрисвоить:
+		им.выражение(x.L)
+		им.выражение(x.R)
+	когда асд.ОператорУвеличить:
+		им.выражение(x.L)
+	когда асд.ОператорУменьшить:
+		им.выражение(x.L)
+	когда асд.ОператорЕсли:
+		им.выражение(x.Cond)
+		им.операторы(x.Then)
+		если x.Else # nil {
+			им.оператор(nil, x.Else)
+		}
+	когда асд.ОператорПока:
+		им.выражение(x.Cond)
+		им.операторы(x.Seq)
+	когда асд.ОператорЦикл:
+		им.выражение(x.Expr)
+		если x.IndexVar # nil {
+			x.IndexVar.Later = истина
+			им.локальное описание(x.Seq, x.IndexVar)
+		}
+		если x.ElementVar # nil {
+			x.ElementVar.Later = истина
+			им.локальное описание(x.Seq, x.ElementVar)
+		}
+		им.операторы(x.Seq)
+	когда асд.ОператорНадо:
+		им.выражение(x.Cond)
+		им.оператор(nil, x.Else)
+	когда асд.ОператорВыбор:
+		lc.lookSelect(x)
+	когда асд.ОператорВыборType:
+		lc.lookSelectType(x)
+	когда асд.ОператорВернуть:
+		если x.X # nil {
+			им.выражение(x.X)
+		}
+	когда асд.ОператорПрервать:
+		//nothing
+	когда асд.ОператорАвария:
+		им.выражение(x.X)
+
+	другое
+		panic(fmt.Sprintf("statement: ni %T", s))
+
+	}
+}
+
+фн (им: Имена) lookLocalDecl(seq асд.ОператорSeq, decl ast.Decl) {
+	если lc.scope # seq.Inner {
+		seq.Inner = ast.NewScope(lc.scope)
+		lc.scope = seq.Inner
+	}
+	выбор x := decl.(тип) {
+	когда асд.ОписаниеПеременной:
+		lc.lookVarDecl(x)
+		добавить в область(x.Name, x, lc.scope)
+	другое
+		panic(fmt.Sprintf("local decl: ni %T", decl))
+	}
+	//ast.ShowScopes("", lc.scope)
+}
+
+фн (им: Имена) lookSelect(x асд.ОператорВыбор) {
+	если x.X # nil {
+		им.выражение(x.X)
+	}
+
+	пока _, c := range x.Cases {
+		пока _, e := range c.Exprs {
+			им.выражение(e)
+		}
+		им.операторы(c.Seq)
+	}
+	если x.Else # nil {
+		им.операторы(x.Else)
+	}
+}
+
+фн (им: Имена) lookSelectType(x асд.ОператорВыборType) {
+	им.выражение(x.X)
+
+	пока _, c := range x.Cases {
+		пока _, t := range c.Types {
+			им.указание-типа(t)
+		}
+		если c.Var # nil {
+			c.Var.Later = истина
+			им.локальное описание(c.Seq, c.Var)
+		}
+
+		им.операторы(c.Seq)
+	}
+	если x.Else # nil {
+		им.операторы(x.Else)
+	}
+}
+*/

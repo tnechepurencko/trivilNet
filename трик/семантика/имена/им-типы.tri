@@ -1,0 +1,171 @@
+модуль имена
+
+импорт "стд::вывод"
+импорт "трик/асд"
+//импорт "трик/основа"
+
+
+//== ссылка на тип
+/*
+фн (им: Имена) lookTypeRef(t ast.Type) {
+
+	если maybe, ok := t.(асд.MayBeType); ok {
+		им.указание-типа(maybe.Typ)
+
+		если ~ast.IsReferenceType(maybe.Typ) {
+			env.AddError(maybe.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(maybe.Typ))
+		}
+		вернуть
+	}
+
+	пусть tr, ok = t.(асд.ТипRef)
+	если ~ok {
+		если t = nil {
+			panic("assert")
+		}
+		vTyp, ok := t.(асд.VariadicType)
+		если ok {
+			им.указание-типа(vTyp.ElementTyp)
+		}
+		вернуть
+	}
+
+	если tr.Typ # nil {
+		вернуть // уже сделано
+	}
+
+	пусть td асд.ТипDecl
+
+	если tr.ModuleName # "" {
+		td = lc.lookTypeDeclInModule(tr.ModuleName, tr.TypeName, tr.Pos)
+	} иначе {
+		td = lc.lookTypeDeclInScopes(tr.TypeName, tr.Pos)
+	}
+
+	tr.TypeDecl = td
+	tr.Typ = tr.TypeDecl.Typ
+
+	если tr.Typ = nil {
+		panic("not resolved")
+	}
+
+	//fmt.Printf("~ %v %T\n", tr.TypeDecl, tr.Typ)
+}
+
+фн (им: Имена) lookTypeDeclInScopes(name Строка, pos int) асд.ТипDecl {
+
+	пусть d = findInScopes(lc.scope, name, pos)
+
+	если d = nil {
+		env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО", name)
+		пусть td = lc.makeTypeDecl(name, pos)
+		добавить в область(name, td, lc.scope)
+		вернуть td
+	}
+
+	td, ok := d.(асд.ТипDecl)
+	если ~ok {
+		env.AddError(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-ТИП", name)
+		вернуть lc.makeTypeDecl(name, pos)
+	}
+
+	вернуть td
+}
+
+фн (им: Имена) lookTypeDeclInModule(moduleName, name Строка, pos int) асд.ТипDecl {
+	пусть d = findInScopes(lc.scope, moduleName, pos)
+
+	если d = nil {
+		env.AddError(pos, "СЕМ-НЕ-НАЙДЕН-МОДУЛЬ", moduleName)
+		вернуть lc.makeTypeDecl(name, pos)
+	}
+
+	m, ok := d.(асд.Модуль)
+	если ~ok {
+		env.AddError(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-МОДУЛЬ", moduleName)
+		вернуть lc.makeTypeDecl(name, pos)
+	}
+
+	lc.checkImported(m, pos)
+
+	d, ok = m.Inner.Names[name]
+	если ~ok {
+		env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО-В-МОДУЛЕ", m.Name, name)
+		пусть td = lc.makeTypeDecl(name, pos)
+		добавить в область(name, td, lc.scope)
+		вернуть td
+	}
+
+	td, ok := d.(асд.ТипDecl)
+	если ~ok {
+		env.AddError(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-ТИП", name)
+		вернуть lc.makeTypeDecl(name, pos)
+	}
+
+	если ~d.IsExported() {
+		env.AddError(pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", name, m.Name)
+	}
+
+	вернуть td
+}
+
+фн (им: Имена) makeTypeDecl(name Строка, pos int) асд.ТипDecl {
+	пусть td = &ast.TypeDecl{
+		DeclBase: ast.DeclBase{
+			Pos:      pos,
+			Name:     name,
+			Typ:      ast.MakeInvalidType(pos),
+			Host:     lc.module,
+			Exported: истина,
+		},
+	}
+	вернуть td
+}
+
+//== типы
+
+фн (им: Имена) lookTypeDecl(v асд.ТипDecl) {
+
+	выбор x := v.Typ.(тип) {
+	когда асд.VectorType:
+		им.указание-типа(x.ElementTyp)
+		lc.checkRecursion(x.ElementTyp)
+
+	когда асд.ClassType:
+		если x.BaseTyp # nil {
+			им.указание-типа(x.BaseTyp)
+			lc.checkRecursion(x.BaseTyp)
+		}
+		пока _, f := range x.Fields {
+			если f.Typ # nil {
+				им.указание-типа(f.Typ)
+			}
+			если ~f.Later {
+				им.выражение(f.Init)
+			}
+		}
+	когда асд.ТипRef:
+		им.указание-типа(x)
+	когда асд.MayBeType:
+		им.указание-типа(x.Typ)
+
+		если ~ast.IsReferenceType(ast.UnderType(x.Typ)) {
+			env.AddError(x.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(x.Typ))
+		}
+	когда асд.InvalidType:
+	другое
+		panic(fmt.Sprintf("lookTypeDecl: ni %T", v.Typ))
+	}
+}
+
+фн (им: Имена) checkRecursion(t ast.Type) {
+	tr, ok := t.(асд.ТипRef)
+	если ok {
+		tr = ast.DirectTypeRef(tr)
+		пусть td = tr.TypeDecl
+		если td.GetHost() = lc.module {
+			им.описание(td)
+		}
+	}
+}
+*/
