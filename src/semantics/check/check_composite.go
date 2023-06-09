@@ -136,8 +136,8 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 		return
 	}
 
-	cl, ok := ast.UnderType(t).(*ast.ClassType)
-	if !ok {
+	cl, isClass := ast.UnderType(t).(*ast.ClassType)
+	if !isClass {
 		env.AddError(c.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-ОШ-ТИП")
 		c.Typ = ast.MakeInvalidType(c.X.GetPos())
 	} else {
@@ -148,13 +148,13 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 		cc.expr(vp.Value)
 	}
 
-	if cl == nil {
+	if !isClass {
 		return
 	}
 
 	// проверяю поля и типы
 	var vals = make(map[string]bool)
-	for _, vp := range c.Values {
+	for i, vp := range c.Values {
 		d, ok := cl.Members[vp.Name]
 		if !ok {
 			env.AddError(vp.Pos, "СЕМ-КЛАСС-КОМПОЗИТ-НЕТ-ПОЛЯ", vp.Name)
@@ -166,6 +166,7 @@ func (cc *checkContext) classComposite(c *ast.ClassCompositeExpr) {
 				env.AddError(vp.Pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", f.Name, f.Host.Name)
 			} else {
 				vals[vp.Name] = true
+				c.Values[i].Field = f
 				cc.checkAssignable(f.Typ, vp.Value)
 			}
 		}

@@ -119,7 +119,8 @@ type Crash struct {
 
 type Return struct {
 	StatementBase
-	X Expr
+	ReturnTyp Type
+	X         Expr
 }
 
 type Break struct {

@@ -1,9 +1,39 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <errno.h>
 #include "rt_sysapi.h"
 
 struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
+
+
+//=== вещественные (временно)
+
+TBool sysapi_string_to_float64(TString s, TFloat64* res)  {
+    
+    char *endptr;
+    *res = strtod((char *)s->body, &endptr);
+    
+    //printf("%s: %f %p %p\n", (char *)s->body, *res, endptr, s->body);
+    if (endptr != NULL) {
+        if (endptr < (char *)s->body + s->bytes)  return false;
+    }
+
+    /* If the result is 0, test for an error */
+    if (*res == 0)
+    {
+        /* If the value provided was out of range, display a warning message */
+        if (errno == ERANGE || errno == EINVAL) return false;
+    }
+    return true;
+}
+
+EXPORTED TString sysapi_float64_to_string(TString format, TFloat64 f)  {
+    char buf[100];
+    int len = snprintf(buf, 100, (char*)format->body, f);
+   
+    return tri_newString(len, -1, buf); 
+}
 
 //==== коды ошибок общие ===
 
@@ -125,6 +155,16 @@ EXPORTED void* sysapi_dirnames(void* request, TString filename)  {
     return NULL;
 }
 
+EXPORTED TString sysapi_abs_path(void* request, TString filename) {
+    struct Request* req = request;    
+    
+    char buf[80];
+    sprintf(buf, "sysapi_abs_path не реализована"); 
+
+    req->err_id = tri_newString(strlen(buf), -1, buf);
+    return NULL;
+}
+
 // ============== windows ==============
 #else
     
@@ -226,12 +266,41 @@ EXPORTED void* sysapi_dirnames(void* request, TString filename)  {
     return list;
 }
 
+EXPORTED TString sysapi_abs_path(void* request, TString filename) {
+    struct Request* req = request;    
+    
+    DWORD retval = GetFullPathNameA(
+        (char*)filename->body,
+        0,
+        NULL,
+        NULL);
+    
+    if (retval == 0) {
+        req->err_id = win_error_id(GetLastError());
+        return NULL;
+    }
 
-/* Сохранил для проверки на папку
-    if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-        _tprintf(TEXT("  %s   <DIR>\n"), FindFileData.cFileName);
-    else
-        _tprintf(TEXT("  %s \n"), FindFileData.cFileName);
-*/
+    char* buf = nogc_alloc(retval);
+
+    retval = GetFullPathNameA(
+        (char*)filename->body,
+        retval,
+        buf,
+        NULL);
+
+    if (retval == 0) {
+        tri_crash("sysapi_abs_path: assert 2nd call of GetFullPathNameA returns error", "");
+        return NULL;
+    }
+    
+    for (int i = 0; i < retval; i++) {
+        if (buf[i] == '\\') buf[i] = '/';
+    }       
+    
+    TString full =  tri_newString(retval, -1, buf); 
+    nogc_free(buf);
+    
+    return full;
+}
 
 #endif

@@ -202,21 +202,17 @@ func (p *Parser) parseDeclarations() {
 		switch p.tok {
 		case lexer.TYPE:
 			var d = p.parseTypeDecl()
-			d.Host = p.module
 			p.module.Decls = append(p.module.Decls, d)
 		case lexer.CONST:
 			var cs = p.parseConstDecls()
 			for _, c := range cs {
-				c.Host = p.module
 				p.module.Decls = append(p.module.Decls, c)
 			}
 		case lexer.VAR:
 			var d = p.parseVarDecl()
-			d.Host = p.module
 			p.module.Decls = append(p.module.Decls, d)
 		case lexer.FN:
 			var d = p.parseFn()
-			d.Host = p.module
 			p.module.Decls = append(p.module.Decls, d)
 		case lexer.ENTRY:
 			p.parseEntry()

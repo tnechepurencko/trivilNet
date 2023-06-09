@@ -120,7 +120,12 @@ func (genc *genContext) params(ft *ast.FuncType) string {
 			list[i] = fmt.Sprintf("TInt64 %s%s", genc.declName(p), nm_variadic_len_suffic)
 			list = append(list, fmt.Sprintf("void* %s", genc.declName(p)))
 		} else {
-			list[i] = fmt.Sprintf("%s %s", genc.typeRef(p.Typ), genc.declName(p))
+			var out = ""
+			if p.Out {
+				out = "*"
+			}
+
+			list[i] = fmt.Sprintf("%s%s %s", genc.typeRef(p.Typ), out, genc.declName(p))
 		}
 	}
 	return strings.Join(list, ", ")

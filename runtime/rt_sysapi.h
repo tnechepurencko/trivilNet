@@ -3,15 +3,30 @@
 
 #include "rt_api.h"
 
-// Используется 
+//=== вещественные (временно)
+
+// Возвращает истину, если корректное представление вещественного целиком занимает строку
+EXPORTED TBool sysapi_string_to_float64(TString s, TFloat64* res) ;
+
+// Выдает строку по указанному формату (как в printf)
+EXPORTED TString sysapi_float64_to_string(TString format, TFloat64 f) ;
+
+//==== Используется для работы с файлами
 struct Request {
     _BaseObject _base;
     //FILE* handler;
     TString err_id;
 };
 
+//==== имена файлов
+
 // Выдает строку - папку программы с правильными разделителями
 EXPORTED TString sysapi_exec_path();
+
+// По имени файла выдает аболютное имя файла (от корня файловой системы) 
+EXPORTED TString sysapi_abs_path(void* request, TString filename);
+
+//=== чтение/запись
 
 // Читает файл, возвращает дескриптор байтового вектора.
 // В случае ошибки, возвращает NULL и выставляет код ошибки в запросе 
@@ -21,9 +36,7 @@ EXPORTED void* sysapi_fread(void* request, TString filename);
 // В случае ошибки выставляет код ошибки в запросе
 EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes);
 
-// Выдает список имен в папке - список строк []Строка
-// В случае ошибки выставляет код ошибки в запросе
-EXPORTED void* sysapi_dirnames(void* request, TString filename) ;
+//=== работа с папками
 
 // Выдает true, если файл является папкой 
 // В случае ошибки выставляет код ошибки в запросе

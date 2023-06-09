@@ -74,7 +74,7 @@ func (cc *compileContext) parseModule(isMain bool, list []*env.Source) *ast.Modu
 	}
 
 	for _, i := range m.Imports {
-		cc.importModule(m, i)
+		cc.importModule(i)
 	}
 
 	cc.folders[m] = list[0].FolderPath
@@ -130,7 +130,6 @@ func mergeModules(mods []*ast.Module) {
 
 		var m = mods[n]
 
-		setHost(combined, m.Decls)
 		combined.Decls = append(combined.Decls, m.Decls...)
 
 		if m.Entry != nil {
@@ -141,21 +140,5 @@ func mergeModules(mods []*ast.Module) {
 			}
 		}
 	}
-}
-
-func setHost(combined *ast.Module, decls []ast.Decl) {
-
-	for _, d := range decls {
-		d.SetHost(combined)
-
-		if td, ok := d.(*ast.TypeDecl); ok {
-			if cl, ok := td.Typ.(*ast.ClassType); ok {
-				for _, f := range cl.Fields {
-					f.SetHost(combined)
-				}
-			}
-		}
-
-	}
-
+	combined.SetDeclsHost()
 }

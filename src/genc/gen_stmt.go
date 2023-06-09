@@ -56,12 +56,12 @@ func (genc *genContext) genStatement(s ast.Statement) {
 	case *ast.SelectType:
 		genc.genSelectType(x)
 	case *ast.Return:
-		r := ""
 		if x.X != nil {
-			r = " " + genc.genExpr(x.X)
+			var cast = genc.assignCast(x.ReturnTyp, x.X.GetType())
+			genc.c("return %s%s;", cast, genc.genExpr(x.X))
+		} else {
+			genc.c("return;")
 		}
-		genc.c("return %s;", r)
-
 	case *ast.Break:
 		genc.c("break;")
 	case *ast.Crash:
@@ -73,6 +73,7 @@ func (genc *genContext) genStatement(s ast.Statement) {
 }
 
 func (genc *genContext) assignCast(lt, rt ast.Type) string {
+
 	if ast.UnderType(lt) != ast.UnderType(rt) {
 		return "(" + genc.typeRef(lt) + ")"
 	}
@@ -121,7 +122,11 @@ func (genc *genContext) genCycle(x *ast.Cycle) {
 		index = genc.localName("i")
 	}
 
-	//TODO: нельзя для вариадик
+	if ast.IsVariadicType(x.Expr.GetType()) {
+		// нельзя использовать временную переменную
+		panic("не реализовано для вариативных")
+	}
+
 	var loc = genc.localName("")
 	genc.c("%s %s = %s;", genc.typeRef(x.Expr.GetType()), loc, genc.genExpr(x.Expr))
 
@@ -178,7 +183,7 @@ func (genc *genContext) genCrash(x *ast.Crash) {
 		expr = genc.genExpr(x.X) + "->body"
 	}
 
-	genc.c("%s(%s,%s);", rt_crash, expr, genPos(x.Pos))
+	genc.c("%s((char *)%s,%s);", rt_crash, expr, genPos(x.Pos))
 }
 
 func genPos(pos int) string {

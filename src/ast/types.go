@@ -72,6 +72,7 @@ type FuncType struct {
 
 type Param struct {
 	DeclBase
+	Out bool // выходной параметр
 }
 
 func VariadicParam(ft *FuncType) *Param {
@@ -182,6 +183,8 @@ func ElementType(t Type) Type {
 		return x.ElementTyp
 	case *VariadicType:
 		return x.ElementTyp
+	case *InvalidType:
+		return Int64
 	default:
 		if t == String8 {
 			return Byte

@@ -95,7 +95,7 @@ func (p *Parser) parseFuncType() *ast.FuncType {
 	return ft
 }
 
-/* не используется
+/* пока не используется
 var skipToParam = tokens{
 	lexer.EOF: true,
 
@@ -114,7 +114,12 @@ func (p *Parser) parseParameters(ft *ast.FuncType) {
 
 		param.Name = p.parseIdent()
 
-		p.expect(lexer.COLON)
+		if p.tok == lexer.ASSIGN {
+			param.Out = true
+			p.next()
+		} else {
+			p.expect(lexer.COLON)
+		}
 
 		var variadic = p.tok == lexer.ELLIPSIS
 		var variadic_pos = p.pos

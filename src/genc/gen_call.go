@@ -32,32 +32,37 @@ func (genc *genContext) genArgs(call *ast.CallExpr) string {
 
 	var ft = call.X.GetType().(*ast.FuncType)
 
+	var cargs = make([]string, len(ft.Params))
+	var normLen = len(ft.Params)
+
 	var vPar = ast.VariadicParam(ft)
+	if vPar != nil {
+		normLen--
+	}
 
-	if vPar == nil {
-		var cargs = make([]string, len(call.Args))
-		for i, a := range call.Args {
-			cargs[i] = genc.genExpr(a)
+	// не вариативные параметры
+	for i := 0; i < normLen; i++ {
+		var p = ft.Params[i]
+		var arg = call.Args[i]
+		var expr = genc.genExpr(arg)
+		if p.Out {
+			cargs[i] = fmt.Sprintf("&(%s)", expr)
+		} else {
+			var cast = genc.assignCast(p.Typ, arg.GetType())
+			cargs[i] = fmt.Sprintf("%s%s", cast, expr)
 		}
-		return strings.Join(cargs, ", ")
-	} else {
-		var cargs = make([]string, len(ft.Params))
-		var normCount = len(ft.Params) - 1
+	}
 
-		for i := 0; i < normCount; i++ {
-			cargs[i] = genc.genExpr(call.Args[i])
-		}
-
+	if vPar != nil {
 		var vTyp = vPar.Typ.(*ast.VariadicType)
 
 		if ast.IsTagPairType(vTyp.ElementTyp) {
-			cargs[normCount] = genc.genVariadicTaggedArgs(call, vPar, normCount)
+			cargs[normLen] = genc.genVariadicTaggedArgs(call, vPar, normLen)
 		} else {
-			cargs[normCount] = genc.genVariadicArgs(call, vPar, vTyp, normCount)
+			cargs[normLen] = genc.genVariadicArgs(call, vPar, vTyp, normLen)
 		}
-
-		return strings.Join(cargs, ", ")
 	}
+	return strings.Join(cargs, ", ")
 }
 
 func getUnfold(call *ast.CallExpr) *ast.UnfoldExpr {
@@ -365,7 +370,8 @@ func (genc *genContext) genVectorAppend(call *ast.CallExpr) string {
 
 		var cargs = make([]string, len(call.Args))
 		for i, a := range call.Args {
-			cargs[i] = genc.genExpr(a)
+			var cast = genc.assignCast(vt.ElementTyp, a.GetType())
+			cargs[i] = fmt.Sprintf("%s%s", cast, genc.genExpr(a))
 		}
 
 		genc.c("%s %s[%d] = {%s};", et, loc, len(call.Args), strings.Join(cargs, ", "))

@@ -140,8 +140,8 @@ func (p *Parser) parseField() *ast.Field {
 
 	var n = &ast.Field{
 		DeclBase: ast.DeclBase{
-			Pos:  p.pos,
-			Host: p.module,
+			Pos: p.pos,
+			//Host: p.module,
 		},
 	}
 

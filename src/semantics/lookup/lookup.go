@@ -163,22 +163,28 @@ func (lc *lookContext) lookConstDecl(v *ast.ConstDecl) {
 
 func (lc *lookContext) lookFunction(f *ast.Function) {
 
-	f.Inner = ast.NewScope(lc.scope)
-	lc.scope = f.Inner
+	var hasBody = !f.External
+
+	if hasBody {
+		f.Seq.Inner = ast.NewScope(lc.scope)
+		lc.scope = f.Seq.Inner
+	}
 
 	if f.Recv != nil {
 		lc.lookTypeRef(f.Recv.Typ)
 
 		lc.addMethodToType(f)
 
-		lc.addVarForParameter(f.Recv)
+		if hasBody {
+			lc.addVarForParameter(f.Recv)
+		}
 	}
 
 	var ft = f.Typ.(*ast.FuncType)
 
 	for _, p := range ft.Params {
 		lc.lookTypeRef(p.Typ)
-		if !f.External {
+		if hasBody {
 			lc.addVarForParameter(p)
 		}
 	}
@@ -187,11 +193,9 @@ func (lc *lookContext) lookFunction(f *ast.Function) {
 		lc.lookTypeRef(ft.ReturnTyp)
 	}
 
-	if !f.External {
+	if hasBody {
 		lc.lookStatements(f.Seq)
 	}
-
-	lc.scope = lc.scope.Outer
 }
 
 func (lc *lookContext) addMethodToType(f *ast.Function) {
@@ -212,6 +216,7 @@ func (lc *lookContext) addVarForParameter(p *ast.Param) {
 	var v = &ast.VarDecl{}
 	v.Typ = p.Typ
 	v.Name = p.Name
+	v.OutParam = p.Out
 	addToScope(v.Name, v, lc.scope)
 }
 

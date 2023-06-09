@@ -54,7 +54,6 @@ type InvalidDecl struct {
 type Function struct {
 	DeclBase
 	Recv     *Param
-	Inner    *Scope
 	Seq      *StatementSeq
 	External bool
 	Mod      *Modifier
@@ -65,6 +64,7 @@ type VarDecl struct {
 	Init       Expr
 	Later      bool
 	AssignOnce bool
+	OutParam   bool // если это выходной параметр
 }
 
 type ConstDecl struct {
