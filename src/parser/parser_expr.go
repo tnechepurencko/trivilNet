@@ -90,6 +90,7 @@ func (p *Parser) parseUnaryExpression() ast.Expr {
 			X:        x,
 		}
 	case lexer.ADD:
+		p.next()
 		return p.parseUnaryExpression()
 	}
 
