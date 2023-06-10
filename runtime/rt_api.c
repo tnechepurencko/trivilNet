@@ -689,7 +689,7 @@ enum Tags {
     tag_string,
     tag_tag,
     
-    tag_class,
+    tag_class, // не используется - поставить в мете?
     max_tag = 31
 };
 
@@ -745,6 +745,10 @@ EXPORTED TString tri_className(TWord64 tag) {
     return m->name;
 }
 
+EXPORTED TWord64 tri_tagObject(TWord64 o) {
+        _BaseObject* obj = (void*) o;
+        return (TWord64) obj->vtable;
+}
 
 //==== console
 

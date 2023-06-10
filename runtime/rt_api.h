@@ -123,6 +123,9 @@ EXPORTED TWord64 tri_tagTBool();
 EXPORTED TWord64 tri_tagTSymbol();
 EXPORTED TWord64 tri_tagTString();
 
+// Тег объекта класса (динамический тип)
+EXPORTED TWord64 tri_tagObject(TWord64 obj);
+
 EXPORTED TBool tri_isClassTag(TWord64 tag);
 EXPORTED TString tri_className(TWord64 tag);
 
