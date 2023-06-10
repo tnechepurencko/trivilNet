@@ -255,13 +255,16 @@ func (genc *genContext) genStdTag(call *ast.CallExpr) string {
 }
 
 // Выдает тег по статическому типу
-func (genc *genContext) genTypeTag(t ast.Type) string {
-	t = ast.UnderType(t)
+func (genc *genContext) genTypeTag(typ ast.Type) string {
+	var t = ast.UnderType(typ)
 	switch x := t.(type) {
 	case *ast.PredefinedType:
 		return fmt.Sprintf("%s%s()", rt_tag, predefinedTypeName(x.Name))
 	case *ast.ClassType:
-		panic("ni")
+		var tr = ast.DirectTypeRef(typ)
+		return fmt.Sprintf("((%s)%s).w",
+			rt_cast_union,
+			genc.declName(tr.TypeDecl)+nm_class_info_ptr_suffix)
 	case *ast.VectorType:
 		panic("ni")
 	case *ast.MayBeType:

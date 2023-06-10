@@ -156,7 +156,7 @@ func (genc *genContext) genClassDesc(td *ast.TypeDecl, cl *ast.ClassType) {
 
 	genc.genVTable(col.vtable, tname, meta_type, vt_type)
 	genc.genObjectInit(cl, tname)
-	genc.genClassInit(cl, col.vtable, tname, tname_st, meta_type, vt_type)
+	genc.genClassInit(cl, td.Name, col.vtable, tname, tname_st, meta_type, vt_type)
 }
 
 func (genc *genContext) genMeta(cl *ast.ClassType, meta_type string) {
@@ -164,6 +164,7 @@ func (genc *genContext) genMeta(cl *ast.ClassType, meta_type string) {
 	genc.c("typedef struct %s {", meta_type)
 	genc.c("size_t object_size;")
 	genc.c("void* base;")
+	genc.c("%s name;", predefinedTypeName(ast.String.Name))
 
 	genc.c("} %s;", meta_type)
 }
@@ -222,7 +223,10 @@ func (genc *genContext) genMethodField(f *ast.Function, tname string) string {
 		strings.Join(ps, ", "))
 }
 
-func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, tname, tname_st, meta_type, vt_type string) {
+func (genc *genContext) genClassInit(x *ast.ClassType,
+	className string,
+	vtable []*ast.Function,
+	tname, tname_st, meta_type, vt_type string) {
 
 	var desc_var = tname + nm_class_info_suffix
 	genc.c("struct { %s vt; %s meta; } %s;", vt_type, meta_type, desc_var)
@@ -250,6 +254,10 @@ func (genc *genContext) genClassInit(x *ast.ClassType, vtable []*ast.Function, t
 	}
 	genc.c("%s.meta.object_size = sizeof(struct %s);", desc_var, tname)
 	genc.c("%s.meta.base = %s;", desc_var, base)
+
+	var str = fmt.Sprintf("%s(%d, %d, \"%s\")", rt_newString, len(className), -1, className)
+
+	genc.c("%s.meta.name = %s;", desc_var, str)
 
 	//--
 	genc.c("%s = &%s;", tname+nm_class_info_ptr_suffix, desc_var)

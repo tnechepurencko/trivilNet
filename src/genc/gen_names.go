@@ -42,7 +42,8 @@ const (
 
 	rt_init = rt_prefix + "init"
 
-	rt_newLiteralString = rt_prefix + "newLiteralString"
+	rt_newLiteralString = rt_prefix + "newLiteralString" // сохраняет в переменную
+	rt_newString        = rt_prefix + "newString"
 	rt_lenString        = rt_prefix + "lenString"
 	rt_emptyString      = rt_prefix + "emptyString"
 	rt_equalStrings     = rt_prefix + "equalStrings"

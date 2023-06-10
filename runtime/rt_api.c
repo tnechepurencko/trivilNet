@@ -689,13 +689,16 @@ enum Tags {
     tag_string,
     tag_tag,
     
-    tag_class
+    tag_class,
+    max_tag = 31
 };
 
 #define size_shift 8
 #define tag_id_shift 3
 
+#define tag_flag_mask 7 // 3 признака максимум
 #define flag_lang 1
+#define flag_vector 2
 
 EXPORTED TWord64 tri_tagTByte() {
     return 1 << size_shift | tag_unsigned << tag_id_shift | flag_lang;
@@ -724,6 +727,24 @@ EXPORTED TWord64 tri_tagTSymbol() {
 EXPORTED TWord64 tri_tagTString() {
     return 8 << size_shift | tag_string << tag_id_shift | flag_lang;
 }
+
+EXPORTED TBool tri_isClassTag(TWord64 tag) {
+    return (tag & tag_flag_mask) == 0;
+}
+
+EXPORTED TString tri_className(TWord64 tag) {
+    if ((tag & tag_flag_mask) != 0) tri_crash("тег не является тегом класса", "");
+    
+	_BaseVT* vt = (void*) tag;
+	size_t vt_sz = vt->self_size;
+
+	_BaseMeta* m = (void*) tag + vt_sz;
+
+    if (m->name == NULL) tri_crash("не задано имя класса", "");
+    
+    return m->name;
+}
+
 
 //==== console
 
