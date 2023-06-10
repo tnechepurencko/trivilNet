@@ -6,9 +6,9 @@
 
 
 //== ссылка на тип
-/*
-фн (им: Имена) lookTypeRef(t ast.Type) {
 
+фн (им: Имена) указание-типа(Т: асд.Тип) {
+/*
 	если maybe, ok := t.(асд.MayBeType); ok {
 		им.указание-типа(maybe.Typ)
 
@@ -50,8 +50,10 @@
 	}
 
 	//fmt.Printf("~ %v %T\n", tr.TypeDecl, tr.Typ)
+*/    
 }
 
+/*
 фн (им: Имена) lookTypeDeclInScopes(name Строка, pos int) асд.ТипDecl {
 
 	пусть d = findInScopes(lc.scope, name, pos)
@@ -121,11 +123,11 @@
 	}
 	вернуть td
 }
-
+*/
 //== типы
 
-фн (им: Имена) lookTypeDecl(v асд.ТипDecl) {
-
+фн (им: Имена) описание-типа(оп: асд.ОписаниеТипа) {
+/*
 	выбор x := v.Typ.(тип) {
 	когда асд.VectorType:
 		им.указание-типа(x.ElementTyp)
@@ -156,12 +158,14 @@
 	другое
 		panic(fmt.Sprintf("lookTypeDecl: ni %T", v.Typ))
 	}
+ */
 }
 
+/*
 фн (им: Имена) checkRecursion(t ast.Type) {
 	tr, ok := t.(асд.ТипRef)
 	если ok {
-		tr = ast.DirectTypeRef(tr)
+		tr = ast.DirectУказТипа(tr)
 		пусть td = tr.TypeDecl
 		если td.GetHost() = lc.module {
 			им.описание(td)
