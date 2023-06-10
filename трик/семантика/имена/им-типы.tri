@@ -1,23 +1,25 @@
 модуль имена
 
 импорт "стд::вывод"
+
 импорт "трик/асд"
-//импорт "трик/основа"
+импорт "трик/основа"
 
 
 //== ссылка на тип
 
-фн (им: Имена) указание-типа(Т: асд.Тип) {
-/*
-	если maybe, ok := t.(асд.MayBeType); ok {
-		им.указание-типа(maybe.Typ)
+фн (им: Имена) указание-типа(т: асд.Тип) {
 
-		если ~ast.IsReferenceType(maybe.Typ) {
-			env.AddError(maybe.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(maybe.Typ))
+    если т типа асд.ТипМБ {
+        пусть т-мб = т(:асд.ТипМБ)
+		им.указание-типа(т-мб .Т)
+
+		если ~ асд.ссылочный тип?(т-мб.Т) {
+			основа.добавить ошибку(т-мб.поз, "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", асд.изображение имени-типа(т-мб.Т))
 		}
 		вернуть
 	}
-
+/*
 	пусть tr, ok = t.(асд.ТипRef)
 	если ~ok {
 		если t = nil {
@@ -59,7 +61,7 @@
 	пусть d = findInScopes(lc.scope, name, pos)
 
 	если d = nil {
-		env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО", name)
+		основа.добавить ошибку(pos, "СЕМ-НЕ-НАЙДЕНО", name)
 		пусть td = lc.makeTypeDecl(name, pos)
 		добавить в область(name, td, lc.scope)
 		вернуть td
@@ -67,7 +69,7 @@
 
 	td, ok := d.(асд.ТипDecl)
 	если ~ok {
-		env.AddError(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-ТИП", name)
+		основа.добавить ошибку(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-ТИП", name)
 		вернуть lc.makeTypeDecl(name, pos)
 	}
 
@@ -78,13 +80,13 @@
 	пусть d = findInScopes(lc.scope, moduleName, pos)
 
 	если d = nil {
-		env.AddError(pos, "СЕМ-НЕ-НАЙДЕН-МОДУЛЬ", moduleName)
+		основа.добавить ошибку(pos, "СЕМ-НЕ-НАЙДЕН-МОДУЛЬ", moduleName)
 		вернуть lc.makeTypeDecl(name, pos)
 	}
 
 	m, ok := d.(асд.Модуль)
 	если ~ok {
-		env.AddError(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-МОДУЛЬ", moduleName)
+		основа.добавить ошибку(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-МОДУЛЬ", moduleName)
 		вернуть lc.makeTypeDecl(name, pos)
 	}
 
@@ -92,7 +94,7 @@
 
 	d, ok = m.Inner.Names[name]
 	если ~ok {
-		env.AddError(pos, "СЕМ-НЕ-НАЙДЕНО-В-МОДУЛЕ", m.Name, name)
+		основа.добавить ошибку(pos, "СЕМ-НЕ-НАЙДЕНО-В-МОДУЛЕ", m.Name, name)
 		пусть td = lc.makeTypeDecl(name, pos)
 		добавить в область(name, td, lc.scope)
 		вернуть td
@@ -100,12 +102,12 @@
 
 	td, ok := d.(асд.ТипDecl)
 	если ~ok {
-		env.AddError(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-ТИП", name)
+		основа.добавить ошибку(pos, "СЕМ-ДОЛЖЕН-БЫТЬ-ТИП", name)
 		вернуть lc.makeTypeDecl(name, pos)
 	}
 
 	если ~d.IsExported() {
-		env.AddError(pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", name, m.Name)
+		основа.добавить ошибку(pos, "СЕМ-НЕ-ЭКСПОРТИРОВАН", name, m.Name)
 	}
 
 	вернуть td
@@ -152,7 +154,7 @@
 		им.указание-типа(x.Typ)
 
 		если ~ast.IsReferenceType(ast.UnderType(x.Typ)) {
-			env.AddError(x.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(x.Typ))
+			основа.добавить ошибку(x.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(x.Typ))
 		}
 	когда асд.InvalidType:
 	другое
