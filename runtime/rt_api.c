@@ -16,17 +16,30 @@ typedef struct VectorDesc {
 
 //==== crash
 
+static TBool printReturnAddr = false;
+static int printStackDepth = 20;
+
+EXPORTED void  printStack(TBool printReturnAddr, int maxFuncs);
+
  _Noreturn void panic() {
     exit(1);
 }
 
  _Noreturn void runtime_crash(char* s) {
 	printf("!crash: %s\n", s);
+    printStack(printReturnAddr, printStackDepth);
     panic();
 }
 
  _Noreturn void runtime_crash_pos(char* position, char* s) {
 	printf("!crash at %s: %s\n", position, s);
+    printStack(printReturnAddr, printStackDepth);
+    panic();
+}
+
+EXPORTED  _Noreturn void tri_crash(char* msg, char* pos) {
+	printf("авария '%s' (%s)\n", msg, pos);
+    printStack(printReturnAddr, printStackDepth);
     panic();
 }
 
@@ -788,13 +801,6 @@ EXPORTED void print_bool(TBool b) {
 
 EXPORTED void println() {
   printf("\n");
-}
-
-//==== crash
-
-EXPORTED  _Noreturn void tri_crash(char* msg, char* pos) {
-	printf("авария '%s' (%s)\n", msg, pos);
-    panic();
 }
 
 //==== аргументы
