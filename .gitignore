@@ -1,4 +1,6 @@
 *.exe
+*.ilk
+*.pdb
 *.bak
 *.dll
 *.exp
@@ -9,3 +11,4 @@ _genc/*
 x.*
 *.tri!
 _totri.cfg
+
