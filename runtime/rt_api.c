@@ -511,7 +511,10 @@ EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 }
 
 EXPORTED TBool tri_isClassType(void* object, void* target_desc) {
-    	_BaseVT* current_vt = ((_BaseObject*)object)->vtable;
+    
+    if (object == NULL) return false;
+    
+    _BaseVT* current_vt = ((_BaseObject*)object)->vtable;
 	
 	if (current_vt == target_desc) {
 //printf("found self\n");
