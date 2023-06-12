@@ -214,6 +214,7 @@ func (lc *lookContext) addMethodToType(f *ast.Function) {
 
 func (lc *lookContext) addVarForParameter(p *ast.Param) {
 	var v = &ast.VarDecl{}
+	v.Pos = p.Pos
 	v.Typ = p.Typ
 	v.Name = p.Name
 	v.OutParam = p.Out
