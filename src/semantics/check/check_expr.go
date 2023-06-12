@@ -288,7 +288,8 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 
 	case lexer.EQ, lexer.NEQ:
 		var t = ast.UnderType(x.X.GetType())
-		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 || t == ast.Symbol || t == ast.String {
+		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 ||
+			t == ast.Symbol || t == ast.String || t == ast.Bool {
 			checkOperandTypes(x)
 		} else if ast.IsClassType(t) {
 			checkClassOperands(x)
