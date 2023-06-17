@@ -28,10 +28,10 @@
 	}
 	пусть names = make([]Строка, длина(modules))
 	пока i, m := range modules {
-		names[i] = env.OutName(m.Name) + ".c"
+		names[i] = env.OutName(m.имя) + ".c"
 	}
 
-	пусть target = env.OutName(modules[len(modules)-1].Name)
+	пусть target = env.OutName(modules[len(modules)-1].имя)
 
 	command = Строкаs.ReplaceAll(command, place_files, Строкаs.Join(names, " "))
 	command = Строкаs.ReplaceAll(command, place_runtime, env.RuntimePath())

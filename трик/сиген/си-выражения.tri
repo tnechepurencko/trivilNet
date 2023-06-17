@@ -256,8 +256,8 @@
 	вернуть строки.ф("($;)->$;.$;$;",
 		си.выражение(x.X),
 		nm_class_fields,
-		pathToField(cl, x.Name),
-		си.outName(x.Name))
+		pathToField(cl, x.имя),
+		си.outName(x.имя))
 }
 
 фн pathToField(cl асд.ТипКласс, name Строка) Строка {
@@ -338,7 +338,7 @@
 	если асд.полиморфный тип?(vt.ElementTyp) {
 		/ *
 			вернуть строки.ф("(($;*)($; + sizeof(TInt64)))[$;($;, *(TInt64 *)$;) << 1]",
-				predefinedTypeName(асд.ТЦел64().Name),
+				predefinedTypeName(асд.ТЦел64().имя),
 				vPar,
 				rt_indexcheck,
 				си.выражение(inx),
@@ -370,7 +370,7 @@
 	если длина(x.Indexes) > 0 & x.LenExpr # пусто {
 		// c.Length = maxIndex + 1
 		пусть lenName = си.localName("len")
-		си.к("$; $; = $;;", predefinedTypeName(асд.ТЦел64().Name), lenName, lenExpr)
+		си.к("$; $; = $;;", predefinedTypeName(асд.ТЦел64().имя), lenName, lenExpr)
 		lenExpr = lenName
 
 		си.к("$;(%d, $;, $;);", rt_indexcheck, x.MaxIndex, lenName, genPos(x.поз))
@@ -465,7 +465,7 @@
 	пока i, v := range x.Values {
 		пусть cast = си.конверсия при присваивании(v.Field.Typ, v.Value.GetType())
 		list[i] = строки.ф("$;->$;.$;$; = $;$;;",
-			name, nm_class_fields, pathToField(cl, v.Name), си.outName(v.Name),
+			name, nm_class_fields, pathToField(cl, v.имя), си.outName(v.имя),
 			cast, си.выражение(v.Value))
 	}
 	s += Строкаs.Join(list, " ")

@@ -57,11 +57,11 @@
 }
 
 фн (си: СиГен) convertPredefined(expr Строка, from, to асд.PredefinedType) Строка {
-	вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(from.Name), predefinedTypeName(to.Name), expr)
+	вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(from.имя), predefinedTypeName(to.имя), expr)
 }
 
 фн (си: СиГен) castPredefined(expr Строка, to асд.PredefinedType) Строка {
-	вернуть строки.ф("($;)($;)", predefinedTypeName(to.Name), expr)
+	вернуть строки.ф("($;)($;)", predefinedTypeName(to.имя), expr)
 }
 
 фн (си: СиГен) convertToString(expr Строка, from асд.Тип) Строка {
@@ -79,9 +79,9 @@
 
 	пусть et = асд.основа(vt.ElementTyp)
 	если et = асд.ТБайт() {
-		вернуть строки.ф("$;$;_to_$;($;)", rt_convert, "Bytes", predefinedTypeName(асд.ТСтрока().Name), expr)
+		вернуть строки.ф("$;$;_to_$;($;)", rt_convert, "Bytes", predefinedTypeName(асд.ТСтрока().имя), expr)
 	} иначе если et = асд.ТСимвол() {
-		вернуть строки.ф("$;$;_to_$;($;)", rt_convert, "Symbols", predefinedTypeName(асд.ТСтрока().Name), expr)
+		вернуть строки.ф("$;$;_to_$;($;)", rt_convert, "Symbols", predefinedTypeName(асд.ТСтрока().имя), expr)
 	} иначе {
 		panic("ni")
 	}
@@ -94,14 +94,14 @@
 
 		пусть et = асд.основа(to.ElementTyp)
 		если et = асд.ТБайт() {
-			вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(асд.ТСтрока().Name), "Bytes", expr)
+			вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(асд.ТСтрока().имя), "Bytes", expr)
 		} иначе если et = асд.ТСимвол() {
-			вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(асд.ТСтрока().Name), "Symbols", expr)
+			вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(асд.ТСтрока().имя), "Symbols", expr)
 		} иначе {
 			panic("ni")
 		}
 	} иначе если from = асд.ТСимвол() {
-		вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(асд.ТСимвол().Name), "Bytes", expr)
+		вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(асд.ТСимвол().имя), "Bytes", expr)
 	} иначе {
 		panic("ni")
 	}
@@ -148,7 +148,7 @@
 	когда from = асд.ТСлово64(), from = асд.ТБайт(), from = асд.ТСимвол(), from = асд.ТЛог():
 		вернуть expr
 	когда from = асд.ТЦел64():
-		вернуть строки.ф("(($;)($;)$;).w", rt_cast_union, predefinedTypeName(асд.ТЦел64().Name), expr)
+		вернуть строки.ф("(($;)($;)$;).w", rt_cast_union, predefinedTypeName(асд.ТЦел64().имя), expr)
 	когда асд.ссылочный тип?(from):
 		вернуть строки.ф("(($;)(void*)$;).w", rt_cast_union, expr)
 	другое

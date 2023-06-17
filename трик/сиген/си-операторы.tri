@@ -129,7 +129,7 @@
 	си.к("$; $; = $;;", си.указание-типа(x.Expr.GetType()), loc, си.выражение(x.Expr))
 
 	си.к("пока ($; $; = 0;$; < $;;$;++) {",
-		predefinedTypeName(асд.ТЦел64().Name),
+		predefinedTypeName(асд.ТЦел64().имя),
 		index,
 		index,
 		си.genLen(loc, x.Expr.GetType()),

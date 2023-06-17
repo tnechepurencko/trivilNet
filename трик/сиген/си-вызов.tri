@@ -137,7 +137,7 @@
 	когда асд.ТСлово64():
 		вернуть s
 	другое
-		вернуть строки.ф("($;)$;", predefinedTypeName(асд.ТСлово64().Name), s)
+		вернуть строки.ф("($;)$;", predefinedTypeName(асд.ТСлово64().имя), s)
 	}
 }
 
@@ -179,12 +179,12 @@
 		args += ", " + си.аргументы(call)
 	}
 
-	вернуть строки.ф("$;->$;->$;($;)", name, nm_VT_field, си.outName(f.Name), args)
+	вернуть строки.ф("$;->$;->$;($;)", name, nm_VT_field, си.outName(f.имя), args)
 }
 
 фн (си: СиГен) стандартная функция(call асд.Вызов) Строка {
 
-	выбор call.StdFunc.Name {
+	выбор call.StdFunc.имя {
 	когда ast.StdLen:
 		вернуть си.genStdLen(call)
 	когда ast.StdTag:
@@ -196,7 +196,7 @@
 		вернуть си.genVectorAppend(call)
 
 	другое
-		panic("assert: не реализована стандартная функция " + call.StdFunc.Name)
+		panic("assert: не реализована стандартная функция " + call.StdFunc.имя)
 	}
 }
 
@@ -256,7 +256,7 @@
 	пусть t = асд.основа(typ)
 	выбор x := t.(type) {
 	когда асд.PredefinedType:
-		вернуть строки.ф("$;$;()", rt_tag, predefinedTypeName(x.Name))
+		вернуть строки.ф("$;$;()", rt_tag, predefinedTypeName(x.имя))
 	когда асд.ТипКласс:
 		пусть tr = ast.DirectTypeRef(typ)
 		вернуть строки.ф("(($;)$;).w",
@@ -282,7 +282,7 @@
 		пусть left = си.выражение(x.X)
 
 		вернуть строки.ф("(($;*)($;))[$;($;, $;$;, $;) << 1]",
-			predefinedTypeName(асд.ТСлово64().Name),
+			predefinedTypeName(асд.ТСлово64().имя),
 			left,
 			rt_indexcheck,
 			си.выражение(x.Index),
@@ -314,7 +314,7 @@
 		пусть left = си.выражение(x.X)
 
 		вернуть строки.ф("(($;*)($;))[($;($;, $;$;, $;) << 1)+1]",
-			predefinedTypeName(асд.ТСлово64().Name),
+			predefinedTypeName(асд.ТСлово64().имя),
 			left,
 			rt_indexcheck,
 			си.выражение(x.Index),

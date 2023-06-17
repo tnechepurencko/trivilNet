@@ -10,7 +10,7 @@
 фн (си: СиГен) указание-типа(t асд.Тип) Строка {
 	выбор x := t.(type) {
 	когда асд.PredefinedType:
-		вернуть predefinedTypeName(x.Name)
+		вернуть predefinedTypeName(x.имя)
 	когда асд.УказТипа:
 		//fmt.Printf("~TR1 %v %T\n", x.TypeName, x.Typ)
 		// Пропускаю тип ref до последнего
@@ -22,7 +22,7 @@
 		когда асд.ТипМБ:
 			вернуть си.указание-типа(y.Typ)
 		когда асд.PredefinedType:
-			вернуть predefinedTypeName(y.Name)
+			вернуть predefinedTypeName(y.имя)
 		другое
 			если си.genTypes {
 				вернуть си.покаwardTypeName(tr.TypeDecl)
@@ -122,7 +122,7 @@
 	пока i, f := range x.Fields {
 		fields[i] = строки.ф("$; $;;",
 			си.указание-типа(f.Typ),
-			си.outName(f.Name)) // без префикса модуля
+			си.outName(f.имя)) // без префикса модуля
 	}
 
 	си.з("= класс $; {", tname_fields)
@@ -155,7 +155,7 @@
 
 	си.genVTable(col.vtable, tname, meta_type, vt_type)
 	си.genObjectInit(cl, tname)
-	си.genClassInit(cl, td.Name, col.vtable, tname, tname_fields, meta_type, vt_type)
+	си.genClassInit(cl, td.имя, col.vtable, tname, tname_fields, meta_type, vt_type)
 }
 
 фн (си: СиГен) genMeta(cl асд.ТипКласс, meta_тип Строка) {
@@ -163,7 +163,7 @@
 	си.к("= класс $; {", meta_type)
 	си.к("size_t object_size;")
 	си.к("void* base;")
-	си.к("$; name;", predefinedTypeName(асд.ТСтрока().Name))
+	си.к("$; name;", predefinedTypeName(асд.ТСтрока().имя))
 	си.к("};")
 }
 
@@ -193,7 +193,7 @@
 
 	пока _, f := range cl.Fields {
 		если ~f.задать-позже {
-			си.к("o->$;.$; = $;;", nm_class_fields, си.outName(f.Name), си.выражение(f.Init))
+			си.к("o->$;.$; = $;;", nm_class_fields, си.outName(f.имя), си.выражение(f.Init))
 		}
 	}
 
@@ -217,7 +217,7 @@
 
 	вернуть строки.ф("$; (*$;)($;);",
 		си.вернутьType(ft),
-		си.outName(f.Name), // только имя, без префикса модуля
+		си.outName(f.имя), // только имя, без префикса модуля
 		Строкаs.Join(ps, ", "))
 }
 
@@ -242,7 +242,7 @@
 	си.к("$;.vt.$; = &$;$;;", desc_var, nm_object_init_suffux, tname, nm_object_init_suffux)
 
 	пока _, f := range vtable {
-		си.к("$;.vt.$; = &$;;", desc_var, си.outName(f.Name), си.фнtionName(f))
+		си.к("$;.vt.$; = &$;;", desc_var, си.outName(f.имя), си.фнtionName(f))
 	}
 
 	//-- Meta
@@ -290,18 +290,18 @@
 
 	пока _, m := range sub.Methods {
 
-		d, ok := col.cl.Members[m.Name]
+		d, ok := col.cl.Members[m.имя]
 		если ~ok {
 			panic("assert")
 		}
 
 		f := d.(асд.Функция)
 
-		_, ok = col.done[f.Name]
+		_, ok = col.done[f.имя]
 		если ~ok {
 			col.vtable = append(col.vtable, d.(асд.Функция))
-			col.done[f.Name] = struct{}{}
-			//fmt.Printf("~ add $;\n", f.Name)
+			col.done[f.имя] = struct{}{}
+			//fmt.Printf("~ add $;\n", f.имя)
 		}
 	}
 
