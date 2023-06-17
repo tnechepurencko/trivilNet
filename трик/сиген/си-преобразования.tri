@@ -52,16 +52,16 @@
 	когда асд.ТипКласс:
 		вернуть си.convertToClass(expr, x.TargetTyp)
 	другое
-		panic(строки.ф("ni %T '%s'", to, асд.ТипString(to)))
+		panic(строки.ф("ni %T '$;'", to, асд.ТипString(to)))
 	}
 }
 
 фн (си: СиГен) convertPredefined(expr Строка, from, to асд.PredefinedType) Строка {
-	вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(from.Name), predefinedTypeName(to.Name), expr)
+	вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(from.Name), predefinedTypeName(to.Name), expr)
 }
 
 фн (си: СиГен) castPredefined(expr Строка, to асд.PredefinedType) Строка {
-	вернуть строки.ф("(%s)(%s)", predefinedTypeName(to.Name), expr)
+	вернуть строки.ф("($;)($;)", predefinedTypeName(to.Name), expr)
 }
 
 фн (си: СиГен) convertToString(expr Строка, from асд.Тип) Строка {
@@ -79,9 +79,9 @@
 
 	пусть et = асд.основа(vt.ElementTyp)
 	если et = асд.ТБайт() {
-		вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, "Bytes", predefinedTypeName(асд.ТСтрока().Name), expr)
+		вернуть строки.ф("$;$;_to_$;($;)", rt_convert, "Bytes", predefinedTypeName(асд.ТСтрока().Name), expr)
 	} иначе если et = асд.ТСимвол() {
-		вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, "Symbols", predefinedTypeName(асд.ТСтрока().Name), expr)
+		вернуть строки.ф("$;$;_to_$;($;)", rt_convert, "Symbols", predefinedTypeName(асд.ТСтрока().Name), expr)
 	} иначе {
 		panic("ni")
 	}
@@ -94,14 +94,14 @@
 
 		пусть et = асд.основа(to.ElementTyp)
 		если et = асд.ТБайт() {
-			вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(асд.ТСтрока().Name), "Bytes", expr)
+			вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(асд.ТСтрока().Name), "Bytes", expr)
 		} иначе если et = асд.ТСимвол() {
-			вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(асд.ТСтрока().Name), "Symbols", expr)
+			вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(асд.ТСтрока().Name), "Symbols", expr)
 		} иначе {
 			panic("ni")
 		}
 	} иначе если from = асд.ТСимвол() {
-		вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(асд.ТСимвол().Name), "Bytes", expr)
+		вернуть строки.ф("$;$;_to_$;($;)", rt_convert, predefinedTypeName(асд.ТСимвол().Name), "Bytes", expr)
 	} иначе {
 		panic("ni")
 	}
@@ -110,7 +110,7 @@
 фн (си: СиГен) convertToClass(expr Строка, target асд.Тип) Строка {
 	пусть tname = си.указание-типа(target)
 
-	вернуть строки.ф("((%s)%s(%s, %s))", tname, rt_checkClassType, expr, tname+nm_class_info_ptr_suffix)
+	вернуть строки.ф("(($;)$;($;, $;))", tname, rt_checkClassType, expr, tname+nm_class_info_ptr_suffix)
 }
 
 фн (си: СиГен) осторожное преобразование(x асд.Преобразовать) Строка {
@@ -125,17 +125,17 @@
 
 	выбор to {
 	когда асд.ТЦел64():
-		вернуть строки.ф("((%s)%s).i", rt_cast_union, expr)
+		вернуть строки.ф("(($;)$;).i", rt_cast_union, expr)
 	когда асд.ТВещ64():
-		вернуть строки.ф("((%s)%s).f", rt_cast_union, expr)
+		вернуть строки.ф("(($;)$;).f", rt_cast_union, expr)
 	когда асд.ТСлово64():
 		вернуть си.genCastToWord64(expr, from)
 	другое
 		если from = асд.ТСлово64() & асд.ссылочный тип?(to) {
 			//TODO: проверить указатель и тег
-			вернуть строки.ф("(%s)((%s)%s).a", си.указание-типа(x.TargetTyp), rt_cast_union, expr)
+			вернуть строки.ф("($;)(($;)$;).a", си.указание-типа(x.TargetTyp), rt_cast_union, expr)
 		} иначе {
-			panic(строки.ф("ni %T '%s'", to, асд.ТипString(to)))
+			panic(строки.ф("ni %T '$;'", to, асд.ТипString(to)))
 		}
 	}
 }
@@ -148,11 +148,11 @@
 	когда from = асд.ТСлово64(), from = асд.ТБайт(), from = асд.ТСимвол(), from = асд.ТЛог():
 		вернуть expr
 	когда from = асд.ТЦел64():
-		вернуть строки.ф("((%s)(%s)%s).w", rt_cast_union, predefinedTypeName(асд.ТЦел64().Name), expr)
+		вернуть строки.ф("(($;)($;)$;).w", rt_cast_union, predefinedTypeName(асд.ТЦел64().Name), expr)
 	когда асд.ссылочный тип?(from):
-		вернуть строки.ф("((%s)(void*)%s).w", rt_cast_union, expr)
+		вернуть строки.ф("(($;)(void*)$;).w", rt_cast_union, expr)
 	другое
-		вернуть строки.ф("((%s)%s).w", rt_cast_union, expr)
+		вернуть строки.ф("(($;)$;).w", rt_cast_union, expr)
 	}
 }
 */

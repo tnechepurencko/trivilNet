@@ -41,7 +41,7 @@
 	пусть name = си.имя описания(td)
 
 	если td.GetHost() = си.мод & асд.тип-класса?(td.Typ) {
-		вернуть строки.ф("= класс %s*", name)
+		вернуть строки.ф("= класс $;*", name)
 	}
 	вернуть name
 }
@@ -84,7 +84,7 @@
 	когда "Строка8":
 		вернуть "TString"
 	другое
-		panic(строки.ф("predefinedTypeName: ni %s", name))
+		panic(строки.ф("predefinedTypeName: ni $;", name))
 	}
 }
 
@@ -94,9 +94,9 @@
 		пусть tname = си.имя описания(td)
 		пусть et = си.указание-типа(x.ElementTyp)
 		//TODO meta
-		си.з("typedef = класс %s {", tname)
-		си.з("TInt64 len; TInt64 capacity; %s* body;", et)
-		си.з("} *%s;", tname)
+		си.з("typedef = класс $; {", tname)
+		си.з("TInt64 len; TInt64 capacity; $;* body;", et)
+		си.з("} *$;;", tname)
 	когда асд.ТипКласс:
 		си.genClassType(td, x)
 	когда асд.УказТипа:
@@ -120,21 +120,21 @@
 
 	пусть fields = make([]Строка, длина(x.Fields))
 	пока i, f := range x.Fields {
-		fields[i] = строки.ф("%s %s;",
+		fields[i] = строки.ф("$; $;;",
 			си.указание-типа(f.Typ),
 			си.outName(f.Name)) // без префикса модуля
 	}
 
-	си.з("= класс %s {", tname_fields)
+	си.з("= класс $; {", tname_fields)
 	если x.BaseTyp # пусто {
-		си.з("= класс %s%s %s;", си.baseTypeName(x.BaseTyp), nm_class_fields_suffix, nm_base_fields)
+		си.з("= класс $;$; $;;", си.baseTypeName(x.BaseTyp), nm_class_fields_suffix, nm_base_fields)
 	}
 	си.строки-заголовка = append(си.строки-заголовка, fields...)
 	си.з("};")
 
-	си.з("= класс %s;", vt_type)
+	си.з("= класс $;;", vt_type)
 
-	си.з("typedef = класс %s { = класс %s* %s; = класс %s %s;} *%s;",
+	си.з("typedef = класс $; { = класс $;* $;; = класс $; $;;} *$;;",
 		tname, vt_type, nm_VT_field, tname_fields, nm_class_fields, tname)
 
 	си.з("")
@@ -160,32 +160,32 @@
 
 фн (си: СиГен) genMeta(cl асд.ТипКласс, meta_тип Строка) {
 
-	си.к("= класс %s {", meta_type)
+	си.к("= класс $; {", meta_type)
 	си.к("size_t object_size;")
 	си.к("void* base;")
-	си.к("%s name;", predefinedTypeName(асд.ТСтрока().Name))
+	си.к("$; name;", predefinedTypeName(асд.ТСтрока().Name))
 	си.к("};")
 }
 
 фн (си: СиГен) genVTable(vtable []асд.Функция, tname, meta_type, vt_тип Строка) {
 
-	си.з("= класс %s {", vt_type)
+	си.з("= класс $; {", vt_type)
 	си.з("size_t self_size;")
-	си.з("void (*%s)(%s);", nm_object_init_suffux, tname)
+	си.з("void (*$;)($;);", nm_object_init_suffux, tname)
 
 	пока _, f := range vtable {
-		си.з("%s", си.genMethodField(f, tname))
+		си.з("$;", си.genMethodField(f, tname))
 	}
 
 	си.з("};")
 }
 
 фн (си: СиГен) genObjectInit(cl асд.ТипКласс, tname Строка) {
-	си.к("void %s%s(%s o) {", tname, nm_object_init_suffux, tname)
+	си.к("void $;$;($; o) {", tname, nm_object_init_suffux, tname)
 
 	если cl.BaseTyp # пусто {
 		пусть base = си.baseTypeName(cl.BaseTyp)
-		си.к("((%s*)%s)->vt.%s((void*)o);",
+		си.к("(($;*)$;)->vt.$;((void*)o);",
 			nm_base_class_info_struct,
 			base+nm_class_info_ptr_suffix,
 			nm_object_init_suffux)
@@ -193,7 +193,7 @@
 
 	пока _, f := range cl.Fields {
 		если ~f.задать-позже {
-			си.к("o->%s.%s = %s;", nm_class_fields, си.outName(f.Name), си.выражение(f.Init))
+			си.к("o->$;.$; = $;;", nm_class_fields, си.outName(f.Name), си.выражение(f.Init))
 		}
 	}
 
@@ -215,7 +215,7 @@
 		}
 	}
 
-	вернуть строки.ф("%s (*%s)(%s);",
+	вернуть строки.ф("$; (*$;)($;);",
 		си.вернутьType(ft),
 		си.outName(f.Name), // только имя, без префикса модуля
 		Строкаs.Join(ps, ", "))
@@ -227,22 +227,22 @@
 	tname, tname_fields, meta_type, vt_тип Строка) {
 
 	пусть desc_пусть = tname + nm_class_info_suffix
-	си.к("= класс { = класс %s vt; = класс %s meta; } %s;", vt_type, meta_type, desc_var)
+	си.к("= класс { = класс $; vt; = класс $; meta; } $;;", vt_type, meta_type, desc_var)
 
-	пусть ptr = строки.ф("void * %s;", tname+nm_class_info_ptr_suffix)
-	си.з("extern %s", ptr)
-	си.к("%s", ptr)
+	пусть ptr = строки.ф("void * $;;", tname+nm_class_info_ptr_suffix)
+	си.з("extern $;", ptr)
+	си.к("$;", ptr)
 
 	пусть meta_init_fn = tname + "_init"
 
-	си.к("void %s() {", meta_init_fn)
+	си.к("void $;() {", meta_init_fn)
 
 	//-- VT
-	си.к("%s.vt.self_size = sizeof(= класс %s);", desc_var, vt_type)
-	си.к("%s.vt.%s = &%s%s;", desc_var, nm_object_init_suffux, tname, nm_object_init_suffux)
+	си.к("$;.vt.self_size = sizeof(= класс $;);", desc_var, vt_type)
+	си.к("$;.vt.$; = &$;$;;", desc_var, nm_object_init_suffux, tname, nm_object_init_suffux)
 
 	пока _, f := range vtable {
-		си.к("%s.vt.%s = &%s;", desc_var, си.outName(f.Name), си.фнtionName(f))
+		си.к("$;.vt.$; = &$;;", desc_var, си.outName(f.Name), си.фнtionName(f))
 	}
 
 	//-- Meta
@@ -250,18 +250,18 @@
 	если x.BaseTyp # пусто {
 		base = си.baseTypeName(x.BaseTyp) + nm_class_info_ptr_suffix
 	}
-	си.к("%s.meta.object_size = sizeof(= класс %s);", desc_var, tname)
-	си.к("%s.meta.base = %s;", desc_var, base)
+	си.к("$;.meta.object_size = sizeof(= класс $;);", desc_var, tname)
+	си.к("$;.meta.base = $;;", desc_var, base)
 
-	пусть str = строки.ф("%s(%d, %d, \"%s\")", rt_newString, длина(className), -1, className)
+	пусть str = строки.ф("$;(%d, %d, \"$;\")", rt_newString, длина(className), -1, className)
 
-	си.к("%s.meta.name = %s;", desc_var, str)
+	си.к("$;.meta.name = $;;", desc_var, str)
 
 	//--
-	си.к("%s = &%s;", tname+nm_class_info_ptr_suffix, desc_var)
+	си.к("$; = &$;;", tname+nm_class_info_ptr_suffix, desc_var)
 	си.к("}")
 
-	си.строки-инициализация = append(си.строки-инициализация, строки.ф("%s();", meta_init_fn))
+	си.строки-инициализация = append(си.строки-инициализация, строки.ф("$;();", meta_init_fn))
 }
 
 //== collect methods
@@ -301,7 +301,7 @@
 		если ~ok {
 			col.vtable = append(col.vtable, d.(асд.Функция))
 			col.done[f.Name] = struct{}{}
-			//fmt.Printf("~ add %s\n", f.Name)
+			//fmt.Printf("~ add $;\n", f.Name)
 		}
 	}
 

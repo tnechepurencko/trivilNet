@@ -43,10 +43,10 @@
 		пусть arg = call.Args[i]
 		пусть expr = си.выражение(arg)
 		если p.Out {
-			cargs[i] = строки.ф("&(%s)", expr)
+			cargs[i] = строки.ф("&($;)", expr)
 		} иначе {
 			пусть cast = си.конверсия при присваивании(p.Typ, arg.GetType())
-			cargs[i] = строки.ф("%s%s", cast, expr)
+			cargs[i] = строки.ф("$;$;", cast, expr)
 		}
 	}
 
@@ -81,11 +81,11 @@
 
 		если асд.вариативный тип?(unfold.X.GetType()) {
 			пусть vr = си.выражение(unfold.X)
-			вернуть строки.ф("%s%s, %s", vr, nm_variadic_len_suffic, vr)
+			вернуть строки.ф("$;$;, $;", vr, nm_variadic_len_suffic, vr)
 		} иначе {
 			пусть loc = си.localName("")
-			си.к("%s %s = %s;", си.указание-типа(unfold.X.GetType()), loc, си.выражение(unfold.X))
-			вернуть строки.ф("%s->len, %s->body", loc, loc)
+			си.к("$; $; = $;;", си.указание-типа(unfold.X.GetType()), loc, си.выражение(unfold.X))
+			вернуть строки.ф("$;->len, $;->body", loc, loc)
 		}
 	} иначе {
 		пусть loc = си.localName("")
@@ -98,9 +98,9 @@
 			cargs[n] = си.выражение(call.Args[i])
 			n++
 		}
-		си.к("%s %s[%d] ={%s};", et, loc, vLen, Строкаs.Join(cargs, ", "))
+		си.к("$; $;[%d] ={$;};", et, loc, vLen, Строкаs.Join(cargs, ", "))
 
-		вернуть строки.ф("%d, &%s", vLen, loc)
+		вернуть строки.ф("%d, &$;", vLen, loc)
 	}
 }
 
@@ -109,12 +109,12 @@
 	пусть unfold = getUnfold(call)
 	если unfold # пусто {
 		пусть vr = си.выражение(unfold.X)
-		вернуть строки.ф("%s%s, %s", vr, nm_variadic_len_suffic, vr)
+		вернуть строки.ф("$;$;, $;", vr, nm_variadic_len_suffic, vr)
 	} иначе {
 		пусть loc = си.localName("")
 		пусть vLen = длина(call.Args) - normCount
 
-		//си.к("= класс { TInt64 len; TInt64 body[%d]; } %s;", vLen*2, loc)
+		//си.к("= класс { TInt64 len; TInt64 body[%d]; } $;;", vLen*2, loc)
 
 		пусть cargs = make([]Строка, vLen*2)
 		пусть n = 0
@@ -123,9 +123,9 @@
 			cargs[n+1] = си.castToWord64(call.Args[i])
 			n += 2
 		}
-		си.к("TWord64 %s[%d] = {%s};", loc, vLen*2, Строкаs.Join(cargs, ", "))
+		си.к("TWord64 $;[%d] = {$;};", loc, vLen*2, Строкаs.Join(cargs, ", "))
 
-		вернуть строки.ф("%d, &%s", vLen, loc)
+		вернуть строки.ф("%d, &$;", vLen, loc)
 	}
 }
 
@@ -133,11 +133,11 @@
 	пусть s = си.выражение(e)
 	выбор асд.основа(e.GetType()) {
 	когда асд.ТВещ64():
-		вернуть строки.ф("((%s)%s).w", rt_cast_union, s)
+		вернуть строки.ф("(($;)$;).w", rt_cast_union, s)
 	когда асд.ТСлово64():
 		вернуть s
 	другое
-		вернуть строки.ф("(%s)%s", predefinedTypeName(асд.ТСлово64().Name), s)
+		вернуть строки.ф("($;)$;", predefinedTypeName(асд.ТСлово64().Name), s)
 	}
 }
 
@@ -166,20 +166,20 @@
 	} иначе {
 		name = си.localName("")
 
-		си.к("%s %s = %s;",
+		си.к("$; $; = $;;",
 			си.указание-типа(sel.X.GetType()),
 			name,
 			си.выражение(sel.X))
 	}
 
 	//TODO - можно убрать каст, если лишний
-	пусть args = строки.ф("(%s)%s", си.указание-типа(f.Recv.Typ), name)
+	пусть args = строки.ф("($;)$;", си.указание-типа(f.Recv.Typ), name)
 
 	если длина(call.Args) > 0 {
 		args += ", " + си.аргументы(call)
 	}
 
-	вернуть строки.ф("%s->%s->%s(%s)", name, nm_VT_field, си.outName(f.Name), args)
+	вернуть строки.ф("$;->$;->$;($;)", name, nm_VT_field, си.outName(f.Name), args)
 }
 
 фн (си: СиГен) стандартная функция(call асд.Вызов) Строка {
@@ -205,16 +205,16 @@
 
 	пусть t = асд.основа(a.GetType())
 	если t = асд.ТСтрока() {
-		вернуть строки.ф("%s(%s)", rt_lenString, си.выражение(a))
+		вернуть строки.ф("$;($;)", rt_lenString, си.выражение(a))
 	} иначе если t = асд.ТСтрока8() {
-		вернуть строки.ф("(%s)->bytes", си.выражение(a))
+		вернуть строки.ф("($;)->bytes", си.выражение(a))
 	}
 
 	выбор t.(type) {
 	когда асд.ТипВектор:
-		вернуть строки.ф("(%s)->len", си.выражение(a))
+		вернуть строки.ф("($;)->len", си.выражение(a))
 	когда асд.ТипВариативный:
-		вернуть строки.ф("%s%s", си.выражение(a), nm_variadic_len_suffic)
+		вернуть строки.ф("$;$;", си.выражение(a), nm_variadic_len_suffic)
 	другое
 		panic("ni")
 	}
@@ -225,16 +225,16 @@
 
 	пусть t = асд.основа(typ)
 	если t = асд.ТСтрока() {
-		вернуть строки.ф("%s(%s)", rt_lenString, expr)
+		вернуть строки.ф("$;($;)", rt_lenString, expr)
 	} иначе если t = асд.ТСтрока8() {
-		вернуть строки.ф("(%s)->bytes", expr)
+		вернуть строки.ф("($;)->bytes", expr)
 	}
 
 	выбор t.(type) {
 	когда асд.ТипВектор:
-		вернуть строки.ф("(%s)->len", expr)
+		вернуть строки.ф("($;)->len", expr)
 	когда асд.ТипВариативный:
-		вернуть строки.ф("%s%s", expr, nm_variadic_len_suffic)
+		вернуть строки.ф("$;$;", expr, nm_variadic_len_suffic)
 	другое
 		panic("ni")
 	}
@@ -256,10 +256,10 @@
 	пусть t = асд.основа(typ)
 	выбор x := t.(type) {
 	когда асд.PredefinedType:
-		вернуть строки.ф("%s%s()", rt_tag, predefinedTypeName(x.Name))
+		вернуть строки.ф("$;$;()", rt_tag, predefinedTypeName(x.Name))
 	когда асд.ТипКласс:
 		пусть tr = ast.DirectTypeRef(typ)
-		вернуть строки.ф("((%s)%s).w",
+		вернуть строки.ф("(($;)$;).w",
 			rt_cast_union,
 			си.имя описания(tr.TypeDecl)+nm_class_info_ptr_suffix)
 	когда асд.ТипВектор:
@@ -281,7 +281,7 @@
 
 		пусть left = си.выражение(x.X)
 
-		вернуть строки.ф("((%s*)(%s))[%s(%s, %s%s, %s) << 1]",
+		вернуть строки.ф("(($;*)($;))[$;($;, $;$;, $;) << 1]",
 			predefinedTypeName(асд.ТСлово64().Name),
 			left,
 			rt_indexcheck,
@@ -313,7 +313,7 @@
 
 		пусть left = си.выражение(x.X)
 
-		вернуть строки.ф("((%s*)(%s))[(%s(%s, %s%s, %s) << 1)+1]",
+		вернуть строки.ф("(($;*)($;))[($;($;, $;$;, $;) << 1)+1]",
 			predefinedTypeName(асд.ТСлово64().Name),
 			left,
 			rt_indexcheck,
@@ -341,7 +341,7 @@
 		если асд.вариативный тип?(unfold.X.GetType()) {
 			пусть vr = си.выражение(unfold.X)
 
-			вернуть строки.ф("%s(%s, sizeof(%s), %s%s, %s)",
+			вернуть строки.ф("$;($;, sizeof($;), $;$;, $;)",
 				rt_vectorAppend,
 				си.выражение(call.X),
 				et,
@@ -350,14 +350,14 @@
 
 		} иначе {
 			пусть loc = си.localName("")
-			си.к("%s %s = %s;", си.указание-типа(unfold.X.GetType()), loc, си.выражение(unfold.X))
+			си.к("$; $; = $;;", си.указание-типа(unfold.X.GetType()), loc, си.выражение(unfold.X))
 
 			пусть lenName = "len"
 			если асд.основа(unfold.X.GetType()) = асд.ТСтрока8() {
 				lenName = "bytes"
 			}
 
-			вернуть строки.ф("%s(%s, sizeof(%s), %s->%s, %s->body)",
+			вернуть строки.ф("$;($;, sizeof($;), $;->$;, $;->body)",
 				rt_vectorAppend,
 				си.выражение(call.X),
 				et,
@@ -371,12 +371,12 @@
 		пусть cargs = make([]Строка, длина(call.Args))
 		пока i, a := range call.Args {
 			пусть cast = си.конверсия при присваивании(vt.ElementTyp, a.GetType())
-			cargs[i] = строки.ф("%s%s", cast, си.выражение(a))
+			cargs[i] = строки.ф("$;$;", cast, си.выражение(a))
 		}
 
-		си.к("%s %s[%d] = {%s};", et, loc, длина(call.Args), Строкаs.Join(cargs, ", "))
+		си.к("$; $;[%d] = {$;};", et, loc, длина(call.Args), Строкаs.Join(cargs, ", "))
 
-		вернуть строки.ф("%s(%s, sizeof(%s), %d, %s)",
+		вернуть строки.ф("$;($;, sizeof($;), %d, $;)",
 			rt_vectorAppend,
 			си.выражение(call.X),
 			et,

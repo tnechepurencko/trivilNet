@@ -16,7 +16,7 @@
 	когда асд.Литерал:
 		вернуть си.литерал(тек)
 	когда асд.УнарнаяОперация:
-		вернуть строки.ф("%s(%s)", unaryOp(x.Op), си.выражение(x.X))
+		вернуть строки.ф("$;($;)", unaryOp(x.Op), си.выражение(x.X))
 	когда асд.БинарнаяОперация:
 		вернуть си.бинарное выражениеExpr(тек)
 	когда асд.ПроверкаТипа:
@@ -54,7 +54,7 @@
 	}
 
 	если isVarOutParam(d) {
-		вернуть строки.ф("(*%s)", си.имя описания(d))
+		вернуть строки.ф("(*$;)", си.имя описания(d))
 	}
 
 	вернуть си.имя описания(d)
@@ -111,17 +111,17 @@
 фн (си: СиГен) genStringLiteral(li асд.Литерал) Строка {
 
 	если длина(li.StrVal) = 0 {
-		вернуть строки.ф("%s()", rt_emptyString)
+		вернуть строки.ф("$;()", rt_emptyString)
 	}
 
 	пусть name = си.localName(nm_СтрокаLiteral)
-	си.g("static TString %s = NULL;", name)
+	си.g("static TString $; = NULL;", name)
 
 	пусть outs = encodeLiteralString(li.StrVal)
 	//fmt.Printf("~ байты=%d  символы=%d\n", длина(outs), длина(li.StrVal))
 
 	// передаю -1 в число байтов, чтобы не учитывать Си эскейп последовательности
-	вернуть строки.ф("%s(&%s, %d, %d, \"%s\")", rt_newLiteralString, name, -1, длина(li.StrVal), outs)
+	вернуть строки.ф("$;(&$;, %d, %d, \"$;\")", rt_newLiteralString, name, -1, длина(li.StrVal), outs)
 }
 
 фн encodeLiteralString(runes []rune) Строка {
@@ -225,20 +225,20 @@
 			not = "~"
 		}
 
-		вернуть строки.ф("%s%s(%s, %s)", not, rt_equalStrings, си.выражение(x.X), си.выражение(x.Y))
+		вернуть строки.ф("$;$;($;, $;)", not, rt_equalStrings, си.выражение(x.X), си.выражение(x.Y))
 	}
 
 	если асд.тип-класса?(тек.Л.Т) {
-		вернуть строки.ф("((void*)%s %s (void*)%s)", си.выражение(x.X), binaryOp(x.Op), си.выражение(x.Y))
+		вернуть строки.ф("((void*)$; $; (void*)$;)", си.выражение(x.X), binaryOp(x.Op), си.выражение(x.Y))
 	} иначе {
-		вернуть строки.ф("(%s %s %s)", си.выражение(x.X), binaryOp(x.Op), си.выражение(x.Y))
+		вернуть строки.ф("($; $; $;)", си.выражение(x.X), binaryOp(x.Op), си.выражение(x.Y))
 	}
 }
 
 фн (си: СиГен) проверка-типа(x асд.ПроверкаТипа) Строка {
 	пусть tname = си.указание-типа(x.TargetTyp)
 
-	вернуть строки.ф("%s(%s, %s)",
+	вернуть строки.ф("$;($;, $;)",
 		rt_isClassType,
 		си.выражение(x.X),
 		tname+nm_class_info_ptr_suffix)
@@ -253,7 +253,7 @@
 	}
 
 	пусть cl = асд.основа(тек.Л.Т).(асд.ТипКласс)
-	вернуть строки.ф("(%s)->%s.%s%s",
+	вернуть строки.ф("($;)->$;.$;$;",
 		си.выражение(x.X),
 		nm_class_fields,
 		pathToField(cl, x.Name),
@@ -280,7 +280,7 @@
 //== проверка на пусто
 
 фн (си: СиГен) подтверждение-типа(x асд.ПодтверждениеТипа) Строка {
-	вернуть строки.ф("(%s)%s(%s,%s)",
+	вернуть строки.ф("($;)$;($;,$;)",
 		си.указание-типа(x.Typ),
 		rt_пустоcheck,
 		си.выражение(x.X),
@@ -316,12 +316,12 @@
 	} иначе {
 		name = си.localName("")
 
-		си.к("%s %s = %s;",
+		си.к("$; $; = $;;",
 			си.указание-типа(x.GetType()),
 			name,
 			си.выражение(тек))
 	}
-	вернуть строки.ф("%s->body[%s(%s, %s->%s,%s)]",
+	вернуть строки.ф("$;->body[$;($;, $;->$;,$;)]",
 		name,
 		rt_indexcheck,
 		си.выражение(inx),
@@ -337,7 +337,7 @@
 
 	если асд.полиморфный тип?(vt.ElementTyp) {
 		/ *
-			вернуть строки.ф("((%s*)(%s + sizeof(TInt64)))[%s(%s, *(TInt64 *)%s) << 1]",
+			вернуть строки.ф("(($;*)($; + sizeof(TInt64)))[$;($;, *(TInt64 *)$;) << 1]",
 				predefinedTypeName(асд.ТЦел64().Name),
 				vPar,
 				rt_indexcheck,
@@ -347,7 +347,7 @@
 		panic("assert")
 	} иначе {
 
-		вернуть строки.ф("((%s*)%s)[%s(%s, %s%s, %s)]",
+		вернуть строки.ф("(($;*)$;)[$;($;, $;$;, $;)]",
 			си.указание-типа(vt.ElementTyp),
 			vPar,
 			rt_indexcheck,
@@ -370,16 +370,16 @@
 	если длина(x.Indexes) > 0 & x.LenExpr # пусто {
 		// c.Length = maxIndex + 1
 		пусть lenName = си.localName("len")
-		си.к("%s %s = %s;", predefinedTypeName(асд.ТЦел64().Name), lenName, lenExpr)
+		си.к("$; $; = $;;", predefinedTypeName(асд.ТЦел64().Name), lenName, lenExpr)
 		lenExpr = lenName
 
-		си.к("%s(%d, %s, %s);", rt_indexcheck, x.MaxIndex, lenName, genPos(x.поз))
+		си.к("$;(%d, $;, $;);", rt_indexcheck, x.MaxIndex, lenName, genPos(x.поз))
 	}
 
 	пусть s = ""
 
 	если x.Default # пусто {
-		s = строки.ф("%s %s = %s(sizeof(%s), %s, %s, %s);",
+		s = строки.ф("$; $; = $;(sizeof($;), $;, $;, $;);",
 			си.указание-типа(x.Typ),
 			name,
 			rt_newVectorFill,
@@ -388,7 +388,7 @@
 			си.genArrayCompositeCap(тек),
 			си.genFiller(x.Default))
 	} иначе {
-		s = строки.ф("%s %s = %s(sizeof(%s), %s, %s);",
+		s = строки.ф("$; $; = $;(sizeof($;), $;, $;);",
 			си.указание-типа(x.Typ),
 			name,
 			rt_newVector,
@@ -405,11 +405,11 @@
 		} иначе {
 			inx = си.выражение(x.Indexes[i])
 		}
-		list[i] = строки.ф("%s->body[%s] = %s;", name, inx, си.выражение(val))
+		list[i] = строки.ф("$;->body[$;] = $;;", name, inx, си.выражение(val))
 	}
 	s += Строкаs.Join(list, " ")
 
-	си.к("%s", s)
+	си.к("$;", s)
 
 	вернуть name
 }
@@ -453,7 +453,7 @@
 	пусть name = си.localName("")
 
 	пусть tname = си.указание-типа(x.Typ)
-	пусть s = строки.ф("%s %s = %s(%s);",
+	пусть s = строки.ф("$; $; = $;($;);",
 		tname,
 		name,
 		rt_newObject,
@@ -464,13 +464,13 @@
 	пусть list = make([]Строка, длина(x.Values))
 	пока i, v := range x.Values {
 		пусть cast = си.конверсия при присваивании(v.Field.Typ, v.Value.GetType())
-		list[i] = строки.ф("%s->%s.%s%s = %s%s;",
+		list[i] = строки.ф("$;->$;.$;$; = $;$;;",
 			name, nm_class_fields, pathToField(cl, v.Name), си.outName(v.Name),
 			cast, си.выражение(v.Value))
 	}
 	s += Строкаs.Join(list, " ")
 
-	си.к("%s", s)
+	си.к("$;", s)
 	вернуть name
 }
 */

@@ -19,7 +19,7 @@
 пусть _ = fmt.Printf
 
 фн BuildExe(modules []асд.Модуль) {
-	//fmt.Printf("build: %s\n", runtime.GOOS)
+	//fmt.Printf("build: $;\n", runtime.GOOS)
 
 	//== setup command
 	пусть command = findTemplate(runtime.GOOS + "-build")
@@ -56,7 +56,7 @@
 	выбор runtime.GOOS {
 	когда "windows":
 		mainCmd = "cmd"
-		arg = строки.ф("[/c cd %s & call %s ]", folder, script)
+		arg = строки.ф("[/c cd $; & call $; ]", folder, script)
 		//fmt.Printf("arg %v\n", arg)
 	когда "linux":
 		absoluteFolder, _ := filepath.Abs(folder)
@@ -69,9 +69,9 @@
 	пусть cmd = exec.Command(mainCmd, arg)
 	out, err := cmd.CombinedOutput()
 	если err # пусто {
-		fmt.Printf("Exec failed: %s\n%s\n", err.Error(), Строка(out))
+		fmt.Printf("Exec failed: $;\n$;\n", err.Error(), Строка(out))
 	} иначе {
-		fmt.Printf("Execute: %s/%s  Rebuild C code: %s/%s\n", folder, target, folder, script)
+		fmt.Printf("Execute: $;/$;  Rebuild C code: $;/$;\n", folder, target, folder, script)
 	}
 }
 
