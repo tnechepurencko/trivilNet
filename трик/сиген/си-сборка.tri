@@ -1,0 +1,110 @@
+модуль сиген
+
+импорт "стд::вывод"
+//импорт "стд::строки"
+
+импорт "трик/асд"
+//импорт "трик/основа"
+//импорт "трик/лексер"
+
+/*
+конст (
+	conf_file_name = "config/си.txt"
+	place_files    = "#files#"
+	place_target   = "#target#"
+	place_runtime  = "#runtime#"
+	place_genc     = "#genc#"
+)
+
+пусть _ = fmt.Printf
+
+фн BuildExe(modules []асд.Модуль) {
+	//fmt.Printf("build: %s\n", runtime.GOOS)
+
+	//== setup command
+	пусть command = findTemplate(runtime.GOOS + "-build")
+	если command = "" {
+		вернуть
+	}
+	пусть names = make([]Строка, длина(modules))
+	пока i, m := range modules {
+		names[i] = env.OutName(m.Name) + ".c"
+	}
+
+	пусть target = env.OutName(modules[len(modules)-1].Name)
+
+	command = Строкаs.ReplaceAll(command, place_files, Строкаs.Join(names, " "))
+	command = Строкаs.ReplaceAll(command, place_runtime, env.RuntimePath())
+	command = Строкаs.ReplaceAll(command, place_target, target)
+
+	пусть folder = env.PrepareOutFolder()
+	gencAbsolute, _ := filepath.Abs(folder)
+	command = Строкаs.ReplaceAll(command, place_genc, gencAbsolute)
+
+	//== write script file
+	пусть script = findTemplate(runtime.GOOS + "-script")
+	если script # "" {
+		пусть lines = make([]Строка, 1)
+		lines[0] = command
+
+		writeFile(folder, script, "", lines)
+	}
+
+	пусть arg Строка
+	пусть mainCmd Строка
+
+	выбор runtime.GOOS {
+	когда "windows":
+		mainCmd = "cmd"
+		arg = строки.ф("[/c cd %s & call %s ]", folder, script)
+		//fmt.Printf("arg %v\n", arg)
+	когда "linux":
+		absoluteFolder, _ := filepath.Abs(folder)
+		mainCmd = "bash"
+		arg = path.Join(absoluteFolder, script)
+	другое
+		panic("build not implemented пока " + runtime.GOOS)
+	}
+
+	пусть cmd = exec.Command(mainCmd, arg)
+	out, err := cmd.CombinedOutput()
+	если err # пусто {
+		fmt.Printf("Exec failed: %s\n%s\n", err.Error(), Строка(out))
+	} иначе {
+		fmt.Printf("Execute: %s/%s  Rebuild C code: %s/%s\n", folder, target, folder, script)
+	}
+}
+
+//== genc configuration
+
+пусть settings []Строка
+
+фн findTemplate(name Строка) Строка {
+
+	если settings = пусто {
+
+		buf, err := os.ReadFile(env.SettingsRelativePath(conf_file_name))
+		если err # пусто {
+			env.AddProgramError("ГЕН-ОШ-КОНФ-ФАЙЛА", err.Error())
+			вернуть ""
+		}
+
+		settings = Строкаs.Split(Строка(buf[:]), "\n")
+	}
+
+	пока _, s := range settings {
+		если Строкаs.HasPrefix(s, name) {
+			пусть pair = Строкаs.SplitN(s, ":", 2)
+			если длина(pair) = 2 & Строкаs.TrimSpace(pair[1]) # "" {
+				вернуть Строкаs.TrimSpace(pair[1])
+			}
+			env.AddProgramError("ГЕН-ОШ-НАСТРОЙКА", conf_file_name, name)
+			вернуть ""
+		}
+	}
+
+	env.AddProgramError("ГЕН-ОШ-НАСТРОЙКА", conf_file_name, name)
+	вернуть ""
+}
+
+*/

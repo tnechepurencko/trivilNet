@@ -1,0 +1,158 @@
+модуль сиген
+
+импорт "стд::вывод"
+
+импорт "трик/асд"
+
+/*
+фн (си: СиГен) преобразование(x асд.Преобразовать) Строка {
+
+	пусть expr = си.выражение(x.X)
+	если x.Done {
+		вернуть expr
+	}
+
+	пусть to = асд.основа(x.TargetTyp)
+
+	пусть from = асд.основа(тек.Л.Т)
+	fromPred, _ := from.(асд.PredefinedType)
+
+	выбор to {
+	когда асд.ТБайт():
+		вернуть си.convertPredefined(expr, fromPred, асд.ТБайт())
+	когда асд.ТЦел64():
+		если fromPred = асд.ТБайт() | fromPred = асд.ТСимвол() {
+			вернуть си.castPredefined(expr, асд.ТЦел64())
+		} иначе {
+			вернуть си.convertPredefined(expr, fromPred, асд.ТЦел64())
+		}
+	когда асд.ТСлово64():
+		если fromPred = асд.ТБайт() | fromPred = асд.ТСимвол() {
+			вернуть си.castPredefined(expr, асд.ТСлово64())
+		} иначе {
+			вернуть си.convertPredefined(expr, fromPred, асд.ТСлово64())
+		}
+	когда асд.ТВещ64():
+		вернуть си.castPredefined(expr, асд.ТВещ64())
+	когда асд.ТСимвол():
+		если fromPred = асд.ТБайт() | fromPred = асд.ТСимвол() {
+			вернуть си.castPredefined(expr, асд.ТСимвол())
+		} иначе {
+			вернуть си.convertPredefined(expr, fromPred, асд.ТСимвол())
+		}
+	когда асд.ТСтрока():
+		вернуть си.convertToString(expr, асд.основа(тек.Л.Т))
+	когда асд.ТСтрока8():
+		вернуть expr
+	}
+
+	выбор xt := to.(type) {
+	когда асд.ТипВектор:
+		вернуть си.convertToVector(expr, from, xt)
+	когда асд.ТипКласс:
+		вернуть си.convertToClass(expr, x.TargetTyp)
+	другое
+		panic(строки.ф("ni %T '%s'", to, асд.ТипString(to)))
+	}
+}
+
+фн (си: СиГен) convertPredefined(expr Строка, from, to асд.PredefinedType) Строка {
+	вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(from.Name), predefinedTypeName(to.Name), expr)
+}
+
+фн (си: СиГен) castPredefined(expr Строка, to асд.PredefinedType) Строка {
+	вернуть строки.ф("(%s)(%s)", predefinedTypeName(to.Name), expr)
+}
+
+фн (си: СиГен) convertToString(expr Строка, from асд.Тип) Строка {
+
+	если from = асд.ТСимвол() {
+		вернуть си.convertPredefined(expr, асд.ТСимвол(), асд.ТСтрока())
+	} иначе если from = асд.ТСтрока8() {
+		вернуть expr
+	}
+
+	vt, ok := from.(асд.ТипВектор)
+	если ~ok {
+		panic("ni")
+	}
+
+	пусть et = асд.основа(vt.ElementTyp)
+	если et = асд.ТБайт() {
+		вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, "Bytes", predefinedTypeName(асд.ТСтрока().Name), expr)
+	} иначе если et = асд.ТСимвол() {
+		вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, "Symbols", predefinedTypeName(асд.ТСтрока().Name), expr)
+	} иначе {
+		panic("ni")
+	}
+
+}
+
+фн (си: СиГен) convertToVector(expr Строка, from асд.Тип, to асд.ТипВектор) Строка {
+
+	если from = асд.ТСтрока() {
+
+		пусть et = асд.основа(to.ElementTyp)
+		если et = асд.ТБайт() {
+			вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(асд.ТСтрока().Name), "Bytes", expr)
+		} иначе если et = асд.ТСимвол() {
+			вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(асд.ТСтрока().Name), "Symbols", expr)
+		} иначе {
+			panic("ni")
+		}
+	} иначе если from = асд.ТСимвол() {
+		вернуть строки.ф("%s%s_to_%s(%s)", rt_convert, predefinedTypeName(асд.ТСимвол().Name), "Bytes", expr)
+	} иначе {
+		panic("ni")
+	}
+}
+
+фн (си: СиГен) convertToClass(expr Строка, target асд.Тип) Строка {
+	пусть tname = си.указание-типа(target)
+
+	вернуть строки.ф("((%s)%s(%s, %s))", tname, rt_checkClassType, expr, tname+nm_class_info_ptr_suffix)
+}
+
+фн (си: СиГен) осторожное преобразование(x асд.Преобразовать) Строка {
+
+	пусть expr = си.выражение(x.X)
+	если x.Done {
+		вернуть expr
+	}
+
+	пусть to = асд.основа(x.TargetTyp)
+	пусть from = асд.основа(тек.Л.Т)
+
+	выбор to {
+	когда асд.ТЦел64():
+		вернуть строки.ф("((%s)%s).i", rt_cast_union, expr)
+	когда асд.ТВещ64():
+		вернуть строки.ф("((%s)%s).f", rt_cast_union, expr)
+	когда асд.ТСлово64():
+		вернуть си.genCastToWord64(expr, from)
+	другое
+		если from = асд.ТСлово64() & асд.ссылочный тип?(to) {
+			//TODO: проверить указатель и тег
+			вернуть строки.ф("(%s)((%s)%s).a", си.указание-типа(x.TargetTyp), rt_cast_union, expr)
+		} иначе {
+			panic(строки.ф("ni %T '%s'", to, асд.ТипString(to)))
+		}
+	}
+}
+
+фн (си: СиГен) genCastToWord64(expr Строка, exprTyp асд.Тип) Строка {
+
+	пусть from = асд.основа(exprTyp)
+
+	выбор {
+	когда from = асд.ТСлово64(), from = асд.ТБайт(), from = асд.ТСимвол(), from = асд.ТЛог():
+		вернуть expr
+	когда from = асд.ТЦел64():
+		вернуть строки.ф("((%s)(%s)%s).w", rt_cast_union, predefinedTypeName(асд.ТЦел64().Name), expr)
+	когда асд.ссылочный тип?(from):
+		вернуть строки.ф("((%s)(void*)%s).w", rt_cast_union, expr)
+	другое
+		вернуть строки.ф("((%s)%s).w", rt_cast_union, expr)
+	}
+}
+*/

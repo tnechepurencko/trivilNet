@@ -1,0 +1,387 @@
+модуль сиген
+
+импорт "стд::вывод"
+//импорт "стд::строки"
+
+импорт "трик/асд"
+
+/*
+//== call
+
+фн (си: СиГен) вызов(call асд.Вызов) Строка {
+
+	если call.StdFunc # пусто {
+		вернуть си.стандартная функция(call)
+	}
+
+	если isMethodCall(call.X) {
+		вернуть си.вызов метода(call)
+	}
+
+	пусть left = си.выражение(call.X)
+
+	пусть cargs = си.аргументы(call)
+
+	вернуть left + "(" + cargs + ")"
+}
+
+фн (си: СиГен) аргументы(call асд.Вызов) Строка {
+
+	пусть ft = call.X.GetType().(асд.ТипФункция)
+
+	пусть cargs = make([]Строка, длина(ft.Params))
+	пусть normLen = длина(ft.Params)
+
+	пусть vPar = асд.ВариативныйПараметр(ft)
+	если vPar # пусто {
+		normLen--
+	}
+
+	// не вариативные параметры
+	пока i := 0; i < normLen; i++ {
+		пусть p = ft.Params[i]
+		пусть arg = call.Args[i]
+		пусть expr = си.выражение(arg)
+		если p.Out {
+			cargs[i] = строки.ф("&(%s)", expr)
+		} иначе {
+			пусть cast = си.конверсия при присваивании(p.Typ, arg.GetType())
+			cargs[i] = строки.ф("%s%s", cast, expr)
+		}
+	}
+
+	если vPar # пусто {
+		пусть vTyp = vPar.Typ.(асд.ТипВариативный)
+
+		если асд.полиморфный тип?(vTyp.ElementTyp) {
+			cargs[normLen] = си.genVariadicTaggedArgs(call, vPar, normLen)
+		} иначе {
+			cargs[normLen] = си.genVariadicArgs(call, vPar, vTyp, normLen)
+		}
+	}
+	вернуть Строкаs.Join(cargs, ", ")
+}
+
+фн getUnfold(call асд.Вызов) асд.Развернуть {
+	если длина(call.Args) = 0 {
+		вернуть пусто
+	}
+	пусть last = call.Args[len(call.Args)-1]
+	если u, ok := last.(асд.Развернуть); ok {
+		вернуть u
+	}
+	вернуть пусто
+}
+
+//TODO: нужно ли выдержать какой-то порядок вычисления аргументов?
+фн (си: СиГен) genVariadicArgs(call асд.Вызов, vPar асд.Параметр, vTyp асд.ТипВариативный, normCount int) Строка {
+
+	пусть unfold = getUnfold(call)
+	если unfold # пусто {
+
+		если асд.вариативный тип?(unfold.X.GetType()) {
+			пусть vr = си.выражение(unfold.X)
+			вернуть строки.ф("%s%s, %s", vr, nm_variadic_len_suffic, vr)
+		} иначе {
+			пусть loc = си.localName("")
+			си.к("%s %s = %s;", си.указание-типа(unfold.X.GetType()), loc, си.выражение(unfold.X))
+			вернуть строки.ф("%s->len, %s->body", loc, loc)
+		}
+	} иначе {
+		пусть loc = си.localName("")
+		пусть et = си.указание-типа(vTyp.ElementTyp)
+		пусть vLen = длина(call.Args) - normCount
+
+		пусть cargs = make([]Строка, vLen)
+		пусть n = 0
+		пока i := normCount; i < длина(call.Args); i++ {
+			cargs[n] = си.выражение(call.Args[i])
+			n++
+		}
+		си.к("%s %s[%d] ={%s};", et, loc, vLen, Строкаs.Join(cargs, ", "))
+
+		вернуть строки.ф("%d, &%s", vLen, loc)
+	}
+}
+
+фн (си: СиГен) genVariadicTaggedArgs(call асд.Вызов, vPar асд.Параметр, normCount int) Строка {
+
+	пусть unfold = getUnfold(call)
+	если unfold # пусто {
+		пусть vr = си.выражение(unfold.X)
+		вернуть строки.ф("%s%s, %s", vr, nm_variadic_len_suffic, vr)
+	} иначе {
+		пусть loc = си.localName("")
+		пусть vLen = длина(call.Args) - normCount
+
+		//си.к("= класс { TInt64 len; TInt64 body[%d]; } %s;", vLen*2, loc)
+
+		пусть cargs = make([]Строка, vLen*2)
+		пусть n = 0
+		пока i := normCount; i < длина(call.Args); i++ {
+			cargs[n] = си.genTypeTag(call.Args[i].GetType())
+			cargs[n+1] = си.castToWord64(call.Args[i])
+			n += 2
+		}
+		си.к("TWord64 %s[%d] = {%s};", loc, vLen*2, Строкаs.Join(cargs, ", "))
+
+		вернуть строки.ф("%d, &%s", vLen, loc)
+	}
+}
+
+фн (си: СиГен) castToWord64(e асд.Выражение) Строка {
+	пусть s = си.выражение(e)
+	выбор асд.основа(e.GetType()) {
+	когда асд.ТВещ64():
+		вернуть строки.ф("((%s)%s).w", rt_cast_union, s)
+	когда асд.ТСлово64():
+		вернуть s
+	другое
+		вернуть строки.ф("(%s)%s", predefinedTypeName(асд.ТСлово64().Name), s)
+	}
+}
+
+фн isMethodCall(left асд.Выражение) Лог {
+	sel, ok := left.(асд.Доступ)
+	если ~ok {
+		вернуть ложь
+	}
+
+	f, ok := sel.Obj.(асд.Функция)
+	если ~ok {
+		вернуть ложь
+	}
+
+	вернуть f.Recv # пусто
+}
+
+фн (си: СиГен) вызов метода(call асд.Вызов) Строка {
+
+	sel := call.X.(асд.Доступ)
+	f := sel.Obj.(асд.Функция)
+
+	пусть name Строка
+	если id, ok := sel.X.(асд.ОперандИдент); ok {
+		name = си.идентификатор(id)
+	} иначе {
+		name = си.localName("")
+
+		си.к("%s %s = %s;",
+			си.указание-типа(sel.X.GetType()),
+			name,
+			си.выражение(sel.X))
+	}
+
+	//TODO - можно убрать каст, если лишний
+	пусть args = строки.ф("(%s)%s", си.указание-типа(f.Recv.Typ), name)
+
+	если длина(call.Args) > 0 {
+		args += ", " + си.аргументы(call)
+	}
+
+	вернуть строки.ф("%s->%s->%s(%s)", name, nm_VT_field, си.outName(f.Name), args)
+}
+
+фн (си: СиГен) стандартная функция(call асд.Вызов) Строка {
+
+	выбор call.StdFunc.Name {
+	когда ast.StdLen:
+		вернуть си.genStdLen(call)
+	когда ast.StdTag:
+		вернуть си.genStdTag(call)
+	когда ast.StdSomething:
+		вернуть си.genStdSomething(call)
+
+	когда ast.VectorAppend:
+		вернуть си.genVectorAppend(call)
+
+	другое
+		panic("assert: не реализована стандартная функция " + call.StdFunc.Name)
+	}
+}
+
+фн (си: СиГен) genStdLen(call асд.Вызов) Строка {
+	пусть a = call.Args[0]
+
+	пусть t = асд.основа(a.GetType())
+	если t = асд.ТСтрока() {
+		вернуть строки.ф("%s(%s)", rt_lenString, си.выражение(a))
+	} иначе если t = асд.ТСтрока8() {
+		вернуть строки.ф("(%s)->bytes", си.выражение(a))
+	}
+
+	выбор t.(type) {
+	когда асд.ТипВектор:
+		вернуть строки.ф("(%s)->len", си.выражение(a))
+	когда асд.ТипВариативный:
+		вернуть строки.ф("%s%s", си.выражение(a), nm_variadic_len_suffic)
+	другое
+		panic("ni")
+	}
+}
+
+// Запрос длины по выражению expr тип typ
+фн (си: СиГен) genLen(expr Строка, typ асд.Тип) Строка {
+
+	пусть t = асд.основа(typ)
+	если t = асд.ТСтрока() {
+		вернуть строки.ф("%s(%s)", rt_lenString, expr)
+	} иначе если t = асд.ТСтрока8() {
+		вернуть строки.ф("(%s)->bytes", expr)
+	}
+
+	выбор t.(type) {
+	когда асд.ТипВектор:
+		вернуть строки.ф("(%s)->len", expr)
+	когда асд.ТипВариативный:
+		вернуть строки.ф("%s%s", expr, nm_variadic_len_suffic)
+	другое
+		panic("ni")
+	}
+}
+
+фн (си: СиГен) genStdTag(call асд.Вызов) Строка {
+
+	пусть a = call.Args[0]
+
+	если tExpr, ok := a.(асд.TypeExpr); ok {
+		вернуть си.genTypeTag(tExpr.Typ)
+	} иначе {
+		вернуть си.genTagPairTag(a)
+	}
+}
+
+// Выдает тег по статическому типу
+фн (си: СиГен) genTypeTag(typ асд.Тип) Строка {
+	пусть t = асд.основа(typ)
+	выбор x := t.(type) {
+	когда асд.PredefinedType:
+		вернуть строки.ф("%s%s()", rt_tag, predefinedTypeName(x.Name))
+	когда асд.ТипКласс:
+		пусть tr = ast.DirectTypeRef(typ)
+		вернуть строки.ф("((%s)%s).w",
+			rt_cast_union,
+			си.имя описания(tr.TypeDecl)+nm_class_info_ptr_suffix)
+	когда асд.ТипВектор:
+		panic("ni")
+	когда асд.ТипМБ:
+		вернуть си.genTypeTag(x.Typ)
+	другое
+		panic(строки.ф("ni тип tag %T", t))
+	}
+}
+
+// Тег для TagPair выражения
+фн (си: СиГен) genTagPairTag(e асд.Выражение) Строка {
+	выбор x := e.(type) {
+	когда асд.ИндексацияИлиКомпозит:
+		если x.Index = пусто {
+			panic("assert - не может быть композита")
+		}
+
+		пусть left = си.выражение(x.X)
+
+		вернуть строки.ф("((%s*)(%s))[%s(%s, %s%s, %s) << 1]",
+			predefinedTypeName(асд.ТСлово64().Name),
+			left,
+			rt_indexcheck,
+			си.выражение(x.Index),
+			left,
+			nm_variadic_len_suffic,
+			genPos(x.поз))
+
+	когда асд.ОперандИдент:
+		panic("ni - не вариадик параметр '*'")
+	}
+	panic("assert")
+}
+
+фн (си: СиГен) genStdSomething(call асд.Вызов) Строка {
+
+	пусть a = call.Args[0]
+
+	пусть t = a.GetType()
+	если ~асд.полиморфный тип?(t) {
+		panic("assert")
+	}
+
+	выбор x := a.(type) {
+	когда асд.ИндексацияИлиКомпозит:
+		если x.Index = пусто {
+			panic("assert")
+		}
+
+		пусть left = си.выражение(x.X)
+
+		вернуть строки.ф("((%s*)(%s))[(%s(%s, %s%s, %s) << 1)+1]",
+			predefinedTypeName(асд.ТСлово64().Name),
+			left,
+			rt_indexcheck,
+			си.выражение(x.Index),
+			left,
+			nm_variadic_len_suffic,
+			genPos(x.поз))
+
+	когда асд.ОперандИдент:
+		panic("ni")
+	}
+	panic("assert")
+}
+
+//== векторные
+
+фн (си: СиГен) genVectorAppend(call асд.Вызов) Строка {
+
+	пусть vt = асд.основа(call.X.GetType()).(асд.ТипВектор)
+	пусть et = си.указание-типа(vt.ElementTyp)
+
+	пусть unfold = getUnfold(call)
+	если unfold # пусто {
+
+		если асд.вариативный тип?(unfold.X.GetType()) {
+			пусть vr = си.выражение(unfold.X)
+
+			вернуть строки.ф("%s(%s, sizeof(%s), %s%s, %s)",
+				rt_vectorAppend,
+				си.выражение(call.X),
+				et,
+				vr, nm_variadic_len_suffic,
+				vr)
+
+		} иначе {
+			пусть loc = си.localName("")
+			си.к("%s %s = %s;", си.указание-типа(unfold.X.GetType()), loc, си.выражение(unfold.X))
+
+			пусть lenName = "len"
+			если асд.основа(unfold.X.GetType()) = асд.ТСтрока8() {
+				lenName = "bytes"
+			}
+
+			вернуть строки.ф("%s(%s, sizeof(%s), %s->%s, %s->body)",
+				rt_vectorAppend,
+				си.выражение(call.X),
+				et,
+				loc,
+				lenName,
+				loc)
+		}
+	} иначе {
+		пусть loc = си.localName("")
+
+		пусть cargs = make([]Строка, длина(call.Args))
+		пока i, a := range call.Args {
+			пусть cast = си.конверсия при присваивании(vt.ElementTyp, a.GetType())
+			cargs[i] = строки.ф("%s%s", cast, си.выражение(a))
+		}
+
+		си.к("%s %s[%d] = {%s};", et, loc, длина(call.Args), Строкаs.Join(cargs, ", "))
+
+		вернуть строки.ф("%s(%s, sizeof(%s), %d, %s)",
+			rt_vectorAppend,
+			си.выражение(call.X),
+			et,
+			len(call.Args),
+			loc)
+	}
+}
+*/

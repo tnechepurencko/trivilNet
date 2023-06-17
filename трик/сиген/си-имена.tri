@@ -1,0 +1,129 @@
+модуль сиген
+
+импорт "стд::вывод"
+
+импорт "трик/асд"
+импорт "трик/основа"
+
+/*
+конст typeNamePrefix = "T"
+
+// класс струкура и мета информация
+конст (
+	nm_class_fields        = "f"
+	nm_class_fields_suffix = "_F"
+
+	nm_base_fields = "_BASE"
+	nm_VT_field    = "vtable"
+
+	nm_VT_suffix             = "_VT"
+	nm_meta_suffix           = "_Meta"
+	nm_meta_field            = "_meta_"
+	nm_class_info_suffix     = "_class_info"
+	nm_class_info_ptr_suffix = "_class_info_ptr"
+	nm_object_init_suffux    = "__init__"
+
+	nm_base_class_info_= класс = "_BaseClassInfo"
+
+	nm_variadic_len_suffic = "_len"
+)
+
+// prefixes пока generated names
+конст (
+	nm_СтрокаLiteral = "strlit"
+)
+
+// run-time API
+конст (
+	rt_prefix = "tri_"
+
+	rt_cast_union = "TUnion64"
+
+	rt_init = rt_prefix + "init"
+
+	rt_newLiteralString = rt_prefix + "newLiteralString" // сохраняет в переменную
+	rt_newString        = rt_prefix + "newString"
+	rt_lenString        = rt_prefix + "lenString"
+	rt_emptyString      = rt_prefix + "emptyString"
+	rt_equalStrings     = rt_prefix + "equalStrings"
+
+	rt_newVector     = rt_prefix + "newVector"
+	rt_newVectorFill = rt_prefix + "newVectorFill"
+	//rt_lenVector     = rt_prefix + "lenVector"
+
+	rt_indexcheck = rt_prefix + "indexcheck"
+	rt_пустоcheck   = rt_prefix + "пустоcheck"
+
+	rt_newObject      = rt_prefix + "newObject"
+	rt_checkClassType = rt_prefix + "checkClassType"
+	rt_isClassType    = rt_prefix + "isClassType"
+
+	rt_convert = rt_prefix
+
+	rt_crash = rt_prefix + "crash"
+
+	rt_tag = rt_prefix + "tag"
+
+	rt_vectorAppend = rt_prefix + "vectorAppend"
+)
+
+фн (си: СиГен) localName(prefix Строка) Строка {
+	если prefix = "" {
+		prefix = "loc"
+	}
+
+	си.autoNo++
+	вернуть строки.ф("%s%d", prefix, си.autoNo)
+}
+
+//==
+
+фн (си: СиГен) имя описания(d асд.Описание) Строка {
+
+	out, ok := си.имя описанияs[d]
+	если ok {
+		вернуть out
+	}
+
+	f, is_fn := d.(асд.Функция)
+
+	если is_fn & f.External {
+		name, ok := f.Mod.Attrs["имя"]
+		если ~ok {
+			name = env.OutName(f.Name)
+		}
+		си.имя описанияs[d] = name
+
+		вернуть name
+	}
+
+	out = ""
+	пусть host = d.GetHost()
+	если host # пусто {
+		out = си.имя описания(host) + "__"
+	}
+
+	пусть prefix = ""
+	если _, ok := d.(асд.ОписаниеТипа); ok {
+		prefix = typeNamePrefix
+	}
+
+	out += prefix + env.OutName(d.GetName())
+
+	си.имя описанияs[d] = out
+
+	вернуть out
+}
+
+фн (си: СиГен) outName(name Строка) Строка {
+	вернуть env.OutName(name)
+}
+
+фн (си: СиГен) фнtionName(f асд.Функция) Строка {
+
+	если f.Recv # пусто {
+		вернуть си.указание-типа(f.Recv.Typ) + "_" + си.outName(f.Name)
+	}
+	вернуть си.имя описания(f)
+}
+*/
