@@ -60,10 +60,6 @@ func (genc *genContext) g(format string, args ...interface{}) {
 	genc.globals = append(genc.globals, fmt.Sprintf(format, args...))
 }
 
-func l(lines []string, format string, args ...interface{}) {
-	lines = append(lines, fmt.Sprintf(format, args...))
-}
-
 func (genc *genContext) finishCode() {
 	var hname = fmt.Sprintf("_%s_H", genc.outname)
 
