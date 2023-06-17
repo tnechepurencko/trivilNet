@@ -43,9 +43,9 @@ func OutName(name string) string {
 		case '№':
 			s = "N_"
 		case '?':
-			s = "_Q"
+			s = "Qm"
 		case '!':
-			s = "_E"
+			s = "Em"
 		case 'а':
 			c("a")
 		case 'б':
