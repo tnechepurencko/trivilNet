@@ -106,19 +106,19 @@
 фн (си: СиГен) тип-класса(оп: асд.ОписаниеТипа, тк: асд.ТипКласс) {
 /*
 	пусть tname = си.имя описания(td)
-	пусть tname_fields = tname + nm_class_fields_suffix
-	пусть vt_тип = tname + nm_VT_suffix
+	пусть tname_fields = tname + суффикс-полей-класса
+	пусть vt_тип = tname + суффикс-ВТ
 
 	пусть fields = make([]Строка, длина(x.Fields))
 	пока i, f := range x.Fields {
 		fields[i] = строки.ф("$; $;;",
 			си.указание-типа(f.Typ),
-			си.outName(f.имя)) // без префикса модуля
+			перевести имя(f.имя)) // без префикса модуля
 	}
 
 	си.з("= класс $; {", tname_fields)
 	если x.BaseTyp # пусто {
-		си.з("= класс $;$; $;;", си.baseTypeName(x.BaseTyp), nm_class_fields_suffix, nm_base_fields)
+		си.з("= класс $;$; $;;", си.baseTypeName(x.BaseTyp), суффикс-полей-класса, имя-поля-базового-класса)
 	}
 	си.строки-заголовка = append(си.строки-заголовка, fields...)
 	си.з("};")
@@ -126,7 +126,7 @@
 	си.з("= класс $;;", vt_type)
 
 	си.з("typedef = класс $; { = класс $;* $;; = класс $; $;;} *$;;",
-		tname, vt_type, nm_VT_field, tname_fields, nm_class_fields, tname)
+		tname, vt_type, имя-поля-ВТ, tname_fields, имя-поля-класса, tname)
 
 	си.з("")
 */    
@@ -137,8 +137,8 @@
 /*
 	пусть tname = си.имя описания(td)
 	пусть tname_fields = tname + "_ST"
-	пусть meta_тип = tname + nm_meta_suffix
-	пусть vt_тип = tname + nm_VT_suffix
+	пусть meta_тип = tname + суффикс-структуры-Мета
+	пусть vt_тип = tname + суффикс-ВТ
 
 	си.genMeta(cl, meta_type)
 
@@ -182,13 +182,13 @@
 		пусть base = си.baseTypeName(cl.BaseTyp)
 		си.к("(($;*)$;)->vt.$;((void*)o);",
 			nm_base_class_info_struct,
-			base+nm_class_info_ptr_suffix,
+			base+суффикс-адрес-дескриптора,
 			nm_object_init_suffux)
 	}
 
 	пока _, f := range cl.Fields {
 		если ~f.задать-позже {
-			си.к("o->$;.$; = $;;", nm_class_fields, си.outName(f.имя), си.выражение(f.Init))
+			си.к("o->$;.$; = $;;", имя-поля-класса, перевести имя(f.имя), си.выражение(f.Init))
 		}
 	}
 
@@ -212,7 +212,7 @@
 
 	вернуть строки.ф("$; (*$;)($;);",
 		си.тип-результата(ft),
-		си.outName(f.имя), // только имя, без префикса модуля
+		перевести имя(f.имя), // только имя, без префикса модуля
 		Строкаs.Join(ps, ", "))
 }
 
@@ -224,7 +224,7 @@
 	пусть desc_пусть = tname + nm_class_info_suffix
 	си.к("= класс { = класс $; vt; = класс $; meta; } $;;", vt_type, meta_type, desc_var)
 
-	пусть ptr = строки.ф("void * $;;", tname+nm_class_info_ptr_suffix)
+	пусть ptr = строки.ф("void * $;;", tname+суффикс-адрес-дескриптора)
 	си.з("extern $;", ptr)
 	си.к("$;", ptr)
 
@@ -237,13 +237,13 @@
 	си.к("$;.vt.$; = &$;$;;", desc_var, nm_object_init_suffux, tname, nm_object_init_suffux)
 
 	пока _, f := range vtable {
-		си.к("$;.vt.$; = &$;;", desc_var, си.outName(f.имя), си.имя функции(f))
+		си.к("$;.vt.$; = &$;;", desc_var, перевести имя(f.имя), си.имя функции(f))
 	}
 
 	//-- Meta
 	пусть base = "NULL"
 	если x.BaseTyp # пусто {
-		base = си.baseTypeName(x.BaseTyp) + nm_class_info_ptr_suffix
+		base = си.baseTypeName(x.BaseTyp) + суффикс-адрес-дескриптора
 	}
 	си.к("$;.meta.object_size = sizeof(= класс $;);", desc_var, tname)
 	си.к("$;.meta.base = $;;", desc_var, base)
@@ -253,7 +253,7 @@
 	си.к("$;.meta.name = $;;", desc_var, str)
 
 	//--
-	си.к("$; = &$;;", tname+nm_class_info_ptr_suffix, desc_var)
+	си.к("$; = &$;;", tname+суффикс-адрес-дескриптора, desc_var)
 	си.к("}")
 
 	си.строки-инициализация = append(си.строки-инициализация, строки.ф("$;();", meta_init_fn))

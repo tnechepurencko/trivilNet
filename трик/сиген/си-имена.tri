@@ -10,65 +10,61 @@
 
 конст (
     префикс-имени-типа = "T"
-   	nm_СтрокаLiteral = "strlit" // префикс для имен строковых литералов
+   	префикс-строкового-литерала = "strlit" // префикс для имен строковых литералов
     суффикс-длины-вариативного = "_len"
 )    
 
-/*
 // класс струкура и мета информация
 конст (
-	nm_class_fields        = "f"
-	nm_class_fields_suffix = "_F"
+	имя-поля-класса        = "f"
+	суффикс-полей-класса = "_F"
+	имя-поля-базового-класса = "_BASE"
 
-	nm_base_fields = "_BASE"
-	nm_VT_field    = "vtable"
+	имя-поля-ВТ    = "vtable"
+	имя-поля-Мета = "_meta_"
 
-	nm_VT_suffix             = "_VT"
-	nm_meta_suffix           = "_Meta"
-	nm_meta_field            = "_meta_"
-	nm_class_info_suffix     = "_class_info"
-	nm_class_info_ptr_suffix = "_class_info_ptr"
+	суффикс-структуры-ВТ = "_VT"
+	суффикс-структуры-Мета = "_Meta"
+
+	суффикс-дескриптор     = "_class_info"
+	суффикс-адрес-дескриптора = "_class_info_ptr"
+/*
 	nm_object_init_suffux    = "__init__"
 
 	nm_base_class_info_= класс = "_BaseClassInfo"
-)
 */
-
-// run-time API
-конст (
-	rt_init = "tri_init"  // временно!
-/*
-	rt_префикс = "tri_"
-
-	rt_cast_union = "TUnion64"
-
-	rt_init = rt_префикс + "init"
-
-	rt_newLiteralString = rt_префикс + "newLiteralString" // сохраняет в переменную
-	rt_newString        = rt_префикс + "newString"
-	rt_lenString        = rt_префикс + "lenString"
-	rt_emptyString      = rt_префикс + "emptyString"
-	rt_equalStrings     = rt_префикс + "equalStrings"
-
-	rt_newVector     = rt_префикс + "newVector"
-	rt_newVectorFill = rt_префикс + "newVectorFill"
-
-	rt_indexcheck = rt_префикс + "indexcheck"
-	rt_пустоcheck   = rt_префикс + "пустоcheck"
-
-	rt_newObject      = rt_префикс + "newObject"
-	rt_checkClassType = rt_префикс + "checkClassType"
-	rt_isClassType    = rt_префикс + "isClassType"
-
-	rt_convert = rt_префикс
-
-	rt_crash = rt_префикс + "crash"
-
-	rt_tag = rt_префикс + "tag"
-
-	rt_vectorAppend = rt_префикс + "vectorAppend"
-*/    
 )
+
+
+конст 	(
+    rt_префикс = "tri_"
+    rt_cast_union = "TUnion64"
+    rt_convert = rt_префикс
+)    
+
+//=== run-time API
+пусть rt_init = строки.собрать(rt_префикс, "init")
+
+пусть rt_newLiteralString = строки.собрать(rt_префикс, "newLiteralString") // сохраняет в переменную
+пусть rt_newString          = строки.собрать(rt_префикс, "newString")
+пусть rt_lenString       = строки.собрать(rt_префикс, "lenString")
+пусть rt_emptyString     = строки.собрать(rt_префикс, "emptyString")
+пусть rt_equalStrings    = строки.собрать(rt_префикс, "equalStrings")
+
+пусть rt_newVector    = строки.собрать(rt_префикс, "newVector")
+пусть rt_newVectorFill = строки.собрать(rt_префикс, "newVectorFill")
+
+пусть rt_indexcheck = строки.собрать(rt_префикс, "indexcheck")
+пусть rt_nilcheck  = строки.собрать(rt_префикс, "nilcheck")
+
+пусть rt_newObject     = строки.собрать(rt_префикс, "newObject")
+пусть rt_checkClassType = строки.собрать(rt_префикс, "checkClassType")
+пусть rt_isClassType   = строки.собрать(rt_префикс, "isClassType")
+
+пусть rt_crash= строки.собрать(rt_префикс, "crash")
+пусть rt_tag= строки.собрать(rt_префикс, "tag")
+
+пусть rt_vectorAppend= строки.собрать(rt_префикс, "vectorAppend")
 
 
 // TODO: поставить "_" перед именем

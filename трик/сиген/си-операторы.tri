@@ -181,12 +181,7 @@
 		expr = си.выражение(x.X) + "->body"
 	}
 
-	си.к("$;((char *)$;,$;);", rt_crash, expr, genPos(x.поз))
-}
-
-фн genPos(pos int): Строка {
-	src, line, col := env.SourcePos(pos)
-	вернуть строки.ф("\"$;/$;:%d:%d\"", src.OriginPath, src.FileName, line, col)
+	си.к("$;((char *)$;,$;);", rt_crash, expr, позиция в строку(x.поз))
 }
 
 фн literal(expr асд.Выражение) асд.Литерал {
@@ -310,7 +305,7 @@
 	си.к("$; $; = $;;", си.указание-типа(тек.Л.Т), loc, си.выражение(x.X))
 
 	пусть tag = си.новое локальное имя("tag")
-	си.к("void* $; = $;->$;;", tag, loc, nm_VT_field)
+	си.к("void* $; = $;->$;;", tag, loc, имя-поля-ВТ)
 
 	пусть els = ""
 	пока _, c := range x.Cases {
@@ -318,7 +313,7 @@
 		пусть conds = make([]Строка, 0)
 		пока _, t := range c.Types {
 			пусть tname = си.указание-типа(t)
-			conds = append(conds, строки.ф("$; = $;", tag, tname+nm_class_info_ptr_suffix))
+			conds = append(conds, строки.ф("$; = $;", tag, tname+суффикс-адрес-дескриптора))
 		}
 		си.к("$;если ($;) {", els, Строкаs.Join(conds, " | "))
 		els = "иначе "
