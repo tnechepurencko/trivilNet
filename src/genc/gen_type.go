@@ -18,9 +18,6 @@ func (genc *genContext) typeRef(t ast.Type) string {
 		// Пропускаю type ref до последнего
 		var tr = ast.DirectTypeRef(x)
 		switch y := tr.Typ.(type) {
-		case *ast.TypeRef:
-			fmt.Printf(" !TR2 %v %T\n", y.TypeName, y.Typ)
-			return genc.typeRef(y.Typ)
 		case *ast.MayBeType:
 			return genc.typeRef(y.Typ)
 		case *ast.PredefinedType:
