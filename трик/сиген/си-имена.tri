@@ -8,7 +8,11 @@
 импорт "трик/основа"
 импорт "трик/сиген/перевод-имен"
 
-конст префикс-имени-типа = "T"
+конст (
+    префикс-имени-типа = "T"
+   	nm_СтрокаLiteral = "strlit" // префикс для имен строковых литералов
+    суффикс-длины-вариативного = "_len"
+)    
 
 /*
 // класс струкура и мета информация
@@ -27,58 +31,56 @@
 	nm_object_init_suffux    = "__init__"
 
 	nm_base_class_info_= класс = "_BaseClassInfo"
-
-	nm_variadic_len_suffic = "_len"
 )
-
-// prefixes пока generated names
-конст (
-	nm_СтрокаLiteral = "strlit"
-)
+*/
 
 // run-time API
 конст (
-	rt_prefix = "tri_"
+	rt_init = "tri_init"  // временно!
+/*
+	rt_префикс = "tri_"
 
 	rt_cast_union = "TUnion64"
 
-	rt_init = rt_prefix + "init"
+	rt_init = rt_префикс + "init"
 
-	rt_newLiteralString = rt_prefix + "newLiteralString" // сохраняет в переменную
-	rt_newString        = rt_prefix + "newString"
-	rt_lenString        = rt_prefix + "lenString"
-	rt_emptyString      = rt_prefix + "emptyString"
-	rt_equalStrings     = rt_prefix + "equalStrings"
+	rt_newLiteralString = rt_префикс + "newLiteralString" // сохраняет в переменную
+	rt_newString        = rt_префикс + "newString"
+	rt_lenString        = rt_префикс + "lenString"
+	rt_emptyString      = rt_префикс + "emptyString"
+	rt_equalStrings     = rt_префикс + "equalStrings"
 
-	rt_newVector     = rt_prefix + "newVector"
-	rt_newVectorFill = rt_prefix + "newVectorFill"
-	//rt_lenVector     = rt_prefix + "lenVector"
+	rt_newVector     = rt_префикс + "newVector"
+	rt_newVectorFill = rt_префикс + "newVectorFill"
 
-	rt_indexcheck = rt_prefix + "indexcheck"
-	rt_пустоcheck   = rt_prefix + "пустоcheck"
+	rt_indexcheck = rt_префикс + "indexcheck"
+	rt_пустоcheck   = rt_префикс + "пустоcheck"
 
-	rt_newObject      = rt_prefix + "newObject"
-	rt_checkClassType = rt_prefix + "checkClassType"
-	rt_isClassType    = rt_prefix + "isClassType"
+	rt_newObject      = rt_префикс + "newObject"
+	rt_checkClassType = rt_префикс + "checkClassType"
+	rt_isClassType    = rt_префикс + "isClassType"
 
-	rt_convert = rt_prefix
+	rt_convert = rt_префикс
 
-	rt_crash = rt_prefix + "crash"
+	rt_crash = rt_префикс + "crash"
 
-	rt_tag = rt_prefix + "tag"
+	rt_tag = rt_префикс + "tag"
 
-	rt_vectorAppend = rt_prefix + "vectorAppend"
+	rt_vectorAppend = rt_префикс + "vectorAppend"
+*/    
 )
 
-фн (си: СиГен) localName(prefix Строка) Строка {
-	если prefix = "" {
-		prefix = "loc"
+
+// TODO: поставить "_" перед именем
+фн (си: СиГен) новое локальное имя(префикс: Строка): Строка {
+	если префикс = "" {
+		префикс := "loc"
 	}
 
-	си.autoNo++
-	вернуть строки.ф("$;%d", prefix, си.autoNo)
+	си.авто-№++
+	вернуть строки.ф("$;%d", префикс, си.авто-№)
 }
-*/
+
 //==
 
 фн (си: СиГен) имя описания(оп: асд.Описание): Строка {
@@ -94,7 +96,7 @@
     
         если ф.внешняя  {
             
-            пусть имя := ф.модификатор^.атрибут("имя")
+            пусть имя := асд.атрибут модификатора(ф.модификатор, "имя")
             если имя = "" {
                 имя := перевести имя(ф.имя) 
             }
@@ -122,15 +124,13 @@
 	вернуть имя
 }
 
-/*
-фн (си: СиГен) фнtionName(f асд.Функция) Строка {
+фн (си: СиГен) имя функции(ф: асд.Функция): Строка {
 
-	если f.Recv # пусто {
-		вернуть си.указание-типа(f.Recv.Typ) + "_" + си.outName(f.имя)
+	если ф.получатель # пусто {
+		вернуть строки.ф("$;_$;", си.указание-типа(ф.получатель^.Т^) , перевести имя(ф.имя))
 	}
-	вернуть си.имя описания(f)
+	вернуть си.имя описания(ф)
 }
-*/
 
 //==== трансляция имен
 

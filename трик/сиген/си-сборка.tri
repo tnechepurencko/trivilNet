@@ -63,7 +63,7 @@
 		mainCmd = "bash"
 		arg = path.Join(absoluteFolder, script)
 	другое
-		panic("build not implemented пока " + runtime.GOOS)
+		авария("build not implemented пока " + runtime.GOOS)
 	}
 
 	пусть cmd = exec.Command(mainCmd, arg)
@@ -79,7 +79,7 @@
 
 пусть settings []Строка
 
-фн findTemplate(name Строка) Строка {
+фн findTemplate(name Строка): Строка {
 
 	если settings = пусто {
 
