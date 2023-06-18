@@ -248,7 +248,7 @@
 	си.к("$;.meta.object_size = sizeof(= класс $;);", desc_var, tname)
 	си.к("$;.meta.base = $;;", desc_var, base)
 
-	пусть str = строки.ф("$;(%d, %d, \"$;\")", rt_newString, длина(className), -1, className)
+	пусть str = строки.ф("$;($;, $;, \"$;\")", rt_newString, длина(className), -1, className)
 
 	си.к("$;.meta.name = $;;", desc_var, str)
 
@@ -278,7 +278,7 @@
 	}
 	col.addMethods(тек)
 
-	//fmt.Printf("~ len = %d\n", длина(col.vtable))
+	//fmt.Printf("~ len = $;\n", длина(col.vtable))
 }
 
 фн (col *collector) addMethods(sub асд.ТипКласс) {
