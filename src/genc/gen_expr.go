@@ -305,8 +305,8 @@ func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 			if xt == ast.String8 {
 				return genc.genVectorIndex(x.X, x.Index, "bytes")
 			}
-			panic("assert")
 		}
+		panic("assert")
 	}
 
 	return genc.genArrayComposite(x.Composite)
