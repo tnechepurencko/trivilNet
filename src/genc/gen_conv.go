@@ -155,6 +155,7 @@ func (genc *genContext) genCastToWord64(expr string, exprTyp ast.Type) string {
 	case ast.IsReferenceType(from):
 		return fmt.Sprintf("((%s)(void*)%s).w", rt_cast_union, expr)
 	default:
-		return fmt.Sprintf("((%s)%s).w", rt_cast_union, expr)
+		//return fmt.Sprintf("((%s)%s).w", rt_cast_union, expr)
+		return fmt.Sprintf("(%s)%s", predefinedTypeName(ast.Word64.Name), expr)
 	}
 }
