@@ -47,6 +47,11 @@ func (genc *genContext) forwardTypeName(td *ast.TypeDecl) string {
 
 // Выдает имя типа, чтобы использовать его с суффиксами, например, _ST
 func (genc *genContext) baseTypeName(t ast.Type) string {
+
+	var tr = ast.DirectTypeRef(t)
+	return genc.declName(tr.TypeDecl)
+
+	/* предыдущая странная версия
 	switch x := t.(type) {
 	case *ast.TypeRef:
 		switch y := x.Typ.(type) {
@@ -60,6 +65,7 @@ func (genc *genContext) baseTypeName(t ast.Type) string {
 	default:
 		panic(fmt.Sprintf("assert: %T", t))
 	}
+	*/
 }
 
 func predefinedTypeName(name string) string {
@@ -277,15 +283,16 @@ func (col *collector) collectVTable(x *ast.ClassType) {
 	col.vtable = make([]*ast.Function, 0)
 	col.done = make(map[string]struct{})
 
-	if x.BaseTyp != nil {
-		col.addMethods(ast.UnderType(x.BaseTyp).(*ast.ClassType))
-	}
 	col.addMethods(x)
 
 	//fmt.Printf("! len = %d\n", len(col.vtable))
 }
 
 func (col *collector) addMethods(sub *ast.ClassType) {
+
+	if sub.BaseTyp != nil {
+		col.addMethods(ast.UnderType(sub.BaseTyp).(*ast.ClassType))
+	}
 
 	for _, m := range sub.Methods {
 
