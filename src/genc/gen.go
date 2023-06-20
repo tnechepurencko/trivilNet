@@ -70,7 +70,7 @@ func (genc *genContext) finishCode() {
 	genc.h("#ifndef %s", hname)
 	genc.h("#define %s", hname)
 
-	genc.includeSysAPI(true)
+	genc.includeSysAPI(genc.header, true)
 	genc.h("")
 
 	genc.header = append(genc.header, lines...)
@@ -83,7 +83,7 @@ func (genc *genContext) finishCode() {
 
 	genc.c("#include \"rt_api.h\"")
 	genc.c("#include \"%s\"", genc.outname+".h")
-	genc.includeSysAPI(false)
+	genc.includeSysAPI(genc.code, false)
 	genc.c("")
 
 	if len(genc.globals) != 0 {
@@ -96,12 +96,14 @@ func (genc *genContext) finishCode() {
 	genc.code = append(genc.code, lines...)
 }
 
-func (genc *genContext) includeSysAPI(header bool) {
+func (genc *genContext) includeSysAPI(list []string, header bool) {
 	for name, exported := range genc.sysAPI {
-		if exported {
-			genc.h("#include \"%s.h\"", name)
-		} else {
-			genc.c("#include \"%s.h\"", name)
+		if header == exported {
+			if header {
+				genc.h("#include \"%s.h\"", name)
+			} else {
+				genc.c("#include \"%s.h\"", name)
+			}
 		}
 	}
 }
