@@ -296,19 +296,16 @@ func (col *collector) addMethods(sub *ast.ClassType) {
 
 	for _, m := range sub.Methods {
 
-		d, ok := col.cl.Members[m.Name]
-		if !ok {
-			panic("assert")
-		}
+		if _, ok := col.done[m.Name]; !ok {
 
-		f := d.(*ast.Function)
+			d, ok := col.cl.Members[m.Name]
+			if !ok {
+				panic("assert")
+			}
 
-		_, ok = col.done[f.Name]
-		if !ok {
 			col.vtable = append(col.vtable, d.(*ast.Function))
-			col.done[f.Name] = struct{}{}
+			col.done[m.Name] = struct{}{}
 			//fmt.Printf("! add %s\n", f.Name)
 		}
 	}
-
 }
