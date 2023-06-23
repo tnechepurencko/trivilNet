@@ -1,31 +1,33 @@
 модуль сиген
 
 импорт "стд::вывод"
-//импорт "стд::строки"
+импорт "стд::строки"
+импорт "стд::файлы"
 
 импорт "трик/асд"
-//импорт "трик/основа"
-//импорт "трик/лексер"
+импорт "трик/основа"
 
-/*
 конст (
-	conf_file_name = "config/си.txt"
-	place_files    = "#files#"
-	place_target   = "#target#"
-	place_runtime  = "#runtime#"
-	place_genc     = "#genc#"
+	имя-конфиг-файла = "config/си.txt"
+	место-папка-файлов     = "#genc#"
+	место-файлы    = "#files#"
+	место-имя-цели   = "#target#"
+	место-папка-runtime  = "#runtime#"
 )
 
-пусть _ = fmt.Printf
+тип Модули = []асд.Модуль
 
-фн BuildExe(modules []асд.Модуль) {
-	//fmt.Printf("build: $;\n", runtime.GOOS)
+фн построить исполняемый файл*(модули: Модули) {
 
-	//== setup command
-	пусть command = findTemplate(runtime.GOOS + "-build")
-	если command = "" {
-		вернуть
-	}
+    пусть настройки = прочитать конфигурацию()
+	надо основа.число ошибок() = 0 иначе вернуть
+
+    пусть имя = "windows-build" //runtime.GOOS + "-script"
+
+    пусть команда = найти настройку(настройки, имя)
+    надо команда # "" иначе вернуть 
+
+/*
 	пусть names = make([]Строка, длина(modules))
 	пока i, m := range modules {
 		names[i] = env.OutName(m.имя) + ".c"
@@ -33,13 +35,13 @@
 
 	пусть target = env.OutName(modules[len(modules)-1].имя)
 
-	command = Строкаs.ReplaceAll(command, place_files, Строкаs.Join(names, " "))
-	command = Строкаs.ReplaceAll(command, place_runtime, env.RuntimePath())
-	command = Строкаs.ReplaceAll(command, place_target, target)
+	command = Строкаs.ReplaceAll(command, место-файлы, Строкаs.Join(names, " "))
+	command = Строкаs.ReplaceAll(command, место-папка-runtime, env.RuntimePath())
+	command = Строкаs.ReplaceAll(command, место-имя-цели, target)
 
 	пусть folder = env.PrepareOutFolder()
 	gencAbsolute, _ := filepath.Abs(folder)
-	command = Строкаs.ReplaceAll(command, place_genc, gencAbsolute)
+	command = Строкаs.ReplaceAll(command, место-папка-файлов, gencAbsolute)
 
 	//== write script file
 	пусть script = findTemplate(runtime.GOOS + "-script")
@@ -73,38 +75,43 @@
 	} иначе {
 		fmt.Printf("Execute: $;/$;  Rebuild C code: $;/$;\n", folder, target, folder, script)
 	}
+*/    
 }
 
-//== genc configuration
+//==== конфигурация
 
-пусть settings []Строка
+фн прочитать конфигурацию(): Строки {
 
-фн findTemplate(name Строка): Строка {
-
-	если settings = пусто {
-
-		buf, err := os.ReadFile(env.SettingsRelativePath(conf_file_name))
-		если err # пусто {
-			env.AddProgramError("ГЕН-ОШ-КОНФ-ФАЙЛА", err.Error())
-			вернуть ""
-		}
-
-		settings = Строкаs.Split(Строка(buf[:]), "\n")
+    пусть путь = основа.собрать путь настройки(имя-конфиг-файла)
+    пусть файл = файлы.новый файл(путь)
+    пусть байты = файл.прочитать()    
+	если файл.ошибка?() # пусто {
+		основа.добавить общую ошибку("ГЕН-ОШ-КОНФ-ФАЙЛА", файл.ошибка?()^.сообщение())
+		вернуть Строки[]
 	}
+    
+	вернуть строки.разобрать(байты(:Строка), "\n")
+}    
 
-	пока _, s := range settings {
-		если Строкаs.HasPrefix(s, name) {
-			пусть pair = Строкаs.SplitN(s, ":", 2)
-			если длина(pair) = 2 & Строкаs.TrimSpace(pair[1]) # "" {
-				вернуть Строкаs.TrimSpace(pair[1])
-			}
-			env.AddProgramError("ГЕН-ОШ-НАСТРОЙКА", conf_file_name, name)
-			вернуть ""
+
+фн найти настройку(настройки: Строки, имя: Строка): Строка {
+
+	цикл стр среди настройки {
+		если строки.есть префикс(стр, имя) {
+            пусть левая := ""
+            пусть правая := ""
+			если строки.разделить(стр, ":", левая, правая) {
+                пусть настройка = строки.обрезать пробельные символы(правая)
+                надо настройка # "" иначе {
+                    основа.добавить общую ошибку("ГЕН-ОШ-НАСТРОЙКА", имя-конфиг-файла, имя)
+                    вернуть ""
+                }
+                вернуть настройка 
+            }
 		}
 	}
-
-	env.AddProgramError("ГЕН-ОШ-НАСТРОЙКА", conf_file_name, name)
+	основа.добавить общую ошибку("ГЕН-ОШ-НАСТРОЙКА", имя-конфиг-файла, имя)
 	вернуть ""
 }
 
-*/
+
