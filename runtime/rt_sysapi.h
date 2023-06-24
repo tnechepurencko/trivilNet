@@ -6,7 +6,10 @@
 //=== платформа
 
 // Выдает вид ОС: windows | linux | unknown
-EXPORTED TString sysapi_os_kind() ;
+EXPORTED TString sysapi_os_kind();
+
+// Выполняет команду, возращает истину в случае успешного выполнения
+EXPORTED TBool sysapi_exec(TString cmd);
 
 //=== вещественные (временно)
 

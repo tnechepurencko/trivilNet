@@ -9,13 +9,16 @@ struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
 //=== платформа
 
 EXPORTED TString sysapi_os_kind() {
-    
 #ifndef _WIN32
         return tri_newString(5, 5, "linux"); 
 #else
         return tri_newString(7, 7, "windows"); 
 #endif    
-    
+}
+
+EXPORTED TBool sysapi_exec(TString cmd) {
+    int res = system((char *)cmd->body);
+    return res == 0;    
 }
 
 //=== вещественные (временно)
