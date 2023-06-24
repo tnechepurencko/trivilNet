@@ -1,0 +1,138 @@
+модуль компилятор
+
+импорт "стд::вывод"
+импорт "стд::файлы"
+
+импорт "трик/асд"
+импорт "трик/основа"
+
+// TODO: сделать конфигурационный файл (для всего компилятора)
+/*
+конст (
+	testsFolderName   = "_тест_"
+	testEntryPath     = "стд::тестирование/тест-вход"
+	patternImportPath = "№путь-тестируемого№"
+	patternModuleName = "№имя-тестируемого№"
+)
+*/
+
+фн тестировать-модуль*(исходный-путь: Строка) {
+    вывод.ф("тестировать $;\n", исходный-путь)
+/*
+	env.Normalizer.Process(tpath)
+	если env.Normalizer.Err # пусто {
+		env.AddProgramError("ОКР-ОШ-ПУТЬ", tpath, env.Normalizer.Err.Error())
+		вернуть
+	}
+
+	пусть npath = env.Normalizer.NPath
+
+	пусть cc = &compileContext{
+		импортed:       make(map[Строка]асд.Модуль),
+		folders:        make(map[асд.Модуль]Строка),
+		testModulePath: tpath,
+	}
+
+	// Подготовка головного модуля тестирования
+	пусть list = prepareTestEntry(tpath, npath)
+	если основа.число ошибок() # 0 {
+		вернуть
+	}
+
+	cc.main = cc.parseModule(истина, list)
+
+	если основа.число ошибок() # 0 {
+		вернуть
+	}
+
+	cc.build()
+*/    
+}
+
+//== добавление тестов ==
+/*
+фн collectTestSources(tpath, npath Строка) []основа.Исходник {
+
+	пусть list = getTestSources(path.Join(tpath, testsFolderName), path.Join(npath, testsFolderName))
+	если list = пусто {
+		env.AddProgramError("ОКР-ОШ-НЕТ-ТЕСТОВ", path.Join(npath, testsFolderName))
+		вернуть пусто
+	}
+
+	вернуть list
+}
+
+фн getTestSources(tpath, npath Строка) []основа.Исходник {
+	пусть err = env.EnsureFolder(npath)
+	если err # пусто {
+		вернуть пусто
+	}
+
+	пусть list = env.GetFolderSources(tpath, npath)
+
+	если len(list) = 0 {
+		вернуть пусто
+	}
+
+	если len(list) = 1 & list[0].Err # пусто {
+		вернуть пусто
+	}
+
+	вернуть list
+}
+
+// == тест вход
+
+// Получает пути к тестируемому модулю
+фн prepareTestEntry(tpath, npath Строка) []основа.Исходник {
+
+	пусть list = getTestEntrySource()
+	если list = пусто {
+		panic("нет входа в тестирование")
+		вернуть пусто
+	}
+
+	если len(list) # 1 {
+		panic("тест-вход - должен быть один исходный файл")
+	}
+
+	пусть text = Строка(list[0].Bytes)
+
+	text = Строкаs.ReplaceAll(text, patternImportPath, tpath)
+	text = Строкаs.ReplaceAll(text, patternModuleName, filepath.Base(npath))
+
+	//вывод.ф("~~ $; $;\n", npath, filepath.Base(npath))
+
+	list[0].Bytes = []byte(text)
+
+	вернуть list
+}
+
+фн getTestEntrySource() []основа.Исходник {
+
+	env.Normalizer.Process(testEntryPath)
+	если env.Normalizer.Err # пусто {
+		env.AddProgramError("ОКР-НЕТ-ТЕСТ-ВХОДА", testEntryPath, env.Normalizer.Err.Error())
+		вернуть пусто
+	}
+
+	пусть npath = env.Normalizer.NPath
+
+	пусть err = env.EnsureFolder(npath)
+	если err # пусто {
+		вернуть пусто
+	}
+
+	пусть list = env.GetFolderSources(testEntryPath, npath)
+
+	если len(list) = 0 {
+		вернуть пусто
+	}
+
+	если len(list) = 1 & list[0].Err # пусто {
+		вернуть пусто
+	}
+
+	вернуть list
+}
+*/
