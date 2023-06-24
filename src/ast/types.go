@@ -241,8 +241,8 @@ func IsReferenceType(t Type) bool {
 
 // Объекты каких типов имеют тег
 func HasTag(t Type) bool {
-	return !IsVariadicType(t) //пока так, можно разрешить для всех, но потом
-
+	//пока так, можно разрешить для всех, но потом
+	return !IsVariadicType(t) && !IsFuncType(t)
 }
 
 //==== invalid type
