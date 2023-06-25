@@ -12,10 +12,11 @@ const typeNamePrefix = "T"
 
 // класс струкура и мета информация
 const (
-	nm_class_struct_suffix = "_ST"
 	nm_class_fields        = "f"
-	nm_base_fields         = "_B"
-	nm_VT_field            = "vtable"
+	nm_class_fields_suffix = "_F"
+
+	nm_base_fields = "_BASE"
+	nm_VT_field    = "vtable"
 
 	nm_VT_suffix             = "_VT"
 	nm_meta_suffix           = "_Meta"
@@ -42,7 +43,8 @@ const (
 
 	rt_init = rt_prefix + "init"
 
-	rt_newLiteralString = rt_prefix + "newLiteralString"
+	rt_newLiteralString = rt_prefix + "newLiteralString" // сохраняет в переменную
+	rt_newString        = rt_prefix + "newString"
 	rt_lenString        = rt_prefix + "lenString"
 	rt_emptyString      = rt_prefix + "emptyString"
 	rt_equalStrings     = rt_prefix + "equalStrings"

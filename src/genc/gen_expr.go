@@ -99,11 +99,11 @@ func (genc *genContext) genLiteral(li *ast.LiteralExpr) string {
 	case ast.Lit_Int:
 		return fmt.Sprintf("%d", li.IntVal)
 	case ast.Lit_Word:
-		return fmt.Sprintf("0x%x", li.WordVal)
+		return fmt.Sprintf("0x%X", li.WordVal)
 	case ast.Lit_Float:
 		return li.FloatStr
 	case ast.Lit_Symbol:
-		return fmt.Sprintf("0x%x", li.WordVal)
+		return fmt.Sprintf("0x%X", li.WordVal)
 	case ast.Lit_String:
 		return genc.genStringLiteral(li)
 	default:
@@ -305,8 +305,8 @@ func (genc *genContext) genBracketExpr(x *ast.GeneralBracketExpr) string {
 			if xt == ast.String8 {
 				return genc.genVectorIndex(x.X, x.Index, "bytes")
 			}
-			panic("assert")
 		}
+		panic("assert")
 	}
 
 	return genc.genArrayComposite(x.Composite)

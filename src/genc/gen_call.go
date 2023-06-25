@@ -133,15 +133,18 @@ func (genc *genContext) genVariadicTaggedArgs(call *ast.CallExpr, vPar *ast.Para
 }
 
 func (genc *genContext) castToWord64(e ast.Expr) string {
-	var s = genc.genExpr(e)
-	switch ast.UnderType(e.GetType()) {
-	case ast.Float64:
-		return fmt.Sprintf("((%s)%s).w", rt_cast_union, s)
-	case ast.Word64:
-		return s
-	default:
-		return fmt.Sprintf("(%s)%s", predefinedTypeName(ast.Word64.Name), s)
-	}
+	return genc.genCastToWord64(genc.genExpr(e), e.GetType())
+	/*
+		var s = genc.genExpr(e)
+		switch ast.UnderType(e.GetType()) {
+		case ast.Float64:
+			return fmt.Sprintf("((%s)%s).w", rt_cast_union, s)
+		case ast.Word64:
+			return s
+		default:
+			return fmt.Sprintf("(%s)%s", predefinedTypeName(ast.Word64.Name), s)
+		}
+	*/
 }
 
 func isMethodCall(left ast.Expr) bool {
@@ -255,13 +258,16 @@ func (genc *genContext) genStdTag(call *ast.CallExpr) string {
 }
 
 // Выдает тег по статическому типу
-func (genc *genContext) genTypeTag(t ast.Type) string {
-	t = ast.UnderType(t)
+func (genc *genContext) genTypeTag(typ ast.Type) string {
+	var t = ast.UnderType(typ)
 	switch x := t.(type) {
 	case *ast.PredefinedType:
 		return fmt.Sprintf("%s%s()", rt_tag, predefinedTypeName(x.Name))
 	case *ast.ClassType:
-		panic("ni")
+		var tr = ast.DirectTypeRef(typ)
+		return fmt.Sprintf("((%s)%s).w",
+			rt_cast_union,
+			genc.declName(tr.TypeDecl)+nm_class_info_ptr_suffix)
 	case *ast.VectorType:
 		panic("ni")
 	case *ast.MayBeType:

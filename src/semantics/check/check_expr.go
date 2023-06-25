@@ -288,7 +288,8 @@ func (cc *checkContext) binaryExpr(x *ast.BinaryExpr) {
 
 	case lexer.EQ, lexer.NEQ:
 		var t = ast.UnderType(x.X.GetType())
-		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 || t == ast.Symbol || t == ast.String {
+		if t == ast.Byte || t == ast.Int64 || t == ast.Float64 || t == ast.Word64 ||
+			t == ast.Symbol || t == ast.String || t == ast.Bool {
 			checkOperandTypes(x)
 		} else if ast.IsClassType(t) {
 			checkClassOperands(x)
@@ -359,7 +360,13 @@ func (cc *checkContext) ofTypeExpr(x *ast.OfTypeExpr) {
 
 	x.Typ = ast.Bool
 
-	t, ok := ast.UnderType(x.X.GetType()).(*ast.ClassType)
+	var t = x.X.GetType()
+	maybe, ok := ast.UnderType(t).(*ast.MayBeType)
+	if ok {
+		t = maybe.Typ
+	}
+
+	cl, ok := ast.UnderType(t).(*ast.ClassType)
 	if !ok {
 		env.AddError(x.X.GetPos(), "СЕМ-ОПЕРАЦИЯ-ТИПА", ast.TypeName(x.X.GetType()))
 		return
@@ -377,8 +384,8 @@ func (cc *checkContext) ofTypeExpr(x *ast.OfTypeExpr) {
 		}
 	*/
 
-	if !isDerivedClass(t, target) {
-		env.AddError(x.Pos, "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
+	if !isDerivedClass(cl, target) {
+		env.AddError(x.Pos, "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(x.TargetTyp), ast.TypeName(t))
 	}
 
 }

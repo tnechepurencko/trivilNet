@@ -16,17 +16,30 @@ typedef struct VectorDesc {
 
 //==== crash
 
+static TBool printReturnAddr = false;
+static int printStackDepth = 20;
+
+EXPORTED void  printStack(TBool printReturnAddr, int maxFuncs);
+
  _Noreturn void panic() {
     exit(1);
 }
 
  _Noreturn void runtime_crash(char* s) {
 	printf("!crash: %s\n", s);
+    printStack(printReturnAddr, printStackDepth);
     panic();
 }
 
  _Noreturn void runtime_crash_pos(char* position, char* s) {
 	printf("!crash at %s: %s\n", position, s);
+    printStack(printReturnAddr, printStackDepth);
+    panic();
+}
+
+EXPORTED  _Noreturn void tri_crash(char* msg, char* pos) {
+	printf("авария '%s' (%s)\n", msg, pos);
+    printStack(printReturnAddr, printStackDepth);
     panic();
 }
 
@@ -498,7 +511,10 @@ EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 }
 
 EXPORTED TBool tri_isClassType(void* object, void* target_desc) {
-    	_BaseVT* current_vt = ((_BaseObject*)object)->vtable;
+    
+    if (object == NULL) return false;
+    
+    _BaseVT* current_vt = ((_BaseObject*)object)->vtable;
 	
 	if (current_vt == target_desc) {
 //printf("found self\n");
@@ -689,13 +705,16 @@ enum Tags {
     tag_string,
     tag_tag,
     
-    tag_class
+    tag_class, // не используется - поставить в мете?
+    max_tag = 31
 };
 
 #define size_shift 8
 #define tag_id_shift 3
 
+#define tag_flag_mask 7 // 3 признака максимум
 #define flag_lang 1
+#define flag_vector 2
 
 EXPORTED TWord64 tri_tagTByte() {
     return 1 << size_shift | tag_unsigned << tag_id_shift | flag_lang;
@@ -723,6 +742,28 @@ EXPORTED TWord64 tri_tagTSymbol() {
 
 EXPORTED TWord64 tri_tagTString() {
     return 8 << size_shift | tag_string << tag_id_shift | flag_lang;
+}
+
+EXPORTED TBool tri_isClassTag(TWord64 tag) {
+    return (tag & tag_flag_mask) == 0;
+}
+
+EXPORTED TString tri_className(TWord64 tag) {
+    if ((tag & tag_flag_mask) != 0) tri_crash("тег не является тегом класса", "");
+    
+	_BaseVT* vt = (void*) tag;
+	size_t vt_sz = vt->self_size;
+
+	_BaseMeta* m = (void*) tag + vt_sz;
+
+    if (m->name == NULL) tri_crash("не задано имя класса", "");
+    
+    return m->name;
+}
+
+EXPORTED TWord64 tri_tagObject(TWord64 o) {
+        _BaseObject* obj = (void*) o;
+        return (TWord64) obj->vtable;
 }
 
 //==== console
@@ -763,13 +804,6 @@ EXPORTED void print_bool(TBool b) {
 
 EXPORTED void println() {
   printf("\n");
-}
-
-//==== crash
-
-EXPORTED  _Noreturn void tri_crash(char* msg, char* pos) {
-	printf("авария '%s' (%s)\n", msg, pos);
-    panic();
 }
 
 //==== аргументы
