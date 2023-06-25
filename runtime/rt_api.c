@@ -486,7 +486,12 @@ EXPORTED void* tri_newObject(void* class_desc) {
 }
 
 EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
-	
+
+    if (object == NULL) {
+      	runtime_crash("ошибка преобразования к классу: объект = пусто");  
+        return NULL;
+    }
+    
 	_BaseVT* current_vt = ((_BaseObject*)object)->vtable;
 	
 	if (current_vt == target_desc) {
@@ -505,7 +510,7 @@ EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 		m = (void *)current_vt + current_vt->self_size;
 	}
 	
-	runtime_crash("failed class type check");
+	runtime_crash("ошибка преобразования к классу");
 	
 	return NULL;
 }
