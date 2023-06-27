@@ -15,13 +15,28 @@ xcopy /q /y /k /i doc\*.xml %1\doc
 xcopy /q /y /k /i config\*.* %1\config
 
 cd src
-
 go build trivil.go
-if exist trivil.exe (
-	move trivil.exe %1\tric.exe
-) else (
- 	echo compilation failed
+if  not exist trivil.exe (
+ 	echo ошибка при выполнении go build
 	exit
 )
+
+cd ..
+move src\trivil.exe tric.exe
+del /q trik.exe
+
+rem tric -exe=false трик
+tric трик
+rem cd _genc
+rem call build.bat
+rem cd ..
+    
+if not exist trik.exe (
+        echo ошибка при компиляции трик компилятора
+        exit
+)
+
+move tric.exe %1\tric.exe
+move trik.exe %1\трик.exe
 
 echo success
