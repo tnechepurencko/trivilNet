@@ -132,7 +132,16 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 	switch x := v.Typ.(type) {
 	case *ast.VectorType:
 		lc.lookTypeRef(x.ElementTyp)
-		lc.checkRecursion(x.ElementTyp)
+		// проверяю на []мб Т - это самая длинная в Тривиле цепочка,
+		// если будут анонимные типы вектора, надо переделывать
+		var t = x.ElementTyp
+		if maybe, ok := t.(*ast.MayBeType); ok {
+			lc.lookTypeRef(maybe.Typ)
+			t = maybe.Typ
+		}
+		if !ast.IsClassType(t) {
+			lc.checkRecursion(t)
+		}
 
 	case *ast.ClassType:
 		if x.BaseTyp != nil {
@@ -176,12 +185,14 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 }
 
 func (lc *lookContext) checkRecursion(t ast.Type) {
+
 	tr, ok := t.(*ast.TypeRef)
-	if ok {
-		tr = ast.DirectTypeRef(tr)
-		var td = tr.TypeDecl
-		if td.GetHost() == lc.module {
-			lc.lookDecl(td)
-		}
+	if !ok {
+		return
+	}
+	tr = ast.DirectTypeRef(tr)
+	var td = tr.TypeDecl
+	if td.GetHost() == lc.module {
+		lc.lookDecl(td)
 	}
 }
