@@ -216,7 +216,13 @@ func (genc *genContext) genMethodField(f *ast.Function, tname string) string {
 			ps[i+1] = "TInt64"
 			ps = append(ps, "void*")
 		} else {
-			ps[i+1] = genc.typeRef(p.Typ)
+
+			var out = ""
+			if p.Out {
+				out = "*"
+			}
+
+			ps[i+1] = fmt.Sprintf("%s%s", genc.typeRef(p.Typ), out)
 		}
 	}
 
