@@ -15,7 +15,7 @@ xcopy /q /y /k /i doc\*.xml %1\doc
 xcopy /q /y /k /i config\*.* %1\config
 
 cd src
-echo go build...
+echo строим tric компилятор (Go)...
 go build trivil.go
 if  not exist trivil.exe (
  	echo ошибка при выполнении go build
