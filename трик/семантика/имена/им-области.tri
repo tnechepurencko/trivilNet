@@ -25,7 +25,6 @@
 
 	пока истина {
 		если тек = пусто {
-			//ast.ShowScopes("not found "+name, scope)
 			вернуть пусто
 		}
 
