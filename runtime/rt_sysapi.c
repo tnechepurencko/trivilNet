@@ -55,7 +55,7 @@ TString error_id(int errcode) {
     char buf[80];
     
     switch (errcode) {
-    case ENOENT: strcpy_s(buf, 80, "ФАЙЛ-НЕ-НАЙДЕН"); break;
+    case ENOENT: strcpy(buf, "ФАЙЛ-НЕ-НАЙДЕН"); break;
     default:
         sprintf(buf, "ОШИБКА[%d]", errcode); 
     }
@@ -89,11 +89,10 @@ EXPORTED void* sysapi_fread(void* request, TString filename) {
     
     struct Request* req = request;
     
-    FILE* fp;
+    FILE* fp = fopen((char *)filename->body, "rb");
 
-    int errcode = fopen_s(&fp, (char *)filename->body, "rb");
-    if (errcode != 0) {
-        req->err_id = error_id(errcode);
+    if (fp == NULL) {
+        req->err_id = error_id(errno);
         return NULL;
     }
 
@@ -121,11 +120,9 @@ EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes) {
     
     struct Request* req = request;
     
-    FILE* fp;
-
-    int errcode = fopen_s(&fp, (char *)filename->body, "wb");
-    if (errcode != 0) {
-        req->err_id = error_id(errcode);
+    FILE* fp = fopen((char *)filename->body, "wb");
+    if (fp == NULL) {
+        req->err_id = error_id(errno);
         return;
     }
     
