@@ -174,3 +174,6 @@ EXPORTED void register_default_crash_handler() {
   set_signal_handler();
 }
 
+void printStack(_Bool printReturnAddr, int maxFuncs) {
+    posix_print_stack_trace();
+}

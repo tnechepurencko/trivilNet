@@ -243,8 +243,9 @@ func (genc *genContext) genSelectAsSwitch(x *ast.Select) {
 	}
 
 	if x.Else != nil {
-		genc.c("default:")
+		genc.c("default:{")
 		genc.genStatementSeq(x.Else)
+		genc.c("}");
 	}
 
 	genc.c("}")
