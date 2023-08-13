@@ -132,7 +132,16 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 	switch x := v.Typ.(type) {
 	case *ast.VectorType:
 		lc.lookTypeRef(x.ElementTyp)
-		lc.checkRecursion(x.ElementTyp)
+		// проверяю на []мб Т - это самая длинная в Тривиле цепочка,
+		// если будут анонимные типы вектора, надо переделывать
+		var t = x.ElementTyp
+		if maybe, ok := t.(*ast.MayBeType); ok {
+			lc.lookTypeRef(maybe.Typ)
+			t = maybe.Typ
+		}
+		if !ast.IsClassType(t) {
+			lc.checkRecursion(t)
+		}
 
 	case *ast.ClassType:
 		if x.BaseTyp != nil {
@@ -147,14 +156,28 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 				lc.lookExpr(f.Init)
 			}
 		}
-	case *ast.TypeRef:
-		lc.lookTypeRef(x)
+
 	case *ast.MayBeType:
 		lc.lookTypeRef(x.Typ)
+		lc.checkRecursion(x.Typ)
 
 		if !ast.IsReferenceType(ast.UnderType(x.Typ)) {
 			env.AddError(x.Typ.GetPos(), "СЕМ-МБ-ТИП-НЕ-ССЫЛКА", ast.TypeName(x.Typ))
 		}
+
+	case *ast.TypeRef:
+		lc.lookTypeRef(x)
+		var td = x.TypeDecl
+
+		completed, exist := lc.processed[td]
+		if exist {
+			if !completed {
+				env.AddError(td.GetPos(), "СЕМ-РЕКУРСИВНОЕ-ОПРЕДЕЛЕНИЕ", td.GetName())
+			}
+		} else if td.GetHost() == lc.module {
+			lc.lookDecl(td)
+		}
+
 	case *ast.InvalidType:
 	default:
 		panic(fmt.Sprintf("lookTypeDecl: ni %T", v.Typ))
@@ -162,12 +185,14 @@ func (lc *lookContext) lookTypeDecl(v *ast.TypeDecl) {
 }
 
 func (lc *lookContext) checkRecursion(t ast.Type) {
+
 	tr, ok := t.(*ast.TypeRef)
-	if ok {
-		tr = ast.DirectTypeRef(tr)
-		var td = tr.TypeDecl
-		if td.GetHost() == lc.module {
-			lc.lookDecl(td)
-		}
+	if !ok {
+		return
+	}
+	tr = ast.DirectTypeRef(tr)
+	var td = tr.TypeDecl
+	if td.GetHost() == lc.module {
+		lc.lookDecl(td)
 	}
 }

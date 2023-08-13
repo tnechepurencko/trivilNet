@@ -84,11 +84,18 @@ func RuntimePath() string {
 }
 
 func initFolders() {
-	baseFolder = filepath.ToSlash(filepath.Dir(os.Args[0]))
+	var dir = filepath.Dir(os.Args[0])
+	var err error
+	baseFolder, err = filepath.Abs(dir)
+	if err != nil {
+		panic(fmt.Sprintf("filepath.Abs(%s): %s", dir, err.Error()))
+	}
+
+	baseFolder = filepath.ToSlash(baseFolder)
 
 	var stdPath = path.Join(baseFolder, stdName)
 
-	var err = EnsureFolder(stdPath)
+	err = EnsureFolder(stdPath)
 	if err == nil {
 		sourceRoots[stdName] = stdPath
 	}

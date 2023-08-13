@@ -68,7 +68,6 @@ func (cc *checkContext) conversion(x *ast.ConversionExpr) {
 
 	env.AddError(x.Pos, "СЕМ-ОШ-ПРИВЕДЕНИЯ-ТИПА", ast.TypeName(x.X.GetType()), ast.TypeName(x.TargetTyp))
 	x.Typ = ast.MakeInvalidType(x.Pos)
-	//panic(fmt.Sprintf("ni %T '%s'", target, ast.TypeString(target)))
 }
 
 func (cc *checkContext) conversionToByte(x *ast.ConversionExpr) {
@@ -437,8 +436,15 @@ func (cc *checkContext) conversionToClass(x *ast.ConversionExpr, target *ast.Cla
 		return
 	}
 
-	tClass, ok := t.(*ast.ClassType)
-	if ok {
+	tClass, isClass := t.(*ast.ClassType)
+
+	if !isClass {
+		if tMayBe, ok := t.(*ast.MayBeType); ok {
+			tClass, isClass = ast.UnderType(tMayBe.Typ).(*ast.ClassType)
+		}
+	}
+
+	if isClass {
 		if !isDerivedClass(tClass, target) {
 			env.AddError(x.Pos, "СЕМ-ДОЛЖЕН-БЫТЬ-НАСЛЕДНИКОМ", ast.TypeName(x.TargetTyp), ast.TypeName(x.X.GetType()))
 		}
