@@ -44,7 +44,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Тривиль-0 компилятор v0.6")
+	fmt.Println("Тривиль-0 компилятор (tric) v0.7")
 	env.Init()
 
 	//fmt.Printf("%v\n", src.Bytes)
