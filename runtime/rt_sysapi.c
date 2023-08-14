@@ -55,7 +55,13 @@ TString error_id(int errcode) {
     char buf[80];
     
     switch (errcode) {
-    case ENOENT: strcpy(buf, "ФАЙЛ-НЕ-НАЙДЕН"); break;
+
+    case ENOENT:
+#if defined(_WIN32) || defined(_WIN64)
+      strcpy_s(buf, 80, "ФАЙЛ-НЕ-НАЙДЕН"); break;
+#else
+      strcpy(buf, "ФАЙЛ-НЕ-НАЙДЕН"); break;
+#endif
     default:
         sprintf(buf, "ОШИБКА[%d]", errcode); 
     }
@@ -88,13 +94,23 @@ EXPORTED TString sysapi_exec_path() {
 EXPORTED void* sysapi_fread(void* request, TString filename) {
     
     struct Request* req = request;
-    
-    FILE* fp = fopen((char *)filename->body, "rb");
+
+    FILE* fp;
+
+#if defined(_WIN32) || defined(_WIN64)
+    int errcode = fopen_s(&fp, (char *)filename->body, "rb");
+    if (errcode != 0) {
+        req->err_id = error_id(errcode);
+        return NULL;
+    }
+#else
+    fp = fopen((char *)filename->body, "rb");
 
     if (fp == NULL) {
         req->err_id = error_id(errno);
         return NULL;
     }
+#endif
 
     fseek(fp, 0, SEEK_END);
     size_t sz = ftell(fp);
@@ -120,12 +136,22 @@ EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes) {
     
     struct Request* req = request;
     
-    FILE* fp = fopen((char *)filename->body, "wb");
+    FILE* fp;
+
+#if defined(_WIN32) || defined(_WIN64)
+    int errcode = fopen_s(&fp, (char *)filename->body, "wb");
+    if (errcode != 0) {
+        req->err_id = error_id(errcode);
+        return;
+    }
+#else
+    fp = fopen((char *)filename->body, "wb");
     if (fp == NULL) {
         req->err_id = error_id(errno);
         return;
     }
-    
+#endif
+
     struct BytesDesc* v = bytes;
     
     size_t ret = fwrite(v->body, sizeof(TByte), v->len, fp);
