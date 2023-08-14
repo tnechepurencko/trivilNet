@@ -93,6 +93,16 @@ func predefinedTypeName(name string) string {
 	}
 }
 
+func (genc *genContext) genVectorForwardDecl(td *ast.TypeDecl) {
+	switch td.Typ.(type) {
+	case *ast.VectorType:
+		var tName = genc.declName(td)
+		genc.h("typedef struct %s *%s;", tName, tName)
+	default:
+		/*nothing*/
+	}
+}
+
 func (genc *genContext) genTypeDecl(td *ast.TypeDecl) {
 	switch x := td.Typ.(type) {
 	case *ast.VectorType:
