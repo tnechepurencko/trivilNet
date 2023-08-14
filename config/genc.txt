@@ -1,5 +1,5 @@
-#static: !temporary -no-deprecated
-windows-build: clang #runtime#/rt_api.c #runtime#/rt_syscrash_win.c #runtime#/rt_sysapi.c #files# -I#runtime# -ldbghelp -Wl,-noimplib -fno-omit-frame-pointer -gline-tables-only -Wno-deprecated-declarations -o ../#target#.exe && del /f ..\#target#.exp
+#static: 
+windows-build: clang #runtime#/rt_api.c #runtime#/rt_syscrash_win.c #runtime#/rt_sysapi.c #files# -I#runtime# -ldbghelp -Wl,-noimplib -fno-omit-frame-pointer -gline-tables-only  -o ../#target#.exe && del /f ..\#target#.exp
 #dynamic:
 #windows-build: clang #files# -I#runtime# -l#runtime#/libwelrt -fno-omit-frame-pointer -o #target#.exe
 windows-script: build.bat
