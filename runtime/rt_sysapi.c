@@ -231,10 +231,10 @@ EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     struct Request* req = request;    
     
 
-    char actualpath[PATH_MAX];
+    char actualPath[PATH_MAX];
     char *ptr;
 
-    ptr = realpath((char*)filename->body, actualpath);
+    ptr = realpath((char*)filename->body, actualPath);
 
     if (ptr == NULL) {
       char buf[120];
