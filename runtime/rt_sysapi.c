@@ -4,15 +4,20 @@
 #include <errno.h>
 #include "rt_sysapi.h"
 
+#if !defined(_WIN32) && !defined(_WIN64)
+#include <dirent.h>
+#include <sys/stat.h>
+#endif
+
 struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
 
 //=== платформа
 
 EXPORTED TString sysapi_os_kind() {
-#ifndef _WIN32
-        return tri_newString(5, 5, "linux"); 
+#if defined(_WIN32) || defined(_WIN64)
+    return tri_newString(7, 7, "windows");
 #else
-        return tri_newString(7, 7, "windows"); 
+    return tri_newString(5, 5, "linux");
 #endif    
 }
 
@@ -71,22 +76,33 @@ TString error_id(int errcode) {
 //==== папки ====
 
 EXPORTED TString sysapi_exec_path() {
-    TString folder = tri_arg(0);
-    
+    TString executable = tri_arg(0);
+
 #if defined(_WIN32) || defined(_WIN64)
-    size_t len = folder->bytes;
+    size_t len = executable->bytes;
     char* s = nogc_alloc(len + 1);
-    strncpy_s(s, len+1, (char*)folder->body, len);    
+    strncpy_s(s, len+1, (char*)executable->body, len);
     s[len] = 0; 
 
-    for (int i = 0; i < folder->bytes; i++) {
+    for (int i = 0; i < executable->bytes; i++) {
         if (s[i] == '\\') s[i] = '/';
     }   
-    folder =  tri_newString(len, -1, s); 
+    executable =  tri_newString(len, -1, s);
     nogc_free(s);
+#else
+    char actualPath[PATH_MAX];
+    char *ptr;
+
+    ptr = realpath((char*)executable->body, actualPath);
+
+    if (ptr == NULL) {
+      return executable;
+    } else{
+      return tri_newString(strlen(ptr), -1, ptr);;
+    }
 #endif
 
-    return folder;
+    return executable;
 }
 
 //==== чтение/запись ====
@@ -173,33 +189,73 @@ EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes) {
 
 EXPORTED TBool sysapi_is_dir(void* request, TString filename)  {
     struct Request* req = request;    
+
+    struct stat sb;
+    req->err_id = NULL;
+
+    // printf("sysapi_is_dir: %s\n", filename->body);
     
-    char buf[80];
-    sprintf(buf, "sysapi_is_dir не реализована"); 
-    req->err_id = tri_newString(strlen(buf), -1, buf);
-    
-    return false;
+    if (stat((char*)filename->body, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+	return true;
+    } else {
+        return false;
+    }
 }
 
 EXPORTED void* sysapi_dirnames(void* request, TString filename)  {
-    
-    struct Request* req = request;    
-    
-    char buf[80];
-    sprintf(buf, "sysapi_dirnames не реализована"); 
+    struct Request* req = request;
 
-    req->err_id = tri_newString(strlen(buf), -1, buf);
-    return NULL;
+    TInt64 count = 0;
+
+    DIR *d;
+    struct dirent *dir;
+    d = opendir((char*)filename->body);
+
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            if (strcmp(dir->d_name, ".") != 0 && (strcmp(dir->d_name, "..") != 0)) {
+                count++;
+            }
+        }
+        closedir(d);
+    }
+
+    void* list = tri_newVector(sizeof(TString), 0, count);
+
+    d = opendir((char*)filename->body);
+
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            if (strcmp(dir->d_name, ".") != 0 && (strcmp(dir->d_name, "..") != 0)) {
+	        TString s = tri_newString(strlen(dir->d_name), -1, dir->d_name);
+	        tri_vectorAppend(list, sizeof(TString), 1, &s);
+            }
+        }
+        closedir(d);
+    }
+
+    req->err_id = NULL;
+    return list;
 }
 
 EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     struct Request* req = request;    
     
-    char buf[80];
-    sprintf(buf, "sysapi_abs_path не реализована"); 
 
-    req->err_id = tri_newString(strlen(buf), -1, buf);
-    return NULL;
+    char actualPath[PATH_MAX];
+    char *ptr;
+
+    ptr = realpath((char*)filename->body, actualPath);
+
+    if (ptr == NULL) {
+      char buf[120];
+      sprintf(buf, "Файл %s не найден", filename->body);
+      req->err_id = tri_newString(strlen(buf), -1, buf);
+      return NULL;
+    } else{
+      req->err_id = NULL;
+      return tri_newString(strlen(ptr), -1, ptr);;
+    }
 }
 
 // ============== windows ==============

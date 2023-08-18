@@ -22,6 +22,13 @@ func (genc *genContext) genModule(main bool) {
 	for _, d := range genc.module.Decls {
 		d, ok := d.(*ast.TypeDecl)
 		if ok {
+			genc.genVectorForwardDecl(d)
+		}
+	}
+
+	for _, d := range genc.module.Decls {
+		d, ok := d.(*ast.TypeDecl)
+		if ok {
 			genc.genTypeDecl(d)
 		}
 	}
