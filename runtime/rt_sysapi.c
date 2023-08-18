@@ -76,22 +76,33 @@ TString error_id(int errcode) {
 //==== папки ====
 
 EXPORTED TString sysapi_exec_path() {
-    TString folder = tri_arg(0);
-    
+    TString executable = tri_arg(0);
+
 #if defined(_WIN32) || defined(_WIN64)
-    size_t len = folder->bytes;
+    size_t len = executable->bytes;
     char* s = nogc_alloc(len + 1);
-    strncpy_s(s, len+1, (char*)folder->body, len);    
+    strncpy_s(s, len+1, (char*)executable->body, len);
     s[len] = 0; 
 
-    for (int i = 0; i < folder->bytes; i++) {
+    for (int i = 0; i < executable->bytes; i++) {
         if (s[i] == '\\') s[i] = '/';
     }   
-    folder =  tri_newString(len, -1, s); 
+    executable =  tri_newString(len, -1, s);
     nogc_free(s);
+#else
+    char actualPath[PATH_MAX];
+    char *ptr;
+
+    ptr = realpath((char*)executable->body, actualPath);
+
+    if (ptr == NULL) {
+      return executable;
+    } else{
+      return tri_newString(strlen(ptr), -1, ptr);;
+    }
 #endif
 
-    return folder;
+    return executable;
 }
 
 //==== чтение/запись ====
