@@ -186,6 +186,27 @@ EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes) {
     req->err_id = NULL;
 }
 
+EXPORTED TBool sysapi_make_dir(void* request, TString folder) {
+    struct Request* req = request;
+
+    int ret;
+
+#if defined(_WIN32) || defined(_WIN64)
+    ret = _mkdir((char*)folder->body);
+#else
+    ret = mkdir((char*)folder->body, S_IRWXU | S_IRWXG | S_IRWXO); // Права 777, но с учетом umask
+#endif
+
+    if (ret == 0) {
+        req->err_id = NULL;
+	return true;
+    } else {
+        req->err_id = error_id(errno);
+	return false;
+    }
+}
+
+
 // ==============   linux     ==============
 
 #ifndef _WIN32
@@ -257,20 +278,6 @@ EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     } else{
       req->err_id = NULL;
       return tri_newString(strlen(ptr), -1, ptr);;
-    }
-}
-
-EXPORTED TBool sysapi_make_dir(void* request, TString folder) {
-    struct Request* req = request;
-
-    int ret = mkdir((char*)folder->body, S_IRWXU | S_IRWXG | S_IRWXO); // Права 777, но с учетом umask
-
-    if (ret == 0) {
-        req->err_id = NULL;
-	return true;
-    } else {
-        req->err_id = error_id(errno);
-	return false;
     }
 }
 
@@ -425,11 +432,6 @@ EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     nogc_free(buf);
     
     return full;
-}
-
-EXPORTED TBool sysapi_make_dir(void* request, TString folder) {
-    // TBD
-    return false;
 }
 
 EXPORTED TBool sysapi_set_permissions(void* request, TString path, int permissions) {
