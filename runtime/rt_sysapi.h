@@ -55,4 +55,9 @@ EXPORTED TBool sysapi_is_dir(void* request, TString filename);
 // В случае ошибки выставляет код ошибки в запросе
 EXPORTED void* sysapi_dirnames(void* request, TString filename);
 
+// Создает папку. Возвращает true, если папка создана. Возвращает
+// false, если произошла ошибка создания, в том числе, если папка уже
+// существует.
+EXPORTED TBool sysapi_make_dir(void* request, TString folder);
+
 #endif

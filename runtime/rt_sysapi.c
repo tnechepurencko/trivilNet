@@ -5,8 +5,11 @@
 #include "rt_sysapi.h"
 
 #if !defined(_WIN32) && !defined(_WIN64)
+
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+
 #endif
 
 struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
@@ -241,7 +244,6 @@ EXPORTED void* sysapi_dirnames(void* request, TString filename)  {
 EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     struct Request* req = request;    
     
-
     char actualPath[PATH_MAX];
     char *ptr;
 
@@ -258,6 +260,19 @@ EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     }
 }
 
+EXPORTED TBool sysapi_make_dir(void* request, TString folder) {
+    struct Request* req = request;
+
+    int ret = mkdir((char*)folder->body, S_IRWXU | S_IRWXG | S_IRWXO); // Права 777, но с учетом umask
+
+    if (ret == 0) {
+        req->err_id = NULL;
+	return true;
+    } else {
+        req->err_id = error_id(errno);
+	return false;
+    }
+}
 // ============== windows ==============
 #else
     
@@ -396,4 +411,8 @@ EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     return full;
 }
 
+EXPORTED TBool sysapi_make_dir(void* request, TString folder) {
+    // TBD
+    return false;
+}
 #endif
