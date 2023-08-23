@@ -273,6 +273,22 @@ EXPORTED TBool sysapi_make_dir(void* request, TString folder) {
 	return false;
     }
 }
+
+EXPORTED TBool sysapi_set_permissions(void* request, TString path, TInt64 permissions) {
+    struct Request* req = request;
+
+    int ret = chmod((char*)path->body, (int)(permissions&0x7FFFFFFF));
+
+    if (ret == 0) {
+        req->err_id = NULL;
+	return true;
+    } else {
+        req->err_id = error_id(errno);
+	return false;
+    }
+}
+
+
 // ============== windows ==============
 #else
     
@@ -415,4 +431,10 @@ EXPORTED TBool sysapi_make_dir(void* request, TString folder) {
     // TBD
     return false;
 }
+
+EXPORTED TBool sysapi_set_permissions(void* request, TString path, int permissions) {
+    // Не имеет смысла на Windows
+    return true;
+}
+
 #endif

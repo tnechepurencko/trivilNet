@@ -44,6 +44,8 @@ EXPORTED void* sysapi_fread(void* request, TString filename);
 // В случае ошибки выставляет код ошибки в запросе
 EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes);
 
+EXPORTED TBool sysapi_set_permissions(void* request, TString path, TInt64 permissions);
+
 //=== работа с папками
 
 // Выдает true, если файл является папкой 
