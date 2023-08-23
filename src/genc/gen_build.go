@@ -54,7 +54,7 @@ func BuildExe(modules []*ast.Module) {
 		var lines = make([]string, 1)
 		lines[0] = command
 
-		writeFile(folder, script, "", lines)
+		writeFileExecutable(folder, script, "", lines)
 	}
 
 	var arg string
