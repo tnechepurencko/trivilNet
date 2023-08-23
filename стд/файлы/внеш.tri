@@ -4,6 +4,7 @@
 
 фн sysapi_fread(запрос: Запрос, имя-файла: Строка): мб Байты @внеш("sysapi":"rt_sysapi")
 фн sysapi_fwrite(запрос: Запрос, имя-файла: Строка, байты: Байты) @внеш("sysapi":"rt_sysapi")
+фн sysapi_set_permission(запрос: Запрос, путь: Строка, права: Цел64) @внеш("sysapi":"rt_sysapi")
 
 фн sysapi_is_dir(запрос: Запрос, имя-файла: Строка): Лог @внеш("sysapi":"rt_sysapi")
 фн sysapi_dirnames(запрос: Запрос, имя-файла: Строка): Строки @внеш("sysapi":"rt_sysapi")
@@ -11,3 +12,4 @@
 фн sysapi_exec_path(): Строка @внеш("sysapi":"rt_sysapi")
 фн sysapi_abs_path(запрос: Запрос, имя-файла: Строка): Строка @внеш("sysapi":"rt_sysapi")
 
+фн sysapi_make_dir(запрос: Запрос, имя-папки: Строка): Лог @внеш("sysapi":"rt_sysapi")
