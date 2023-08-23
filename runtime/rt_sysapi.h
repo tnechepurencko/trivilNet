@@ -48,10 +48,11 @@ EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes);
 
 // Выдает true, если файл является папкой 
 // В случае ошибки выставляет код ошибки в запросе
-EXPORTED TBool sysapi_is_dir(void* request, TString filename) ;
+// На Линукс true возвращается, только если папка существует в файловой системе
+EXPORTED TBool sysapi_is_dir(void* request, TString filename);
 
 // Выдает список имен в папке - список строк []Строка
 // В случае ошибки выставляет код ошибки в запросе
-EXPORTED void* sysapi_dirnames(void* request, TString filename) ;
+EXPORTED void* sysapi_dirnames(void* request, TString filename);
 
 #endif
