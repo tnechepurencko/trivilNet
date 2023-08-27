@@ -4,7 +4,11 @@
 #include <errno.h>
 #include "rt_sysapi.h"
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64)
+
+#include <direct.h>
+
+#else
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -434,7 +438,7 @@ EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     return full;
 }
 
-EXPORTED TBool sysapi_set_permissions(void* request, TString path, int permissions) {
+EXPORTED TBool sysapi_set_permissions(void* request, TString path, TInt64 permissions) {
     // Не имеет смысла на Windows
     return true;
 }
