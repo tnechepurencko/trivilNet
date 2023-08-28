@@ -2,6 +2,7 @@ package genc
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"strings"
@@ -118,12 +119,20 @@ func (genc *genContext) save() {
 }
 
 func writeFile(folder, name, ext string, lines []string) {
+    writeFileCommon(folder, name, ext, lines, 0644)
+}
+
+func writeFileExecutable(folder, name, ext string, lines []string) {
+    writeFileCommon(folder, name, ext, lines, 0755)
+}
+
+func writeFileCommon(folder, name, ext string, lines []string, perm fs.FileMode) {
 
 	var filename = path.Join(folder, name+ext)
 
 	var out = strings.Join(lines, "\n")
 
-	var err = os.WriteFile(filename, []byte(out), 0755)
+	var err = os.WriteFile(filename, []byte(out), perm)
 
 	if err != nil {
 		panic("Ошибка записи файла " + filename + ": " + err.Error())

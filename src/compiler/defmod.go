@@ -59,7 +59,7 @@ func writeFile(folder, name, ext string, lines []string) {
 
 	var out = strings.Join(lines, "\n")
 
-	var err = os.WriteFile(filename, []byte(out), 0755)
+	var err = os.WriteFile(filename, []byte(out), 0644)
 
 	if err != nil {
 		panic("Ошибка записи файла " + filename + ": " + err.Error())

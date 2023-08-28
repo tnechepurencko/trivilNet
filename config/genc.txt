@@ -4,5 +4,5 @@ windows-build: clang #runtime#/rt_api.c #runtime#/rt_syscrash_win.c #runtime#/rt
 #windows-build: clang #files# -I#runtime# -l#runtime#/libwelrt -fno-omit-frame-pointer -o #target#.exe
 windows-script: build.bat
 
-linux-build: pushd . && cd #genc# && clang #files# #runtime#/rt_api.c #runtime#/rt_sysapi.c #runtime#/rt_syscrash_linux.c -lm -rdynamic -I#runtime# -o ../#target# && popd
+linux-build: pushd . && cd #genc# && clang #files# #runtime#/rt_api.c #runtime#/rt_sysapi.c #runtime#/rt_syscrash_linux.c -lm -rdynamic -I#runtime# -o ../#target#.exe && popd
 linux-script: build.sh

@@ -4,9 +4,16 @@
 #include <errno.h>
 #include "rt_sysapi.h"
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64)
+
+#include <direct.h>
+
+#else
+
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+
 #endif
 
 struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
@@ -183,6 +190,27 @@ EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes) {
     req->err_id = NULL;
 }
 
+EXPORTED TBool sysapi_make_dir(void* request, TString folder) {
+    struct Request* req = request;
+
+    int ret;
+
+#if defined(_WIN32) || defined(_WIN64)
+    ret = _mkdir((char*)folder->body);
+#else
+    ret = mkdir((char*)folder->body, S_IRWXU | S_IRWXG | S_IRWXO); // Права 777, но с учетом umask
+#endif
+
+    if (ret == 0) {
+        req->err_id = NULL;
+	return true;
+    } else {
+        req->err_id = error_id(errno);
+	return false;
+    }
+}
+
+
 // ==============   linux     ==============
 
 #ifndef _WIN32
@@ -241,7 +269,6 @@ EXPORTED void* sysapi_dirnames(void* request, TString filename)  {
 EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     struct Request* req = request;    
     
-
     char actualPath[PATH_MAX];
     char *ptr;
 
@@ -257,6 +284,21 @@ EXPORTED TString sysapi_abs_path(void* request, TString filename) {
       return tri_newString(strlen(ptr), -1, ptr);;
     }
 }
+
+EXPORTED TBool sysapi_set_permissions(void* request, TString path, TInt64 permissions) {
+    struct Request* req = request;
+
+    int ret = chmod((char*)path->body, (int)(permissions&0x7FFFFFFF));
+
+    if (ret == 0) {
+        req->err_id = NULL;
+	return true;
+    } else {
+        req->err_id = error_id(errno);
+	return false;
+    }
+}
+
 
 // ============== windows ==============
 #else
@@ -394,6 +436,11 @@ EXPORTED TString sysapi_abs_path(void* request, TString filename) {
     nogc_free(buf);
     
     return full;
+}
+
+EXPORTED TBool sysapi_set_permissions(void* request, TString path, TInt64 permissions) {
+    // Не имеет смысла на Windows
+    return true;
 }
 
 #endif

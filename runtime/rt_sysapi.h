@@ -44,14 +44,22 @@ EXPORTED void* sysapi_fread(void* request, TString filename);
 // В случае ошибки выставляет код ошибки в запросе
 EXPORTED void sysapi_fwrite(void* request, TString filename, void* bytes);
 
+EXPORTED TBool sysapi_set_permissions(void* request, TString path, TInt64 permissions);
+
 //=== работа с папками
 
 // Выдает true, если файл является папкой 
 // В случае ошибки выставляет код ошибки в запросе
-EXPORTED TBool sysapi_is_dir(void* request, TString filename) ;
+// На Линукс true возвращается, только если папка существует в файловой системе
+EXPORTED TBool sysapi_is_dir(void* request, TString filename);
 
 // Выдает список имен в папке - список строк []Строка
 // В случае ошибки выставляет код ошибки в запросе
-EXPORTED void* sysapi_dirnames(void* request, TString filename) ;
+EXPORTED void* sysapi_dirnames(void* request, TString filename);
+
+// Создает папку. Возвращает true, если папка создана. Возвращает
+// false, если произошла ошибка создания, в том числе, если папка уже
+// существует.
+EXPORTED TBool sysapi_make_dir(void* request, TString folder);
 
 #endif
