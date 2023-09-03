@@ -766,7 +766,7 @@ EXPORTED TString tri_className(TWord64 tag) {
     return m->name;
 }
 
-EXPORTED TWord64 tri_tagObject(TWord64 o) {
+EXPORTED TWord64 tri_objectTag(void* o) {
         _BaseObject* obj = (void*) o;
         return (TWord64) obj->vtable;
 }

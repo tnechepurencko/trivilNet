@@ -4,7 +4,6 @@
 фн tri_substring_from_bytes(байты: Байты, первый-байт: Цел64, число-байтов: Цел64): Строка @внеш
 
 фн tri_isClassTag(тег: Слово64): Лог @внеш
-фн tri_tagObject(o: Слово64): Слово64 @внеш
 фн tri_className(тег: Слово64): Строка @внеш
 
 фн sysapi_float64_to_string(вещ-формат: Строка, в: Вещ64): Строка @внеш("sysapi":"rt_sysapi")

@@ -24,6 +24,8 @@ typedef struct StringDesc {
 // для преобразования с сохранением битов
 typedef union {TFloat64 f; TInt64 i; TWord64 w; void* a; } TUnion64;
 
+typedef struct { TWord64 tag; TWord64 value; } TTagPair;
+
 // Основа любого класса и объекта любого класса
 typedef struct _BaseVT { size_t self_size; void (*__init__)(void*); } _BaseVT;
 typedef struct _BaseMeta { size_t object_size; void* base_desc; TString name; } _BaseMeta;
@@ -80,6 +82,8 @@ EXPORTED void* tri_nilcheck(void* r, char* position);
 */
 
 EXPORTED void* tri_newObject(void* class_desc);
+
+EXPORTED TWord64 tri_objectTag(void* object);
 
 // Объект может быть равен NULL
 EXPORTED void* tri_checkClassType(void* object, void* class_desc);
