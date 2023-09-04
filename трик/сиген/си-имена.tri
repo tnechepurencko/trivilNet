@@ -58,7 +58,8 @@
 
 пусть rt_newObject     = строки.собрать(rt_префикс, "newObject")
 пусть rt_checkClassType = строки.собрать(rt_префикс, "checkClassType")
-пусть rt_isClassType   = строки.собрать(rt_префикс, "isClassType")
+пусть rt_isClassType  = строки.собрать(rt_префикс, "isClassType")
+пусть rt_objectTag  = строки.собрать(rt_префикс, "objectTag")
 
 пусть rt_crash= строки.собрать(rt_префикс, "crash")
 пусть rt_tag= строки.собрать(rt_префикс, "tag")
