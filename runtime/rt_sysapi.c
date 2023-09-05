@@ -18,6 +18,10 @@
 #include <sys/syslimits.h>
 #endif
 
+#if defined(__FreeBSD__)
+#include <sys/param.h>
+#endif
+
 #endif
 
 struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
@@ -36,6 +40,10 @@ EXPORTED TString sysapi_os_kind() {
 
 #if defined(__linux__)
     return tri_newString(5, 5, "linux");
+#endif
+
+#if defined(__FreeBSD__)
+    return tri_newString(7, 7, "freebsd");
 #endif
 
 }
