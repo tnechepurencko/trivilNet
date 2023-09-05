@@ -14,6 +14,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#if defined(__apple_build_version__)
+#include <sys/syslimits.h>
+#endif
+
+#if defined(__FreeBSD__)
+#include <sys/param.h>
+#endif
+
 #endif
 
 struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
@@ -21,11 +29,23 @@ struct BytesDesc { TInt64 len; TInt64 capacity; TByte* body; };
 //=== платформа
 
 EXPORTED TString sysapi_os_kind() {
+
 #if defined(_WIN32) || defined(_WIN64)
     return tri_newString(7, 7, "windows");
-#else
+#endif
+
+#if defined(__apple_build_version__)
+    return tri_newString(6, 6, "darwin");
+#endif
+
+#if defined(__linux__)
     return tri_newString(5, 5, "linux");
-#endif    
+#endif
+
+#if defined(__FreeBSD__)
+    return tri_newString(7, 7, "freebsd");
+#endif
+
 }
 
 EXPORTED TBool sysapi_exec(TString cmd) {

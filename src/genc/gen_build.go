@@ -65,7 +65,7 @@ func BuildExe(modules []*ast.Module) {
 		mainCmd = "cmd"
 		arg = fmt.Sprintf("[/c cd %s & call %s ]", folder, script)
 		//fmt.Printf("arg %v\n", arg)
-	case "linux":
+	case "linux", "darwin", "freebsd":
 		absoluteFolder, _ := filepath.Abs(folder)
 		mainCmd = "bash"
 		arg = path.Join(absoluteFolder, script)
