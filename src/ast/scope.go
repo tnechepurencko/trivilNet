@@ -17,8 +17,9 @@ var (
 	String  *PredefinedType
 	String8 *PredefinedType
 
+	NullType *PredefinedType
+
 	VoidType    *PredefinedType // только для вызова функции без результата
-	NullType    *PredefinedType // только для константы
 	TagPairType *PredefinedType // только в типе параметров и в типе элемента variadic
 )
 
@@ -59,10 +60,10 @@ func initScopes() {
 	Symbol = addType("Символ")
 	String = addType("Строка")
 	String8 = addType("Строка8")
+	NullType = addType("Пусто")
 
 	VoidType = &PredefinedType{Name: "нет результата"}
 	TagPairType = &PredefinedType{Name: "ТегСлово"}
-	NullType = &PredefinedType{Name: "ТипПусто"}
 
 	addBoolConst("истина", true)
 	addBoolConst("ложь", false)

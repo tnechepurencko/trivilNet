@@ -88,6 +88,8 @@ func predefinedTypeName(name string) string {
 		return "TString"
 	case "Строка8":
 		return "TString"
+	case "Пусто":
+		return "TNull"
 	default:
 		panic(fmt.Sprintf("predefinedTypeName: ni %s", name))
 	}

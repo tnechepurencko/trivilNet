@@ -708,6 +708,7 @@ enum Tags {
     tag_bool,
     tag_symbol,
     tag_string,
+    tag_null,
     tag_tag,
     
     tag_class, // не используется - поставить в мете?
@@ -747,6 +748,10 @@ EXPORTED TWord64 tri_tagTSymbol() {
 
 EXPORTED TWord64 tri_tagTString() {
     return 8 << size_shift | tag_string << tag_id_shift | flag_lang;
+}
+
+EXPORTED TWord64 tri_tagTNull()  {
+    return 8 << size_shift | tag_null << tag_id_shift | flag_lang;
 }
 
 EXPORTED TBool tri_isClassTag(TWord64 tag) {

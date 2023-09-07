@@ -12,6 +12,7 @@ typedef double TFloat64;
 typedef uint64_t TWord64;
 typedef _Bool TBool;
 typedef uint32_t TSymbol;
+typedef void* TNull;
 
 // Строка
 typedef struct StringDesc {
@@ -127,6 +128,7 @@ EXPORTED TWord64 tri_tagTWord64();
 EXPORTED TWord64 tri_tagTBool();
 EXPORTED TWord64 tri_tagTSymbol();
 EXPORTED TWord64 tri_tagTString();
+EXPORTED TWord64 tri_tagTNull();
 
 // Тег объекта класса (динамический тип)
 EXPORTED TWord64 tri_tagObject(TWord64 obj);

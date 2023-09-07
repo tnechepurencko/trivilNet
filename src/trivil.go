@@ -11,6 +11,11 @@ import (
 	"trivil/lexer"
 )
 
+const (
+	versionCompiler = "0.71"
+	versionLanguage = "0.9.0"
+)
+
 // команды
 const (
 	prefix  = "+"
@@ -44,7 +49,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Тривиль-0 компилятор (tric) v0.7")
+	fmt.Printf("Тривиль-0 компилятор (Go) v%s (язык %s)\n", versionCompiler, versionLanguage)
 	env.Init()
 
 	//fmt.Printf("%v\n", src.Bytes)
