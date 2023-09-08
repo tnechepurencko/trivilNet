@@ -53,7 +53,7 @@ func (genc *genContext) genConversion(x *ast.ConversionExpr) string {
 	case *ast.VectorType:
 		return genc.convertToVector(expr, from, xt)
 	case *ast.ClassType:
-		return genc.convertToClass(expr, x.TargetTyp)
+		return genc.convertToClass(expr, x.TargetTyp, x.Pos)
 	default:
 		panic(fmt.Sprintf("ni %T '%s'", to, ast.TypeString(to)))
 	}
@@ -110,10 +110,15 @@ func (genc *genContext) convertToVector(expr string, from ast.Type, to *ast.Vect
 	}
 }
 
-func (genc *genContext) convertToClass(expr string, target ast.Type) string {
+func (genc *genContext) convertToClass(expr string, target ast.Type, pos int) string {
 	var tname = genc.typeRef(target)
 
-	return fmt.Sprintf("((%s)%s(%s, %s))", tname, rt_checkClassType, expr, tname+nm_class_info_ptr_suffix)
+	return fmt.Sprintf("((%s)%s(%s, %s, %s))",
+		tname,
+		rt_checkClassType,
+		expr,
+		tname+nm_class_info_ptr_suffix,
+		genPos(pos))
 }
 
 func (genc *genContext) genCautionCast(x *ast.ConversionExpr) string {
