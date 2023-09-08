@@ -26,19 +26,19 @@ EXPORTED void  printStack(TBool printReturnAddr, int maxFuncs);
 }
 
  _Noreturn void runtime_crash(char* s) {
-	printf("!crash: %s\n", s);
+	printf("!ошибка: '%s'\n", s);
     printStack(printReturnAddr, printStackDepth);
     panic();
 }
 
  _Noreturn void runtime_crash_pos(char* position, char* s) {
-	printf("!crash at %s: %s\n", position, s);
+	printf("!ошибка '%s' (%s)\n", s, position);
     printStack(printReturnAddr, printStackDepth);
     panic();
 }
 
 EXPORTED  _Noreturn void tri_crash(char* msg, char* pos) {
-	printf("авария '%s' (%s)\n", msg, pos);
+	printf("!авария '%s' (%s)\n", msg, pos);
     printStack(printReturnAddr, printStackDepth);
     panic();
 }
@@ -369,7 +369,7 @@ EXPORTED TInt64 tri_lenVector(void* vd) {
 EXPORTED TInt64 tri_indexcheck(TInt64 inx, TInt64 len, char* position) {
 	if (inx < 0 || inx >= len) {
         char buf[128];
-        sprintf(buf, "index %" PRId64 " out of bounds [0..%" PRId64 "[", inx, len);
+        sprintf(buf, "выход индекса %" PRId64 " за границу вектора [0..%" PRId64 "[", inx, len);
 		runtime_crash_pos(position, buf);
 	}
 	
@@ -485,10 +485,10 @@ EXPORTED void* tri_newObject(void* class_desc) {
 	return o;
 }
 
-EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
+EXPORTED void* tri_checkClassType(void* object, void* target_desc, char* position) {
 
     if (object == NULL) {
-      	runtime_crash("ошибка преобразования к классу: объект = пусто");  
+      	runtime_crash_pos(position,"ошибка преобразования к классу: объект = пусто");  
         return NULL;
     }
     
@@ -510,7 +510,7 @@ EXPORTED void* tri_checkClassType(void* object, void* target_desc) {
 		m = (void *)current_vt + current_vt->self_size;
 	}
 	
-	runtime_crash("ошибка преобразования к классу");
+	runtime_crash_pos(position,"ошибка преобразования к классу");
 	
 	return NULL;
 }
@@ -709,8 +709,8 @@ enum Tags {
     tag_symbol,
     tag_string,
     tag_null,
-    tag_tag,
-    
+
+    tag_tag, // не используется
     tag_class, // не используется - поставить в мете?
     max_tag = 31
 };
@@ -722,36 +722,45 @@ enum Tags {
 #define flag_lang 1
 #define flag_vector 2
 
-EXPORTED TWord64 tri_tagTByte() {
-    return 1 << size_shift | tag_unsigned << tag_id_shift | flag_lang;
+#define tagByte       (1 << size_shift | tag_unsigned << tag_id_shift | flag_lang)
+#define tagInt64      (8 << size_shift | tag_signed << tag_id_shift | flag_lang)
+#define tagWord64 (8 << size_shift | tag_unsigned << tag_id_shift | flag_lang)
+#define tagFloat64  (8 << size_shift | tag_float << tag_id_shift | flag_lang)
+#define tagBool      (1 << size_shift | tag_bool << tag_id_shift | flag_lang)
+#define tagSymbol  (4 << size_shift | tag_symbol << tag_id_shift | flag_lang)
+#define tagString    (8 << size_shift | tag_string << tag_id_shift | flag_lang)
+#define tagNull      (8 << size_shift | tag_null << tag_id_shift | flag_lang)
+
+EXPORTED TWord64 tri_tagTByte() { 
+    return tagByte;
 }
 
 EXPORTED TWord64 tri_tagTInt64() {
-    return (8 << size_shift) | (tag_signed << tag_id_shift) | flag_lang;
-}
-
-EXPORTED TWord64 tri_tagTFloat64() {
-    return 8 << size_shift | tag_float << tag_id_shift | flag_lang;
+    return tagInt64;
 }
 
 EXPORTED TWord64 tri_tagTWord64() {
-    return 8 << size_shift | tag_unsigned << tag_id_shift | flag_lang;
+    return tagWord64;
+}
+
+EXPORTED TWord64 tri_tagTFloat64() {
+    return tagFloat64;
 }
 
 EXPORTED TWord64 tri_tagTBool() {
-    return 1 << size_shift | tag_bool << tag_id_shift | flag_lang;
+    return tagBool;
 }
 
 EXPORTED TWord64 tri_tagTSymbol() {
-    return 4 << size_shift | tag_symbol << tag_id_shift | flag_lang;
+    return tagSymbol;
 }
 
 EXPORTED TWord64 tri_tagTString() {
-    return 8 << size_shift | tag_string << tag_id_shift | flag_lang;
+    return tagString;
 }
 
 EXPORTED TWord64 tri_tagTNull()  {
-    return 8 << size_shift | tag_null << tag_id_shift | flag_lang;
+    return tagNull;
 }
 
 EXPORTED TBool tri_isClassTag(TWord64 tag) {
@@ -774,6 +783,69 @@ EXPORTED TString tri_className(TWord64 tag) {
 EXPORTED TWord64 tri_objectTag(void* o) {
         _BaseObject* obj = (void*) o;
         return (TWord64) obj->vtable;
+}
+
+// извлечения из полиморфного значения
+
+#define INVCONV "полиморфное значение должно быть типа "
+
+EXPORTED TByte tri_TTagPair_to_TByte(TWord64 tag, TWord64 value, char* position) {
+    if (tag != tagByte) {
+		runtime_crash_pos(position, INVCONV "Байт");
+    }
+    return (TByte) value;
+}
+
+EXPORTED TInt64 tri_TTagPair_to_TInt64(TWord64 tag, TWord64 value, char* position) {
+    if (tag != tagInt64) {
+		runtime_crash_pos(position, INVCONV "Цел64");
+    }
+    return (TInt64) value;
+}
+EXPORTED TWord64 tri_TTagPair_to_TWord64(TWord64 tag, TWord64 value, char* position) {
+    if (tag != tagWord64) {
+		runtime_crash_pos(position, INVCONV "Слово64");
+    }
+    return (TWord64) value;
+}
+EXPORTED TFloat64 tri_TTagPair_to_TFloat64(TWord64 tag, TWord64 value, char* position) {
+    if (tag != tagFloat64) {
+		runtime_crash_pos(position, INVCONV "Вещ64");
+    }
+    return (TFloat64) value;
+}
+EXPORTED TBool tri_TTagPair_to_TBool(TWord64 tag, TWord64 value, char* position) {
+    if (tag != tagBool) {
+		runtime_crash_pos(position, INVCONV "Лог");
+    }
+    return (TBool) value;
+}
+EXPORTED TSymbol tri_TTagPair_to_TSymbol(TWord64 tag, TWord64 value, char* position) {
+    if (tag != tagSymbol) {
+		runtime_crash_pos(position, INVCONV "Символ");
+    }
+    return (TSymbol) value;
+}
+EXPORTED TNull tri_TTagPair_to_TNull(TWord64 tag, TWord64 value, char* position) {
+    if (tag != tagNull) {
+		runtime_crash_pos(position, INVCONV "Пусто");
+    }
+    return (TNull) value;
+}
+
+EXPORTED TString tri_TTagPair_to_TString(TWord64 tag, TWord64 value, char* position) {
+    if (tag != tagString) {
+		runtime_crash_pos(position, INVCONV "Строка");
+    }
+    return (TString) value;
+}
+
+EXPORTED void* tri_TTagPair_to_Class(TWord64 tag, TWord64 value, void* class_desc, char* position) {
+    if (!tri_isClassTag(tag)) {
+		runtime_crash_pos(position, INVCONV "класс");        
+    }
+     
+     return tri_checkClassType((void *) value, class_desc, position); 
 }
 
 //==== console

@@ -2,6 +2,7 @@
 \ProvidesClass{trivilreport}[ Trivil language report class]
 
 \LoadClass[a4paper]{article}
+\usepackage[top=2cm, bottom=2cm, right=2cm]{geometry}
 
 \RequirePackage{xltxtra}
 \RequirePackage{etoolbox}

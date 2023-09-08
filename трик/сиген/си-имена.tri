@@ -38,11 +38,12 @@
 конст 	(
     rt_префикс = "tri_"
     rt_cast_union = "TUnion64"
-    rt_convert = rt_префикс
 )    
 
 //=== run-time API
 пусть rt_init = строки.собрать(rt_префикс, "init")
+
+пусть rt_convert = rt_префикс
 
 пусть rt_newLiteralString = строки.собрать(rt_префикс, "newLiteralString") // сохраняет в переменную
 пусть rt_newString          = строки.собрать(rt_префикс, "newString")
