@@ -12,6 +12,7 @@ typedef double TFloat64;
 typedef uint64_t TWord64;
 typedef _Bool TBool;
 typedef uint32_t TSymbol;
+typedef void* TNull;
 
 // Строка
 typedef struct StringDesc {
@@ -86,7 +87,7 @@ EXPORTED void* tri_newObject(void* class_desc);
 EXPORTED TWord64 tri_objectTag(void* object);
 
 // Объект может быть равен NULL
-EXPORTED void* tri_checkClassType(void* object, void* class_desc);
+EXPORTED void* tri_checkClassType(void* object, void* class_desc, char* position);
 EXPORTED TBool tri_isClassType(void* object, void* class_desc);
 
 //==== conversions
@@ -118,6 +119,19 @@ EXPORTED void* tri_TSymbol_to_Bytes(TSymbol x);
 // Возвращает []Символ
 EXPORTED void* tri_TString_to_Symbols(TString s);
 
+// извлечения из полиморфного значения
+
+EXPORTED TByte tri_TTagPair_to_TByte(TWord64 tag, TWord64 value, char* position);
+EXPORTED TInt64 tri_TTagPair_to_TInt64(TWord64 tag, TWord64 value, char* position);
+EXPORTED TWord64 tri_TTagPair_to_TWord64(TWord64 tag, TWord64 value, char* position);
+EXPORTED TFloat64 tri_TTagPair_to_TFloat64(TWord64 tag, TWord64 value, char* position);
+EXPORTED TBool tri_TTagPair_to_TBool(TWord64 tag, TWord64 value, char* position);
+EXPORTED TSymbol tri_TTagPair_to_TSymbol(TWord64 tag, TWord64 value, char* position);
+EXPORTED TNull tri_TTagPair_to_TNull(TWord64 tag, TWord64 value, char* position);
+EXPORTED TString tri_TTagPair_to_TString(TWord64 tag, TWord64 value, char* position);
+
+EXPORTED void* tri_TTagPair_to_Class(TWord64 tag, TWord64 value, void* class_desc, char* position);
+
 //==== tags
 
 EXPORTED TWord64 tri_tagTByte();
@@ -127,6 +141,7 @@ EXPORTED TWord64 tri_tagTWord64();
 EXPORTED TWord64 tri_tagTBool();
 EXPORTED TWord64 tri_tagTSymbol();
 EXPORTED TWord64 tri_tagTString();
+EXPORTED TWord64 tri_tagTNull();
 
 // Тег объекта класса (динамический тип)
 EXPORTED TWord64 tri_tagObject(TWord64 obj);

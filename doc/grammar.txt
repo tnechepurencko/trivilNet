@@ -121,7 +121,7 @@ param
 	;
 
 result_type
-	: ':' type_ref
+	: ':' ('*' | type_ref) // v0.72
 	;
 
 //=== entry 
