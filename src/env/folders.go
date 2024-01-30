@@ -76,7 +76,8 @@ func SettingsFolder() string {
 }
 
 func SettingsRelativePath(filename string) string {
-	return path.Join(baseFolder, filename)
+	join := path.Join(baseFolder, filename)
+	return join
 }
 
 func RuntimePath() string {
@@ -86,7 +87,8 @@ func RuntimePath() string {
 func initFolders() {
 	var dir = filepath.Dir(os.Args[0])
 	var err error
-	baseFolder, err = filepath.Abs(dir)
+	//baseFolder, err = filepath.Abs(dir) // todo this line should be uncommented instead of the line under
+	baseFolder += "C:\\Users\\321av\\GolandProjects\\trivilNet"
 	if err != nil {
 		panic(fmt.Sprintf("filepath.Abs(%s): %s", dir, err.Error()))
 	}
