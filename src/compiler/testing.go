@@ -30,7 +30,7 @@ func TestOne(tpath string) {
 
 	var npath = env.Normalizer.NPath
 
-	var cc = &compileContext{
+	var cc = &CompileContext{
 		imported:       make(map[string]*ast.Module),
 		folders:        make(map[*ast.Module]string),
 		testModulePath: tpath,
@@ -42,7 +42,7 @@ func TestOne(tpath string) {
 		return
 	}
 
-	cc.main = cc.parseModule(true, list)
+	cc.Main = cc.parseModule(true, list)
 
 	if env.ErrorCount() != 0 {
 		return

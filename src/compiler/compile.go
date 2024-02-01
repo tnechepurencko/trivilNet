@@ -11,8 +11,8 @@ import (
 
 var _ = fmt.Printf
 
-type compileContext struct {
-	main     *ast.Module
+type CompileContext struct {
+	Main     *ast.Module
 	imported map[string]*ast.Module // map[folder]
 
 	testModulePath string // импорт путь для тестируемого модуля
@@ -35,12 +35,12 @@ func Compile(spath string) {
 		return
 	}
 
-	var cc = &compileContext{
+	var cc = &CompileContext{
 		imported: make(map[string]*ast.Module),
 		folders:  make(map[*ast.Module]string),
 	}
 
-	cc.main = cc.parseModule(true, list)
+	cc.Main = cc.parseModule(true, list)
 
 	if env.ErrorCount() != 0 {
 		return
@@ -49,7 +49,7 @@ func Compile(spath string) {
 	cc.build()
 }
 
-func (cc *compileContext) build() {
+func (cc *CompileContext) build() {
 	cc.orderedList()
 
 	for _, m := range cc.list {
@@ -73,7 +73,7 @@ func (cc *compileContext) build() {
 
 //=== process
 
-func (cc *compileContext) process(m *ast.Module) {
+func (cc *CompileContext) process(m *ast.Module) {
 
 	ast.CurHost = m
 	semantics.Analyse(m)
@@ -87,21 +87,21 @@ func (cc *compileContext) process(m *ast.Module) {
 		fmt.Println(ast.SExpr(m))
 	}
 
-	if *env.MakeDef && m != cc.main {
+	if *env.MakeDef && m != cc.Main {
 		makeDef(m, cc.folders[m])
 	}
 
 	if *env.DoGen {
-		genc.Generate(m, m == cc.main)
+		genc.Generate(m, m == cc.Main)
 	}
 }
 
-func (cc *compileContext) orderedList() {
+func (cc *CompileContext) orderedList() {
 
 	cc.list = make([]*ast.Module, 0)
 	cc.status = make(map[*ast.Module]int)
 
-	cc.traverse(cc.main, cc.main.Pos)
+	cc.traverse(cc.Main, cc.Main.Pos)
 }
 
 const (
@@ -111,7 +111,7 @@ const (
 
 //=== traverse
 
-func (cc *compileContext) traverse(m *ast.Module, pos int) {
+func (cc *CompileContext) traverse(m *ast.Module, pos int) {
 
 	s, ok := cc.status[m]
 	if ok {

@@ -9,7 +9,7 @@ import (
 
 var _ = fmt.Printf
 
-func (cc *compileContext) setup(setuped *ast.Module) []*ast.Module {
+func (cc *CompileContext) setup(setuped *ast.Module) []*ast.Module {
 
 	var setting = setuped.Setting
 
