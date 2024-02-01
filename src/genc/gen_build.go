@@ -89,7 +89,6 @@ var settings []string
 func findTemplate(name string) string {
 
 	if settings == nil {
-
 		buf, err := os.ReadFile(env.SettingsRelativePath(conf_file_name))
 		if err != nil {
 			env.AddProgramError("ГЕН-ОШ-КОНФ-ФАЙЛА", err.Error())

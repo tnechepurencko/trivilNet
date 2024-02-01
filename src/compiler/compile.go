@@ -1,8 +1,9 @@
 package compiler
 
 import (
+	"encoding/json"
 	"fmt"
-
+	"os"
 	"trivil/ast"
 	"trivil/env"
 	"trivil/genc"
@@ -46,6 +47,8 @@ func Compile(spath string) {
 		return
 	}
 
+	//Тута надо наш компилятор написать вместо cc.build()
+	//Для Тани
 	cc.build()
 }
 
@@ -78,6 +81,16 @@ func (cc *compileContext) process(m *ast.Module) {
 	ast.CurHost = m
 	semantics.Analyse(m)
 	ast.CurHost = nil
+
+	content, err := json.Marshal(cc.main)
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = os.WriteFile("userfile.json", content, 0644)
+	//enc := json.NewEncoder(os.Stdout)
+	//if err := enc.Encode(cc.main); err != nil {
+	//	fmt.Printf("error encoding struct into JSON: %v\n", err)
+	//}
 
 	if env.ErrorCount() != 0 {
 		return

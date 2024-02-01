@@ -1,8 +1,9 @@
 package semantics
 
 import (
+	_ "encoding/json" //JSON package from the standard library
 	"fmt"
-
+	_ "os"
 	"trivil/ast"
 	"trivil/env"
 	"trivil/semantics/check"
@@ -19,5 +20,4 @@ func Analyse(m *ast.Module) {
 	}
 
 	check.Process(m)
-
 }

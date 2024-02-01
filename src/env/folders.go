@@ -86,7 +86,7 @@ func RuntimePath() string {
 func initFolders() {
 	var dir = filepath.Dir(os.Args[0])
 	var err error
-	baseFolder, err = filepath.Abs(dir)
+	baseFolder = "C:\\Users\\User\\GolandProjects\\trivil"
 	if err != nil {
 		panic(fmt.Sprintf("filepath.Abs(%s): %s", dir, err.Error()))
 	}
