@@ -9,17 +9,7 @@ type Code struct {
 func StartGeneration(cc *compiler.CompileContext) *Code {
 	var c = &Code{}
 
-	for _, imps := range cc.Main.Imports {
-		c.GenerateModule(imps.Mod)
-	}
-
-	for _, decl := range cc.Main.Decls {
-		c.GenerateDeclaration(decl)
-	}
-
-	for _, stmt := range cc.Main.Entry.Seq.Statements {
-		c.GenerateStatement(stmt)
-	}
+	c.GenerateModule(cc.Main)
 
 	return c
 }
@@ -37,11 +27,27 @@ func (c *Code) GenerateStatement(stmt ast.Statement) {
 	switch x := stmt.(type) {
 	case *ast.ExprStatement:
 		c.GenerateExpr(x.X)
+	case *ast.Guard:
+		c.GenerateIf(x)
 	}
 }
 
-func (c *Code) GenerateModule(td *ast.Module) {
+func (c *Code) GenerateIf(ifStmt *ast.Guard) {
 
+}
+
+func (c *Code) GenerateModule(module *ast.Module) {
+	for _, imps := range module.Imports {
+		c.GenerateModule(imps.Mod)
+	}
+
+	for _, decl := range module.Decls {
+		c.GenerateDeclaration(decl)
+	}
+
+	for _, stmt := range module.Entry.Seq.Statements {
+		c.GenerateStatement(stmt)
+	}
 }
 
 func (c *Code) GenerateTypeDecl(td *ast.TypeDecl) {
