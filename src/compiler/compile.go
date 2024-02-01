@@ -67,6 +67,7 @@ func (cc *compileContext) build() {
 		}
 
 		cc.process(m)
+
 	}
 
 	if env.ErrorCount() == 0 && *env.DoGen && *env.BuildExe {
@@ -87,10 +88,6 @@ func (cc *compileContext) process(m *ast.Module) {
 		fmt.Println(err)
 	}
 	err = os.WriteFile("userfile.json", content, 0644)
-	//enc := json.NewEncoder(os.Stdout)
-	//if err := enc.Encode(cc.main); err != nil {
-	//	fmt.Printf("error encoding struct into JSON: %v\n", err)
-	//}
 
 	if env.ErrorCount() != 0 {
 		return
