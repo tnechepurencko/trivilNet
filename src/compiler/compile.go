@@ -87,7 +87,7 @@ func (cc *compileContext) process(m *ast.Module) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	err = os.WriteFile("userfile.json", content, 0644)
+	err = os.WriteFile("ast.json", content, 0644)
 
 	if env.ErrorCount() != 0 {
 		return
