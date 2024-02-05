@@ -11,7 +11,7 @@ import (
 
 var _ = fmt.Printf
 
-func (cc *compileContext) parseFile(src *env.Source) *ast.Module {
+func (cc *CompileContext) parseFile(src *env.Source) *ast.Module {
 
 	if *env.TraceCompile {
 		fmt.Printf("Синтаксис: '%s'\n", src.FilePath)
@@ -22,7 +22,7 @@ func (cc *compileContext) parseFile(src *env.Source) *ast.Module {
 	return m
 }
 
-func (cc *compileContext) parseList(isMain bool, list []*env.Source) []*ast.Module {
+func (cc *CompileContext) parseList(isMain bool, list []*env.Source) []*ast.Module {
 
 	var mods = make([]*ast.Module, 0)
 	var moduleName = ""
@@ -51,7 +51,7 @@ func (cc *compileContext) parseList(isMain bool, list []*env.Source) []*ast.Modu
 	return mods
 }
 
-func (cc *compileContext) parseModule(isMain bool, list []*env.Source) *ast.Module {
+func (cc *CompileContext) parseModule(isMain bool, list []*env.Source) *ast.Module {
 
 	var mods = cc.parseList(isMain, list)
 
