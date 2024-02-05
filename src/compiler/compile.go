@@ -83,7 +83,7 @@ func (cc *CompileContext) process(m *ast.Module) {
 	semantics.Analyse(m)
 	ast.CurHost = nil
 
-	content, err := json.Marshal(cc.main)
+	content, err := json.Marshal(cc.Main)
 	if err != nil {
 		fmt.Println(err)
 	}
