@@ -1,9 +1,7 @@
 package compiler
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"trivil/ast"
 	"trivil/env"
 	"trivil/genc"
@@ -83,11 +81,15 @@ func (cc *CompileContext) process(m *ast.Module) {
 	semantics.Analyse(m)
 	ast.CurHost = nil
 
-	content, err := json.Marshal(cc.Main)
-	if err != nil {
-		fmt.Println(err)
-	}
-	err = os.WriteFile("ast.json", content, 0644)
+	//content, err := json.MarshalIndent(cc.Main, "", "\t")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//err = os.WriteFile("../ast/ast.json", content, 0644)
+
+	treePrinter := &ast.TreePrinter{}
+
+	m.Accept(treePrinter)
 
 	if env.ErrorCount() != 0 {
 		return

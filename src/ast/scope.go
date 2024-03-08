@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -23,9 +24,22 @@ var (
 	TagPairType *PredefinedType // только в типе параметров и в типе элемента variadic
 )
 
+func (n *Scope) PrintScope() string {
+	b, err := json.Marshal(n)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(string(b))
+	return string(b)
+}
+
 type Scope struct {
 	Outer *Scope
 	Names map[string]Decl
+}
+
+func (m *Scope) Accept(visitor Visitor) {
+	visitor.VisitScope(m)
 }
 
 // Стандартные функции

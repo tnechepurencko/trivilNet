@@ -13,3 +13,7 @@ type Modifier struct {
 	Name  string
 	Attrs map[string]string
 }
+
+func (m *Modifier) Accept(visitor Visitor) {
+	visitor.VisitModifier(m)
+}

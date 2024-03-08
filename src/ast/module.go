@@ -20,6 +20,10 @@ type Module struct {
 	Setting *Setting
 }
 
+func (m *Module) Accept(visitor Visitor) {
+	visitor.VisitModule(m)
+}
+
 func (n *Module) DeclNode() {}
 
 func (n *Module) GetPos() int {
@@ -75,6 +79,10 @@ type Setting struct {
 	//Attrs map[string]string
 }
 
+func (m *Setting) Accept(visitor Visitor) {
+	visitor.VisitSetting(m)
+}
+
 //=== импорт
 
 type Import struct {
@@ -83,6 +91,10 @@ type Import struct {
 	Mod  *Module
 	// Собирается на слиянии модулей:
 	Sources []int // список номеров исходных файлов, в которых есть импорт
+}
+
+func (m *Import) Accept(visitor Visitor) {
+	visitor.VisitImport(m)
 }
 
 func (n *Import) GetPos() int {
@@ -94,6 +106,10 @@ func (n *Import) GetPos() int {
 type EntryFn struct {
 	Pos int
 	Seq *StatementSeq
+}
+
+func (m *EntryFn) Accept(visitor Visitor) {
+	visitor.VisitEntryFn(m)
 }
 
 func (n *EntryFn) GetPos() int {

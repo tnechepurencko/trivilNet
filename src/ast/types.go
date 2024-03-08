@@ -12,6 +12,10 @@ type TypeBase struct {
 	Pos int
 }
 
+func (m *TypeBase) Accept(visitor Visitor) {
+	visitor.VisitTypeBase(m)
+}
+
 func (n *TypeBase) GetPos() int {
 	return n.Pos
 }
@@ -24,8 +28,16 @@ type PredefinedType struct {
 	Name string
 }
 
+func (m *PredefinedType) Accept(visitor Visitor) {
+	visitor.VisitPredefinedType(m)
+}
+
 type InvalidType struct {
 	TypeBase
+}
+
+func (m *InvalidType) Accept(visitor Visitor) {
+	visitor.VisitInvalidType(m)
 }
 
 //=== type ref
@@ -38,11 +50,19 @@ type TypeRef struct {
 	Typ        Type
 }
 
+func (m *TypeRef) Accept(visitor Visitor) {
+	visitor.VisitTypeRef(m)
+}
+
 //==== vector type
 
 type VectorType struct {
 	TypeBase
 	ElementTyp Type
+}
+
+func (m *VectorType) Accept(visitor Visitor) {
+	visitor.VisitVectorType(m)
 }
 
 //==== class type
@@ -55,11 +75,19 @@ type ClassType struct {
 	Members map[string]Decl // включая поля и методы базовых типов
 }
 
+func (m *ClassType) Accept(visitor Visitor) {
+	visitor.VisitClassType(m)
+}
+
 type Field struct {
 	DeclBase
 	Init       Expr
 	Later      bool
 	AssignOnce bool
+}
+
+func (m *Field) Accept(visitor Visitor) {
+	visitor.VisitField(m)
 }
 
 //==== function type
@@ -70,9 +98,17 @@ type FuncType struct {
 	ReturnTyp Type
 }
 
+func (m *FuncType) Accept(visitor Visitor) {
+	visitor.VisitFuncType(m)
+}
+
 type Param struct {
 	DeclBase
 	Out bool // выходной параметр
+}
+
+func (m *Param) Accept(visitor Visitor) {
+	visitor.VisitParam(m)
 }
 
 func VariadicParam(ft *FuncType) *Param {
@@ -93,11 +129,17 @@ type VariadicType struct {
 	ElementTyp Type
 }
 
-//==== мб тип
+func (m *VariadicType) Accept(visitor Visitor) {
+	visitor.VisitVariadicType(m)
+}
 
 type MayBeType struct {
 	TypeBase
 	Typ Type
+}
+
+func (m *MayBeType) Accept(visitor Visitor) {
+	visitor.VisitMayBeType(m)
 }
 
 //==== type refs

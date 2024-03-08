@@ -15,6 +15,10 @@ type ExprBase struct {
 	ReadOnly bool
 }
 
+func (m *ExprBase) Accept(visitor Visitor) {
+	visitor.VisitExprBase(m)
+}
+
 func (n *ExprBase) ExprNode() {}
 
 func (n *ExprBase) GetPos() int {
@@ -39,6 +43,10 @@ type InvalidExpr struct {
 	ExprBase
 }
 
+func (m *InvalidExpr) Accept(visitor Visitor) {
+	visitor.VisitInvalidExpr(m)
+}
+
 //====
 
 type BinaryExpr struct {
@@ -48,16 +56,28 @@ type BinaryExpr struct {
 	Y  Expr
 }
 
+func (m *BinaryExpr) Accept(visitor Visitor) {
+	visitor.VisitBinaryExpr(m)
+}
+
 type UnaryExpr struct {
 	ExprBase
 	Op lexer.Token
 	X  Expr
 }
 
+func (m *UnaryExpr) Accept(visitor Visitor) {
+	visitor.VisitUnaryExpr(m)
+}
+
 type OfTypeExpr struct {
 	ExprBase
 	X         Expr
 	TargetTyp Type
+}
+
+func (m *OfTypeExpr) Accept(visitor Visitor) {
+	visitor.VisitOfTypeExpr(m)
 }
 
 type LiteralKind int
@@ -71,6 +91,10 @@ const (
 	Lit_Null
 )
 
+func (m *LiteralKind) Accept(visitor Visitor) {
+	visitor.VisitLiteralKind(m)
+}
+
 type LiteralExpr struct {
 	ExprBase
 	Kind     LiteralKind
@@ -80,15 +104,27 @@ type LiteralExpr struct {
 	StrVal   []rune // Строка
 }
 
+func (m *LiteralExpr) Accept(visitor Visitor) {
+	visitor.VisitLiteralExpr(m)
+}
+
 type BoolLiteral struct {
 	ExprBase
 	Value bool
+}
+
+func (m *BoolLiteral) Accept(visitor Visitor) {
+	visitor.VisitBoolLiteral(m)
 }
 
 type IdentExpr struct {
 	ExprBase
 	Name string
 	Obj  Node // Decl: Var, Const or Function or TypeRef
+}
+
+func (m *IdentExpr) Accept(visitor Visitor) {
+	visitor.VisitIdentExpr(m)
 }
 
 type SelectorExpr struct {
@@ -99,6 +135,10 @@ type SelectorExpr struct {
 	StdMethod *StdFunction
 }
 
+func (m *SelectorExpr) Accept(visitor Visitor) {
+	visitor.VisitSelectorExpr(m)
+}
+
 type CallExpr struct {
 	ExprBase
 	X       Expr
@@ -106,9 +146,17 @@ type CallExpr struct {
 	StdFunc *StdFunction
 }
 
+func (m *CallExpr) Accept(visitor Visitor) {
+	visitor.VisitCallExpr(m)
+}
+
 type UnfoldExpr struct {
 	ExprBase
 	X Expr
+}
+
+func (m *UnfoldExpr) Accept(visitor Visitor) {
+	visitor.VisitUnfoldExpr(m)
 }
 
 type ConversionExpr struct {
@@ -119,14 +167,26 @@ type ConversionExpr struct {
 	Done      bool // X уже преобразован к целевому типу
 }
 
+func (m *ConversionExpr) Accept(visitor Visitor) {
+	visitor.VisitConversionExpr(m)
+}
+
 // Если тип передается, как параметр, например, в функции 'тег'
 type TypeExpr struct {
 	ExprBase
 }
 
+func (m *TypeExpr) Accept(visitor Visitor) {
+	visitor.VisitTypeExpr(m)
+}
+
 type NotNilExpr struct {
 	ExprBase
 	X Expr
+}
+
+func (m *NotNilExpr) Accept(visitor Visitor) {
+	visitor.VisitNotNilExpr(m)
 }
 
 //==== index
@@ -136,6 +196,10 @@ type GeneralBracketExpr struct {
 	X         Expr
 	Index     Expr // indexation if != nil, otherwise composite
 	Composite *ArrayCompositeExpr
+}
+
+func (m *GeneralBracketExpr) Accept(visitor Visitor) {
+	visitor.VisitGeneralBracketExpr(m)
 }
 
 type ArrayCompositeExpr struct {
@@ -149,6 +213,10 @@ type ArrayCompositeExpr struct {
 	Values   []Expr
 }
 
+func (m *ArrayCompositeExpr) Accept(visitor Visitor) {
+	visitor.VisitArrayCompositeExpr(m)
+}
+
 //=== class composite
 
 type ClassCompositeExpr struct {
@@ -157,9 +225,17 @@ type ClassCompositeExpr struct {
 	Values []ValuePair
 }
 
+func (m *ClassCompositeExpr) Accept(visitor Visitor) {
+	visitor.VisitClassCompositeExpr(m)
+}
+
 type ValuePair struct {
 	Pos   int
 	Name  string
 	Field *Field
 	Value Expr
+}
+
+func (m *ValuePair) Accept(visitor Visitor) {
+	visitor.VisitValuePair(m)
 }

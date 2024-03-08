@@ -2,7 +2,7 @@ package ast
 
 import (
 	"fmt"
-	//	"trivil/env"
+	//"trivil/env"
 )
 
 var _ = fmt.Printf
@@ -15,6 +15,10 @@ type DeclBase struct {
 	Typ      Type
 	Host     *Module
 	Exported bool
+}
+
+func (m *DeclBase) Accept(visitor Visitor) {
+	visitor.VisitDeclBase(m)
 }
 
 func (n *DeclBase) DeclNode() {}
@@ -49,6 +53,10 @@ type InvalidDecl struct {
 	DeclBase
 }
 
+func (m *InvalidDecl) Accept(visitor Visitor) {
+	visitor.VisitInvalidDecl(m)
+}
+
 //=== описания
 
 type Function struct {
@@ -59,6 +67,10 @@ type Function struct {
 	Mod      *Modifier
 }
 
+func (m *Function) Accept(visitor Visitor) {
+	visitor.VisitFunction(m)
+}
+
 type VarDecl struct {
 	DeclBase
 	Init       Expr
@@ -67,13 +79,25 @@ type VarDecl struct {
 	OutParam   bool // если это выходной параметр
 }
 
+func (m *VarDecl) Accept(visitor Visitor) {
+	visitor.VisitVarDecl(m)
+}
+
 type ConstDecl struct {
 	DeclBase
 	Value Expr
 }
 
+func (m *ConstDecl) Accept(visitor Visitor) {
+	visitor.VisitConstDecl(m)
+}
+
 type TypeDecl struct {
 	DeclBase
+}
+
+func (m *TypeDecl) Accept(visitor Visitor) {
+	visitor.VisitTypeDecl(m)
 }
 
 //====
@@ -81,4 +105,8 @@ type TypeDecl struct {
 type StdFunction struct {
 	DeclBase
 	Method bool
+}
+
+func (m *StdFunction) Accept(visitor Visitor) {
+	visitor.VisitStdFunction(m)
 }
