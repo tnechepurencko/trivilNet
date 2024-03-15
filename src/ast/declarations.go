@@ -17,8 +17,8 @@ type DeclBase struct {
 	Exported bool
 }
 
-func (m *DeclBase) Accept(visitor Visitor) {
-	visitor.VisitDeclBase(m)
+func (m *DeclBase) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitDeclBase(m)
 }
 
 func (n *DeclBase) DeclNode() {}
@@ -53,8 +53,8 @@ type InvalidDecl struct {
 	DeclBase
 }
 
-func (m *InvalidDecl) Accept(visitor Visitor) {
-	visitor.VisitInvalidDecl(m)
+func (m *InvalidDecl) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitInvalidDecl(m)
 }
 
 //=== описания
@@ -67,8 +67,8 @@ type Function struct {
 	Mod      *Modifier
 }
 
-func (m *Function) Accept(visitor Visitor) {
-	visitor.VisitFunction(m)
+func (m *Function) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitFunction(m)
 }
 
 type VarDecl struct {
@@ -79,8 +79,8 @@ type VarDecl struct {
 	OutParam   bool // если это выходной параметр
 }
 
-func (m *VarDecl) Accept(visitor Visitor) {
-	visitor.VisitVarDecl(m)
+func (m *VarDecl) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitVarDecl(m)
 }
 
 type ConstDecl struct {
@@ -88,16 +88,16 @@ type ConstDecl struct {
 	Value Expr
 }
 
-func (m *ConstDecl) Accept(visitor Visitor) {
-	visitor.VisitConstDecl(m)
+func (m *ConstDecl) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitConstDecl(m)
 }
 
 type TypeDecl struct {
 	DeclBase
 }
 
-func (m *TypeDecl) Accept(visitor Visitor) {
-	visitor.VisitTypeDecl(m)
+func (m *TypeDecl) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitTypeDecl(m)
 }
 
 //====
@@ -107,6 +107,6 @@ type StdFunction struct {
 	Method bool
 }
 
-func (m *StdFunction) Accept(visitor Visitor) {
-	visitor.VisitStdFunction(m)
+func (m *StdFunction) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitStdFunction(m)
 }

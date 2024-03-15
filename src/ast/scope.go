@@ -38,8 +38,8 @@ type Scope struct {
 	Names map[string]Decl
 }
 
-func (m *Scope) Accept(visitor Visitor) {
-	visitor.VisitScope(m)
+func (m *Scope) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitScope(m)
 }
 
 // Стандартные функции

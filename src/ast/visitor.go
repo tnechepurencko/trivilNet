@@ -1,66 +1,66 @@
 package ast
 
 type Visitor interface {
-	VisitModule(m *Module)
-	VisitDeclaration(m *Decl)
-	VisitImport(m *Import)
-	VisitSetting(m *Setting)
-	VisitEntryFn(m *EntryFn)
-	VisitDeclBase(m *DeclBase)
-	VisitInvalidDecl(m *InvalidDecl)
-	VisitFunction(m *Function)
-	VisitVarDecl(m *VarDecl)
-	VisitConstDecl(m *ConstDecl)
-	VisitTypeDecl(m *TypeDecl)
-	VisitStdFunction(m *StdFunction)
-	VisitExprBase(m *ExprBase)
-	VisitInvalidExpr(m *InvalidExpr)
-	VisitBinaryExpr(m *BinaryExpr)
-	VisitUnaryExpr(m *UnaryExpr)
-	VisitOfTypeExpr(m *OfTypeExpr)
-	VisitLiteralKind(m *LiteralKind)
-	VisitLiteralExpr(m *LiteralExpr)
-	VisitBoolLiteral(m *BoolLiteral)
-	VisitIdentExpr(m *IdentExpr)
-	VisitSelectorExpr(m *SelectorExpr)
-	VisitCallExpr(m *CallExpr)
-	VisitUnfoldExpr(m *UnfoldExpr)
-	VisitConversionExpr(m *ConversionExpr)
-	VisitTypeExpr(m *TypeExpr)
-	VisitNotNilExpr(m *NotNilExpr)
-	VisitGeneralBracketExpr(m *GeneralBracketExpr)
-	VisitArrayCompositeExpr(m *ArrayCompositeExpr)
-	VisitClassCompositeExpr(m *ClassCompositeExpr)
-	VisitValuePair(m *ValuePair)
-	VisitTypeBase(m *TypeBase)
-	VisitPredefinedType(m *PredefinedType)
-	VisitInvalidType(m *InvalidType)
-	VisitTypeRef(m *TypeRef)
-	VisitVectorType(m *VectorType)
-	VisitClassType(m *ClassType)
-	VisitField(m *Field)
-	VisitFuncType(m *FuncType)
-	VisitParam(m *Param)
-	VisitVariadicType(m *VariadicType)
-	VisitMayBeType(m *MayBeType)
-	VisitStatementBase(m *StatementBase)
-	VisitStatementSeq(m *StatementSeq)
-	VisitExprStatement(m *ExprStatement)
-	VisitDeclStatement(m *DeclStatement)
-	VisitAssignStatement(m *AssignStatement)
-	VisitIncStatement(m *IncStatement)
-	VisitDecStatement(m *DecStatement)
-	VisitIf(m *If)
-	VisitGuard(m *Guard)
-	VisitSelect(m *Select)
-	VisitCase(m *Case)
-	VisitSelectType(m *SelectType)
-	VisitCaseType(m *CaseType)
-	VisitWhile(m *While)
-	VisitCycle(m *Cycle)
-	VisitCrash(m *Crash)
-	VisitReturn(m *Return)
-	VisitBreak(m *Break)
-	VisitScope(m *Scope)
-	VisitModifier(m *Modifier)
+	VisitModule(m *Module) TreePrinter
+	VisitDeclaration(m *Decl) TreePrinter
+	VisitImport(m *Import) TreePrinter
+	VisitSetting(m *Setting) TreePrinter
+	VisitEntryFn(m *EntryFn) TreePrinter
+	VisitDeclBase(m *DeclBase) TreePrinter
+	VisitInvalidDecl(m *InvalidDecl) TreePrinter
+	VisitFunction(m *Function) TreePrinter
+	VisitVarDecl(m *VarDecl) TreePrinter
+	VisitConstDecl(m *ConstDecl) TreePrinter
+	VisitTypeDecl(m *TypeDecl) TreePrinter
+	VisitStdFunction(m *StdFunction) TreePrinter
+	VisitExprBase(m *ExprBase) TreePrinter
+	VisitInvalidExpr(m *InvalidExpr) TreePrinter
+	VisitBinaryExpr(m *BinaryExpr) TreePrinter
+	VisitUnaryExpr(m *UnaryExpr) TreePrinter
+	VisitOfTypeExpr(m *OfTypeExpr) TreePrinter
+	VisitLiteralKind(m *LiteralKind) TreePrinter
+	VisitLiteralExpr(m *LiteralExpr) TreePrinter
+	VisitBoolLiteral(m *BoolLiteral) TreePrinter
+	VisitIdentExpr(m *IdentExpr) TreePrinter
+	VisitSelectorExpr(m *SelectorExpr) TreePrinter
+	VisitCallExpr(m *CallExpr) TreePrinter
+	VisitUnfoldExpr(m *UnfoldExpr) TreePrinter
+	VisitConversionExpr(m *ConversionExpr) TreePrinter
+	VisitTypeExpr(m *TypeExpr) TreePrinter
+	VisitNotNilExpr(m *NotNilExpr) TreePrinter
+	VisitGeneralBracketExpr(m *GeneralBracketExpr) TreePrinter
+	VisitArrayCompositeExpr(m *ArrayCompositeExpr) TreePrinter
+	VisitClassCompositeExpr(m *ClassCompositeExpr) TreePrinter
+	VisitValuePair(m *ValuePair) TreePrinter
+	VisitTypeBase(m *TypeBase) TreePrinter
+	VisitPredefinedType(m *PredefinedType) TreePrinter
+	VisitInvalidType(m *InvalidType) TreePrinter
+	VisitTypeRef(m *TypeRef) TreePrinter
+	VisitVectorType(m *VectorType) TreePrinter
+	VisitClassType(m *ClassType) TreePrinter
+	VisitField(m *Field) TreePrinter
+	VisitFuncType(m *FuncType) TreePrinter
+	VisitParam(m *Param) TreePrinter
+	VisitVariadicType(m *VariadicType) TreePrinter
+	VisitMayBeType(m *MayBeType) TreePrinter
+	VisitStatementBase(m *StatementBase) TreePrinter
+	VisitStatementSeq(m *StatementSeq) TreePrinter
+	VisitExprStatement(m *ExprStatement) TreePrinter
+	VisitDeclStatement(m *DeclStatement) TreePrinter
+	VisitAssignStatement(m *AssignStatement) TreePrinter
+	VisitIncStatement(m *IncStatement) TreePrinter
+	VisitDecStatement(m *DecStatement) TreePrinter
+	VisitIf(m *If) TreePrinter
+	VisitGuard(m *Guard) TreePrinter
+	VisitSelect(m *Select) TreePrinter
+	VisitCase(m *Case) TreePrinter
+	VisitSelectType(m *SelectType) TreePrinter
+	VisitCaseType(m *CaseType) TreePrinter
+	VisitWhile(m *While) TreePrinter
+	VisitCycle(m *Cycle) TreePrinter
+	VisitCrash(m *Crash) TreePrinter
+	VisitReturn(m *Return) TreePrinter
+	VisitBreak(m *Break) TreePrinter
+	VisitScope(m *Scope) TreePrinter
+	VisitModifier(m *Modifier) TreePrinter
 }

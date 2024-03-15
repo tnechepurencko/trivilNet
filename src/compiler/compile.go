@@ -2,6 +2,7 @@ package compiler
 
 import (
 	"fmt"
+	"os"
 	"trivil/ast"
 	"trivil/env"
 	"trivil/genc"
@@ -89,7 +90,12 @@ func (cc *CompileContext) process(m *ast.Module) {
 
 	treePrinter := &ast.TreePrinter{}
 
-	m.Accept(treePrinter)
+	var astString = m.Accept(treePrinter).JsonString
+	fmt.Println(astString)
+	var err = os.WriteFile("ast.json", []byte(astString), 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	if env.ErrorCount() != 0 {
 		return

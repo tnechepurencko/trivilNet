@@ -14,6 +14,6 @@ type Modifier struct {
 	Attrs map[string]string
 }
 
-func (m *Modifier) Accept(visitor Visitor) {
-	visitor.VisitModifier(m)
+func (m *Modifier) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitModifier(m)
 }

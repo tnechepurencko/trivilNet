@@ -12,8 +12,8 @@ type StatementBase struct {
 	Pos int
 }
 
-func (m *StatementBase) Accept(visitor Visitor) {
-	visitor.VisitStatementBase(m)
+func (m *StatementBase) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitStatementBase(m)
 }
 
 func (n *StatementBase) GetPos() int {
@@ -29,8 +29,8 @@ type StatementSeq struct {
 	Inner      *Scope
 }
 
-func (m *StatementSeq) Accept(visitor Visitor) {
-	visitor.VisitStatementSeq(m)
+func (m *StatementSeq) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitStatementSeq(m)
 }
 
 type ExprStatement struct {
@@ -38,8 +38,8 @@ type ExprStatement struct {
 	X Expr
 }
 
-func (m *ExprStatement) Accept(visitor Visitor) {
-	visitor.VisitExprStatement(m)
+func (m *ExprStatement) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitExprStatement(m)
 }
 
 type DeclStatement struct {
@@ -47,8 +47,8 @@ type DeclStatement struct {
 	D Decl
 }
 
-func (m *DeclStatement) Accept(visitor Visitor) {
-	visitor.VisitDeclStatement(m)
+func (m *DeclStatement) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitDeclStatement(m)
 }
 
 type AssignStatement struct {
@@ -57,8 +57,8 @@ type AssignStatement struct {
 	R Expr
 }
 
-func (m *AssignStatement) Accept(visitor Visitor) {
-	visitor.VisitAssignStatement(m)
+func (m *AssignStatement) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitAssignStatement(m)
 }
 
 type IncStatement struct {
@@ -66,8 +66,8 @@ type IncStatement struct {
 	L Expr
 }
 
-func (m *IncStatement) Accept(visitor Visitor) {
-	visitor.VisitIncStatement(m)
+func (m *IncStatement) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitIncStatement(m)
 }
 
 type DecStatement struct {
@@ -75,8 +75,8 @@ type DecStatement struct {
 	L Expr
 }
 
-func (m *DecStatement) Accept(visitor Visitor) {
-	visitor.VisitDecStatement(m)
+func (m *DecStatement) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitDecStatement(m)
 }
 
 //==== управление
@@ -88,8 +88,8 @@ type If struct {
 	Else Statement
 }
 
-func (m *If) Accept(visitor Visitor) {
-	visitor.VisitIf(m)
+func (m *If) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitIf(m)
 }
 
 type Guard struct {
@@ -98,8 +98,8 @@ type Guard struct {
 	Else Statement
 }
 
-func (m *Guard) Accept(visitor Visitor) {
-	visitor.VisitGuard(m)
+func (m *Guard) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitGuard(m)
 }
 
 type Select struct {
@@ -109,8 +109,8 @@ type Select struct {
 	Else  *StatementSeq
 }
 
-func (m *Select) Accept(visitor Visitor) {
-	visitor.VisitSelect(m)
+func (m *Select) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitSelect(m)
 }
 
 type Case struct {
@@ -119,8 +119,8 @@ type Case struct {
 	Seq   *StatementSeq
 }
 
-func (m *Case) Accept(visitor Visitor) {
-	visitor.VisitCase(m)
+func (m *Case) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitCase(m)
 }
 
 type SelectType struct {
@@ -131,8 +131,8 @@ type SelectType struct {
 	Else     *StatementSeq
 }
 
-func (m *SelectType) Accept(visitor Visitor) {
-	visitor.VisitSelectType(m)
+func (m *SelectType) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitSelectType(m)
 }
 
 type CaseType struct {
@@ -142,8 +142,8 @@ type CaseType struct {
 	Seq   *StatementSeq
 }
 
-func (m *CaseType) Accept(visitor Visitor) {
-	visitor.VisitCaseType(m)
+func (m *CaseType) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitCaseType(m)
 }
 
 //==== циклы
@@ -154,8 +154,8 @@ type While struct {
 	Seq  *StatementSeq
 }
 
-func (m *While) Accept(visitor Visitor) {
-	visitor.VisitWhile(m)
+func (m *While) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitWhile(m)
 }
 
 type Cycle struct {
@@ -166,8 +166,8 @@ type Cycle struct {
 	Seq        *StatementSeq
 }
 
-func (m *Cycle) Accept(visitor Visitor) {
-	visitor.VisitCycle(m)
+func (m *Cycle) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitCycle(m)
 }
 
 //==== завершающие
@@ -177,8 +177,8 @@ type Crash struct {
 	X Expr //
 }
 
-func (m *Crash) Accept(visitor Visitor) {
-	visitor.VisitCrash(m)
+func (m *Crash) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitCrash(m)
 }
 
 type Return struct {
@@ -187,14 +187,14 @@ type Return struct {
 	X         Expr
 }
 
-func (m *Return) Accept(visitor Visitor) {
-	visitor.VisitReturn(m)
+func (m *Return) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitReturn(m)
 }
 
 type Break struct {
 	StatementBase
 }
 
-func (m *Break) Accept(visitor Visitor) {
-	visitor.VisitBreak(m)
+func (m *Break) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitBreak(m)
 }

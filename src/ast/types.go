@@ -12,8 +12,8 @@ type TypeBase struct {
 	Pos int
 }
 
-func (m *TypeBase) Accept(visitor Visitor) {
-	visitor.VisitTypeBase(m)
+func (m *TypeBase) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitTypeBase(m)
 }
 
 func (n *TypeBase) GetPos() int {
@@ -28,16 +28,16 @@ type PredefinedType struct {
 	Name string
 }
 
-func (m *PredefinedType) Accept(visitor Visitor) {
-	visitor.VisitPredefinedType(m)
+func (m *PredefinedType) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitPredefinedType(m)
 }
 
 type InvalidType struct {
 	TypeBase
 }
 
-func (m *InvalidType) Accept(visitor Visitor) {
-	visitor.VisitInvalidType(m)
+func (m *InvalidType) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitInvalidType(m)
 }
 
 //=== type ref
@@ -50,8 +50,8 @@ type TypeRef struct {
 	Typ        Type
 }
 
-func (m *TypeRef) Accept(visitor Visitor) {
-	visitor.VisitTypeRef(m)
+func (m *TypeRef) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitTypeRef(m)
 }
 
 //==== vector type
@@ -61,8 +61,8 @@ type VectorType struct {
 	ElementTyp Type
 }
 
-func (m *VectorType) Accept(visitor Visitor) {
-	visitor.VisitVectorType(m)
+func (m *VectorType) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitVectorType(m)
 }
 
 //==== class type
@@ -75,8 +75,8 @@ type ClassType struct {
 	Members map[string]Decl // включая поля и методы базовых типов
 }
 
-func (m *ClassType) Accept(visitor Visitor) {
-	visitor.VisitClassType(m)
+func (m *ClassType) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitClassType(m)
 }
 
 type Field struct {
@@ -86,8 +86,8 @@ type Field struct {
 	AssignOnce bool
 }
 
-func (m *Field) Accept(visitor Visitor) {
-	visitor.VisitField(m)
+func (m *Field) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitField(m)
 }
 
 //==== function type
@@ -98,8 +98,8 @@ type FuncType struct {
 	ReturnTyp Type
 }
 
-func (m *FuncType) Accept(visitor Visitor) {
-	visitor.VisitFuncType(m)
+func (m *FuncType) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitFuncType(m)
 }
 
 type Param struct {
@@ -107,8 +107,8 @@ type Param struct {
 	Out bool // выходной параметр
 }
 
-func (m *Param) Accept(visitor Visitor) {
-	visitor.VisitParam(m)
+func (m *Param) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitParam(m)
 }
 
 func VariadicParam(ft *FuncType) *Param {
@@ -129,8 +129,8 @@ type VariadicType struct {
 	ElementTyp Type
 }
 
-func (m *VariadicType) Accept(visitor Visitor) {
-	visitor.VisitVariadicType(m)
+func (m *VariadicType) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitVariadicType(m)
 }
 
 type MayBeType struct {
@@ -138,8 +138,8 @@ type MayBeType struct {
 	Typ Type
 }
 
-func (m *MayBeType) Accept(visitor Visitor) {
-	visitor.VisitMayBeType(m)
+func (m *MayBeType) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitMayBeType(m)
 }
 
 //==== type refs

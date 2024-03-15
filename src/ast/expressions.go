@@ -15,8 +15,8 @@ type ExprBase struct {
 	ReadOnly bool
 }
 
-func (m *ExprBase) Accept(visitor Visitor) {
-	visitor.VisitExprBase(m)
+func (m *ExprBase) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitExprBase(m)
 }
 
 func (n *ExprBase) ExprNode() {}
@@ -43,8 +43,8 @@ type InvalidExpr struct {
 	ExprBase
 }
 
-func (m *InvalidExpr) Accept(visitor Visitor) {
-	visitor.VisitInvalidExpr(m)
+func (m *InvalidExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitInvalidExpr(m)
 }
 
 //====
@@ -56,8 +56,8 @@ type BinaryExpr struct {
 	Y  Expr
 }
 
-func (m *BinaryExpr) Accept(visitor Visitor) {
-	visitor.VisitBinaryExpr(m)
+func (m *BinaryExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitBinaryExpr(m)
 }
 
 type UnaryExpr struct {
@@ -66,8 +66,8 @@ type UnaryExpr struct {
 	X  Expr
 }
 
-func (m *UnaryExpr) Accept(visitor Visitor) {
-	visitor.VisitUnaryExpr(m)
+func (m *UnaryExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitUnaryExpr(m)
 }
 
 type OfTypeExpr struct {
@@ -76,8 +76,8 @@ type OfTypeExpr struct {
 	TargetTyp Type
 }
 
-func (m *OfTypeExpr) Accept(visitor Visitor) {
-	visitor.VisitOfTypeExpr(m)
+func (m *OfTypeExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitOfTypeExpr(m)
 }
 
 type LiteralKind int
@@ -91,8 +91,8 @@ const (
 	Lit_Null
 )
 
-func (m *LiteralKind) Accept(visitor Visitor) {
-	visitor.VisitLiteralKind(m)
+func (m *LiteralKind) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitLiteralKind(m)
 }
 
 type LiteralExpr struct {
@@ -104,8 +104,8 @@ type LiteralExpr struct {
 	StrVal   []rune // Строка
 }
 
-func (m *LiteralExpr) Accept(visitor Visitor) {
-	visitor.VisitLiteralExpr(m)
+func (m *LiteralExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitLiteralExpr(m)
 }
 
 type BoolLiteral struct {
@@ -113,8 +113,8 @@ type BoolLiteral struct {
 	Value bool
 }
 
-func (m *BoolLiteral) Accept(visitor Visitor) {
-	visitor.VisitBoolLiteral(m)
+func (m *BoolLiteral) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitBoolLiteral(m)
 }
 
 type IdentExpr struct {
@@ -123,8 +123,8 @@ type IdentExpr struct {
 	Obj  Node // Decl: Var, Const or Function or TypeRef
 }
 
-func (m *IdentExpr) Accept(visitor Visitor) {
-	visitor.VisitIdentExpr(m)
+func (m *IdentExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitIdentExpr(m)
 }
 
 type SelectorExpr struct {
@@ -135,8 +135,8 @@ type SelectorExpr struct {
 	StdMethod *StdFunction
 }
 
-func (m *SelectorExpr) Accept(visitor Visitor) {
-	visitor.VisitSelectorExpr(m)
+func (m *SelectorExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitSelectorExpr(m)
 }
 
 type CallExpr struct {
@@ -146,8 +146,8 @@ type CallExpr struct {
 	StdFunc *StdFunction
 }
 
-func (m *CallExpr) Accept(visitor Visitor) {
-	visitor.VisitCallExpr(m)
+func (m *CallExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitCallExpr(m)
 }
 
 type UnfoldExpr struct {
@@ -155,8 +155,8 @@ type UnfoldExpr struct {
 	X Expr
 }
 
-func (m *UnfoldExpr) Accept(visitor Visitor) {
-	visitor.VisitUnfoldExpr(m)
+func (m *UnfoldExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitUnfoldExpr(m)
 }
 
 type ConversionExpr struct {
@@ -167,8 +167,8 @@ type ConversionExpr struct {
 	Done      bool // X уже преобразован к целевому типу
 }
 
-func (m *ConversionExpr) Accept(visitor Visitor) {
-	visitor.VisitConversionExpr(m)
+func (m *ConversionExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitConversionExpr(m)
 }
 
 // Если тип передается, как параметр, например, в функции 'тег'
@@ -176,8 +176,8 @@ type TypeExpr struct {
 	ExprBase
 }
 
-func (m *TypeExpr) Accept(visitor Visitor) {
-	visitor.VisitTypeExpr(m)
+func (m *TypeExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitTypeExpr(m)
 }
 
 type NotNilExpr struct {
@@ -185,8 +185,8 @@ type NotNilExpr struct {
 	X Expr
 }
 
-func (m *NotNilExpr) Accept(visitor Visitor) {
-	visitor.VisitNotNilExpr(m)
+func (m *NotNilExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitNotNilExpr(m)
 }
 
 //==== index
@@ -198,8 +198,8 @@ type GeneralBracketExpr struct {
 	Composite *ArrayCompositeExpr
 }
 
-func (m *GeneralBracketExpr) Accept(visitor Visitor) {
-	visitor.VisitGeneralBracketExpr(m)
+func (m *GeneralBracketExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitGeneralBracketExpr(m)
 }
 
 type ArrayCompositeExpr struct {
@@ -213,8 +213,8 @@ type ArrayCompositeExpr struct {
 	Values   []Expr
 }
 
-func (m *ArrayCompositeExpr) Accept(visitor Visitor) {
-	visitor.VisitArrayCompositeExpr(m)
+func (m *ArrayCompositeExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitArrayCompositeExpr(m)
 }
 
 //=== class composite
@@ -225,8 +225,8 @@ type ClassCompositeExpr struct {
 	Values []ValuePair
 }
 
-func (m *ClassCompositeExpr) Accept(visitor Visitor) {
-	visitor.VisitClassCompositeExpr(m)
+func (m *ClassCompositeExpr) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitClassCompositeExpr(m)
 }
 
 type ValuePair struct {
@@ -236,6 +236,6 @@ type ValuePair struct {
 	Value Expr
 }
 
-func (m *ValuePair) Accept(visitor Visitor) {
-	visitor.VisitValuePair(m)
+func (m *ValuePair) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitValuePair(m)
 }

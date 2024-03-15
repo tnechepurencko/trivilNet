@@ -20,8 +20,8 @@ type Module struct {
 	Setting *Setting
 }
 
-func (m *Module) Accept(visitor Visitor) {
-	visitor.VisitModule(m)
+func (m *Module) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitModule(m)
 }
 
 func (n *Module) DeclNode() {}
@@ -79,8 +79,8 @@ type Setting struct {
 	//Attrs map[string]string
 }
 
-func (m *Setting) Accept(visitor Visitor) {
-	visitor.VisitSetting(m)
+func (m *Setting) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitSetting(m)
 }
 
 //=== импорт
@@ -93,8 +93,8 @@ type Import struct {
 	Sources []int // список номеров исходных файлов, в которых есть импорт
 }
 
-func (m *Import) Accept(visitor Visitor) {
-	visitor.VisitImport(m)
+func (m *Import) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitImport(m)
 }
 
 func (n *Import) GetPos() int {
@@ -108,8 +108,8 @@ type EntryFn struct {
 	Seq *StatementSeq
 }
 
-func (m *EntryFn) Accept(visitor Visitor) {
-	visitor.VisitEntryFn(m)
+func (m *EntryFn) Accept(visitor Visitor) TreePrinter {
+	return visitor.VisitEntryFn(m)
 }
 
 func (n *EntryFn) GetPos() int {
